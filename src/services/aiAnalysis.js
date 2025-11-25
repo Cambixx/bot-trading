@@ -5,12 +5,26 @@
 
 const NETLIFY_FUNCTION_URL = '/.netlify/functions/gemini-analysis';
 
+// Detectar si estamos en desarrollo local
+const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
+
 /**
  * Enviar datos de mercado para análisis con IA
  * @param {Object} marketData - Datos del mercado y análisis técnico
  * @returns {Promise<Object>} Análisis de IA
  */
 export async function getAIAnalysis(marketData) {
+    // En desarrollo local, retornar respuesta mock sin hacer la llamada
+    if (isDevelopment) {
+        console.log('💡 AI Analysis deshabilitado en desarrollo local');
+        return {
+            success: false,
+            error: 'AI analysis only available in production',
+            analysis: null,
+            devMode: true
+        };
+    }
+
     try {
         const response = await fetch(NETLIFY_FUNCTION_URL, {
             method: 'POST',
@@ -68,11 +82,11 @@ export async function enrichSignalWithAI(signal, technicalData = {}) {
         };
     }
 
-    // Si falla el análisis de IA, retornar señal original
+    // Si falla el análisis de IA o estamos en dev, retornar señal original
     return {
         ...signal,
         aiEnriched: false,
-        aiError: aiResult.error
+        aiError: aiResult.devMode ? 'Development mode' : aiResult.error
     };
 }
 
