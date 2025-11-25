@@ -122,8 +122,8 @@ function App() {
       setCryptoData(cryptoPrices);
 
       // 8. Notificar nuevas señales
-      if (enrichedSignals.length > 0 && signals.length > 0 && notificationsEnabled) {
-        const newSignals = enrichedSignals.filter(
+      if (generatedSignals.length > 0 && signals.length > 0 && notificationsEnabled) {
+        const newSignals = generatedSignals.filter(
           newSig => !signals.some(oldSig => oldSig.symbol === newSig.symbol)
         );
 
