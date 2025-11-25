@@ -7,7 +7,6 @@ import CryptoSelector from './components/CryptoSelector';
 import binanceService from './services/binanceService';
 import { performTechnicalAnalysis } from './services/technicalAnalysis';
 import { analyzeMultipleSymbols } from './services/signalGenerator';
-import { enrichSignalWithAI } from './services/aiAnalysis';
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
@@ -97,21 +96,10 @@ function App() {
         }
       }
 
-      // 5. Generar señales
+      // 5. Generar señales (solo con análisis técnico)
       const generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis);
 
-      // 6. Enriquecer señales con AI (solo las de alta confianza para ahorrar tokens)
-      const enrichedSignals = [];
-      for (const signal of generatedSignals) {
-        if (signal.confidence === 'HIGH' || signal.confidence === 'MEDIUM') {
-          const enriched = await enrichSignalWithAI(signal);
-          enrichedSignals.push(enriched);
-        } else {
-          enrichedSignals.push(signal);
-        }
-      }
-
-      // 7. Actualizar estado
+      // 6. Actualizar estado
       const cryptoPrices = {};
       priceResults.forEach(({ symbol, data }) => {
         if (data) {
@@ -144,7 +132,7 @@ function App() {
         });
       }
 
-      setSignals(enrichedSignals);
+      setSignals(generatedSignals);
       setLastUpdate(new Date());
       setLoading(false);
 

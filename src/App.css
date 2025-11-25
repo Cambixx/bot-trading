@@ -153,27 +153,56 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-container {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
   .app-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
   }
 
-  .dashboard-grid,
+  .app-subtitle {
+    font-size: 0.875rem;
+  }
+
+  /* Force single column on mobile */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-md);
+  }
+
   .signals-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-md);
   }
 
   .status-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
   }
 
   .signals-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+
+  .signals-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Fix minimum grid size for very small screens */
+@media (max-width: 480px) {
+
+  .dashboard-grid,
+  .signals-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .app-container {
+    padding: 0.5rem;
   }
 }
