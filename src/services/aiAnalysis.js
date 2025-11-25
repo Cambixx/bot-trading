@@ -1,12 +1,115 @@
 /**
  * Servicio para análisis con IA usando Gemini API
- * Se comunica con la función serverless de Netlify
+ * Se comunica con la función serverless de Netlify en producción
+ * En desarrollo llama directamente a Gemini API
  */
 
 const NETLIFY_FUNCTION_URL = '/.netlify/functions/gemini-analysis';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyBNKGZibNjUpXL8lk6qYwcPywAPLn51Di0';
 
 // Detectar si estamos en desarrollo local
 const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
+
+/**
+ * Llamar directamente a Gemini API (solo en desarrollo)
+ */
+async function callGeminiDirectly(marketData) {
+    const { symbol, price, indicators, patterns, reasons, warnings } = marketData;
+
+    const prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot (comprar bajo, vender alto).
+
+Analiza la siguiente oportunidad de trading:
+
+**Criptomoneda**: ${symbol}
+**Precio Actual**: $${price}
+
+**Indicadores Técnicos**:
+- RSI: ${indicators.rsi || 'N/A'}
+- MACD: ${indicators.macd || 'N/A'}
+- Posición en Bandas de Bollinger: ${indicators.bbPosition || 'N/A'}
+
+**Patrones Detectados**: ${patterns && patterns.length > 0 ? patterns.join(', ') : 'Ninguno'}
+
+**Razones para Compra**:
+${reasons.map(r => `- ${r}`).join('\n')}
+
+${warnings && warnings.length > 0 ? `**Advertencias**:\n${warnings.map(w => `- ${w}`).join('\n')}` : ''}
+
+Proporciona un análisis conciso en formato JSON con la siguiente estructura:
+{
+  "sentiment": "BULLISH/NEUTRAL/BEARISH",
+  "recommendation": "STRONG_BUY/BUY/HOLD/AVOID",
+  "insights": ["insight1", "insight2", "insight3"],
+  "riskAssessment": "LOW/MEDIUM/HIGH"
+}
+
+Responde SOLO con el JSON, sin texto adicional.`;
+
+    try {
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.3,
+                        maxOutputTokens: 500
+                    }
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error('Gemini API error:', errorData);
+            throw new Error(`Gemini API failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!generatedText) {
+            throw new Error('No response from Gemini');
+        }
+
+        // Parsear JSON de la respuesta
+        let analysis;
+        try {
+            const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+            const jsonText = jsonMatch ? jsonMatch[0] : generatedText;
+            analysis = JSON.parse(jsonText);
+        } catch (parseError) {
+            console.error('Error parsing Gemini response:', generatedText);
+            analysis = {
+                sentiment: 'NEUTRAL',
+                recommendation: 'HOLD',
+                insights: ['Análisis no disponible, usar solo indicadores técnicos'],
+                riskAssessment: 'MEDIUM'
+            };
+        }
+
+        return {
+            success: true,
+            analysis,
+            timestamp: new Date().toISOString()
+        };
+    } catch (error) {
+        console.error('Error calling Gemini directly:', error);
+        return {
+            success: false,
+            error: error.message,
+            analysis: null
+        };
+    }
+}
 
 /**
  * Enviar datos de mercado para análisis con IA
@@ -14,17 +117,13 @@ const isDevelopment = import.meta.env.DEV || window.location.hostname === 'local
  * @returns {Promise<Object>} Análisis de IA
  */
 export async function getAIAnalysis(marketData) {
-    // En desarrollo local, retornar respuesta mock sin hacer la llamada
+    // En desarrollo, llamar directamente a Gemini
     if (isDevelopment) {
-        console.log('💡 AI Analysis deshabilitado en desarrollo local');
-        return {
-            success: false,
-            error: 'AI analysis only available in production',
-            analysis: null,
-            devMode: true
-        };
+        console.log('💡 Usando Gemini API directamente (desarrollo)');
+        return await callGeminiDirectly(marketData);
     }
 
+    // En producción, usar función serverless
     try {
         const response = await fetch(NETLIFY_FUNCTION_URL, {
             method: 'POST',
