@@ -307,3 +307,70 @@ button {
 .gap-sm { gap: var(--spacing-sm); }
 .gap-md { gap: var(--spacing-md); }
 .gap-lg { gap: var(--spacing-lg); }
+
+/* Mobile Responsive Design - Tablet and down */
+@media (max-width: 768px) {
+  :root {
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+  }
+
+  .app-container {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .dashboard-grid,
+  .signals-grid {
+    width: 100%;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 640px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    width: 100vw;
+    overflow-x: hidden;
+  }
+
+  #root {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  :root {
+    --spacing-md: 0.75rem;
+    --spacing-lg: 0.875rem;
+    --spacing-xl: 1rem;
+  }
+
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1rem; }
+
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    min-height: 40px;
+  }
+
+  .glass-card {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 380px) {
+  :root {
+    --spacing-md: 0.5rem;
+    --spacing-lg: 0.75rem;
+  }
+
+  button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}
