@@ -33,19 +33,39 @@ export async function handler(event, context) {
         // Obtener API key de variables de entorno
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+        console.log('Environment check:', {
+            hasApiKey: !!GEMINI_API_KEY,
+            apiKeyLength: GEMINI_API_KEY?.length || 0
+        });
+
         if (!GEMINI_API_KEY) {
+            console.error('GEMINI_API_KEY not found in environment variables');
             return {
                 statusCode: 500,
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'API key not configured'
+                    error: 'API key not configured in Netlify environment variables'
                 })
             };
         }
 
         // Parsear datos del request
-        const marketData = JSON.parse(event.body);
+        let marketData;
+        try {
+            marketData = JSON.parse(event.body);
+        } catch (parseError) {
+            console.error('Error parsing request body:', parseError);
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Invalid request body'
+                })
+            };
+        }
+
         const { symbol, price, indicators, patterns, reasons, warnings } = marketData;
 
         // Construir prompt para Gemini

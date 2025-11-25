@@ -35,13 +35,18 @@ export async function getAIAnalysis(marketData) {
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.warn('AI Analysis failed:', response.status, errorText);
             throw new Error(`AI Analysis failed: ${response.statusText}`);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Error getting AI analysis:', error);
+        // Solo log en desarrollo, silencioso en producción
+        if (isDevelopment) {
+            console.error('Error getting AI analysis:', error);
+        }
         return {
             success: false,
             error: error.message,
