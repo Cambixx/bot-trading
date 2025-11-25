@@ -25,8 +25,9 @@ Bot de señales de trading profesional para criptomonedas que combina **análisi
 ### Interfaz de Usuario
 - **Diseño Premium**: Dark theme con glassmorphism
 - **Responsive**: Optimizado para desktop y móvil
-- **Notificaciones**: Alertas en navegador para nuevas señales
-- **Auto-Refresh**: Actualización automática cada 5 minutos
+- **Notificaciones**: Alertas en navegador y Telegram para nuevas señales
+- **Auto-Refresh**: Actualización automática cada 20 minutos
+- **Análisis Automático**: Función serverless que analiza el mercado cada 20 minutos
 - **Real-time Data**: Datos en tiempo real desde Binance API
 
 ### Señales de Trading
@@ -52,6 +53,7 @@ Bot de señales de trading profesional para criptomonedas que combina **análisi
 - Node.js 18 o superior
 - npm o yarn
 - API Key de Gemini (gratis en [Google AI Studio](https://makersuite.google.com/app/apikey))
+- Bot de Telegram (opcional, para notificaciones automáticas)
 - Cuenta de Netlify (gratis)
 
 ## 🚀 Instalación Local
@@ -107,8 +109,9 @@ netlify dev
    - Functions directory: `netlify/functions`
 
 3. **Configurar Variables de Entorno**
-   - En Netlify Dashboard → Site settings → Environment variables
-   - Agregar: `GEMINI_API_KEY` con tu API key
+    - En Netlify Dashboard → Site settings → Environment variables
+    - Agregar: `GEMINI_API_KEY` con tu API key
+    - **Opcional para Telegram**: `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`
 
 4. **Deploy**
    - Click en "Deploy site"
@@ -139,16 +142,26 @@ netlify deploy --prod
 ### Configuración Post-Deployment
 
 1. **Variables de Entorno en Netlify**
-   - Site settings → Environment variables
-   - Agregar `GEMINI_API_KEY` con tu API key de Gemini
+    - Site settings → Environment variables
+    - Agregar `GEMINI_API_KEY` con tu API key de Gemini
+    - **Opcional para notificaciones Telegram**: `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`
 
-2. **Verificar Funciones Serverless**
-   - En Functions tab, verificar que `gemini-analysis` esté desplegada
+2. **Configurar Bot de Telegram (Opcional)**
+    - Crear un bot con [@BotFather](https://t.me/botfather) en Telegram
+    - Obtener el token del bot
+    - Iniciar conversación con tu bot y enviar `/start`
+    - Obtener el Chat ID usando: `https://api.telegram.org/bot<TOKEN>/getUpdates`
+    - Configurar `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en Netlify
 
-3. **Probar la Aplicación**
-   - Visitar tu URL de Netlify (ej: `https://tu-app.netlify.app`)
-   - Esperar a que carguen los datos del mercado
-   - Verificar que se generen señales
+3. **Verificar Funciones Serverless**
+    - En Functions tab, verificar que `gemini-analysis` y `scheduled-analysis` estén desplegadas
+    - La función `scheduled-analysis` se ejecutará automáticamente cada 20 minutos
+
+4. **Probar la Aplicación**
+    - Visitar tu URL de Netlify (ej: `https://tu-app.netlify.app`)
+    - Esperar a que carguen los datos del mercado
+    - Verificar que se generen señales
+    - Si configuraste Telegram, recibirás notificaciones automáticas cada 20 minutos
 
 ## 📊 Uso de la Aplicación
 
@@ -185,7 +198,7 @@ const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT
 ### Ajustar Intervalo de Actualización
 Cambiar en `src/App.jsx`:
 \`\`\`javascript
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos en ms
+const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos en ms
 \`\`\`
 
 ### Modificar Umbral de Señales
@@ -217,7 +230,8 @@ trading/
 │   └── main.jsx             # Entry point
 ├── netlify/
 │   └── functions/
-│       └── gemini-analysis.js     # Función serverless
+│       ├── gemini-analysis.js     # Función serverless para AI
+│       └── scheduled-analysis.js  # Función programada para análisis automático
 ├── public/                  # Assets estáticos
 ├── netlify.toml            # Configuración de Netlify
 ├── .env.example            # Template de variables

@@ -6,6 +6,11 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Scheduled function for automatic trading signal analysis
+[[scheduled_functions]]
+  function = "scheduled-analysis"
+  cron = "*/20 * * * *"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -8,7 +8,7 @@ import binanceService from './services/binanceService';
 import { performTechnicalAnalysis } from './services/technicalAnalysis';
 import { analyzeMultipleSymbols } from './services/signalGenerator';
 
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
+const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
 
 function App() {
