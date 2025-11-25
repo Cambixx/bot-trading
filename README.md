@@ -7,11 +7,13 @@ Bot de señales de trading profesional para criptomonedas que combina **análisi
 ## ✨ Características
 
 ### Análisis Técnico Avanzado
-- **Indicadores Técnicos**: RSI, MACD, Bollinger Bands, EMA/SMA, ATR
+- **Indicadores Técnicos**: RSI, MACD, Bollinger Bands, EMA/SMA, ATR, Stochastic Oscillator
 - **Análisis Multi-Timeframe**: 1h (entrada) y 4h (tendencia)
-- **Detección de Patrones**: Hammer, Engulfing Bullish, Doji
+- **Detección de Patrones**: Hammer, Engulfing, Three White Soldiers, Morning Star, Evening Star, Double Top, Double Bottom
+- **Detección de Divergencias**: Divergencias alcistas/bajistas en RSI y MACD
 - **Soporte/Resistencia**: Identificación automática de niveles clave
-- **Análisis de Volumen**: Detección de spikes, volumen promedio, presión compradora/vendedora
+- **Análisis de Volumen**: Spikes, presión compradora/vendedora, On-Balance Volume (OBV)
+- **Detección de Acumulación**: Identifica zonas de acumulación antes de breakouts
 - **Convergencia de Indicadores**: Requiere múltiples indicadores alineados para validar señal
 - **Niveles Dinámicos**: Stop Loss y Take Profit adaptados a volatilidad real (ATR)
 

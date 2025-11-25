@@ -229,6 +229,152 @@ export function isDoji(candle) {
 }
 
 /**
+ * Detectar patrón Three White Soldiers (3 velas alcistas consecutivas)
+ * @param {Array<Object>} candles - Últimas 3 velas
+ * @returns {boolean} True si es three white soldiers
+ */
+export function isThreeWhiteSoldiers(candles) {
+    if (candles.length < 3) return false;
+
+    const last3 = candles.slice(-3);
+
+    // Todas las 3 deben ser alcistas
+    const allBullish = last3.every(c => c.close > c.open);
+
+    if (!allBullish) return false;
+
+    // Cada vela debe cerrar progresivamente más alta
+    const progressiveHigher = (
+        last3[1].close > last3[0].close &&
+        last3[2].close > last3[1].close
+    );
+
+    // Volumes en ascenso
+    const volumeIncreasing = (
+        last3[1].volume > last3[0].volume &&
+        last3[2].volume > last3[1].volume
+    );
+
+    return progressiveHigher && volumeIncreasing;
+}
+
+/**
+ * Detectar patrón Morning Star (reversión de tendencia bajista)
+ * @param {Array<Object>} candles - Últimas 3 velas
+ * @returns {boolean} True si es morning star
+ */
+export function isMorningStar(candles) {
+    if (candles.length < 3) return false;
+
+    const last3 = candles.slice(-3);
+
+    // Primera vela: bajista (roja)
+    const firstBearish = last3[0].close < last3[0].open;
+
+    // Segunda vela: pequeño cuerpo (indecisión) - puede ser cualquier color
+    const secondSmall = Math.abs(last3[1].close - last3[1].open) < Math.abs(last3[0].close - last3[0].open) * 0.5;
+
+    // Tercera vela: alcista (verde) y cierra en mitad o arriba de la primera
+    const thirdBullish = last3[2].close > last3[2].open;
+    const thirdCloseAboveFirst = last3[2].close > last3[0].open;
+
+    return firstBearish && secondSmall && thirdBullish && thirdCloseAboveFirst;
+}
+
+/**
+ * Detectar patrón Evening Star (reversión de tendencia alcista)
+ * @param {Array<Object>} candles - Últimas 3 velas
+ * @returns {boolean} True si es evening star
+ */
+export function isEveningStar(candles) {
+    if (candles.length < 3) return false;
+
+    const last3 = candles.slice(-3);
+
+    // Primera vela: alcista (verde)
+    const firstBullish = last3[0].close > last3[0].open;
+
+    // Segunda vela: pequeño cuerpo (indecisión)
+    const secondSmall = Math.abs(last3[1].close - last3[1].open) < Math.abs(last3[0].close - last3[0].open) * 0.5;
+
+    // Tercera vela: bajista (roja) y cierra en mitad o debajo de la primera
+    const thirdBearish = last3[2].close < last3[2].open;
+    const thirdCloseBelowFirst = last3[2].close < last3[0].open;
+
+    return firstBullish && secondSmall && thirdBearish && thirdCloseBelowFirst;
+}
+
+/**
+ * Detectar patrón Double Bottom (soporte doble, reversión alcista)
+ * @param {Array<Object>} candles - Últimas 5-10 velas
+ * @param {number} tolerance - Tolerancia en % para considerar "mismo nivel"
+ * @returns {boolean} True si es double bottom
+ */
+export function isDoubleBottom(candles, tolerance = 1) {
+    if (candles.length < 5) return false;
+
+    const lows = candles.slice(-10).map(c => c.low);
+    const closes = candles.slice(-10).map(c => c.close);
+
+    // Encontrar dos mínimos similares
+    const lowestIdx1 = lows.indexOf(Math.min(...lows.slice(0, -3)));
+    const lowestIdx2 = lows.indexOf(Math.min(...lows.slice(-3)));
+
+    if (lowestIdx1 >= lowestIdx2 || lowestIdx2 - lowestIdx1 < 2) return false;
+
+    const low1 = lows[lowestIdx1];
+    const low2 = lows[lowestIdx2];
+
+    const priceTolerance = (low1 * tolerance) / 100;
+
+    // Los dos mínimos deben ser similares
+    if (Math.abs(low1 - low2) > priceTolerance) return false;
+
+    // Debe haber un pico entre los dos mínimos
+    const peakBetween = Math.max(...lows.slice(lowestIdx1 + 1, lowestIdx2));
+    if (peakBetween < Math.max(low1, low2)) return false;
+
+    // La última vela debe estar en recuperación
+    const lastClose = closes[closes.length - 1];
+    return lastClose > (low1 + low2) / 2;
+}
+
+/**
+ * Detectar patrón Double Top (resistencia doble, reversión bajista)
+ * @param {Array<Object>} candles - Últimas 5-10 velas
+ * @param {number} tolerance - Tolerancia en % para considerar "mismo nivel"
+ * @returns {boolean} True si es double top
+ */
+export function isDoubleTop(candles, tolerance = 1) {
+    if (candles.length < 5) return false;
+
+    const highs = candles.slice(-10).map(c => c.high);
+    const closes = candles.slice(-10).map(c => c.close);
+
+    // Encontrar dos máximos similares
+    const highestIdx1 = highs.indexOf(Math.max(...highs.slice(0, -3)));
+    const highestIdx2 = highs.indexOf(Math.max(...highs.slice(-3)));
+
+    if (highestIdx1 >= highestIdx2 || highestIdx2 - highestIdx1 < 2) return false;
+
+    const high1 = highs[highestIdx1];
+    const high2 = highs[highestIdx2];
+
+    const priceTolerance = (high1 * tolerance) / 100;
+
+    // Los dos máximos deben ser similares
+    if (Math.abs(high1 - high2) > priceTolerance) return false;
+
+    // Debe haber un valle entre los dos máximos
+    const valleyBetween = Math.min(...highs.slice(highestIdx1 + 1, highestIdx2));
+    if (valleyBetween > Math.min(high1, high2)) return false;
+
+    // La última vela debe estar en caída
+    const lastClose = closes[closes.length - 1];
+    return lastClose < (high1 + high2) / 2;
+}
+
+/**
  * Calcular volumen promedio
  * @param {Array<Object>} candles - Datos de velas
  * @param {number} period - Período
@@ -340,6 +486,152 @@ export function calculateBuyerPressure(candles) {
 }
 
 /**
+ * Calcular Stochastic Oscillator - Detecta sobreventa/sobrecompra
+ * @param {Array<Object>} candles - Datos de velas
+ * @param {number} period - Período lookback (típicamente 14)
+ * @param {number} smoothK - Suavizado K (típicamente 3)
+ * @param {number} smoothD - Suavizado D (típicamente 3)
+ * @returns {Object} { stochK, stochD, stochHistogram }
+ */
+export function calculateStochastic(candles, period = 14, smoothK = 3, smoothD = 3) {
+    const closes = candles.map(c => c.close);
+
+    const rawStoch = [];
+
+    // Calcular %K raw (fast stochastic)
+    for (let i = 0; i < closes.length; i++) {
+        if (i < period - 1) {
+            rawStoch.push(null);
+        } else {
+            const slice = candles.slice(i - period + 1, i + 1);
+            const periodHigh = Math.max(...slice.map(c => c.high));
+            const periodLow = Math.min(...slice.map(c => c.low));
+            const currentClose = closes[i];
+
+            const k = ((currentClose - periodLow) / (periodHigh - periodLow)) * 100;
+            rawStoch.push(isNaN(k) ? 50 : k);
+        }
+    }
+
+    // Suavizar K con SMA
+    const stochK = calculateSMA(rawStoch, smoothK);
+
+    // Suavizar D (SMA de K)
+    const stochD = calculateSMA(stochK, smoothD);
+
+    // Calcular histograma
+    const stochHistogram = stochK.map((k, i) => {
+        if (k === null || stochD[i] === null) return null;
+        return k - stochD[i];
+    });
+
+    return {
+        stochK,
+        stochD,
+        stochHistogram
+    };
+}
+
+/**
+ * Calcular On-Balance Volume (OBV)
+ * @param {Array<Object>} candles - Datos de velas
+ * @returns {Array<number>} OBV values
+ */
+export function calculateOBV(candles) {
+    const obv = [0];
+
+    for (let i = 1; i < candles.length; i++) {
+        let change = 0;
+
+        if (candles[i].close > candles[i - 1].close) {
+            change = candles[i].volume;
+        } else if (candles[i].close < candles[i - 1].close) {
+            change = -candles[i].volume;
+        }
+
+        obv.push(obv[i - 1] + change);
+    }
+
+    return obv;
+}
+
+/**
+ * Detectar divergencias entre precio e indicador
+ * @param {Array<number>} prices - Array de precios
+ * @param {Array<number>} indicator - Array de valores del indicador (RSI, MACD, etc)
+ * @param {number} lookback - Velas atrás para buscar divergencia
+ * @returns {Object} { bullish, bearish, strength }
+ */
+export function detectDivergence(prices, indicator, lookback = 5) {
+    if (prices.length < lookback + 1 || indicator.length < lookback + 1) {
+        return { bullish: false, bearish: false, strength: 0 };
+    }
+
+    const recentPrices = prices.slice(-lookback);
+    const recentIndicator = indicator.slice(-lookback);
+
+    // Validar que tenemos valores válidos
+    if (recentIndicator.some(v => v === null)) {
+        return { bullish: false, bearish: false, strength: 0 };
+    }
+
+    const currentPrice = recentPrices[recentPrices.length - 1];
+    const prevPrice = recentPrices[0];
+
+    const currentIndicator = recentIndicator[recentIndicator.length - 1];
+    const prevIndicator = recentIndicator[0];
+
+    const priceGain = currentPrice > prevPrice;
+    const indicatorGain = currentIndicator > prevIndicator;
+
+    // Divergencia alcista: precio baja, indicador sube (señal bullish)
+    const bullish = !priceGain && indicatorGain;
+
+    // Divergencia bajista: precio sube, indicador baja (señal bearish)
+    const bearish = priceGain && !indicatorGain;
+
+    // Calcular fuerza de divergencia (0-1)
+    let strength = 0;
+    if (bullish || bearish) {
+        const priceChange = Math.abs(currentPrice - prevPrice) / prevPrice;
+        const indicatorChange = Math.abs(currentIndicator - prevIndicator) / (Math.abs(prevIndicator) + 1);
+        strength = Math.min(1, (priceChange + indicatorChange) / 2);
+    }
+
+    return { bullish, bearish, strength };
+}
+
+/**
+ * Detectar acumulación (precio bajo pero volumen alto)
+ * @param {Array<Object>} candles - Datos de velas
+ * @param {number} lookback - Velas a analizar
+ * @returns {Object} { isAccumulating, strength }
+ */
+export function detectAccumulation(candles, lookback = 5) {
+    if (candles.length < lookback) {
+        return { isAccumulating: false, strength: 0 };
+    }
+
+    const recent = candles.slice(-lookback);
+    const avgVolume = recent.reduce((sum, c) => sum + c.volume, 0) / lookback;
+    const avgPrice = recent.reduce((sum, c) => sum + c.close, 0) / lookback;
+
+    // Detectar si hay estabilidad de precio con volumen consistente
+    const prices = recent.map(c => c.close);
+    const maxPrice = Math.max(...prices);
+    const minPrice = Math.min(...prices);
+    const priceRange = ((maxPrice - minPrice) / avgPrice) * 100;
+
+    // Si rango pequeño (<2%) pero volumen constante = acumulación
+    const volumeConsistency = recent.filter(c => c.volume > avgVolume * 0.8).length / lookback;
+
+    const isAccumulating = priceRange < 2 && volumeConsistency > 0.6;
+    const strength = isAccumulating ? volumeConsistency : 0;
+
+    return { isAccumulating, strength };
+}
+
+/**
  * Realizar análisis técnico completo
  * @param {Array<Object>} candles - Datos de velas
  * @returns {Object} Análisis técnico completo
@@ -355,7 +647,16 @@ export function performTechnicalAnalysis(candles) {
     const sma200 = calculateSMA(closes, 200);
     const atr = calculateATR(candles, 14);
     const buyerPressure = calculateBuyerPressure(candles);
+    const stochastic = calculateStochastic(candles, 14, 3, 3);
+    const obv = calculateOBV(candles);
     const { support, resistance } = findSupportResistance(candles, 20);
+
+    // Detectar divergencias
+    const rsiDivergence = detectDivergence(closes, rsi, 5);
+    const macdDivergence = detectDivergence(closes, macd.histogram, 5);
+
+    // Detectar acumulación
+    const accumulation = detectAccumulation(candles, 5);
 
     // Obtener valores actuales (último índice con datos válidos)
     const lastIndex = closes.length - 1;
@@ -366,7 +667,12 @@ export function performTechnicalAnalysis(candles) {
     const patterns = {
         hammer: isHammer(currentCandle),
         bullishEngulfing: isBullishEngulfing(prevCandle, currentCandle),
-        doji: isDoji(currentCandle)
+        doji: isDoji(currentCandle),
+        threeWhiteSoldiers: isThreeWhiteSoldiers(candles),
+        morningStar: isMorningStar(candles),
+        eveningStar: isEveningStar(candles),
+        doubleBottom: isDoubleBottom(candles, 1),
+        doubleTop: isDoubleTop(candles, 1)
     };
 
     return {
@@ -377,6 +683,11 @@ export function performTechnicalAnalysis(candles) {
                 value: macd.macd[lastIndex],
                 signal: macd.signal[lastIndex],
                 histogram: macd.histogram[lastIndex]
+            },
+            stochastic: {
+                k: stochastic.stochK[lastIndex],
+                d: stochastic.stochD[lastIndex],
+                histogram: stochastic.stochHistogram[lastIndex]
             },
             bollingerBands: {
                 upper: bb.upper[lastIndex],
@@ -399,15 +710,23 @@ export function performTechnicalAnalysis(candles) {
             spike: hasVolumeSpike(candles, 1.5)
         },
         buyerPressure,
+        divergence: {
+            rsi: rsiDivergence,
+            macd: macdDivergence
+        },
+        accumulation,
+        obv: obv[lastIndex],
         // Datos completos para gráficos
         fullData: {
             rsi,
             macd,
+            stochastic,
             bollingerBands: bb,
             ema20,
             ema50,
             sma200,
-            atr
+            atr,
+            obv
         }
     };
 }

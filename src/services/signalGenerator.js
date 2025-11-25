@@ -124,6 +124,34 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         reasons.push('Patrón Engulfing Alcista detectado');
     }
 
+    if (patterns.threeWhiteSoldiers) {
+        score += 20;
+        convergenceCount += 1;
+        reasons.push('Patrón Three White Soldiers detectado');
+    }
+
+    if (patterns.morningStar) {
+        score += 18;
+        convergenceCount += 1;
+        reasons.push('Patrón Morning Star detectado (reversión alcista)');
+    }
+
+    if (patterns.doubleBottom) {
+        score += 20;
+        convergenceCount += 1;
+        reasons.push('Patrón Double Bottom detectado (soporte fuerte)');
+    }
+
+    if (patterns.eveningStar) {
+        score -= 18;
+        warnings.push('Patrón Evening Star detectado (reversión bajista)');
+    }
+
+    if (patterns.doubleTop) {
+        score -= 20;
+        warnings.push('Patrón Double Top detectado (resistencia fuerte)');
+    }
+
     if (patterns.doji) {
         score += 5;
         reasons.push('Patrón Doji (indecisión)');
@@ -144,6 +172,59 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     } else if (buyerPressure && buyerPressure.current < 40) {
         score -= 10;
         warnings.push(`Presión de vendedores (${buyerPressure.current.toFixed(1)}%)`);
+    }
+
+    // === ANÁLISIS STOCHASTIC ===
+    if (indicators.stochastic && indicators.stochastic.k !== null) {
+        if (indicators.stochastic.k < 20) {
+            score += 10;
+            convergenceCount += 0.5;
+            reasons.push('Stochastic sobreventa (<20)');
+        } else if (indicators.stochastic.k > 80) {
+            score -= 10;
+            warnings.push('Stochastic sobrecompra (>80)');
+        }
+
+        // Cruce alcista de Stochastic (K > D)
+        if (indicators.stochastic.k > indicators.stochastic.d && indicators.stochastic.histogram > 0) {
+            score += 8;
+            convergenceCount += 0.5;
+            reasons.push('Stochastic cruce alcista');
+        }
+    }
+
+    // === ANÁLISIS DE DIVERGENCIAS ===
+    if (analysis.divergence) {
+        // Divergencia alcista en RSI (precio baja, RSI sube) = BULLISH
+        if (analysis.divergence.rsi && analysis.divergence.rsi.bullish) {
+            score += 10;
+            convergenceCount += 1;
+            reasons.push(`Divergencia alcista en RSI (fuerza: ${(analysis.divergence.rsi.strength * 100).toFixed(0)}%)`);
+        }
+        // Divergencia bajista en RSI (precio sube, RSI baja) = BEARISH
+        else if (analysis.divergence.rsi && analysis.divergence.rsi.bearish) {
+            score -= 15;
+            warnings.push('Divergencia bajista en RSI');
+        }
+
+        // Divergencia alcista en MACD (precio baja, MACD sube)
+        if (analysis.divergence.macd && analysis.divergence.macd.bullish) {
+            score += 8;
+            convergenceCount += 0.5;
+            reasons.push('Divergencia alcista en MACD');
+        }
+        // Divergencia bajista en MACD (precio sube, MACD baja)
+        else if (analysis.divergence.macd && analysis.divergence.macd.bearish) {
+            score -= 12;
+            warnings.push('Divergencia bajista en MACD');
+        }
+    }
+
+    // === ANÁLISIS DE ACUMULACIÓN ===
+    if (analysis.accumulation && analysis.accumulation.isAccumulating) {
+        score += 12;
+        convergenceCount += 1;
+        reasons.push(`Zona de acumulación detectada (fuerza: ${(analysis.accumulation.strength * 100).toFixed(0)}%)`);
     }
 
     // === ANÁLISIS MULTI-TIMEFRAME (si está disponible) ===
