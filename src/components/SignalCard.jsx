@@ -88,7 +88,9 @@ function SignalCard({ signal }) {
                 <h4 className="reasons-title">Razones de Compra</h4>
                 <ul className="reasons-list">
                     {signal.reasons.slice(0, 3).map((reason, idx) => (
-                        <li key={idx} className="reason-item">{reason}</li>
+                        <li key={idx} className="reason-item">
+                            {typeof reason === 'object' ? reason.text : reason}
+                        </li>
                     ))}
                 </ul>
             </div>

@@ -3,16 +3,16 @@ import { performTechnicalAnalysis } from './technicalAnalysis.js';
 // Configurable weights and thresholds (tune these as needed)
 export const SIGNAL_CONFIG = {
     categoryWeights: {
-        momentum: 0.30,
-        trend: 0.20,
+        momentum: 0.35, // Increased weight
+        trend: 0.25,
         levels: 0.20,
         volume: 0.15,
-        patterns: 0.10,
-        divergence: 0.05
+        patterns: 0.05,
+        divergence: 0.05 // Reduced weight
     },
-    categoryThresholdForConvergence: 0.6, // subscore (0..1) needed to count as aligned
-    requiredCategories: 2, // how many categories must be aligned
-    scoreToEmit: 0.70 // final normalized score (0..1) threshold to emit (calibrated)
+    categoryThresholdForConvergence: 0.4, // Lowered from 0.6
+    requiredCategories: 1, // Lowered from 2
+    scoreToEmit: 0.45 // Lowered from 0.70
 };
 
 function clamp(v, a = 0, b = 1) {
@@ -37,7 +37,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     let rsiScore = 0;
     if (indicators.rsi != null) {
         // 30 => strong (1), 40 => neutral (0)
-        rsiScore = clamp((40 - indicators.rsi) / 10, 0, 1);
+        rsiScore = clamp((45 - indicators.rsi) / 15, 0, 1); // Relaxed: <45 starts scoring
     }
 
     const macdScore = (indicators.macd && indicators.macd.histogram != null) ? (indicators.macd.histogram > 0 ? 1 : 0) : 0;
@@ -45,16 +45,23 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     let stochScore = 0;
     if (indicators.stochastic && indicators.stochastic.k != null) {
         if (indicators.stochastic.k < 20) stochScore = 1;
-        else if (indicators.stochastic.k < 30) stochScore = clamp((30 - indicators.stochastic.k) / 10, 0, 1);
+        else if (indicators.stochastic.k < 40) stochScore = clamp((40 - indicators.stochastic.k) / 20, 0, 1); // Relaxed
     }
 
-    const momentumScore = clamp(0.5 * rsiScore + 0.3 * macdScore + 0.2 * stochScore, 0, 1);
+    const momentumScore = clamp(0.4 * rsiScore + 0.4 * macdScore + 0.2 * stochScore, 0, 1);
     if (momentumScore > 0) reasons.push({ text: 'Momentum positivo', weight: percent(momentumScore) });
 
     // === Trend (EMA cross, SMA200) ===
     let emaScore = 0;
     if (indicators.ema20 != null && indicators.ema50 != null) {
-        emaScore = indicators.ema20 > indicators.ema50 ? 1 : 0;
+        if (indicators.ema20 > indicators.ema50) {
+            emaScore = 0.7; // Base score for uptrend
+            // Bonus for dip in uptrend (price < ema20) - Align with CryptoCard
+            if (price < indicators.ema20) {
+                emaScore = 1.0;
+                reasons.push({ text: 'Oportunidad en retroceso (Dip)', weight: 20 });
+            }
+        }
     }
     const smaScore = (indicators.sma200 != null && price != null) ? (price > indicators.sma200 ? 1 : 0) : 0;
     const trendScore = clamp(0.6 * emaScore + 0.4 * smaScore, 0, 1);
