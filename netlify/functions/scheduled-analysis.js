@@ -6,6 +6,9 @@
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
+// Optional secret to protect POST notify endpoint. If set, incoming POSTs must include
+// header `x-notify-secret` equal to this value. If not set, POSTs are accepted (warned).
+const NOTIFY_SECRET = process.env.NOTIFY_SECRET || null;
 // Minimum score threshold to create/send a signal (can be overridden by env var)
 const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 60;
 
@@ -272,6 +275,47 @@ async function sendGroupedTelegramNotification(signals) {
 
 export async function handler(event, context) {
   console.log('Starting scheduled analysis at', new Date().toISOString());
+  // If invoked via HTTP POST with a `signals` payload, send them as notifications
+  if (event && event.httpMethod === 'POST') {
+    try {
+      // If NOTIFY_SECRET is set, require header match
+      const provided = event.headers && (event.headers['x-notify-secret'] || event.headers['X-Notify-Secret']);
+      if (NOTIFY_SECRET) {
+        if (!provided || provided !== NOTIFY_SECRET) {
+          console.warn('POST notify rejected: missing or invalid x-notify-secret');
+          return { statusCode: 401, body: JSON.stringify({ success: false, error: 'Unauthorized' }) };
+        }
+      } else {
+        console.warn('NOTIFY_SECRET not configured; accepting POST notify without secret');
+      }
+
+      const body = event.body ? JSON.parse(event.body) : null;
+      const incomingSignals = body && body.signals ? body.signals : null;
+
+      if (!incomingSignals || !Array.isArray(incomingSignals) || incomingSignals.length === 0) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ success: false, error: 'No signals provided' })
+        };
+      }
+
+      console.log('Received POST request to send notifications for', incomingSignals.length, 'signals');
+      // Optionally filter by threshold
+      const filtered = incomingSignals.filter(s => (typeof s.score === 'number' ? s.score >= SIGNAL_SCORE_THRESHOLD : true));
+
+      if (filtered.length === 0) {
+        console.log('No signals meet the threshold for sending');
+        return { statusCode: 200, body: JSON.stringify({ success: true, sent: 0 }) };
+      }
+
+      await sendGroupedTelegramNotification(filtered);
+
+      return { statusCode: 200, body: JSON.stringify({ success: true, sent: filtered.length }) };
+    } catch (err) {
+      console.error('Error handling POST notify:', err);
+      return { statusCode: 500, body: JSON.stringify({ success: false, error: err.message }) };
+    }
+  }
 
   try {
     const signals = [];

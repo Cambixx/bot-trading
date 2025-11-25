@@ -163,6 +163,54 @@ netlify deploy --prod
     - Verificar que se generen señales
     - Si configuraste Telegram, recibirás notificaciones automáticas cada 20 minutos
 
+    ### Protección del endpoint de notificaciones (recomendado)
+
+    Para evitar que terceros invocen la función `scheduled-analysis` y provoquen envíos no deseados a tu bot de Telegram, el proyecto soporta un secreto opcional.
+
+    - `NOTIFY_SECRET` (server-side): valor secreto que debes configurar en Netlify como variable de entorno. Si `NOTIFY_SECRET` está definido, la función rechazará cualquier POST que no incluya el header `x-notify-secret` con el valor correcto (HTTP 401).
+    - `VITE_NOTIFY_SECRET` (client/build): si quieres que el frontend pueda notificar al servidor (por ejemplo, al abrir la app), añade el mismo valor como `VITE_NOTIFY_SECRET` en Netlify. Cuando el cliente se construya, `import.meta.env.VITE_NOTIFY_SECRET` será embebido y el cliente incluirá `x-notify-secret` en las peticiones.
+
+    Ejemplo de `.env` local (NO subir al repositorio):
+
+    ```dotenv
+    # API Key (NO SUBIR)
+    GEMINI_API_KEY=tu_gemini_key_aqui
+
+    # Telegram
+    TELEGRAM_ENABLED=true
+    TELEGRAM_BOT_TOKEN=123456:ABC-DEF...
+    TELEGRAM_CHAT_ID=987654321
+
+    # Protección del endpoint (opcional)
+    NOTIFY_SECRET=mi-secreto-largo-y-aleatorio
+    VITE_NOTIFY_SECRET=mi-secreto-largo-y-aleatorio
+    ```
+
+    Prueba local rápida:
+
+    1. Añade las variables al `.env` como en el ejemplo anterior.
+    2. Carga las variables y ejecuta el script de prueba que invoca la función con POST (incluye el header si `NOTIFY_SECRET` está presente):
+
+    ```bash
+    set -a && source .env && set +a
+    node test/invoke_notify.mjs
+    ```
+
+    3. Revisa el chat de Telegram y los logs de la función en Netlify.
+
+    Notas de seguridad y alternativas:
+
+    - `VITE_NOTIFY_SECRET` se incorpora al bundle del cliente en tiempo de *build* (necesario si quieres que el frontend haga POST directamente). Si prefieres no exponer ningún secreto en el frontend, no configures `VITE_NOTIFY_SECRET` y utiliza un flujo completamente server-side (por ejemplo, guardar señales en una cola y procesarlas desde funciones protegidas).
+    - Si no deseas que el cliente notifique automáticamente, se puede cambiar para que solo notifique cuando el usuario active la campana de notificaciones.
+
+    Configura en Netlify (resumen):
+
+    - `TELEGRAM_ENABLED=true`
+    - `TELEGRAM_BOT_TOKEN` = tu token
+    - `TELEGRAM_CHAT_ID` = tu chat id
+    - `NOTIFY_SECRET` = mi-secreto-largo-y-aleatorio
+    - `VITE_NOTIFY_SECRET` = mi-secreto-largo-y-aleatorio
+
 ## 📊 Uso de la Aplicación
 
 ### Dashboard Principal

@@ -104,6 +104,24 @@ function App() {
       // 5. Generar señales (solo con análisis técnico)
       const generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis);
 
+      // Send generated signals to serverless function for Telegram notifications
+      // NOTE: we send all generated signals each analysis run so server can decide what to notify.
+      (async () => {
+        try {
+          const notifySecret = import.meta.env.VITE_NOTIFY_SECRET || null;
+          const headers = { 'Content-Type': 'application/json' };
+          if (notifySecret) headers['x-notify-secret'] = notifySecret;
+
+          await fetch('/.netlify/functions/scheduled-analysis', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ signals: generatedSignals })
+          });
+        } catch (e) {
+          console.warn('Failed to notify server for Telegram:', e && e.message);
+        }
+      })();
+
       // 6. Actualizar estado
       const cryptoPrices = {};
       priceResults.forEach(({ symbol, data }) => {
