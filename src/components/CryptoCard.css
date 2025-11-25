@@ -132,3 +132,54 @@
     font-weight: 600;
     text-align: right;
 }
+
+/* Opportunity Color System */
+.crypto-card.opportunity-high {
+    border-left: 4px solid var(--color-success);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.crypto-card.opportunity-medium {
+    border-left: 4px solid var(--color-info);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.crypto-card.opportunity-low {
+    border-left: 4px solid var(--color-danger);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+    opacity: 0.8;
+}
+
+.crypto-card.opportunity-neutral {
+    border-left: 4px solid transparent;
+}
+
+/* Opportunity Badge */
+.opportunity-badge {
+    margin-top: var(--spacing-md);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.opportunity-badge-high {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.2) 100%);
+    color: var(--color-success-light);
+    border: 1px solid var(--color-success);
+}
+
+.opportunity-badge-medium {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+    color: var(--color-info-light);
+    border: 1px solid var(--color-info);
+}
+
+.opportunity-badge-low {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(248, 113, 113, 0.15) 100%);
+    color: var(--color-danger-light);
+    border: 1px solid var(--color-danger);
+}

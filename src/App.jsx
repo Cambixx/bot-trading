@@ -3,16 +3,17 @@ import { Bell, BellOff, RefreshCw, Zap } from 'lucide-react';
 import './App.css';
 import SignalCard from './components/SignalCard';
 import CryptoCard from './components/CryptoCard';
+import CryptoSelector from './components/CryptoSelector';
 import binanceService from './services/binanceService';
 import { performTechnicalAnalysis } from './services/technicalAnalysis';
 import { analyzeMultipleSymbols } from './services/signalGenerator';
 import { enrichSignalWithAI } from './services/aiAnalysis';
 
-// Símbolos a monitorear
-const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT'];
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
+const STORAGE_KEY = 'trading_bot_symbols';
 
 function App() {
+  const [symbols, setSymbols] = useState([]);
   const [cryptoData, setCryptoData] = useState({});
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,38 @@ function App() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Cargar símbolos desde localStorage o top 10 por defecto
+  useEffect(() => {
+    const loadInitialSymbols = async () => {
+      const savedSymbols = localStorage.getItem(STORAGE_KEY);
+
+      if (savedSymbols) {
+        // Usar símbolos guardados
+        setSymbols(JSON.parse(savedSymbols));
+      } else {
+        // Cargar top 10 por volumen
+        try {
+          const topSymbols = await binanceService.getTopCryptosByVolume(10);
+          setSymbols(topSymbols);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(topSymbols));
+        } catch (error) {
+          console.error('Error loading top cryptos:', error);
+          // Fallback a símbolos populares
+          const fallbackSymbols = ['BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC', 'XRPUSDC'];
+          setSymbols(fallbackSymbols);
+        }
+      }
+    };
+
+    loadInitialSymbols();
+  }, []);
+
+  // Guardar símbolos en localStorage cuando cambien
+  const handleSymbolsChange = (newSymbols) => {
+    setSymbols(newSymbols);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSymbols));
+  };
 
   // Pedir permisos para notificaciones
   useEffect(() => {
@@ -34,11 +67,15 @@ function App() {
 
   // Función para obtener datos y generar señales
   const fetchDataAndAnalyze = async () => {
+    if (symbols.length === 0) {
+      return; // No hacer nada si no hay símbolos cargados
+    }
+
     try {
       setError(null);
 
       // 1. Obtener datos de precios actuales
-      const pricePromises = SYMBOLS.map(symbol =>
+      const pricePromises = symbols.map(symbol =>
         binanceService.getCurrentPrice(symbol)
           .then(data => ({ symbol, data, error: null }))
           .catch(err => ({ symbol, data: null, error: err.message }))
@@ -46,14 +83,14 @@ function App() {
       const priceResults = await Promise.all(pricePromises);
 
       // 2. Obtener datos de velas para análisis (1h)
-      const candleData = await binanceService.getMultipleSymbolsData(SYMBOLS, '1h', 100);
+      const candleData = await binanceService.getMultipleSymbolsData(symbols, '1h', 100);
 
       // 3. Obtener datos de 4h para confirmación de tendencia
-      const candleData4h = await binanceService.getMultipleSymbolsData(SYMBOLS, '4h', 50);
+      const candleData4h = await binanceService.getMultipleSymbolsData(symbols, '4h', 50);
 
       // 4. Realizar análisis técnico y convertir para multi-timeframe
       const multiTimeframeAnalysis = {};
-      for (const symbol of SYMBOLS) {
+      for (const symbol of symbols) {
         if (candleData4h[symbol]?.data) {
           const analysis4h = performTechnicalAnalysis(candleData4h[symbol].data);
           multiTimeframeAnalysis[symbol] = { '4h': analysis4h };
@@ -147,19 +184,23 @@ function App() {
     setIsRefreshing(false);
   };
 
-  // Cargar datos inicial
+  // Cargar datos inicial (cuando symbols esté disponible)
   useEffect(() => {
-    fetchDataAndAnalyze();
-  }, []);
+    if (symbols.length > 0) {
+      fetchDataAndAnalyze();
+    }
+  }, [symbols]);
 
   // Auto-refresh
   useEffect(() => {
+    if (symbols.length === 0) return;
+
     const interval = setInterval(() => {
       fetchDataAndAnalyze();
     }, REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [signals, notificationsEnabled]);
+  }, [symbols, signals, notificationsEnabled]);
 
   return (
     <div className="app-container">
@@ -206,6 +247,12 @@ function App() {
           </button>
         </div>
       </div>
+
+      {/* Crypto Selector */}
+      <CryptoSelector
+        selectedSymbols={symbols}
+        onSymbolsChange={handleSymbolsChange}
+      />
 
       {/* Error Display */}
       {error && (
