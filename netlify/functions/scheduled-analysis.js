@@ -10,7 +10,8 @@ const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() 
 // header `x-notify-secret` equal to this value. If not set, POSTs are accepted (warned).
 const NOTIFY_SECRET = process.env.NOTIFY_SECRET || null;
 // Minimum score threshold to create/send a signal (can be overridden by env var)
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 60;
+// Default updated to 70 to align with signalGenerator's calibrated default (0..100 scale)
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70;
 
 // Helper: escape text for Telegram MarkdownV2
 function escapeMarkdownV2(text = '') {
@@ -203,7 +204,35 @@ async function sendTelegramNotification(signal) {
   }
 
   // Kept for backward compatibility; prefer grouped sender
-  const message = `*🚀 NUEVA SEÑAL DE TRADING*\n\n*Criptomoneda:* ${escapeMarkdownV2(signal.symbol)}\n*Precio:* $${escapeMarkdownV2(signal.price.toFixed(2))}\n*Score:* ${escapeMarkdownV2(String(signal.score))}\n\n${signal.reasons.map(r => `• ${escapeMarkdownV2(r)}`).join('\n')}\n\n${escapeMarkdownV2(new Date().toLocaleString('es-ES'))}`;
+  // Build message handling both legacy (string reasons) and new formats
+  let message = '*🚀 NUEVA SEÑAL DE TRADING*\n\n';
+  message += `*Criptomoneda:* ${escapeMarkdownV2(signal.symbol)}\n`;
+  message += `*Precio:* $${escapeMarkdownV2(signal.price.toFixed(2))}\n`;
+  message += `*Score:* ${escapeMarkdownV2(String(signal.score))}\n`;
+  if (typeof signal.categoriesAligned !== 'undefined') {
+    message += `*Categorías alineadas:* ${escapeMarkdownV2(String(signal.categoriesAligned))}\n`;
+  }
+
+  if (signal.subscores && typeof signal.subscores === 'object') {
+    message += '\n*Subscores:*\n';
+    for (const [k, v] of Object.entries(signal.subscores)) {
+      message += `• ${escapeMarkdownV2(k)}: ${escapeMarkdownV2(String(v))}%\n`;
+    }
+  }
+
+  if (signal.reasons && Array.isArray(signal.reasons) && signal.reasons.length > 0) {
+    message += '\n*Razones:*\n';
+    for (const r of signal.reasons) {
+      if (typeof r === 'string') {
+        message += `• ${escapeMarkdownV2(r)}\n`;
+      } else if (r && typeof r === 'object' && r.text) {
+        const weightText = r.weight ? ` (${escapeMarkdownV2(String(r.weight))}%)` : '';
+        message += `• ${escapeMarkdownV2(r.text)}${weightText}\n`;
+      }
+    }
+  }
+
+  message += `\n${escapeMarkdownV2(new Date().toLocaleString('es-ES'))}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -241,14 +270,29 @@ async function sendGroupedTelegramNotification(signals) {
   message += `*Total:* ${signals.length} \n\n`;
 
   for (const sig of signals) {
-    message += `*${escapeMarkdownV2(sig.symbol)}*\n`;
-    message += `Precio: \$${escapeMarkdownV2(sig.price.toFixed(2))}  \n`;
-    message += `Score: ${escapeMarkdownV2(String(sig.score))}  \n`;
-    if (sig.reasons && sig.reasons.length > 0) {
-      message += `Razones:\n`;
-      for (const r of sig.reasons) {
-        message += `• ${escapeMarkdownV2(r)}\n`;
-      }
+    // Compact entry per signal: symbol | score | top-2 subscores (or top-2 reasons)
+    message += `*${escapeMarkdownV2(sig.symbol)}* — Score: ${escapeMarkdownV2(String(sig.score))}\n`;
+    if (typeof sig.categoriesAligned !== 'undefined') {
+      message += `Categorías: ${escapeMarkdownV2(String(sig.categoriesAligned))}  \n`;
+    }
+
+    // Show top-2 subscores if available
+    if (sig.subscores && typeof sig.subscores === 'object') {
+      // sort subscores by value desc
+      const entries = Object.entries(sig.subscores).sort((a, b) => Number(b[1]) - Number(a[1]));
+      const top = entries.slice(0, 2).map(e => `${escapeMarkdownV2(e[0])}: ${escapeMarkdownV2(String(e[1]))}%`);
+      if (top.length) message += `${top.join(' — ')}\n`;
+    } else if (sig.reasons && sig.reasons.length > 0) {
+      // fallback: top-2 reasons (short)
+      const reasons = sig.reasons.slice(0, 2).map(r => (typeof r === 'string' ? r : (r.text || '')));
+      if (reasons.length) message += `${escapeMarkdownV2(reasons.join(' — '))}\n`;
+    }
+
+    // add a short line with price + R:R
+    if (sig.levels && sig.levels.entry) {
+      const priceText = `@ $${escapeMarkdownV2(Number(sig.levels.entry).toFixed(4))}`;
+      const rr = sig.riskReward ? `R:R ${escapeMarkdownV2(String(sig.riskReward))}` : '';
+      message += `${priceText} ${rr}\n`;
     }
     message += `\n`;
   }
@@ -344,13 +388,9 @@ export async function handler(event, context) {
 
     // Enviar notificaciones para señales detectadas
     if (signals.length > 0) {
-      console.log(`Sending notifications for ${signals.length} signals`);
-
-      for (const signal of signals) {
-        await sendTelegramNotification(signal);
-        // Pequeño delay para evitar rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      console.log(`Sending grouped notification for ${signals.length} signals`);
+      // Send a single grouped message for scheduled runs to avoid spamming
+      await sendGroupedTelegramNotification(signals);
     } else {
       console.log('No signals detected');
     }

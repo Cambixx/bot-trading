@@ -251,11 +251,21 @@ const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos en ms
 
 ### Modificar Umbral de Señales
 Editar en `src/services/signalGenerator.js`:
-\`\`\`javascript
-if (score < 50) { // Cambiar umbral aqui
-  return null;
-}
-\`\`\`
+```javascript
+// Ahora el umbral y pesos están centralizados en SIGNAL_CONFIG.
+// Para ajustar el comportamiento edita `SIGNAL_CONFIG` en `src/services/signalGenerator.js`.
+// Ejemplo: cambiar `scoreToEmit` a 0.5 para ser más permisivo.
+```
+
+### Nuevo: Ejecutar backtest de ejemplo
+
+Hay un pequeño script de demostración que genera velas sintéticas y ejecuta el analizador para mostrar una señal de ejemplo.
+
+Ejecutar:
+```bash
+node test/backtest_sample.mjs
+```
+Este script es un punto de partida para crear un backtest real con datos históricos.
 
 ## 🧪 Estructura del Proyecto
 

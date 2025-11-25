@@ -1,279 +1,173 @@
-import { performTechnicalAnalysis } from './technicalAnalysis';
+import { performTechnicalAnalysis } from './technicalAnalysis.js';
 
-/**
- * Generador de señales de trading para day trading spot
- * Enfocado en identificar oportunidades de COMPRA con convergencia de indicadores
- */
+// Configurable weights and thresholds (tune these as needed)
+export const SIGNAL_CONFIG = {
+    categoryWeights: {
+        momentum: 0.30,
+        trend: 0.20,
+        levels: 0.20,
+        volume: 0.15,
+        patterns: 0.10,
+        divergence: 0.05
+    },
+    categoryThresholdForConvergence: 0.6, // subscore (0..1) needed to count as aligned
+    requiredCategories: 2, // how many categories must be aligned
+    scoreToEmit: 0.70 // final normalized score (0..1) threshold to emit (calibrated)
+};
+
+function clamp(v, a = 0, b = 1) {
+    return Math.max(a, Math.min(b, v));
+}
+
+function percent(v) {
+    return Math.round(v * 100);
+}
 
 /**
  * Generar señal de trading basada en análisis técnico
- * @param {Object} analysis - Análisis técnico del símbolo
- * @param {string} symbol - Símbolo de la criptomoneda
- * @param {Object} multiTimeframeData - Datos de múltiples timeframes (opcional)
- * @returns {Object|null} Señal de trading o null si no hay señal
+ * Implementación basada en subscores por categoría para evitar double-counting
  */
 export function generateSignal(analysis, symbol, multiTimeframeData = null) {
-    const { indicators, levels, patterns, volume, price, buyerPressure } = analysis;
+    const { indicators = {}, levels = {}, patterns = {}, volume = {}, price, buyerPressure } = analysis;
 
-    let score = 0;
-    let convergenceCount = 0; // Contador de indicadores alineados
     const reasons = [];
     const warnings = [];
 
-    // === ANÁLISIS RSI ===
-    if (indicators.rsi !== null) {
-        if (indicators.rsi < 30) {
-            score += 25;
-            convergenceCount += 1;
-            reasons.push('RSI sobreventa (<30)');
-        } else if (indicators.rsi < 40) {
-            score += 15;
-            convergenceCount += 0.5;
-            reasons.push('RSI bajo (<40)');
-        } else if (indicators.rsi > 70) {
-            score -= 20;
-            warnings.push('RSI sobrecompra (>70)');
-        }
+    // === Momentum (RSI, MACD, Stochastic) ===
+    let rsiScore = 0;
+    if (indicators.rsi != null) {
+        // 30 => strong (1), 40 => neutral (0)
+        rsiScore = clamp((40 - indicators.rsi) / 10, 0, 1);
     }
 
-    // === ANÁLISIS MACD ===
-    if (indicators.macd.histogram !== null) {
-        // Crossover bullish (histograma cambia de negativo a positivo)
-        if (indicators.macd.histogram > 0 && indicators.macd.value > indicators.macd.signal) {
-            score += 20;
-            convergenceCount += 1;
-            reasons.push('MACD cruce alcista');
-        }
-        // Divergencia o momentum positivo
-        else if (indicators.macd.histogram > 0) {
-            score += 10;
-            convergenceCount += 0.5;
-            reasons.push('MACD momentum positivo');
-        }
+    const macdScore = (indicators.macd && indicators.macd.histogram != null) ? (indicators.macd.histogram > 0 ? 1 : 0) : 0;
+
+    let stochScore = 0;
+    if (indicators.stochastic && indicators.stochastic.k != null) {
+        if (indicators.stochastic.k < 20) stochScore = 1;
+        else if (indicators.stochastic.k < 30) stochScore = clamp((30 - indicators.stochastic.k) / 10, 0, 1);
     }
 
-    // === ANÁLISIS BOLLINGER BANDS ===
-    if (indicators.bollingerBands.lower !== null) {
+    const momentumScore = clamp(0.5 * rsiScore + 0.3 * macdScore + 0.2 * stochScore, 0, 1);
+    if (momentumScore > 0) reasons.push({ text: 'Momentum positivo', weight: percent(momentumScore) });
+
+    // === Trend (EMA cross, SMA200) ===
+    let emaScore = 0;
+    if (indicators.ema20 != null && indicators.ema50 != null) {
+        emaScore = indicators.ema20 > indicators.ema50 ? 1 : 0;
+    }
+    const smaScore = (indicators.sma200 != null && price != null) ? (price > indicators.sma200 ? 1 : 0) : 0;
+    const trendScore = clamp(0.6 * emaScore + 0.4 * smaScore, 0, 1);
+    if (trendScore > 0) reasons.push({ text: 'Tendencia favorable', weight: percent(trendScore) });
+
+    // === Levels (support, bollinger lower) ===
+    let supportScore = 0;
+    if (levels.support != null && price != null) {
+        const distanceToSupport = ((price - levels.support) / price) * 100; // percent
+        if (distanceToSupport <= 2) supportScore = 1;
+        else if (distanceToSupport <= 5) supportScore = 0.6;
+    }
+
+    let bollScore = 0;
+    if (indicators.bollingerBands && indicators.bollingerBands.lower != null) {
         const distanceToLower = ((price - indicators.bollingerBands.lower) / price) * 100;
-
-        // Precio cerca o debajo de banda inferior (oportunidad de compra)
-        if (price <= indicators.bollingerBands.lower) {
-            score += 20;
-            convergenceCount += 1;
-            reasons.push('Precio en banda inferior de Bollinger');
-        } else if (distanceToLower < 2) {
-            score += 15;
-            convergenceCount += 0.5;
-            reasons.push('Precio cerca de banda inferior');
-        }
-
-        // Precio cerca de banda superior (evitar compra)
-        const distanceToUpper = ((indicators.bollingerBands.upper - price) / price) * 100;
-        if (distanceToUpper < 2) {
-            score -= 15;
-            warnings.push('Precio cerca de banda superior');
-        }
+        if (price <= indicators.bollingerBands.lower) bollScore = 1;
+        else if (distanceToLower < 2) bollScore = 0.7;
     }
 
-    // === ANÁLISIS EMA ===
-    if (indicators.ema20 !== null && indicators.ema50 !== null) {
-        // Golden cross (EMA20 cruza por arriba de EMA50)
-        if (indicators.ema20 > indicators.ema50) {
-            score += 15;
-            convergenceCount += 1;
-            reasons.push('EMA20 > EMA50 (tendencia alcista)');
-        }
+    const levelsScore = clamp(Math.max(supportScore, bollScore), 0, 1);
+    if (levelsScore > 0) reasons.push({ text: 'Niveles favorables (soporte/Bollinger)', weight: percent(levelsScore) });
 
-        // Precio por debajo de EMAs (posible rebote)
-        if (price < indicators.ema20 && price < indicators.ema50) {
-            score += 10;
-            convergenceCount += 0.5;
-            reasons.push('Precio bajo EMAs (posible rebote)');
-        }
+    // === Volume (spike, buyer pressure) ===
+    const spikeScore = volume.spike ? 1 : 0;
+    let buyerScore = 0;
+    if (buyerPressure && typeof buyerPressure.current === 'number') {
+        if (buyerPressure.current > 60) buyerScore = 1;
+        else if (buyerPressure.current > 50) buyerScore = (buyerPressure.current - 50) / 10; // 0..1
     }
+    const volumeScore = clamp(0.7 * spikeScore + 0.3 * buyerScore, 0, 1);
+    if (volumeScore > 0) reasons.push({ text: 'Señal de volumen', weight: percent(volumeScore) });
 
-    // Tendencia general con SMA200
-    if (indicators.sma200 !== null && price > indicators.sma200) {
-        score += 10;
-        reasons.push('Precio sobre SMA200 (tendencia alcista largo plazo)');
-    }
+    // === Patterns ===
+    const positivePatterns = ['bullishEngulfing', 'threeWhiteSoldiers', 'morningStar', 'doubleBottom', 'hammer', 'doji'];
+    let patternCount = 0;
+    positivePatterns.forEach(p => { if (patterns[p]) patternCount += 1; });
+    const patternScore = clamp(patternCount / 3, 0, 1); // 3 patterns -> 1.0
+    if (patternScore > 0) reasons.push({ text: 'Patrones alcistas', weight: percent(patternScore) });
 
-    // === ANÁLISIS DE SOPORTE/RESISTENCIA ===
-    const distanceToSupport = ((price - levels.support) / price) * 100;
-
-    if (distanceToSupport < 2) {
-        score += 20;
-        convergenceCount += 1;
-        reasons.push('Precio cerca de soporte');
-    } else if (distanceToSupport < 5) {
-        score += 10;
-        convergenceCount += 0.5;
-        reasons.push('Precio acercándose a soporte');
-    }
-
-    // === PATRONES DE VELAS ===
-    if (patterns.hammer) {
-        score += 15;
-        convergenceCount += 0.5;
-        reasons.push('Patrón Hammer detectado');
-    }
-
-    if (patterns.bullishEngulfing) {
-        score += 20;
-        convergenceCount += 1;
-        reasons.push('Patrón Engulfing Alcista detectado');
-    }
-
-    if (patterns.threeWhiteSoldiers) {
-        score += 20;
-        convergenceCount += 1;
-        reasons.push('Patrón Three White Soldiers detectado');
-    }
-
-    if (patterns.morningStar) {
-        score += 18;
-        convergenceCount += 1;
-        reasons.push('Patrón Morning Star detectado (reversión alcista)');
-    }
-
-    if (patterns.doubleBottom) {
-        score += 20;
-        convergenceCount += 1;
-        reasons.push('Patrón Double Bottom detectado (soporte fuerte)');
-    }
-
-    if (patterns.eveningStar) {
-        score -= 18;
-        warnings.push('Patrón Evening Star detectado (reversión bajista)');
-    }
-
-    if (patterns.doubleTop) {
-        score -= 20;
-        warnings.push('Patrón Double Top detectado (resistencia fuerte)');
-    }
-
-    if (patterns.doji) {
-        score += 5;
-        reasons.push('Patrón Doji (indecisión)');
-    }
-
-    // === ANÁLISIS DE VOLUMEN ===
-    if (volume.spike) {
-        score += 15;
-        convergenceCount += 0.5;
-        reasons.push('Volumen inusualmente alto');
-    }
-
-    // === ANÁLISIS DE PRESIÓN COMPRADORA (Buy Pressure) ===
-    if (buyerPressure && buyerPressure.current > 60) {
-        score += 10;
-        convergenceCount += 1;
-        reasons.push(`Presión de compradores alta (${buyerPressure.current.toFixed(1)}%)`);
-    } else if (buyerPressure && buyerPressure.current < 40) {
-        score -= 10;
-        warnings.push(`Presión de vendedores (${buyerPressure.current.toFixed(1)}%)`);
-    }
-
-    // === ANÁLISIS STOCHASTIC ===
-    if (indicators.stochastic && indicators.stochastic.k !== null) {
-        if (indicators.stochastic.k < 20) {
-            score += 10;
-            convergenceCount += 0.5;
-            reasons.push('Stochastic sobreventa (<20)');
-        } else if (indicators.stochastic.k > 80) {
-            score -= 10;
-            warnings.push('Stochastic sobrecompra (>80)');
-        }
-
-        // Cruce alcista de Stochastic (K > D)
-        if (indicators.stochastic.k > indicators.stochastic.d && indicators.stochastic.histogram > 0) {
-            score += 8;
-            convergenceCount += 0.5;
-            reasons.push('Stochastic cruce alcista');
-        }
-    }
-
-    // === ANÁLISIS DE DIVERGENCIAS ===
+    // === Divergence ===
+    let divScore = 0;
     if (analysis.divergence) {
-        // Divergencia alcista en RSI (precio baja, RSI sube) = BULLISH
-        if (analysis.divergence.rsi && analysis.divergence.rsi.bullish) {
-            score += 10;
-            convergenceCount += 1;
-            reasons.push(`Divergencia alcista en RSI (fuerza: ${(analysis.divergence.rsi.strength * 100).toFixed(0)}%)`);
-        }
-        // Divergencia bajista en RSI (precio sube, RSI baja) = BEARISH
-        else if (analysis.divergence.rsi && analysis.divergence.rsi.bearish) {
-            score -= 15;
-            warnings.push('Divergencia bajista en RSI');
-        }
-
-        // Divergencia alcista en MACD (precio baja, MACD sube)
-        if (analysis.divergence.macd && analysis.divergence.macd.bullish) {
-            score += 8;
-            convergenceCount += 0.5;
-            reasons.push('Divergencia alcista en MACD');
-        }
-        // Divergencia bajista en MACD (precio sube, MACD baja)
-        else if (analysis.divergence.macd && analysis.divergence.macd.bearish) {
-            score -= 12;
-            warnings.push('Divergencia bajista en MACD');
-        }
+        if (analysis.divergence.rsi && analysis.divergence.rsi.bullish) divScore = Math.max(divScore, analysis.divergence.rsi.strength || 0);
+        if (analysis.divergence.macd && analysis.divergence.macd.bullish) divScore = Math.max(divScore, (analysis.divergence.macd.strength || 0) * 0.8);
     }
+    const divergenceScore = clamp(divScore, 0, 1);
+    if (divergenceScore > 0) reasons.push({ text: 'Divergencia alcista', weight: percent(divergenceScore) });
 
-    // === ANÁLISIS DE ACUMULACIÓN ===
-    if (analysis.accumulation && analysis.accumulation.isAccumulating) {
-        score += 12;
-        convergenceCount += 1;
-        reasons.push(`Zona de acumulación detectada (fuerza: ${(analysis.accumulation.strength * 100).toFixed(0)}%)`);
+    // Combine categories with weights
+    const weights = SIGNAL_CONFIG.categoryWeights;
+    const subscores = {
+        momentum: momentumScore,
+        trend: trendScore,
+        levels: levelsScore,
+        volume: volumeScore,
+        patterns: patternScore,
+        divergence: divergenceScore
+    };
+
+    let finalNormalized = 0;
+    for (const k of Object.keys(subscores)) {
+        finalNormalized += (subscores[k] || 0) * (weights[k] || 0);
     }
+    finalNormalized = clamp(finalNormalized, 0, 1);
 
-    // === ANÁLISIS MULTI-TIMEFRAME (si está disponible) ===
+    // Count aligned categories
+    const categoriesAligned = Object.values(subscores).filter(s => s >= SIGNAL_CONFIG.categoryThresholdForConvergence).length;
+
+    // Multi-timeframe confirmation (lightweight)
     if (multiTimeframeData && multiTimeframeData['4h']) {
-        // Usar análisis de 4h para confirmar tendencia
         const tf4h = multiTimeframeData['4h'];
-        if (tf4h.indicators && tf4h.indicators.ema20 && tf4h.indicators.ema50) {
-            if (tf4h.indicators.ema20 > tf4h.indicators.ema50) {
-                score += 10;
-                reasons.push('Tendencia alcista en 4h');
-            }
+        if (tf4h.indicators && tf4h.indicators.ema20 != null && tf4h.indicators.ema50 != null && tf4h.indicators.ema20 > tf4h.indicators.ema50) {
+            // small boost for agreement on higher timeframe
+            finalNormalized = clamp(finalNormalized + 0.05, 0, 1);
+            reasons.push({ text: 'Confirmación 4h', weight: 5 });
         }
     }
 
-    // === DETERMINAR SI GENERAR SEÑAL ===
-    // Requerir convergencia: mínimo 2 indicadores alineados
-    // Y umbral mínimo de 60 puntos
-    if (convergenceCount < 2 || score < 60) {
+    // Emit condition
+    if (categoriesAligned < SIGNAL_CONFIG.requiredCategories || finalNormalized < SIGNAL_CONFIG.scoreToEmit) {
         return null;
     }
 
-    // Calcular niveles de entrada, stop loss y take profit usando ATR
+    // Levels: entry, stopLoss, takeProfit (use ATR when available)
     const entryPrice = price;
     let stopLoss, takeProfit1, takeProfit2;
 
-    if (indicators.atr !== null && indicators.atr > 0) {
-        // Stop loss dinámico: 1.5 ATR abajo del precio
-        stopLoss = price - (indicators.atr * 1.5);
-        
-        // Take profits dinámicos: 2.5 y 5 ATR arriba del precio
-        takeProfit1 = price + (indicators.atr * 2.5);
-        takeProfit2 = price + (indicators.atr * 5);
+    if (indicators.atr != null && indicators.atr > 0) {
+        stopLoss = price - indicators.atr * 1.5;
+        // ensure stopLoss is not far below support if support exists
+        if (levels.support && stopLoss < levels.support * 0.98) stopLoss = Math.max(stopLoss, levels.support * 0.98);
+        takeProfit1 = price + indicators.atr * 2.5;
+        takeProfit2 = price + indicators.atr * 5;
     } else {
-        // Fallback a valores fijos si ATR no disponible
-        stopLoss = levels.support * 0.98;
+        stopLoss = levels.support ? Math.max(levels.support * 0.98, price * 0.98) : price * 0.98;
         takeProfit1 = price * 1.02;
         takeProfit2 = price * 1.05;
     }
 
-    const riskRewardRatio = (takeProfit1 - entryPrice) / (entryPrice - stopLoss);
+    const riskRewardRatio = (takeProfit1 - entryPrice) / Math.max(0.0000001, (entryPrice - stopLoss));
+
+    const scoreOut = Math.round(finalNormalized * 100);
 
     return {
         symbol,
         type: 'BUY',
         timestamp: new Date().toISOString(),
         price: entryPrice,
-        score: Math.min(score, 100), // Cap a 100
-        convergence: convergenceCount.toFixed(1),
-        confidence: score >= 80 ? 'HIGH' : score >= 70 ? 'MEDIUM' : 'LOW',
+        score: scoreOut,
+        confidence: scoreOut >= 80 ? 'HIGH' : scoreOut >= 70 ? 'MEDIUM' : 'LOW',
+        categoriesAligned,
+        subscores: Object.fromEntries(Object.entries(subscores).map(([k, v]) => [k, Math.round(v * 100)])),
         reasons,
         warnings,
         levels: {
@@ -284,27 +178,21 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
             support: levels.support,
             resistance: levels.resistance
         },
-        riskReward: riskRewardRatio.toFixed(2),
+        riskReward: Number(riskRewardRatio.toFixed(2)),
         indicators: {
-            rsi: indicators.rsi?.toFixed(2),
-            macd: indicators.macd.histogram?.toFixed(4),
-            atr: indicators.atr?.toFixed(8),
-            bbPosition: indicators.bollingerBands.lower ?
+            rsi: indicators.rsi != null ? Number(indicators.rsi.toFixed(2)) : null,
+            macd: indicators.macd?.histogram != null ? Number(indicators.macd.histogram.toFixed(6)) : null,
+            atr: indicators.atr != null ? Number(indicators.atr.toFixed(8)) : null,
+            bbPosition: indicators.bollingerBands && indicators.bollingerBands.lower ?
                 ((price - indicators.bollingerBands.lower) / (indicators.bollingerBands.upper - indicators.bollingerBands.lower) * 100).toFixed(1) + '%'
                 : 'N/A',
-            buyerPressure: buyerPressure ? buyerPressure.current.toFixed(1) + '%' : 'N/A'
+            buyerPressure: buyerPressure ? `${Number(buyerPressure.current.toFixed(1))}%` : 'N/A'
         },
         patterns: Object.keys(patterns).filter(key => patterns[key]),
-        volumeSpike: volume.spike
+        volumeSpike: Boolean(volume.spike)
     };
 }
 
-/**
- * Analizar múltiples criptomonedas y generar señales
- * @param {Object} symbolsData - Objeto con datos de velas por símbolo
- * @param {Object} multiTimeframeData - Datos multi-timeframe (opcional)
- * @returns {Array<Object>} Array de señales generadas
- */
 export function analyzeMultipleSymbols(symbolsData, multiTimeframeData = {}) {
     const signals = [];
 
@@ -315,38 +203,20 @@ export function analyzeMultipleSymbols(symbolsData, multiTimeframeData = {}) {
         }
 
         try {
-            // Realizar análisis técnico
             const analysis = performTechnicalAnalysis(candleData.data);
-
-            // Obtener datos multi-timeframe para este símbolo
             const mtfData = multiTimeframeData[symbol] || null;
-
-            // Generar señal
             const signal = generateSignal(analysis, symbol, mtfData);
-
-            if (signal) {
-                signals.push(signal);
-            }
-        } catch (error) {
-            console.error(`Error analizando ${symbol}:`, error);
+            if (signal) signals.push(signal);
+        } catch (err) {
+            console.error(`Error analizando ${symbol}:`, err);
         }
     }
 
-    // Ordenar señales por score (mayor a menor)
     return signals.sort((a, b) => b.score - a.score);
 }
 
-/**
- * Filtrar señales por nivel de confianza
- * @param {Array<Object>} signals - Array de señales
- * @param {string} minConfidence - Confianza mínima ('LOW', 'MEDIUM', 'HIGH')
- * @returns {Array<Object>} Señales filtradas
- */
 export function filterSignalsByConfidence(signals, minConfidence = 'LOW') {
     const confidenceLevels = { 'LOW': 0, 'MEDIUM': 1, 'HIGH': 2 };
     const minLevel = confidenceLevels[minConfidence];
-
-    return signals.filter(signal =>
-        confidenceLevels[signal.confidence] >= minLevel
-    );
+    return signals.filter(signal => confidenceLevels[signal.confidence] >= minLevel);
 }
