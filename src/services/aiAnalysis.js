@@ -5,7 +5,10 @@
  */
 
 const NETLIFY_FUNCTION_URL = '/.netlify/functions/gemini-analysis';
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyBNKGZibNjUpXL8lk6qYwcPywAPLn51Di0';
+
+// IMPORTANTE: La API key debe estar en .env (nunca hardcodeada)
+// Crear archivo .env con: VITE_GEMINI_API_KEY=tu_api_key
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Detectar si estamos en desarrollo local
 const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
