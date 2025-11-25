@@ -55,12 +55,17 @@ function App() {
 
   // Pedir permisos para notificaciones
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        setNotificationsEnabled(permission === 'granted');
-      });
-    } else if (Notification.permission === 'granted') {
-      setNotificationsEnabled(true);
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          setNotificationsEnabled(permission === 'granted');
+        }).catch(() => {});
+      } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        setNotificationsEnabled(true);
+      }
+    } catch (e) {
+      // Some iOS environments may not expose Notification; ignore safely
+      console.warn('Notification API not available:', e && e.message);
     }
   }, []);
 
@@ -145,22 +150,31 @@ function App() {
 
   // Mostrar notificación del navegador
   const showNotification = (signal) => {
-    if (notificationsEnabled && Notification.permission === 'granted') {
-      new Notification(`🚀 Nueva Señal: ${signal.symbol}`, {
-        body: `Precio: $${signal.price} | Score: ${signal.score} | Confianza: ${signal.confidence}`,
-        icon: '/vite.svg',
-        tag: signal.symbol
-      });
+    try {
+      if (notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        new Notification(`🚀 Nueva Señal: ${signal.symbol}`, {
+          body: `Precio: $${signal.price} | Score: ${signal.score} | Confianza: ${signal.confidence}`,
+          icon: '/vite.svg',
+          tag: signal.symbol
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to show Notification:', e && e.message);
     }
   };
 
   // Toggle notificaciones
   const toggleNotifications = () => {
-    if (!notificationsEnabled && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        setNotificationsEnabled(permission === 'granted');
-      });
-    } else {
+    try {
+      if (!notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          setNotificationsEnabled(permission === 'granted');
+        }).catch(() => {});
+      } else {
+        setNotificationsEnabled(!notificationsEnabled);
+      }
+    } catch (e) {
+      console.warn('Notification toggle failed:', e && e.message);
       setNotificationsEnabled(!notificationsEnabled);
     }
   };
