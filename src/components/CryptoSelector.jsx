@@ -18,7 +18,7 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
     const loadAvailablePairs = async () => {
         setLoading(true);
         try {
-            const pairs = await binanceService.getAvailableUSDCPairs();
+            const pairs = await binanceService.getAvailableUSDTPairs();
             setAvailablePairs(pairs);
         } catch (error) {
             console.error('Error loading pairs:', error);
@@ -48,7 +48,7 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
             <div className="selected-symbols">
                 {selectedSymbols.map(symbol => (
                     <div key={symbol} className="symbol-tag">
-                        <span>{symbol.replace('USDC', '')}</span>
+                        <span>{symbol.replace('USDT', '')}</span>
                         <button
                             onClick={() => removeSymbol(symbol)}
                             className="remove-btn"

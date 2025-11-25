@@ -38,7 +38,7 @@ function App() {
         } catch (error) {
           console.error('Error loading top cryptos:', error);
           // Fallback a símbolos populares
-          const fallbackSymbols = ['BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC', 'XRPUSDC'];
+          const fallbackSymbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT'];
           setSymbols(fallbackSymbols);
         }
       }

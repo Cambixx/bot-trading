@@ -133,7 +133,7 @@ class BinanceService {
     try {
       const response = await axios.get(`${BINANCE_API_BASE}/exchangeInfo`);
       return response.data.symbols
-        .filter(s => s.status === 'TRADING' && s.quoteAsset === 'USDC')
+        .filter(s => s.status === 'TRADING' && s.quoteAsset === 'USDT')
         .map(s => ({
           symbol: s.symbol,
           baseAsset: s.baseAsset,
@@ -146,7 +146,7 @@ class BinanceService {
   }
 
   /**
-   * Obtener las top N criptomonedas por volumen en USDC
+   * Obtener las top N criptomonedas por volumen en USDT
    * @param {number} limit - Número de criptos a obtener (default: 10)
    * @returns {Promise<Array<string>>} Array de símbolos ordenados por volumen
    */
@@ -155,11 +155,11 @@ class BinanceService {
       // Obtener todos los tickers de 24h
       const response = await axios.get(`${BINANCE_API_BASE}/ticker/24hr`);
 
-      // Filtrar solo pares USDC y ordenar por volumen
+      // Filtrar solo pares USDT y ordenar por volumen
       const usdcPairs = response.data
         .filter(ticker =>
-          ticker.symbol.endsWith('USDC') &&
-          ticker.symbol !== 'USDC' &&
+          ticker.symbol.endsWith('USDT') &&
+          ticker.symbol !== 'USDT' &&
           parseFloat(ticker.quoteVolume) > 0
         )
         .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
@@ -170,22 +170,22 @@ class BinanceService {
     } catch (error) {
       console.error('Error fetching top cryptos:', error.message);
       // Fallback a criptos populares si falla
-      return ['BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC', 'XRPUSDC', 'DOGEUSDC', 'DOTUSDC', 'MATICUSDC', 'LINKUSDC'].slice(0, limit);
+      return ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT', 'DOGEUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT'].slice(0, limit);
     }
   }
 
   /**
-   * Obtener lista de todos los pares USDC disponibles
+   * Obtener lista de todos los pares USDT disponibles
    * @returns {Promise<Array>} Array de objetos con symbol y baseAsset
    */
-  async getAvailableUSDCPairs() {
+  async getAvailableUSDTPairs() {
     try {
       const allSymbols = await this.getExchangeInfo();
       return allSymbols
-        .filter(s => s.quoteAsset === 'USDC')
+        .filter(s => s.quoteAsset === 'USDT')
         .sort((a, b) => a.baseAsset.localeCompare(b.baseAsset));
     } catch (error) {
-      console.error('Error fetching USDC pairs:', error.message);
+      console.error('Error fetching USDT pairs:', error.message);
       return [];
     }
   }
