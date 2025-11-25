@@ -7,11 +7,13 @@ Bot de señales de trading profesional para criptomonedas que combina **análisi
 ## ✨ Características
 
 ### Análisis Técnico Avanzado
-- **Indicadores Técnicos**: RSI, MACD, Bollinger Bands, EMA/SMA
+- **Indicadores Técnicos**: RSI, MACD, Bollinger Bands, EMA/SMA, ATR
 - **Análisis Multi-Timeframe**: 1h (entrada) y 4h (tendencia)
 - **Detección de Patrones**: Hammer, Engulfing Bullish, Doji
 - **Soporte/Resistencia**: Identificación automática de niveles clave
-- **Análisis de Volumen**: Detección de spikes y volumen promedio
+- **Análisis de Volumen**: Detección de spikes, volumen promedio, presión compradora/vendedora
+- **Convergencia de Indicadores**: Requiere múltiples indicadores alineados para validar señal
+- **Niveles Dinámicos**: Stop Loss y Take Profit adaptados a volatilidad real (ATR)
 
 ### Inteligencia Artificial
 - **Análisis con Gemini AI**: Validación de señales y análisis de sentimiento
@@ -26,9 +28,10 @@ Bot de señales de trading profesional para criptomonedas que combina **análisi
 - **Real-time Data**: Datos en tiempo real desde Binance API
 
 ### Señales de Trading
-- **Score de Confianza**: Algoritmo de scoring 0-100
-- **Niveles Precisos**: Entry, Take Profit 1, Take Profit 2, Stop Loss
-- **Risk/Reward Ratio**: Cálculo automático
+- **Score de Confianza**: Algoritmo de scoring 0-100 con convergencia de indicadores
+- **Convergencia Requerida**: Mínimo 2 indicadores alineados para generar señal
+- **Niveles Precisos**: Entry, Take Profit 1, Take Profit 2, Stop Loss (dinámicos basados en ATR)
+- **Risk/Reward Ratio**: Cálculo automático con niveles adaptativos
 - **Razones Detalladas**: Explicación de por qué se generó la señal
 
 ## 🛠️ Tecnologías

@@ -256,14 +256,96 @@ export function hasVolumeSpike(candles, threshold = 1.5) {
 }
 
 /**
+ * Calcular ATR (Average True Range) - Medida de volatilidad
+ * @param {Array<Object>} candles - Datos de velas con high, low, close
+ * @param {number} period - Período del ATR (típicamente 14)
+ * @returns {Array<number>} ATR values
+ */
+export function calculateATR(candles, period = 14) {
+    const trueRanges = [];
+
+    // Calcular True Range para cada vela
+    for (let i = 0; i < candles.length; i++) {
+        let tr;
+
+        if (i === 0) {
+            tr = candles[i].high - candles[i].low;
+        } else {
+            const hl = candles[i].high - candles[i].low;
+            const hc = Math.abs(candles[i].high - candles[i - 1].close);
+            const lc = Math.abs(candles[i].low - candles[i - 1].close);
+            tr = Math.max(hl, hc, lc);
+        }
+
+        trueRanges.push(tr);
+    }
+
+    // Calcular ATR como EMA del True Range
+    const atrValues = [];
+
+    for (let i = 0; i < trueRanges.length; i++) {
+        if (i < period - 1) {
+            atrValues.push(null);
+        } else if (i === period - 1) {
+            // Primera ATR es SMA del TR
+            const sum = trueRanges.slice(0, period).reduce((a, b) => a + b, 0);
+            atrValues.push(sum / period);
+        } else {
+            // ATRs subsecuentes es EMA del TR
+            const prevATR = atrValues[i - 1];
+            const currentATR = (trueRanges[i] - prevATR) * (2 / (period + 1)) + prevATR;
+            atrValues.push(currentATR);
+        }
+    }
+
+    return atrValues;
+}
+
+/**
+ * Calcular presión de compradores (Buy/Sell Pressure)
+ * Usa takerBuyBaseVolume para determinar qué % del volumen fue de compradores
+ * @param {Array<Object>} candles - Datos de velas
+ * @returns {Object} { current, average, pressure }
+ *   - current: % de volumen compradores en vela actual
+ *   - average: % promedio de últimas 20 velas
+ *   - pressure: 'BULLISH' si >60%, 'BEARISH' si <40%, 'NEUTRAL' si entre 40-60%
+ */
+export function calculateBuyerPressure(candles) {
+    if (candles.length === 0) return null;
+
+    // Calcular buyer pressure para últimas 20 velas
+    const recentCandles = candles.slice(-20);
+    const pressures = recentCandles.map(candle => {
+        const buyVolume = candle.takerBuyBaseVolume || 0;
+        const totalVolume = candle.volume || 1;
+        return (buyVolume / totalVolume) * 100;
+    });
+
+    const currentPressure = pressures[pressures.length - 1];
+    const averagePressure = pressures.reduce((a, b) => a + b, 0) / pressures.length;
+
+    // Determinar presión general
+    let pressure = 'NEUTRAL';
+    if (currentPressure > 60) {
+        pressure = 'BULLISH';
+    } else if (currentPressure < 40) {
+        pressure = 'BEARISH';
+    }
+
+    return {
+        current: currentPressure,
+        average: averagePressure,
+        pressure
+    };
+}
+
+/**
  * Realizar análisis técnico completo
  * @param {Array<Object>} candles - Datos de velas
  * @returns {Object} Análisis técnico completo
  */
 export function performTechnicalAnalysis(candles) {
     const closes = candles.map(c => c.close);
-    const highs = candles.map(c => c.high);
-    const lows = candles.map(c => c.low);
 
     const rsi = calculateRSI(closes, 14);
     const macd = calculateMACD(closes);
@@ -271,6 +353,8 @@ export function performTechnicalAnalysis(candles) {
     const ema20 = calculateEMA(closes, 20);
     const ema50 = calculateEMA(closes, 50);
     const sma200 = calculateSMA(closes, 200);
+    const atr = calculateATR(candles, 14);
+    const buyerPressure = calculateBuyerPressure(candles);
     const { support, resistance } = findSupportResistance(candles, 20);
 
     // Obtener valores actuales (último índice con datos válidos)
@@ -301,7 +385,8 @@ export function performTechnicalAnalysis(candles) {
             },
             ema20: ema20[lastIndex],
             ema50: ema50[lastIndex],
-            sma200: sma200[lastIndex]
+            sma200: sma200[lastIndex],
+            atr: atr[lastIndex]
         },
         levels: {
             support,
@@ -313,6 +398,7 @@ export function performTechnicalAnalysis(candles) {
             average: calculateAverageVolume(candles, 20),
             spike: hasVolumeSpike(candles, 1.5)
         },
+        buyerPressure,
         // Datos completos para gráficos
         fullData: {
             rsi,
@@ -320,7 +406,8 @@ export function performTechnicalAnalysis(candles) {
             bollingerBands: bb,
             ema20,
             ema50,
-            sma200
+            sma200,
+            atr
         }
     };
 }

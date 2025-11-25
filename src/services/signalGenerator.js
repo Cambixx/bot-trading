@@ -2,7 +2,7 @@ import { performTechnicalAnalysis } from './technicalAnalysis';
 
 /**
  * Generador de señales de trading para day trading spot
- * Enfocado en identificar oportunidades de COMPRA (buy low, sell high)
+ * Enfocado en identificar oportunidades de COMPRA con convergencia de indicadores
  */
 
 /**
@@ -13,9 +13,10 @@ import { performTechnicalAnalysis } from './technicalAnalysis';
  * @returns {Object|null} Señal de trading o null si no hay señal
  */
 export function generateSignal(analysis, symbol, multiTimeframeData = null) {
-    const { indicators, levels, patterns, volume, price } = analysis;
+    const { indicators, levels, patterns, volume, price, buyerPressure } = analysis;
 
     let score = 0;
+    let convergenceCount = 0; // Contador de indicadores alineados
     const reasons = [];
     const warnings = [];
 
@@ -23,9 +24,11 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     if (indicators.rsi !== null) {
         if (indicators.rsi < 30) {
             score += 25;
+            convergenceCount += 1;
             reasons.push('RSI sobreventa (<30)');
         } else if (indicators.rsi < 40) {
             score += 15;
+            convergenceCount += 0.5;
             reasons.push('RSI bajo (<40)');
         } else if (indicators.rsi > 70) {
             score -= 20;
@@ -38,11 +41,13 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         // Crossover bullish (histograma cambia de negativo a positivo)
         if (indicators.macd.histogram > 0 && indicators.macd.value > indicators.macd.signal) {
             score += 20;
+            convergenceCount += 1;
             reasons.push('MACD cruce alcista');
         }
         // Divergencia o momentum positivo
-        if (indicators.macd.histogram > 0) {
+        else if (indicators.macd.histogram > 0) {
             score += 10;
+            convergenceCount += 0.5;
             reasons.push('MACD momentum positivo');
         }
     }
@@ -54,9 +59,11 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         // Precio cerca o debajo de banda inferior (oportunidad de compra)
         if (price <= indicators.bollingerBands.lower) {
             score += 20;
+            convergenceCount += 1;
             reasons.push('Precio en banda inferior de Bollinger');
         } else if (distanceToLower < 2) {
             score += 15;
+            convergenceCount += 0.5;
             reasons.push('Precio cerca de banda inferior');
         }
 
@@ -73,12 +80,14 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         // Golden cross (EMA20 cruza por arriba de EMA50)
         if (indicators.ema20 > indicators.ema50) {
             score += 15;
+            convergenceCount += 1;
             reasons.push('EMA20 > EMA50 (tendencia alcista)');
         }
 
         // Precio por debajo de EMAs (posible rebote)
         if (price < indicators.ema20 && price < indicators.ema50) {
             score += 10;
+            convergenceCount += 0.5;
             reasons.push('Precio bajo EMAs (posible rebote)');
         }
     }
@@ -94,20 +103,24 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
 
     if (distanceToSupport < 2) {
         score += 20;
+        convergenceCount += 1;
         reasons.push('Precio cerca de soporte');
     } else if (distanceToSupport < 5) {
         score += 10;
+        convergenceCount += 0.5;
         reasons.push('Precio acercándose a soporte');
     }
 
     // === PATRONES DE VELAS ===
     if (patterns.hammer) {
         score += 15;
+        convergenceCount += 0.5;
         reasons.push('Patrón Hammer detectado');
     }
 
     if (patterns.bullishEngulfing) {
         score += 20;
+        convergenceCount += 1;
         reasons.push('Patrón Engulfing Alcista detectado');
     }
 
@@ -119,7 +132,18 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     // === ANÁLISIS DE VOLUMEN ===
     if (volume.spike) {
         score += 15;
+        convergenceCount += 0.5;
         reasons.push('Volumen inusualmente alto');
+    }
+
+    // === ANÁLISIS DE PRESIÓN COMPRADORA (Buy Pressure) ===
+    if (buyerPressure && buyerPressure.current > 60) {
+        score += 10;
+        convergenceCount += 1;
+        reasons.push(`Presión de compradores alta (${buyerPressure.current.toFixed(1)}%)`);
+    } else if (buyerPressure && buyerPressure.current < 40) {
+        score -= 10;
+        warnings.push(`Presión de vendedores (${buyerPressure.current.toFixed(1)}%)`);
     }
 
     // === ANÁLISIS MULTI-TIMEFRAME (si está disponible) ===
@@ -135,16 +159,30 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     }
 
     // === DETERMINAR SI GENERAR SEÑAL ===
-    // Solo generar señal si el score es suficientemente alto (umbral: 50)
-    if (score < 50) {
+    // Requerir convergencia: mínimo 2 indicadores alineados
+    // Y umbral mínimo de 60 puntos
+    if (convergenceCount < 2 || score < 60) {
         return null;
     }
 
-    // Calcular niveles de entrada, stop loss y take profit
+    // Calcular niveles de entrada, stop loss y take profit usando ATR
     const entryPrice = price;
-    const stopLoss = levels.support * 0.98; // 2% debajo del soporte
-    const takeProfit1 = price * 1.02; // 2% de ganancia
-    const takeProfit2 = price * 1.05; // 5% de ganancia
+    let stopLoss, takeProfit1, takeProfit2;
+
+    if (indicators.atr !== null && indicators.atr > 0) {
+        // Stop loss dinámico: 1.5 ATR abajo del precio
+        stopLoss = price - (indicators.atr * 1.5);
+        
+        // Take profits dinámicos: 2.5 y 5 ATR arriba del precio
+        takeProfit1 = price + (indicators.atr * 2.5);
+        takeProfit2 = price + (indicators.atr * 5);
+    } else {
+        // Fallback a valores fijos si ATR no disponible
+        stopLoss = levels.support * 0.98;
+        takeProfit1 = price * 1.02;
+        takeProfit2 = price * 1.05;
+    }
+
     const riskRewardRatio = (takeProfit1 - entryPrice) / (entryPrice - stopLoss);
 
     return {
@@ -153,7 +191,8 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         timestamp: new Date().toISOString(),
         price: entryPrice,
         score: Math.min(score, 100), // Cap a 100
-        confidence: score >= 80 ? 'HIGH' : score >= 65 ? 'MEDIUM' : 'LOW',
+        convergence: convergenceCount.toFixed(1),
+        confidence: score >= 80 ? 'HIGH' : score >= 70 ? 'MEDIUM' : 'LOW',
         reasons,
         warnings,
         levels: {
@@ -168,9 +207,11 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         indicators: {
             rsi: indicators.rsi?.toFixed(2),
             macd: indicators.macd.histogram?.toFixed(4),
+            atr: indicators.atr?.toFixed(8),
             bbPosition: indicators.bollingerBands.lower ?
                 ((price - indicators.bollingerBands.lower) / (indicators.bollingerBands.upper - indicators.bollingerBands.lower) * 100).toFixed(1) + '%'
-                : 'N/A'
+                : 'N/A',
+            buyerPressure: buyerPressure ? buyerPressure.current.toFixed(1) + '%' : 'N/A'
         },
         patterns: Object.keys(patterns).filter(key => patterns[key]),
         volumeSpike: volume.spike
