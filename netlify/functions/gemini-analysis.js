@@ -98,13 +98,14 @@ Proporciona un análisis conciso en formato JSON con la siguiente estructura:
 
 Responde SOLO con el JSON, sin texto adicional.`;
 
-        // Llamar a Gemini API
+        // Llamar a Gemini API (usando formato correcto según documentación oficial)
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
             {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': GEMINI_API_KEY
                 },
                 body: JSON.stringify({
                     contents: [{
