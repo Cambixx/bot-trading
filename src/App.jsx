@@ -59,7 +59,7 @@ function App() {
       if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
         Notification.requestPermission().then(permission => {
           setNotificationsEnabled(permission === 'granted');
-        }).catch(() => {});
+        }).catch(() => { });
       } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         setNotificationsEnabled(true);
       }
@@ -137,7 +137,7 @@ function App() {
             volume24h: data.volume24h,
             high24h: data.high24h,
             low24h: data.low24h,
-            indicators: analysis ? analysis.indicators : null
+            analysis: analysis
           };
         }
       });
@@ -187,7 +187,7 @@ function App() {
       if (!notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
         Notification.requestPermission().then(permission => {
           setNotificationsEnabled(permission === 'granted');
-        }).catch(() => {});
+        }).catch(() => { });
       } else {
         setNotificationsEnabled(!notificationsEnabled);
       }
