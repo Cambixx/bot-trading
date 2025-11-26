@@ -3,12 +3,13 @@ import { performTechnicalAnalysis } from './technicalAnalysis.js';
 // Configurable weights and thresholds (tune these as needed)
 export const SIGNAL_CONFIG = {
     categoryWeights: {
-        momentum: 0.35, // Increased weight
+        momentum: 0.30,
         trend: 0.25,
-        levels: 0.20,
-        volume: 0.15,
+        trendStrength: 0.15, // New: ADX
+        levels: 0.15,
+        volume: 0.10,
         patterns: 0.05,
-        divergence: 0.05 // Reduced weight
+        divergence: 0.00 // Removed for now to simplify
     },
     categoryThresholdForConvergence: 0.4, // Lowered from 0.6
     requiredCategories: 1, // Lowered from 2
@@ -64,8 +65,30 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         }
     }
     const smaScore = (indicators.sma200 != null && price != null) ? (price > indicators.sma200 ? 1 : 0) : 0;
-    const trendScore = clamp(0.6 * emaScore + 0.4 * smaScore, 0, 1);
+
+    // VWAP Confirmation
+    let vwapScore = 0;
+    if (indicators.vwap != null) {
+        if (price > indicators.vwap) {
+            vwapScore = 1;
+            reasons.push({ text: 'Precio sobre VWAP', weight: 10 });
+        }
+    }
+
+    const trendScore = clamp(0.4 * emaScore + 0.3 * smaScore + 0.3 * vwapScore, 0, 1);
     if (trendScore > 0) reasons.push({ text: 'Tendencia favorable', weight: percent(trendScore) });
+
+    // === Trend Strength (ADX) ===
+    let adxScore = 0;
+    if (indicators.adx != null) {
+        if (indicators.adx > 25) {
+            adxScore = 1; // Strong trend
+            reasons.push({ text: `Tendencia fuerte (ADX ${indicators.adx.toFixed(1)})`, weight: 20 });
+        } else if (indicators.adx > 20) {
+            adxScore = 0.5;
+        }
+    }
+    const trendStrengthScore = adxScore;
 
     // === Levels (support, bollinger lower) ===
     let supportScore = 0;
@@ -82,8 +105,22 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         else if (distanceToLower < 2) bollScore = 0.7;
     }
 
-    const levelsScore = clamp(Math.max(supportScore, bollScore), 0, 1);
-    if (levelsScore > 0) reasons.push({ text: 'Niveles favorables (soporte/Bollinger)', weight: percent(levelsScore) });
+    // Pivot Points Support
+    let pivotScore = 0;
+    if (levels.pivot) {
+        // Check proximity to S1, S2 or Pivot (if bullish reversal)
+        const checkLevel = (level) => {
+            const dist = Math.abs((price - level) / price) * 100;
+            return dist < 1.5;
+        };
+        if (checkLevel(levels.pivot.s1) || checkLevel(levels.pivot.s2) || (price > levels.pivot.p && checkLevel(levels.pivot.p))) {
+            pivotScore = 0.8;
+            reasons.push({ text: 'Cerca de nivel Pivot/Soporte', weight: 15 });
+        }
+    }
+
+    const levelsScore = clamp(Math.max(supportScore, bollScore, pivotScore), 0, 1);
+    if (levelsScore > 0) reasons.push({ text: 'Niveles favorables', weight: percent(levelsScore) });
 
     // === Volume (spike, buyer pressure) ===
     const spikeScore = volume.spike ? 1 : 0;
@@ -116,6 +153,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     const subscores = {
         momentum: momentumScore,
         trend: trendScore,
+        trendStrength: trendStrengthScore,
         levels: levelsScore,
         volume: volumeScore,
         patterns: patternScore,
@@ -162,6 +200,14 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         takeProfit2 = price * 1.05;
     }
 
+    // Adjust TP/SL with Pivot Points if available
+    if (levels.pivot) {
+        if (levels.pivot.r1 > price && (!takeProfit1 || levels.pivot.r1 < takeProfit1)) takeProfit1 = levels.pivot.r1;
+        if (levels.pivot.r2 > price && (!takeProfit2 || levels.pivot.r2 < takeProfit2)) takeProfit2 = levels.pivot.r2;
+        // If S1 is below price, it can be a stop loss reference
+        if (levels.pivot.s1 < price && levels.pivot.s1 > stopLoss) stopLoss = levels.pivot.s1 * 0.99;
+    }
+
     const riskRewardRatio = (takeProfit1 - entryPrice) / Math.max(0.0000001, (entryPrice - stopLoss));
 
     const scoreOut = Math.round(finalNormalized * 100);
@@ -183,7 +229,8 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
             takeProfit1,
             takeProfit2,
             support: levels.support,
-            resistance: levels.resistance
+            resistance: levels.resistance,
+            pivot: levels.pivot
         },
         riskReward: Number(riskRewardRatio.toFixed(2)),
         indicators: {
@@ -193,7 +240,9 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
             bbPosition: indicators.bollingerBands && indicators.bollingerBands.lower ?
                 ((price - indicators.bollingerBands.lower) / (indicators.bollingerBands.upper - indicators.bollingerBands.lower) * 100).toFixed(1) + '%'
                 : 'N/A',
-            buyerPressure: buyerPressure ? `${Number(buyerPressure.current.toFixed(1))}%` : 'N/A'
+            buyerPressure: buyerPressure ? `${Number(buyerPressure.current.toFixed(1))}%` : 'N/A',
+            adx: indicators.adx != null ? Number(indicators.adx.toFixed(1)) : null,
+            vwap: indicators.vwap != null ? Number(indicators.vwap.toFixed(2)) : null
         },
         patterns: Object.keys(patterns).filter(key => patterns[key]),
         volumeSpike: Boolean(volume.spike)

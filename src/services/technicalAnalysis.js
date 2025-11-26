@@ -632,6 +632,197 @@ export function detectAccumulation(candles, lookback = 5) {
 }
 
 /**
+ * Calcular ADX (Average Directional Index)
+ * @param {Array<Object>} candles - Datos de velas
+ * @param {number} period - Período (típicamente 14)
+ * @returns {Object} { adx, pdi, mdi }
+ */
+export function calculateADX(candles, period = 14) {
+    if (candles.length < period * 2) return { adx: [], pdi: [], mdi: [] };
+
+    const tr = [];
+    const dmPlus = [];
+    const dmMinus = [];
+
+    // 1. Calcular TR, +DM, -DM
+    for (let i = 1; i < candles.length; i++) {
+        const high = candles[i].high;
+        const low = candles[i].low;
+        const prevHigh = candles[i - 1].high;
+        const prevLow = candles[i - 1].low;
+        const prevClose = candles[i - 1].close;
+
+        const mTr = Math.max(
+            high - low,
+            Math.abs(high - prevClose),
+            Math.abs(low - prevClose)
+        );
+        tr.push(mTr);
+
+        const upMove = high - prevHigh;
+        const downMove = prevLow - low;
+
+        if (upMove > downMove && upMove > 0) {
+            dmPlus.push(upMove);
+        } else {
+            dmPlus.push(0);
+        }
+
+        if (downMove > upMove && downMove > 0) {
+            dmMinus.push(downMove);
+        } else {
+            dmMinus.push(0);
+        }
+    }
+
+    // 2. Suavizar (Smoothed averages)
+    // Primera iteración es SMA, siguientes son (prev * (period-1) + curr) / period
+    const smooth = (data, period) => {
+        const smoothed = [];
+        let sum = 0;
+        // Primer valor
+        for (let i = 0; i < period; i++) sum += data[i];
+        smoothed.push(sum); // Guardamos la suma inicial para el índice 'period-1' relativo al input
+
+        // Siguientes
+        for (let i = period; i < data.length; i++) {
+            const prev = smoothed[smoothed.length - 1];
+            const curr = data[i];
+            // Wilder's Smoothing
+            smoothed.push(prev - (prev / period) + curr);
+        }
+        return smoothed;
+    };
+
+    // Ajustar índices
+    // tr, dmPlus, dmMinus empiezan en índice 1 de candles
+    const trSmooth = smooth(tr, period);
+    const dmPlusSmooth = smooth(dmPlus, period);
+    const dmMinusSmooth = smooth(dmMinus, period);
+
+    const adx = [];
+    const pdi = [];
+    const mdi = [];
+
+    // Calcular DI y DX
+    // Los arrays smooth empiezan en el índice (period-1) de los arrays originales
+    // que corresponde al índice (period) de candles
+    for (let i = 0; i < trSmooth.length; i++) {
+        const trVal = trSmooth[i];
+        const plusVal = dmPlusSmooth[i];
+        const minusVal = dmMinusSmooth[i];
+
+        if (trVal === 0) {
+            pdi.push(0);
+            mdi.push(0);
+            continue;
+        }
+
+        const p = (plusVal / trVal) * 100;
+        const m = (minusVal / trVal) * 100;
+        pdi.push(p);
+        mdi.push(m);
+
+        const sum = p + m;
+        const dx = sum === 0 ? 0 : (Math.abs(p - m) / sum) * 100;
+
+        // ADX es el suavizado del DX
+        // Necesitamos acumular DX para calcular el primer ADX
+        if (adx.length === 0) {
+            // Esperar a tener suficientes DX?
+            // Simplificación: usar DX directo o implementar otro suavizado
+            // Para ser precisos, ADX requiere otro periodo de suavizado sobre DX
+        }
+    }
+
+    // Simplificación para ADX: Calcular SMA del DX
+    // Recalculamos DX completo para simplificar
+    const dxList = [];
+    for (let i = 0; i < trSmooth.length; i++) {
+        const trVal = trSmooth[i];
+        if (trVal === 0) { dxList.push(0); continue; }
+        const p = (dmPlusSmooth[i] / trVal) * 100;
+        const m = (dmMinusSmooth[i] / trVal) * 100;
+        const sum = p + m;
+        dxList.push(sum === 0 ? 0 : (Math.abs(p - m) / sum) * 100);
+    }
+
+    // ADX final
+    const adxValues = calculateSMA(dxList, period);
+
+    // Rellenar con nulls al principio para alinear con candles
+    // tr empieza en 1. smooth empieza en period. adx empieza en period + period.
+    const offset = 1 + period + period - 2; // Aproximado
+    const alignedAdx = Array(candles.length).fill(null);
+    const alignedPdi = Array(candles.length).fill(null);
+    const alignedMdi = Array(candles.length).fill(null);
+
+    // Mapear valores finales al final del array
+    for (let i = 0; i < adxValues.length; i++) {
+        const idx = candles.length - adxValues.length + i;
+        alignedAdx[idx] = adxValues[i];
+    }
+    // Mapear DI (son más largos que ADX)
+    for (let i = 0; i < pdi.length; i++) {
+        const idx = candles.length - pdi.length + i;
+        alignedPdi[idx] = pdi[i];
+        alignedMdi[idx] = mdi[i];
+    }
+
+    return { adx: alignedAdx, pdi: alignedPdi, mdi: alignedMdi };
+}
+
+/**
+ * Calcular Pivot Points (Standard)
+ * @param {Array<Object>} candles - Datos de velas
+ * @returns {Object} { p, r1, r2, s1, s2 }
+ */
+export function calculatePivotPoints(candles) {
+    if (candles.length < 2) return null;
+
+    // Usar la vela anterior completa (ayer/periodo anterior)
+    const prev = candles[candles.length - 2];
+    const high = prev.high;
+    const low = prev.low;
+    const close = prev.close;
+
+    const p = (high + low + close) / 3;
+    const r1 = 2 * p - low;
+    const s1 = 2 * p - high;
+    const r2 = p + (high - low);
+    const s2 = p - (high - low);
+
+    return { p, r1, r2, s1, s2 };
+}
+
+/**
+ * Calcular VWAP (Volume Weighted Average Price)
+ * @param {Array<Object>} candles - Datos de velas
+ * @returns {Array<number>} VWAP values
+ */
+export function calculateVWAP(candles) {
+    const vwap = [];
+    let cumTPV = 0; // Cumulative Typical Price * Volume
+    let cumVol = 0; // Cumulative Volume
+
+    // En trading real, VWAP se reinicia cada día.
+    // Aquí asumimos que candles es el dataset relevante (ej: últimas 24h o sesión)
+    // O calculamos un "Rolling VWAP" sobre el periodo dado.
+
+    for (let i = 0; i < candles.length; i++) {
+        const typicalPrice = (candles[i].high + candles[i].low + candles[i].close) / 3;
+        const volume = candles[i].volume;
+
+        cumTPV += typicalPrice * volume;
+        cumVol += volume;
+
+        vwap.push(cumTPV / cumVol);
+    }
+
+    return vwap;
+}
+
+/**
  * Realizar análisis técnico completo
  * @param {Array<Object>} candles - Datos de velas
  * @returns {Object} Análisis técnico completo
@@ -650,6 +841,9 @@ export function performTechnicalAnalysis(candles) {
     const stochastic = calculateStochastic(candles, 14, 3, 3);
     const obv = calculateOBV(candles);
     const { support, resistance } = findSupportResistance(candles, 20);
+    const adxData = calculateADX(candles, 14);
+    const pivotPoints = calculatePivotPoints(candles);
+    const vwap = calculateVWAP(candles);
 
     // Detectar divergencias
     const rsiDivergence = detectDivergence(closes, rsi, 5);
@@ -697,11 +891,17 @@ export function performTechnicalAnalysis(candles) {
             ema20: ema20[lastIndex],
             ema50: ema50[lastIndex],
             sma200: sma200[lastIndex],
-            atr: atr[lastIndex]
+            sma200: sma200[lastIndex],
+            atr: atr[lastIndex],
+            adx: adxData.adx[lastIndex],
+            pdi: adxData.pdi[lastIndex],
+            mdi: adxData.mdi[lastIndex],
+            vwap: vwap[lastIndex]
         },
         levels: {
             support,
-            resistance
+            resistance,
+            pivot: pivotPoints
         },
         patterns,
         volume: {
@@ -726,7 +926,9 @@ export function performTechnicalAnalysis(candles) {
             ema50,
             sma200,
             atr,
-            obv
+            obv,
+            adx: adxData,
+            vwap
         }
     };
 }
