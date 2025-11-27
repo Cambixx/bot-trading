@@ -2,7 +2,7 @@ import { TrendingUp, Clock, Target, Shield, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import './SignalCard.css';
 
-function SignalCard({ signal }) {
+function SignalCard({ signal, onSimulateBuy }) {
     const confidenceColor = {
         HIGH: 'success',
         MEDIUM: 'warning',
@@ -122,6 +122,35 @@ function SignalCard({ signal }) {
                     </div>
                 </div>
             )}
+
+            {/* Actions */}
+            {onSimulateBuy && (
+                <div className="signal-actions" style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
+                    <button
+                        className="btn-simulate"
+                        onClick={() => onSimulateBuy(signal)}
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            background: 'rgba(38, 166, 154, 0.2)',
+                            border: '1px solid rgba(38, 166, 154, 0.3)',
+                            borderRadius: '8px',
+                            color: '#26a69a',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        💼 Simular Compra
+                    </button>
+                </div>
+            )}
+
+
 
             {/* Footer */}
             <div className="signal-footer">

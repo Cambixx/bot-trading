@@ -7,6 +7,11 @@ import CryptoSelector from './components/CryptoSelector';
 import binanceService from './services/binanceService';
 import { performTechnicalAnalysis } from './services/technicalAnalysis';
 import { analyzeMultipleSymbols } from './services/signalGenerator';
+import { enrichSignalWithAI } from './services/aiAnalysis';
+import { usePaperTrading } from './hooks/usePaperTrading';
+import { useSignalHistory } from './hooks/useSignalHistory';
+import Portfolio from './components/Portfolio';
+import WinRateStats from './components/WinRateStats';
 
 const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
@@ -20,6 +25,13 @@ function App() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showPortfolio, setShowPortfolio] = useState(false);
+
+  // Paper Trading Hook
+  const { portfolio, openPosition, closePosition, resetPortfolio } = usePaperTrading();
+
+  // Signal History Hook
+  const { history, trackSignal, getStats } = useSignalHistory();
 
   // Cargar símbolos desde localStorage o top 10 por defecto
   useEffect(() => {
@@ -102,7 +114,29 @@ function App() {
       }
 
       // 5. Generar señales (solo con análisis técnico)
-      const generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis);
+      let generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis);
+
+      // 5.1 Enriquecer señales de alta calidad con IA
+      // Filtramos señales con score > 60 para no saturar la API
+      const highQualitySignals = generatedSignals.filter(s => s.score >= 60);
+
+      if (highQualitySignals.length > 0) {
+        // Procesar en paralelo
+        const enrichedSignalsPromises = generatedSignals.map(async (signal) => {
+          if (signal.score >= 60) {
+            try {
+              // Pasamos datos técnicos extra si es necesario
+              return await enrichSignalWithAI(signal);
+            } catch (err) {
+              console.error(`Error enriching signal for ${signal.symbol}:`, err);
+              return signal;
+            }
+          }
+          return signal;
+        });
+
+        generatedSignals = await Promise.all(enrichedSignalsPromises);
+      }
 
       // Send generated signals to serverless function for Telegram notifications
       // NOTE: we send all generated signals each analysis run so server can decide what to notify.
@@ -130,6 +164,26 @@ function App() {
           const analysis = candleData[symbol]?.data ?
             performTechnicalAnalysis(candleData[symbol].data) : null;
 
+          // Calculate opportunity score (same logic as CryptoCard)
+          let opportunityScore = 0;
+          if (analysis?.indicators) {
+            const ind = analysis.indicators;
+            if (ind.rsi < 30) opportunityScore += 30;
+            else if (ind.rsi < 45) opportunityScore += 15;
+            else if (ind.rsi > 70) opportunityScore -= 10;
+
+            if (ind.macd?.histogram > 0) opportunityScore += 20;
+
+            if (ind.ema20 && ind.ema50 && ind.ema20 > ind.ema50) {
+              opportunityScore += 20;
+              if (data.price < ind.ema20) opportunityScore += 10;
+            }
+
+            if (ind.bollingerBands && data.price <= ind.bollingerBands.lower) opportunityScore += 20;
+
+            opportunityScore = Math.max(0, Math.min(100, opportunityScore));
+          }
+
           cryptoPrices[symbol] = {
             symbol,
             price: data.price,
@@ -137,7 +191,8 @@ function App() {
             volume24h: data.volume24h,
             high24h: data.high24h,
             low24h: data.low24h,
-            analysis: analysis
+            analysis: analysis,
+            opportunity: opportunityScore
           };
         }
       });
@@ -154,6 +209,9 @@ function App() {
           showNotification(signal);
         });
       }
+
+      // 6. Track signals for win rate calculation
+      generatedSignals.forEach(signal => trackSignal(signal));
 
       setSignals(generatedSignals);
       setLastUpdate(new Date());
@@ -202,6 +260,17 @@ function App() {
     setIsRefreshing(true);
     await fetchDataAndAnalyze();
     setIsRefreshing(false);
+  };
+
+  const handleSimulateBuy = (signal) => {
+    const result = openPosition(signal, 1000); // Fixed $1000 amount for now
+    if (result.success) {
+      // Optional: Show toast notification
+      console.log('Posición abierta:', signal.symbol);
+      setShowPortfolio(true); // Switch to portfolio view or just notify
+    } else {
+      alert(result.error);
+    }
   };
 
   // Cargar datos inicial (cuando symbols esté disponible)
@@ -266,6 +335,16 @@ function App() {
             <RefreshCw size={16} className={isRefreshing ? 'pulse' : ''} />
           </button>
         </div>
+
+        <div className="status-item">
+          <button
+            onClick={() => setShowPortfolio(!showPortfolio)}
+            className={`btn-${showPortfolio ? 'success' : 'secondary'}`}
+            title="Ver Cartera Simulada"
+          >
+            💼 {showPortfolio ? 'Ocultar Cartera' : 'Ver Cartera'}
+          </button>
+        </div>
       </div>
 
       {/* Crypto Selector */}
@@ -296,13 +375,29 @@ function App() {
       {/* Main Content */}
       {!loading && !error && (
         <>
+          {/* Portfolio Section */}
+          {showPortfolio && (
+            <section className="portfolio-section mb-xl">
+              <Portfolio
+                portfolio={portfolio}
+                currentPrices={cryptoData}
+                onClosePosition={closePosition}
+                onReset={resetPortfolio}
+              />
+            </section>
+          )}
+
+
+
           {/* Crypto Prices Dashboard */}
           <section className="dashboard-section">
             <h2 className="mb-lg">Mercado</h2>
             <div className="dashboard-grid">
-              {Object.values(cryptoData).map(crypto => (
-                <CryptoCard key={crypto.symbol} crypto={crypto} />
-              ))}
+              {Object.values(cryptoData)
+                .sort((a, b) => (b.opportunity || 0) - (a.opportunity || 0))
+                .map(crypto => (
+                  <CryptoCard key={crypto.symbol} crypto={crypto} />
+                ))}
             </div>
           </section>
 
@@ -328,10 +423,22 @@ function App() {
             ) : (
               <div className="signals-grid">
                 {signals.map((signal, idx) => (
-                  <SignalCard key={`${signal.symbol}-${idx}`} signal={signal} />
+                  <SignalCard
+                    key={`${signal.symbol}-${idx}`}
+                    signal={signal}
+                    onSimulateBuy={handleSimulateBuy}
+                  />
                 ))}
               </div>
             )}
+          </section>
+
+          {/* Win Rate Stats */}
+          <section className="winrate-section mb-xl">
+            <WinRateStats
+              stats={getStats()}
+              recentSignals={history.filter(s => s.status === 'WIN' || s.status === 'LOSS')}
+            />
           </section>
 
           {/* Footer Disclaimer */}
