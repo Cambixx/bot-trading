@@ -275,7 +275,10 @@ async function sendGroupedTelegramNotification(signals) {
 
     // Symbol and Score
     const cleanSymbol = sig.symbol.replace('USDC', '').replace('USDT', '');
-    message += `${icon} *${escapeMarkdownV2(cleanSymbol)}*  |  Score: *${escapeMarkdownV2(String(sig.score))}*\n`;
+    // Escape the pipe character or use a different separator that doesn't need escaping if possible, 
+    // but for MarkdownV2 everything needs escaping. 
+    // Easier to just escape the pipe: \|
+    message += `${icon} *${escapeMarkdownV2(cleanSymbol)}*  \\|  Score: *${escapeMarkdownV2(String(sig.score))}*\n`;
 
     // Price
     if (sig.levels && sig.levels.entry) {
@@ -297,11 +300,16 @@ async function sendGroupedTelegramNotification(signals) {
     }
 
     // Separator
+    // The separator line contains dashes which are reserved in MarkdownV2 and must be escaped.
+    // Or we can use a different character that might not need escaping? No, almost everything needs escaping.
+    // Let's use a standard separator that we escape.
     message += `\n───────────────────\n\n`;
   }
 
   // Footer
-  message += `🤖 _Bot Trading AI_  •  ${escapeMarkdownV2(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }))}`;
+  // Dots in dates/times must be escaped in MarkdownV2
+  const timeStr = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  message += `🤖 _Bot Trading AI_  •  ${escapeMarkdownV2(timeStr)}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
