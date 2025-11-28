@@ -100,7 +100,7 @@ Responde SOLO con el JSON, sin texto adicional.`;
 
         // Llamar a Gemini API (usando formato correcto según documentación oficial)
         const response = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
             {
                 method: 'POST',
                 headers: {
@@ -115,7 +115,9 @@ Responde SOLO con el JSON, sin texto adicional.`;
                     }],
                     generationConfig: {
                         temperature: 0.3,
-                        maxOutputTokens: 500
+                        maxOutputTokens: 2048,
+                        topP: 0.95,
+                        topK: 40
                     }
                 })
             }
