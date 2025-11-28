@@ -1,19 +1,58 @@
 import { performTechnicalAnalysis } from './technicalAnalysis.js';
 
 // Configurable weights and thresholds (tune these as needed)
-export const SIGNAL_CONFIG = {
-    categoryWeights: {
-        momentum: 0.25,
-        trend: 0.25,
-        trendStrength: 0.10,
-        levels: 0.25,  
-        volume: 0.15,
-        patterns: 0.00,
-        divergence: 0.00
+// Configuration presets for different trading modes
+const MODES = {
+    CONSERVATIVE: {
+        categoryThresholdForConvergence: 0.25, // Stricter: needs higher subscores
+        requiredCategories: 2,                 // Needs at least 2 strong categories
+        scoreToEmit: 0.65,                     // Only high quality signals (>65)
+        weights: {
+            momentum: 0.15,
+            trend: 0.25,      // Trend is key for safety
+            trendStrength: 0.10,
+            levels: 0.20,     // Support/Resistance crucial
+            volume: 0.10,
+            patterns: 0.05,
+            divergence: 0.05,
+            accumulation: 0.10 // Smart money detection
+        }
     },
-    categoryThresholdForConvergence: 0.20,
-    requiredCategories: 1,
-    scoreToEmit: 0.50  // Adjusted: need 50% (signals >50 are emitted)
+    BALANCED: {
+        categoryThresholdForConvergence: 0.20,
+        requiredCategories: 1,
+        scoreToEmit: 0.50,
+        weights: {
+            momentum: 0.15,
+            trend: 0.20,
+            trendStrength: 0.10,
+            levels: 0.20,
+            volume: 0.15,
+            patterns: 0.05,
+            divergence: 0.05,
+            accumulation: 0.10
+        }
+    },
+    RISKY: {
+        categoryThresholdForConvergence: 0.15, // Looser
+        requiredCategories: 1,
+        scoreToEmit: 0.40,                     // Lower threshold (>40)
+        weights: {
+            momentum: 0.25,   // Momentum is key for quick scalps
+            trend: 0.10,
+            trendStrength: 0.05,
+            levels: 0.15,
+            volume: 0.20,     // Volume spikes matter more
+            patterns: 0.15,   // Speculative patterns included
+            divergence: 0.05,
+            accumulation: 0.05
+        }
+    }
+};
+
+export const getSignalConfig = (mode = 'BALANCED') => {
+    const key = mode.toUpperCase();
+    return MODES[key] || MODES.BALANCED;
 };
 
 function clamp(v, a = 0, b = 1) {
@@ -28,7 +67,8 @@ function percent(v) {
  * Generar señal de trading basada en análisis técnico
  * Implementación basada en subscores por categoría para evitar double-counting
  */
-export function generateSignal(analysis, symbol, multiTimeframeData = null) {
+export function generateSignal(analysis, symbol, multiTimeframeData = null, mode = 'BALANCED') {
+    const config = getSignalConfig(mode);
     const { indicators = {}, levels = {}, patterns = {}, volume = {}, price, buyerPressure } = analysis;
 
     const reasons = [];
@@ -83,7 +123,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         }
     }
 
-    const trendScore = clamp(0.5 * emaScore + 0.35 * smaScore + 0.15 * vwapScore, 0, 1);
+    let trendScore = clamp(0.5 * emaScore + 0.35 * smaScore + 0.15 * vwapScore, 0, 1);
     if (trendScore > 0) reasons.push({ text: 'Tendencia favorable', weight: percent(trendScore) });
 
     // === Trend Strength (ADX) ===
@@ -164,8 +204,39 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     const divergenceScore = clamp(divScore, 0, 1);
     if (divergenceScore > 0) reasons.push({ text: 'Divergencia alcista', weight: percent(divergenceScore) });
 
+    // === Accumulation (Spot Gem) ===
+    let accumulationScore = 0;
+    if (analysis.accumulation && analysis.accumulation.isAccumulating) {
+        accumulationScore = 1;
+        reasons.push({ text: 'Acumulación detectada (Smart Money)', weight: 25 });
+    }
+
+    // === Dip Buying (Pullback to EMA50 in Uptrend) ===
+    // This boosts the Trend score
+    if (indicators.sma200 && price > indicators.sma200) {
+        // We are in an uptrend
+        if (indicators.ema50) {
+            const distToEma50 = ((price - indicators.ema50) / price) * 100;
+            // If price is within 1.5% of EMA50, it's a prime dip buy area
+            if (Math.abs(distToEma50) < 1.5) {
+                trendScore = clamp(trendScore + 0.3, 0, 1); // Boost trend score
+                reasons.push({ text: 'Rebote en EMA50 (Dip Buy)', weight: 30 });
+            }
+        }
+    }
+
+    // === Spot Safety Filter ===
+    // Avoid downtrends in Conservative/Balanced modes unless there's massive volume or accumulation
+    if (mode !== 'RISKY' && indicators.sma200 && price < indicators.sma200) {
+        const isReversal = patternScore > 0.7 || volumeScore > 0.8 || accumulationScore > 0.8;
+        if (!isReversal) {
+            return null; // Filter out downtrend signals for spot safety
+        }
+        warnings.push('Tendencia bajista (Precio < SMA200)');
+    }
+
     // Combine categories with weights
-    const weights = SIGNAL_CONFIG.categoryWeights;
+    const weights = config.weights;
     const subscores = {
         momentum: momentumScore,
         trend: trendScore,
@@ -173,7 +244,8 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         levels: levelsScore,
         volume: volumeScore,
         patterns: patternScore,
-        divergence: divergenceScore
+        divergence: divergenceScore,
+        accumulation: accumulationScore
     };
 
     let finalNormalized = 0;
@@ -183,7 +255,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     finalNormalized = clamp(finalNormalized, 0, 1);
 
     // Count aligned categories
-    const categoriesAligned = Object.values(subscores).filter(s => s >= SIGNAL_CONFIG.categoryThresholdForConvergence).length;
+    const categoriesAligned = Object.values(subscores).filter(s => s >= config.categoryThresholdForConvergence).length;
 
     // Multi-timeframe confirmation (lightweight)
     if (multiTimeframeData && multiTimeframeData['4h']) {
@@ -197,7 +269,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
 
     // Trend-based fallback: if trend is strong (>0.5) and price is above SMA200, lower the emit threshold
     const isTrendStrong = trendScore > 0.5 && smaScore > 0.5;
-    const effectiveThreshold = isTrendStrong ? Math.max(0.25, SIGNAL_CONFIG.scoreToEmit - 0.08) : SIGNAL_CONFIG.scoreToEmit;
+    const effectiveThreshold = isTrendStrong ? Math.max(0.25, config.scoreToEmit - 0.08) : config.scoreToEmit;
 
     // Fallback: if indicators are missing/NaN, use levels-based signal (price near support is good opportunity)
     let fallbackSignal = false;
@@ -210,7 +282,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     }
 
     // Emit condition
-    if (!fallbackSignal && (categoriesAligned < SIGNAL_CONFIG.requiredCategories || finalNormalized < effectiveThreshold)) {
+    if (!fallbackSignal && (categoriesAligned < config.requiredCategories || finalNormalized < effectiveThreshold)) {
         return null;
     }
 
@@ -279,7 +351,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     };
 }
 
-export function analyzeMultipleSymbols(symbolsData, multiTimeframeData = {}) {
+export function analyzeMultipleSymbols(symbolsData, multiTimeframeData = {}, mode = 'BALANCED') {
     const signals = [];
 
     for (const [symbol, candleData] of Object.entries(symbolsData)) {
@@ -291,7 +363,7 @@ export function analyzeMultipleSymbols(symbolsData, multiTimeframeData = {}) {
         try {
             const analysis = performTechnicalAnalysis(candleData.data);
             const mtfData = multiTimeframeData[symbol] || null;
-            const signal = generateSignal(analysis, symbol, mtfData);
+            const signal = generateSignal(analysis, symbol, mtfData, mode);
             if (signal) signals.push(signal);
         } catch (err) {
             console.error(`Error analizando ${symbol}:`, err);

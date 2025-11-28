@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, RefreshCw, Zap } from 'lucide-react';
+import { Bell, BellOff, RefreshCw, Zap, Settings } from 'lucide-react';
 import './App.css';
 import SignalCard from './components/SignalCard';
 import CryptoCard from './components/CryptoCard';
@@ -27,6 +27,7 @@ function App() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showPortfolio, setShowPortfolio] = useState(false);
+  const [tradingMode, setTradingMode] = useState('BALANCED'); // 'CONSERVATIVE', 'BALANCED', 'RISKY'
 
   // Paper Trading Hook
   const { portfolio, openPosition, closePosition, resetPortfolio } = usePaperTrading();
@@ -131,7 +132,7 @@ function App() {
       }
 
       // 5. Generar señales (solo con análisis técnico)
-      let generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis);
+      let generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis, tradingMode);
 
       // 5.1 Enriquecer señales de alta calidad con IA
       // Filtramos señales con score > 60 para no saturar la API
@@ -177,7 +178,7 @@ function App() {
             headers,
             body: JSON.stringify({ signals: generatedSignals })
           });
-          
+
           if (!response.ok && response.status !== 404) {
             console.warn(`Notification request failed: ${response.status}`);
           }
@@ -304,12 +305,12 @@ function App() {
     }
   };
 
-  // Cargar datos inicial (cuando symbols esté disponible)
+  // Cargar datos inicial (cuando symbols esté disponible) y cuando cambie el modo
   useEffect(() => {
     if (symbols.length > 0) {
       fetchDataAndAnalyze();
     }
-  }, [symbols]);
+  }, [symbols, tradingMode]);
 
   // Auto-refresh
   useEffect(() => {
@@ -347,6 +348,28 @@ function App() {
             <span className="text-muted">Última actualización: {lastUpdate.toLocaleTimeString()}</span>
           </div>
         )}
+
+        <div className="status-item">
+          <div className="mode-selector" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.25rem', borderRadius: '8px' }}>
+            <Settings size={14} className="text-muted" />
+            <select
+              value={tradingMode}
+              onChange={(e) => setTradingMode(e.target.value)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value="CONSERVATIVE">Conservador</option>
+              <option value="BALANCED">Equilibrado</option>
+              <option value="RISKY">Arriesgado</option>
+            </select>
+          </div>
+        </div>
 
         <div className="status-item gap-sm">
           <button
