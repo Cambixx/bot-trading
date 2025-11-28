@@ -64,7 +64,9 @@ Responde SOLO con el JSON, sin texto adicional.`;
                     }],
                     generationConfig: {
                         temperature: 0.3,
-                        maxOutputTokens: 500
+                        maxOutputTokens: 2048,
+                        topP: 0.95,
+                        topK: 40
                     }
                 })
             }
@@ -72,14 +74,23 @@ Responde SOLO con el JSON, sin texto adicional.`;
 
         if (!response.ok) {
             const errorData = await response.text();
-            console.error('Gemini API error:', errorData);
-            throw new Error(`Gemini API failed: ${response.statusText}`);
+            console.error(`Gemini API error (${response.status}):`, errorData);
+
+            // Handle rate limiting specifically
+            if (response.status === 429) {
+                throw new Error('Rate limit exceeded - too many requests');
+            }
+
+            throw new Error(`Gemini API failed: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log('Gemini API response:', data); // Debug logging
+
         const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!generatedText) {
+            console.error('No text in Gemini response:', JSON.stringify(data, null, 2));
             throw new Error('No response from Gemini');
         }
 

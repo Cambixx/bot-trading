@@ -118,24 +118,33 @@ function App() {
 
       // 5.1 Enriquecer señales de alta calidad con IA
       // Filtramos señales con score > 60 para no saturar la API
-      const highQualitySignals = generatedSignals.filter(s => s.score >= 60);
+      // Limitamos a máximo 3 señales para evitar rate limits
+      const highQualitySignals = generatedSignals
+        .filter(s => s.score >= 60)
+        .sort((a, b) => b.score - a.score) // Priorizar las de mayor score
+        .slice(0, 3); // Máximo 3 para evitar rate limits
 
       if (highQualitySignals.length > 0) {
-        // Procesar en paralelo
-        const enrichedSignalsPromises = generatedSignals.map(async (signal) => {
-          if (signal.score >= 60) {
-            try {
-              // Pasamos datos técnicos extra si es necesario
-              return await enrichSignalWithAI(signal);
-            } catch (err) {
-              console.error(`Error enriching signal for ${signal.symbol}:`, err);
-              return signal;
-            }
-          }
-          return signal;
-        });
+        console.log(`Enriqueciendo ${highQualitySignals.length} señales con IA...`);
 
-        generatedSignals = await Promise.all(enrichedSignalsPromises);
+        // Procesar SECUENCIALMENTE con delay para evitar rate limits
+        for (const signal of highQualitySignals) {
+          try {
+            const enriched = await enrichSignalWithAI(signal);
+            // Reemplazar la señal en el array original
+            const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
+            if (index !== -1) {
+              generatedSignals[index] = enriched;
+            }
+
+            // Delay de 1 segundo entre llamadas para evitar rate limits
+            if (highQualitySignals.indexOf(signal) < highQualitySignals.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          } catch (err) {
+            console.error(`Error enriching signal for ${signal.symbol}:`, err);
+          }
+        }
       }
 
       // Send generated signals to serverless function for Telegram notifications
