@@ -38,8 +38,8 @@ const BINANCE_API_BASE = 'https://api.binance.com/api/v3';
 
 // Lista de criptomonedas a monitorear
 const SYMBOLS = [
-  'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT',
-  'XRPUSDT', 'DOTUSDT', 'DOGEUSDT', 'AVAXUSDT', 'LTCUSDT'
+  'BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC',
+  'XRPUSDC', 'DOTUSDC', 'DOGEUSDC', 'AVAXUSDC', 'LTCUSDC'
 ];
 
 // Función para obtener datos de velas de Binance
@@ -264,38 +264,44 @@ async function sendGroupedTelegramNotification(signals) {
     return;
   }
 
-  // Build message using MarkdownV2 and escaping
-  let message = '*🚀 NUEVAS SEÑALES DE TRADING*\n\n';
-  message += `_Generadas:_ ${escapeMarkdownV2(new Date().toLocaleString('es-ES'))}\n\n`;
-  message += `*Total:* ${signals.length} \n\n`;
+  // Header
+  let message = '⚡️ *NUEVAS OPORTUNIDADES DETECTADAS* ⚡️\n\n';
 
   for (const sig of signals) {
-    // Compact entry per signal: symbol | score | top-2 subscores (or top-2 reasons)
-    message += `*${escapeMarkdownV2(sig.symbol)}* — Score: ${escapeMarkdownV2(String(sig.score))}\n`;
-    if (typeof sig.categoriesAligned !== 'undefined') {
-      message += `Categorías: ${escapeMarkdownV2(String(sig.categoriesAligned))}  \n`;
-    }
+    // Determine status icon based on score
+    let icon = '🟢'; // High score
+    if (sig.score < 80) icon = '🟡'; // Medium
+    if (sig.score < 60) icon = '⚪️'; // Low
 
-    // Show top-2 subscores if available
-    if (sig.subscores && typeof sig.subscores === 'object') {
-      // sort subscores by value desc
-      const entries = Object.entries(sig.subscores).sort((a, b) => Number(b[1]) - Number(a[1]));
-      const top = entries.slice(0, 2).map(e => `${escapeMarkdownV2(e[0])}: ${escapeMarkdownV2(String(e[1]))}%`);
-      if (top.length) message += `${top.join(' — ')}\n`;
-    } else if (sig.reasons && sig.reasons.length > 0) {
-      // fallback: top-2 reasons (short)
-      const reasons = sig.reasons.slice(0, 2).map(r => (typeof r === 'string' ? r : (r.text || '')));
-      if (reasons.length) message += `${escapeMarkdownV2(reasons.join(' — '))}\n`;
-    }
+    // Symbol and Score
+    const cleanSymbol = sig.symbol.replace('USDC', '').replace('USDT', '');
+    message += `${icon} *${escapeMarkdownV2(cleanSymbol)}*  |  Score: *${escapeMarkdownV2(String(sig.score))}*\n`;
 
-    // add a short line with price + R:R
+    // Price
     if (sig.levels && sig.levels.entry) {
-      const priceText = `@ $${escapeMarkdownV2(Number(sig.levels.entry).toFixed(4))}`;
-      const rr = sig.riskReward ? `R:R ${escapeMarkdownV2(String(sig.riskReward))}` : '';
-      message += `${priceText} ${rr}\n`;
+      message += `💰 Entrada: $${escapeMarkdownV2(Number(sig.levels.entry).toFixed(4))}\n`;
+    } else {
+      message += `💰 Precio: $${escapeMarkdownV2(Number(sig.price).toFixed(4))}\n`;
     }
-    message += `\n`;
+
+    // AI Sentiment (if available)
+    if (sig.aiAnalysis && sig.aiAnalysis.sentiment) {
+      const sentimentEmoji = sig.aiAnalysis.sentiment === 'BULLISH' ? '🐂' : '🐻';
+      message += `🧠 IA: ${sentimentEmoji} ${escapeMarkdownV2(sig.aiAnalysis.sentiment)}\n`;
+    }
+
+    // Top Reasons (limit to 2)
+    if (sig.reasons && sig.reasons.length > 0) {
+      const reasons = sig.reasons.slice(0, 2).map(r => (typeof r === 'string' ? r : (r.text || '')));
+      message += `📊 _${escapeMarkdownV2(reasons.join(', '))}_\n`;
+    }
+
+    // Separator
+    message += `\n───────────────────\n\n`;
   }
+
+  // Footer
+  message += `🤖 _Bot Trading AI_  •  ${escapeMarkdownV2(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }))}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 

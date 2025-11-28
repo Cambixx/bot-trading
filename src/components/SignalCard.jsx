@@ -29,7 +29,7 @@ function SignalCard({ signal, onSimulateBuy }) {
             <div className="signal-header">
                 <div className="signal-symbol">
                     <TrendingUp className="signal-icon" />
-                    <span className="symbol-text">{signal.symbol}</span>
+                    <span className="symbol-text">{signal.symbol.replace('USDC', '')}</span>
                 </div>
                 <span className={`badge badge-${confidenceColor[signal.confidence]}`}>
                     {confidenceLabel[signal.confidence]}

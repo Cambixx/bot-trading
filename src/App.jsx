@@ -34,13 +34,29 @@ function App() {
   const { history, trackSignal, getStats } = useSignalHistory();
 
   // Cargar símbolos desde localStorage o top 10 por defecto
+  // Cargar símbolos desde localStorage o top 10 por defecto
   useEffect(() => {
     const loadInitialSymbols = async () => {
       const savedSymbols = localStorage.getItem(STORAGE_KEY);
 
       if (savedSymbols) {
-        // Usar símbolos guardados
-        setSymbols(JSON.parse(savedSymbols));
+        // Usar símbolos guardados, pero migrar USDT a USDC si es necesario
+        let parsedSymbols = JSON.parse(savedSymbols);
+        let needsUpdate = false;
+
+        parsedSymbols = parsedSymbols.map(s => {
+          if (s.endsWith('USDT')) {
+            needsUpdate = true;
+            return s.replace('USDT', 'USDC');
+          }
+          return s;
+        });
+
+        setSymbols(parsedSymbols);
+
+        if (needsUpdate) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedSymbols));
+        }
       } else {
         // Cargar top 10 por momentum (ganadoras con volumen decente)
         try {
