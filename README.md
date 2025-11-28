@@ -257,6 +257,14 @@ Editar en `src/services/signalGenerator.js`:
 // Ejemplo: cambiar `scoreToEmit` a 0.5 para ser más permisivo.
 ```
 
+### Configurar Umbral para Notificaciones (Telegram)
+Para controlar qué señales se envían al bot de Telegram, configura la variable de entorno `SIGNAL_SCORE_THRESHOLD` en Netlify.
+
+- **Variable**: `SIGNAL_SCORE_THRESHOLD`
+- **Valor por defecto**: `70`
+- **Descripción**: Mínimo score (0-100) requerido para enviar una notificación.
+- **Ejemplo**: Si quieres recibir más señales, bájalo a `60`. Si quieres solo las mejores, súbelo a `80`.
+
 ### Nuevo: Ejecutar backtest de ejemplo
 
 Hay un pequeño script de demostración que genera velas sintéticas y ejecuta el analizador para mostrar una señal de ejemplo.
