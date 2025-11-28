@@ -29,20 +29,23 @@ export function calculateSMA(data, period) {
  * @returns {Array<number>} EMA values
  */
 export function calculateEMA(data, period) {
+    if (!data || data.length === 0) return [];
+    
     const ema = [];
     const multiplier = 2 / (period + 1);
 
-    // Primera EMA es SMA
-    let sum = 0;
-    for (let i = 0; i < period; i++) {
-        if (i < data.length) {
-            sum += data[i];
-            ema.push(null);
-        }
+    // Los primeros period-1 valores son null
+    for (let i = 0; i < period - 1; i++) {
+        ema.push(null);
     }
 
     if (data.length >= period) {
-        ema[period - 1] = sum / period;
+        // Primera EMA es SMA del primer período
+        let sum = 0;
+        for (let i = 0; i < period; i++) {
+            sum += data[i];
+        }
+        ema.push(sum / period);  // Posición period-1 (index period-1)
 
         // Calcular EMA subsecuentes
         for (let i = period; i < data.length; i++) {

@@ -3,17 +3,17 @@ import { performTechnicalAnalysis } from './technicalAnalysis.js';
 // Configurable weights and thresholds (tune these as needed)
 export const SIGNAL_CONFIG = {
     categoryWeights: {
-        momentum: 0.40,      // Increased from 0.30
-        trend: 0.30,         // Increased from 0.25
-        trendStrength: 0.15, // Unchanged
-        levels: 0.10,        // Decreased from 0.15
-        volume: 0.05,        // Decreased from 0.10
-        patterns: 0.00,      // Removed (was 0.05)
-        divergence: 0.00     // Removed
+        momentum: 0.25,
+        trend: 0.25,
+        trendStrength: 0.10,
+        levels: 0.25,  
+        volume: 0.15,
+        patterns: 0.00,
+        divergence: 0.00
     },
-    categoryThresholdForConvergence: 0.4,
+    categoryThresholdForConvergence: 0.20,
     requiredCategories: 1,
-    scoreToEmit: 0.50 // Increased from 0.45 to be more selective
+    scoreToEmit: 0.50  // Adjusted: need 50% (signals >50 are emitted)
 };
 
 function clamp(v, a = 0, b = 1) {
@@ -37,8 +37,14 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
     // === Momentum (RSI, MACD, Stochastic) ===
     let rsiScore = 0;
     if (indicators.rsi != null) {
-        // 30 => strong (1), 40 => neutral (0)
-        rsiScore = clamp((45 - indicators.rsi) / 15, 0, 1); // Relaxed: <45 starts scoring
+        // Relajado: allows signals even with higher RSI
+        // RSI < 35 = strong (1), 35-55 = moderate opportunity, >55 = no signal
+        if (indicators.rsi < 35) {
+            rsiScore = 1;
+        } else if (indicators.rsi < 55) {
+            rsiScore = clamp((55 - indicators.rsi) / 20, 0, 1);  // Moderate scoring
+        }
+        // RSI >= 55 = rsiScore stays 0 (overbought)
     }
 
     const macdScore = (indicators.macd && indicators.macd.histogram != null) ? (indicators.macd.histogram > 0 ? 1 : 0) : 0;
@@ -60,11 +66,13 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
             // Bonus for dip in uptrend (price < ema20) - Align with CryptoCard
             if (price < indicators.ema20) {
                 emaScore = 1.0;
-                reasons.push({ text: 'Oportunidad en retroceso (Dip)', weight: 20 });
             }
+        } else if (indicators.ema50 != null && indicators.ema20 > indicators.ema50 * 0.99) {
+            // Near crossover, give some credit
+            emaScore = 0.3;
         }
     }
-    const smaScore = (indicators.sma200 != null && price != null) ? (price > indicators.sma200 ? 1 : 0) : 0;
+    const smaScore = (indicators.sma200 != null && price != null) ? (price > indicators.sma200 ? 1 : price > indicators.sma200 * 0.98 ? 0.3 : 0) : 0;
 
     // VWAP Confirmation
     let vwapScore = 0;
@@ -75,7 +83,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         }
     }
 
-    const trendScore = clamp(0.4 * emaScore + 0.3 * smaScore + 0.3 * vwapScore, 0, 1);
+    const trendScore = clamp(0.5 * emaScore + 0.35 * smaScore + 0.15 * vwapScore, 0, 1);
     if (trendScore > 0) reasons.push({ text: 'Tendencia favorable', weight: percent(trendScore) });
 
     // === Trend Strength (ADX) ===
@@ -96,6 +104,10 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         const distanceToSupport = ((price - levels.support) / price) * 100; // percent
         if (distanceToSupport <= 2) supportScore = 1;
         else if (distanceToSupport <= 5) supportScore = 0.6;
+        else if (distanceToSupport <= 10) supportScore = 0.3;  // Near support = some score
+    } else if (price != null) {
+        // Fallback: if no support level calculated, assume price in middle of recent range is acceptable
+        supportScore = 0.4;  // Default score when no levels data
     }
 
     let bollScore = 0;
@@ -103,6 +115,10 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         const distanceToLower = ((price - indicators.bollingerBands.lower) / price) * 100;
         if (price <= indicators.bollingerBands.lower) bollScore = 1;
         else if (distanceToLower < 2) bollScore = 0.7;
+        else if (distanceToLower < 5) bollScore = 0.4;
+    } else if (!indicators.bollingerBands) {
+        // Fallback when bollinger bands missing
+        bollScore = 0.3;
     }
 
     // Pivot Points Support
@@ -174,13 +190,27 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         const tf4h = multiTimeframeData['4h'];
         if (tf4h.indicators && tf4h.indicators.ema20 != null && tf4h.indicators.ema50 != null && tf4h.indicators.ema20 > tf4h.indicators.ema50) {
             // small boost for agreement on higher timeframe
-            finalNormalized = clamp(finalNormalized + 0.05, 0, 1);
-            reasons.push({ text: 'Confirmación 4h', weight: 5 });
+            finalNormalized = clamp(finalNormalized + 0.08, 0, 1);
+            reasons.push({ text: 'Confirmación 4h', weight: 8 });
+        }
+    }
+
+    // Trend-based fallback: if trend is strong (>0.5) and price is above SMA200, lower the emit threshold
+    const isTrendStrong = trendScore > 0.5 && smaScore > 0.5;
+    const effectiveThreshold = isTrendStrong ? Math.max(0.25, SIGNAL_CONFIG.scoreToEmit - 0.08) : SIGNAL_CONFIG.scoreToEmit;
+
+    // Fallback: if indicators are missing/NaN, use levels-based signal (price near support is good opportunity)
+    let fallbackSignal = false;
+    if (levelsScore > 0.7 && (momentumScore === 0 || trendScore === 0)) {
+        fallbackSignal = true;  // Price at support level is enough, even without indicators
+        finalNormalized = clamp(levelsScore * 0.5, 0, 1);  // Conservative score from levels
+        if (!reasons.some(r => r.text && r.text.includes('Niveles'))) {
+            reasons.push({ text: 'Precio en nivel clave de soporte', weight: 40 });
         }
     }
 
     // Emit condition
-    if (categoriesAligned < SIGNAL_CONFIG.requiredCategories || finalNormalized < SIGNAL_CONFIG.scoreToEmit) {
+    if (!fallbackSignal && (categoriesAligned < SIGNAL_CONFIG.requiredCategories || finalNormalized < effectiveThreshold)) {
         return null;
     }
 
