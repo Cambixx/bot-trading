@@ -8,18 +8,29 @@ const NETLIFY_FUNCTION_URL = '/.netlify/functions/gemini-analysis';
 
 // IMPORTANTE: La API key debe estar en .env (nunca hardcodeada)
 // Crear archivo .env con: VITE_GEMINI_API_KEY=tu_api_key
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
 // Detectar si estamos en desarrollo local
-const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
+const isDevelopment = (import.meta.env && import.meta.env.DEV) || (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+
+// IMPORTANTE: La API key debe estar en .env (nunca hardcodeada)
+const GEMINI_API_KEY = (import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) || process.env.VITE_GEMINI_API_KEY;
 
 /**
  * Llamar directamente a Gemini API (solo en desarrollo)
  */
-async function callGeminiDirectly(marketData) {
+async function callGeminiDirectly(marketData, tradingMode = 'BALANCED') {
     const { symbol, price, indicators, patterns, reasons, warnings } = marketData;
 
-    const prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot (comprar bajo, vender alto).
+    let modeContext = '';
+    if (tradingMode === 'CONSERVATIVE') {
+        modeContext = 'El usuario opera en modo CONSERVADOR. Prioriza la preservación de capital. Sé escéptico con señales débiles y busca confirmación de tendencia fuerte.';
+    } else if (tradingMode === 'RISKY') {
+        modeContext = 'El usuario opera en modo ARRIESGADO. Busca oportunidades de alto rendimiento/riesgo. Acepta mayor volatilidad si el potencial de subida es alto.';
+    } else {
+        modeContext = 'El usuario opera en modo EQUILIBRADO. Busca un balance entre riesgo y beneficio.';
+    }
+
+    const prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot.
+${modeContext}
 
 Analiza la siguiente oportunidad de trading:
 
@@ -130,11 +141,11 @@ Responde SOLO con el JSON, sin texto adicional.`;
  * @param {Object} marketData - Datos del mercado y análisis técnico
  * @returns {Promise<Object>} Análisis de IA
  */
-export async function getAIAnalysis(marketData) {
+export async function getAIAnalysis(marketData, tradingMode = 'BALANCED') {
     // En desarrollo, llamar directamente a Gemini
     if (isDevelopment) {
         console.log('💡 Usando Gemini API directamente (desarrollo)');
-        return await callGeminiDirectly(marketData);
+        return await callGeminiDirectly(marketData, tradingMode);
     }
 
     // En producción, usar función serverless
@@ -144,7 +155,7 @@ export async function getAIAnalysis(marketData) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(marketData)
+            body: JSON.stringify({ ...marketData, tradingMode })
         });
 
         if (!response.ok) {
@@ -172,9 +183,10 @@ export async function getAIAnalysis(marketData) {
  * Enriquecer una señal con análisis de IA
  * @param {Object} signal - Señal de trading
  * @param {Object} technicalData - Datos técnicos adicionales
+ * @param {string} tradingMode - Modo de trading actual
  * @returns {Promise<Object>} Señal enriquecida con análisis IA
  */
-export async function enrichSignalWithAI(signal, technicalData = {}) {
+export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode = 'BALANCED') {
     const marketData = {
         symbol: signal.symbol,
         price: signal.price,
@@ -185,7 +197,7 @@ export async function enrichSignalWithAI(signal, technicalData = {}) {
         ...technicalData
     };
 
-    const aiResult = await getAIAnalysis(marketData);
+    const aiResult = await getAIAnalysis(marketData, tradingMode);
 
     if (aiResult.success && aiResult.analysis) {
         return {

@@ -27,7 +27,9 @@ function App() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showPortfolio, setShowPortfolio] = useState(false);
-  const [tradingMode, setTradingMode] = useState('BALANCED'); // 'CONSERVATIVE', 'BALANCED', 'RISKY'
+  const [tradingMode, setTradingMode] = useState(() => {
+    return localStorage.getItem('trading_mode') || 'BALANCED';
+  });
 
   // Paper Trading Hook
   const { portfolio, openPosition, closePosition, resetPortfolio } = usePaperTrading();
@@ -148,11 +150,15 @@ function App() {
         // Procesar SECUENCIALMENTE con delay para evitar rate limits
         for (const signal of highQualitySignals) {
           try {
-            const enriched = await enrichSignalWithAI(signal);
+            const enrichedSignal = await enrichSignalWithAI(signal, {
+              // Datos extra para la IA
+              rsi: signal.indicators.rsi,
+              macd: signal.indicators.macd
+            }, tradingMode);
             // Reemplazar la señal en el array original
             const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
             if (index !== -1) {
-              generatedSignals[index] = enriched;
+              generatedSignals[index] = enrichedSignal;
             }
 
             // Delay de 1 segundo entre llamadas para evitar rate limits
@@ -354,7 +360,11 @@ function App() {
             <Settings size={14} className="text-muted" />
             <select
               value={tradingMode}
-              onChange={(e) => setTradingMode(e.target.value)}
+              onChange={(e) => {
+                const newMode = e.target.value;
+                setTradingMode(newMode);
+                localStorage.setItem('trading_mode', newMode);
+              }}
               style={{
                 background: 'transparent',
                 border: 'none',
