@@ -8,7 +8,7 @@ const BINANCE_API_BASE = 'https://api.binance.com/api/v3';
 class BinanceService {
   /**
    * Obtener datos de velas (candlesticks) para un símbolo
-   * @param {string} symbol - Par de trading (ej: BTCUSDT)
+   * @param {string} symbol - Par de trading (ej: BTCUSDC)
    * @param {string} interval - Timeframe (1m, 5m, 15m, 1h, 4h, 1d)
    * @param {number} limit - Número de velas a obtener (default: 100, max: 1000)
    * @returns {Promise<Array>} Array de datos de velas
@@ -133,7 +133,7 @@ class BinanceService {
     try {
       const response = await axios.get(`${BINANCE_API_BASE}/exchangeInfo`);
       return response.data.symbols
-        .filter(s => s.status === 'TRADING' && s.quoteAsset === 'USDT')
+        .filter(s => s.status === 'TRADING' && s.quoteAsset === 'USDC')
         .map(s => ({
           symbol: s.symbol,
           baseAsset: s.baseAsset,
@@ -146,7 +146,7 @@ class BinanceService {
   }
 
   /**
-   * Obtener las top N criptomonedas por volumen en USDT
+   * Obtener las top N criptomonedas por volumen en USDC
    * @param {number} limit - Número de criptos a obtener (default: 10)
    * @returns {Promise<Array<string>>} Array de símbolos ordenados por volumen
    */
@@ -155,11 +155,11 @@ class BinanceService {
       // Obtener todos los tickers de 24h
       const response = await axios.get(`${BINANCE_API_BASE}/ticker/24hr`);
 
-      // Filtrar solo pares USDT y ordenar por volumen
+      // Filtrar solo pares USDC y ordenar por volumen
       const usdcPairs = response.data
         .filter(ticker =>
-          ticker.symbol.endsWith('USDT') &&
-          ticker.symbol !== 'USDT' &&
+          ticker.symbol.endsWith('USDC') &&
+          ticker.symbol !== 'USDC' &&
           parseFloat(ticker.quoteVolume) > 0
         )
         .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
@@ -170,22 +170,82 @@ class BinanceService {
     } catch (error) {
       console.error('Error fetching top cryptos:', error.message);
       // Fallback a criptos populares si falla
-      return ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT', 'DOGEUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT'].slice(0, limit);
+      return ['BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC', 'XRPUSDC', 'DOGEUSDC', 'DOTUSDC', 'MATICUSDC', 'LINKUSDC'].slice(0, limit);
     }
   }
 
   /**
-   * Obtener lista de todos los pares USDT disponibles
+   * Obtener monedas con mejor momentum (ganadoras con volumen decente)
+   * @param {number} limit - Número de monedas a obtener (default: 20)
+   * @returns {Promise<Array<string>>} Array de símbolos con mayor momentum
+   */
+  async getTopMomentumCoins(limit = 20) {
+    try {
+      // Obtener todos los tickers de 24h
+      const response = await axios.get(`${BINANCE_API_BASE}/ticker/24hr`);
+
+      // Filtrar y rankear por momentum
+      const momentumCoins = response.data
+        .filter(ticker => {
+          const symbol = ticker.symbol;
+          const volume = parseFloat(ticker.quoteVolume);
+          const priceChange = parseFloat(ticker.priceChangePercent);
+          const high = parseFloat(ticker.highPrice);
+          const low = parseFloat(ticker.lowPrice);
+          const lastPrice = parseFloat(ticker.lastPrice);
+
+          // Criterios de filtrado:
+          // 1. Pares USDC válidos
+          if (!symbol.endsWith('USDC') || symbol === 'USDC') return false;
+
+          // 2. Volumen mínimo: $10M
+          if (volume < 10000000) return false;
+
+          // 3. Volatilidad mínima: rango alto/bajo > 3%
+          const volatility = ((high - low) / lastPrice) * 100;
+          if (volatility < 3) return false;
+
+          // 4. Cambio positivo en 24h (solo gainers)
+          if (priceChange <= 0) return false;
+
+          return true;
+        })
+        .map(ticker => ({
+          symbol: ticker.symbol,
+          priceChange: parseFloat(ticker.priceChangePercent),
+          volume: parseFloat(ticker.quoteVolume),
+          volatility: ((parseFloat(ticker.highPrice) - parseFloat(ticker.lowPrice)) / parseFloat(ticker.lastPrice)) * 100,
+          // Score combinado: 60% cambio de precio, 30% volatilidad, 10% volumen relativo
+          momentumScore:
+            (parseFloat(ticker.priceChangePercent) * 0.6) +
+            (((parseFloat(ticker.highPrice) - parseFloat(ticker.lowPrice)) / parseFloat(ticker.lastPrice)) * 100 * 0.3) +
+            (Math.log10(parseFloat(ticker.quoteVolume) / 1000000) * 0.1)
+        }))
+        .sort((a, b) => b.momentumScore - a.momentumScore)
+        .slice(0, limit)
+        .map(coin => coin.symbol);
+
+      console.log(`✅ Seleccionadas ${momentumCoins.length} monedas con mejor momentum`);
+      return momentumCoins;
+    } catch (error) {
+      console.error('Error fetching momentum coins:', error.message);
+      // Fallback a monedas medianamente volátiles
+      return ['SOLUSDC', 'AVAXUSDC', 'MATICUSDC', 'LINKUSDC', 'UNIUSDC', 'ATOMUSDC', 'NEARUSDC', 'FTMUSDC', 'SANDUSDC', 'MANAUSDC'].slice(0, limit);
+    }
+  }
+
+  /**
+   * Obtener lista de todos los pares USDC disponibles
    * @returns {Promise<Array>} Array de objetos con symbol y baseAsset
    */
-  async getAvailableUSDTPairs() {
+  async getAvailableUSDCPairs() {
     try {
       const allSymbols = await this.getExchangeInfo();
       return allSymbols
-        .filter(s => s.quoteAsset === 'USDT')
+        .filter(s => s.quoteAsset === 'USDC')
         .sort((a, b) => a.baseAsset.localeCompare(b.baseAsset));
     } catch (error) {
-      console.error('Error fetching USDT pairs:', error.message);
+      console.error('Error fetching USDC pairs:', error.message);
       return [];
     }
   }

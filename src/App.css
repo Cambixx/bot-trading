@@ -61,7 +61,7 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
 }
@@ -101,7 +101,7 @@
 
 .signals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-lg);
 }
 

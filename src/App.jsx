@@ -42,15 +42,15 @@ function App() {
         // Usar símbolos guardados
         setSymbols(JSON.parse(savedSymbols));
       } else {
-        // Cargar top 10 por volumen
+        // Cargar top 10 por momentum (ganadoras con volumen decente)
         try {
-          const topSymbols = await binanceService.getTopCryptosByVolume(10);
-          setSymbols(topSymbols);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(topSymbols));
+          const momentumCoins = await binanceService.getTopMomentumCoins(10);
+          setSymbols(momentumCoins);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(momentumCoins));
         } catch (error) {
-          console.error('Error loading top cryptos:', error);
+          console.error('Error loading momentum coins:', error);
           // Fallback a símbolos populares
-          const fallbackSymbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT'];
+          const fallbackSymbols = ['BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC', 'XRPUSDC'];
           setSymbols(fallbackSymbols);
         }
       }
