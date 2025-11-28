@@ -4,6 +4,7 @@ import './App.css';
 import SignalCard from './components/SignalCard';
 import CryptoCard from './components/CryptoCard';
 import CryptoSelector from './components/CryptoSelector';
+import SkeletonLoader, { SkeletonCryptoCard, SkeletonSignalCard } from './components/SkeletonLoader';
 import binanceService from './services/binanceService';
 import { performTechnicalAnalysis } from './services/technicalAnalysis';
 import { analyzeMultipleSymbols } from './services/signalGenerator';
@@ -171,13 +172,18 @@ function App() {
           const headers = { 'Content-Type': 'application/json' };
           if (notifySecret) headers['x-notify-secret'] = notifySecret;
 
-          await fetch('/.netlify/functions/scheduled-analysis', {
+          const response = await fetch('/.netlify/functions/scheduled-analysis', {
             method: 'POST',
             headers,
             body: JSON.stringify({ signals: generatedSignals })
           });
+          
+          if (!response.ok && response.status !== 404) {
+            console.warn(`Notification request failed: ${response.status}`);
+          }
         } catch (e) {
-          console.warn('Failed to notify server for Telegram:', e && e.message);
+          // Silently handle network errors (common in dev without netlify dev)
+          console.debug('Could not send notifications:', e && e.message);
         }
       })();
 
@@ -354,10 +360,11 @@ function App() {
           <button
             onClick={handleRefresh}
             className="btn-primary"
-            disabled={isRefreshing}
-            title="Actualizar datos"
+            disabled={isRefreshing || loading}
+            title={isRefreshing || loading ? 'Actualizando...' : 'Actualizar datos'}
+            style={{ opacity: isRefreshing || loading ? 0.6 : 1 }}
           >
-            <RefreshCw size={16} className={isRefreshing ? 'pulse' : ''} />
+            <RefreshCw size={16} className={isRefreshing || loading ? 'spin' : ''} />
           </button>
         </div>
 
@@ -389,16 +396,8 @@ function App() {
         </div>
       )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="loading-container">
-          <div className="loading-spinner" />
-          <p className="text-muted">Cargando datos del mercado...</p>
-        </div>
-      )}
-
-      {/* Main Content */}
-      {!loading && !error && (
+      {/* Main Content (Loading or Loaded) */}
+      {!error && (
         <>
           {/* Portfolio Section */}
           {showPortfolio && (
@@ -418,11 +417,15 @@ function App() {
           <section className="dashboard-section">
             <h2 className="mb-lg">Mercado</h2>
             <div className="dashboard-grid">
-              {Object.values(cryptoData)
-                .sort((a, b) => (b.opportunity || 0) - (a.opportunity || 0))
-                .map(crypto => (
-                  <CryptoCard key={crypto.symbol} crypto={crypto} />
-                ))}
+              {loading ? (
+                <SkeletonLoader type="crypto" count={symbols.length || 4} />
+              ) : (
+                Object.values(cryptoData)
+                  .sort((a, b) => (b.opportunity || 0) - (a.opportunity || 0))
+                  .map(crypto => (
+                    <CryptoCard key={crypto.symbol} crypto={crypto} />
+                  ))
+              )}
             </div>
           </section>
 
@@ -431,13 +434,21 @@ function App() {
             <div className="signals-header">
               <h2 className="signals-title">
                 Señales de Trading
-                {signals.length > 0 && (
+                {!loading && signals.length > 0 && (
                   <span className="signal-count">{signals.length}</span>
                 )}
               </h2>
             </div>
 
-            {signals.length === 0 ? (
+            {loading ? (
+              <div className="signals-grid">
+                {[1, 2, 3].map(i => (
+                  <div key={i}>
+                    <SkeletonSignalCard />
+                  </div>
+                ))}
+              </div>
+            ) : signals.length === 0 ? (
               <div className="no-signals glass-card">
                 <div className="no-signals-icon">📊</div>
                 <h3>No hay señales activas</h3>
@@ -459,12 +470,14 @@ function App() {
           </section>
 
           {/* Win Rate Stats */}
-          <section className="winrate-section mb-xl">
-            <WinRateStats
-              stats={getStats()}
-              recentSignals={history.filter(s => s.status === 'WIN' || s.status === 'LOSS')}
-            />
-          </section>
+          {!loading && (
+            <section className="winrate-section mb-xl">
+              <WinRateStats
+                stats={getStats()}
+                recentSignals={history.filter(s => s.status === 'WIN' || s.status === 'LOSS')}
+              />
+            </section>
+          )}
 
           {/* Footer Disclaimer */}
           <footer className="app-footer mt-xl">

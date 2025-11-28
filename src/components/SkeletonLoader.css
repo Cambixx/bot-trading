@@ -1,0 +1,145 @@
+/* Skeleton Loader Styles */
+.skeleton-container {
+  display: contents;
+}
+
+/* Base skeleton card */
+.skeleton-card {
+  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.skeleton-signal {
+  background: linear-gradient(90deg, #1e2749 0%, #2a3a6e 50%, #1e2749 100%);
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Skeleton header */
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 1rem;
+}
+
+/* Skeleton content */
+.skeleton-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Skeleton row */
+.skeleton-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Skeleton text blocks */
+.skeleton-text {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  height: 10px;
+  flex: 1;
+}
+
+.skeleton-text.skeleton-title {
+  height: 16px;
+  width: 60%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-text.skeleton-subtitle {
+  height: 12px;
+  width: 40%;
+}
+
+.skeleton-text.skeleton-large {
+  height: 24px;
+  width: 70%;
+}
+
+.skeleton-text.skeleton-medium {
+  height: 14px;
+  width: 50%;
+}
+
+.skeleton-text.skeleton-small {
+  height: 12px;
+  width: 30%;
+}
+
+/* Skeleton badge */
+.skeleton-badge {
+  width: 80px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+/* Skeleton button */
+.skeleton-button {
+  width: 100%;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+/* Skeleton footer */
+.skeleton-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .skeleton-card {
+    border-radius: 10px;
+  }
+  
+  .skeleton-header {
+    padding: 0.75rem;
+  }
+  
+  .skeleton-content {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .skeleton-footer {
+    padding: 0.75rem;
+  }
+}
+
+/* Pulsing animation alternative */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.skeleton-card.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
