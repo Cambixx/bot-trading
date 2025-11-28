@@ -3,17 +3,17 @@ import { performTechnicalAnalysis } from './technicalAnalysis.js';
 // Configurable weights and thresholds (tune these as needed)
 export const SIGNAL_CONFIG = {
     categoryWeights: {
-        momentum: 0.30,
-        trend: 0.25,
-        trendStrength: 0.15, // New: ADX
-        levels: 0.15,
-        volume: 0.10,
-        patterns: 0.05,
-        divergence: 0.00 // Removed for now to simplify
+        momentum: 0.40,      // Increased from 0.30
+        trend: 0.30,         // Increased from 0.25
+        trendStrength: 0.15, // Unchanged
+        levels: 0.10,        // Decreased from 0.15
+        volume: 0.05,        // Decreased from 0.10
+        patterns: 0.00,      // Removed (was 0.05)
+        divergence: 0.00     // Removed
     },
-    categoryThresholdForConvergence: 0.4, // Lowered from 0.6
-    requiredCategories: 1, // Lowered from 2
-    scoreToEmit: 0.45 // Lowered from 0.70
+    categoryThresholdForConvergence: 0.4,
+    requiredCategories: 1,
+    scoreToEmit: 0.50 // Increased from 0.45 to be more selective
 };
 
 function clamp(v, a = 0, b = 1) {
