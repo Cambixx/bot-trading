@@ -15,6 +15,14 @@ function SignalCard({ signal, onSimulateBuy }) {
         LOW: 'Baja Confianza'
     };
 
+    const formatPrice = (price) => {
+        if (!price) return '0.00';
+        if (price < 0.0001) return price.toFixed(8);
+        if (price < 0.01) return price.toFixed(6);
+        if (price < 1) return price.toFixed(4);
+        return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     return (
         <div className={`signal-card glass-card fade-in ${signal.confidence.toLowerCase()}-signal`}>
             {/* Header */}
@@ -32,7 +40,7 @@ function SignalCard({ signal, onSimulateBuy }) {
             <div className="signal-main">
                 <div className="signal-price">
                     <span className="price-label">Precio de Entrada</span>
-                    <span className="price-value">${signal.price.toLocaleString()}</span>
+                    <span className="price-value">${formatPrice(signal.price)}</span>
                 </div>
                 <div className="signal-score">
                     <div className="score-circle" style={{ '--score': signal.score }}>
@@ -64,21 +72,21 @@ function SignalCard({ signal, onSimulateBuy }) {
                     <Target className="level-icon" />
                     <div className="level-info">
                         <span className="level-label">Take Profit 1</span>
-                        <span className="level-value text-success">${signal.levels.takeProfit1.toFixed(2)}</span>
+                        <span className="level-value text-success">${formatPrice(signal.levels.takeProfit1)}</span>
                     </div>
                 </div>
                 <div className="level-item">
                     <Target className="level-icon" />
                     <div className="level-info">
                         <span className="level-label">Take Profit 2</span>
-                        <span className="level-value text-success">${signal.levels.takeProfit2.toFixed(2)}</span>
+                        <span className="level-value text-success">${formatPrice(signal.levels.takeProfit2)}</span>
                     </div>
                 </div>
                 <div className="level-item">
                     <Shield className="level-icon text-danger" />
                     <div className="level-info">
                         <span className="level-label">Stop Loss</span>
-                        <span className="level-value text-danger">${signal.levels.stopLoss.toFixed(2)}</span>
+                        <span className="level-value text-danger">${formatPrice(signal.levels.stopLoss)}</span>
                     </div>
                 </div>
             </div>

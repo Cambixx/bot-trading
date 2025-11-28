@@ -150,9 +150,18 @@
   color: var(--color-danger-light);
 }
 
+/* Responsive Design - Laptop */
+@media (max-width: 1200px) {
+  .signals-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* Responsive Design - Tablet */
 @media (max-width: 1024px) {
-  .dashboard-grid {
+
+  .dashboard-grid,
+  .signals-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }

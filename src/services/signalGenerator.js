@@ -218,7 +218,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null) {
         timestamp: new Date().toISOString(),
         price: entryPrice,
         score: scoreOut,
-        confidence: scoreOut >= 80 ? 'HIGH' : scoreOut >= 70 ? 'MEDIUM' : 'LOW',
+        confidence: scoreOut >= 80 ? 'HIGH' : scoreOut >= 60 ? 'MEDIUM' : 'LOW',
         categoriesAligned,
         subscores: Object.fromEntries(Object.entries(subscores).map(([k, v]) => [k, Math.round(v * 100)])),
         reasons,
