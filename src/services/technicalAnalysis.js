@@ -30,7 +30,7 @@ export function calculateSMA(data, period) {
  */
 export function calculateEMA(data, period) {
     if (!data || data.length === 0) return [];
-    
+
     const ema = [];
     const multiplier = 2 / (period + 1);
 
@@ -799,139 +799,230 @@ export function calculatePivotPoints(candles) {
 }
 
 /**
- * Calcular VWAP (Volume Weighted Average Price)
+ * Calcular Pivot Points de Fibonacci
  * @param {Array<Object>} candles - Datos de velas
- * @returns {Array<number>} VWAP values
+ * @returns {Object} { p, r1, r2, r3, s1, s2, s3 }
  */
-export function calculateVWAP(candles) {
-    const vwap = [];
-    let cumTPV = 0; // Cumulative Typical Price * Volume
-    let cumVol = 0; // Cumulative Volume
+export function calculateFibonacciPivots(candles) {
+    if (candles.length < 2) return null;
 
-    // En trading real, VWAP se reinicia cada día.
-    // Aquí asumimos que candles es el dataset relevante (ej: últimas 24h o sesión)
-    // O calculamos un "Rolling VWAP" sobre el periodo dado.
+    const prev = candles[candles.length - 2];
+    const high = prev.high;
+    const low = prev.low;
+    const close = prev.close;
 
-    for (let i = 0; i < candles.length; i++) {
-        const typicalPrice = (candles[i].high + candles[i].low + candles[i].close) / 3;
-        const volume = candles[i].volume;
+    const p = (high + low + close) / 3;
+    const range = high - low;
 
-        cumTPV += typicalPrice * volume;
-        cumVol += volume;
+    return {
+        p,
+        r1: p + (range * 0.382),
+        r2: p + (range * 0.618),
+        r3: p + range,
+        s1: p - (range * 0.382),
+        s2: p - (range * 0.618),
+        s3: p - range
+    };
+}
 
-        vwap.push(cumTPV / cumVol);
+/**
+ * Detectar Order Blocks (Zonas de oferta/demanda institucional)
+ * @param {Array<Object>} candles - Datos de velas
+ * @returns {Object} { bullish: [], bearish: [] } - Array de zonas {top, bottom, type}
+ */
+export function detectOrderBlocks(candles, lookback = 50) {
+    if (candles.length < lookback) return { bullish: [], bearish: [] };
+
+    const bullishOBs = [];
+    const bearishOBs = [];
+    const recent = candles.slice(-lookback);
+
+    // Simplificación de Order Block:
+    // Bullish OB: Última vela bajista antes de un movimiento fuerte alcista (BOS)
+    // Bearish OB: Última vela alcista antes de un movimiento fuerte bajista
+
+    for (let i = 2; i < recent.length - 3; i++) {
+        const candle = recent[i];
+        const next1 = recent[i + 1];
+        const next2 = recent[i + 2];
+
+        // Bullish OB Detection
+        if (candle.close < candle.open) { // Vela bajista
+            // Verificar si hubo un movimiento fuerte después
+            const moveUp = next1.close > next1.open && next2.close > next2.open;
+            const breakStructure = next2.close > candle.high; // Rompe el alto de la vela OB
+
+            if (moveUp && breakStructure) {
+                // Verificar Imbalance (FVG) opcionalmente, pero por ahora solo estructura
+                bullishOBs.push({
+                    top: candle.high,
+                    bottom: candle.low,
+                    type: 'bullish',
+                    index: i
+                });
+            }
+        }
+
+        // Bearish OB Detection
+        if (candle.close > candle.open) { // Vela alcista
+            const moveDown = next1.close < next1.open && next2.close < next2.open;
+            const breakStructure = next2.close < candle.low; // Rompe el bajo
+
+            if (moveDown && breakStructure) {
+                bearishOBs.push({
+                    top: candle.high,
+                    bottom: candle.low,
+                    type: 'bearish',
+                    index: i
+                });
+            }
+        }
     }
 
-    return vwap;
+    // Filtrar solo los OBs que no han sido mitigados (precio no ha vuelto a cruzarlos completamente)
+    // Simplificación: devolver los últimos 2 de cada tipo
+    return {
+        bullish: bullishOBs.slice(-2),
+        bearish: bearishOBs.slice(-2)
+    };
+}
+
+/**
+ * Detectar Régimen de Mercado
+ * @param {Array<Object>} candles - Velas (idealmente diarias o 4h)
+ * @returns {string} 'TRENDING_BULL' | 'TRENDING_BEAR' | 'RANGING' | 'VOLATILE'
+ */
+export function detectMarketRegime(candles) {
+    if (!candles || candles.length < 50) return 'UNKNOWN';
+
+    const closes = candles.map(c => c.close);
+    const ema20 = calculateEMA(closes, 20);
+    const ema50 = calculateEMA(closes, 50);
+    const adxData = calculateADX(candles, 14);
+    const adx = adxData.adx[adxData.adx.length - 1];
+    const bb = calculateBollingerBands(closes, 20, 2);
+
+    const lastPrice = closes[closes.length - 1];
+    const lastEma20 = ema20[ema20.length - 1];
+    const lastEma50 = ema50[ema50.length - 1];
+
+    // ADX < 20-25 suele indicar rango
+    if (adx < 20) return 'RANGING';
+
+    // Bollinger Band Width para volatilidad
+    const bbWidth = (bb.upper[bb.upper.length - 1] - bb.lower[bb.lower.length - 1]) / lastPrice;
+    if (bbWidth > 0.15) return 'VOLATILE'; // Bandas muy abiertas
+
+    // Tendencia
+    if (adx > 25) {
+        if (lastEma20 > lastEma50 && lastPrice > lastEma20) return 'TRENDING_BULL';
+        if (lastEma20 < lastEma50 && lastPrice < lastEma20) return 'TRENDING_BEAR';
+    }
+
+    return 'RANGING'; // Default
 }
 
 /**
  * Realizar análisis técnico completo
  * @param {Array<Object>} candles - Datos de velas
- * @returns {Object} Análisis técnico completo
+ * @returns {Object} Resultados del análisis
  */
 export function performTechnicalAnalysis(candles) {
-    const closes = candles.map(c => c.close);
+    if (!candles || candles.length === 0) return null;
 
-    const rsi = calculateRSI(closes, 14);
+    const closes = candles.map(c => c.close);
+    const volumes = candles.map(c => c.volume);
+
+    // Indicadores básicos
+    const rsi = calculateRSI(closes);
     const macd = calculateMACD(closes);
-    const bb = calculateBollingerBands(closes, 20, 2);
     const ema20 = calculateEMA(closes, 20);
     const ema50 = calculateEMA(closes, 50);
     const sma200 = calculateSMA(closes, 200);
-    const atr = calculateATR(candles, 14);
-    const buyerPressure = calculateBuyerPressure(candles);
-    const stochastic = calculateStochastic(candles, 14, 3, 3);
-    const obv = calculateOBV(candles);
-    const { support, resistance } = findSupportResistance(candles, 20);
-    const adxData = calculateADX(candles, 14);
+    const bollingerBands = calculateBollingerBands(closes);
+    const atr = calculateATR(candles);
+    const adx = calculateADX(candles);
+    const stochastic = calculateStochastic(candles);
+    const vwap = calculateSMA(closes, 20); // Aproximación simple si no hay datos intradía reales
+
+    // Niveles
+    const supportResistance = findSupportResistance(candles);
     const pivotPoints = calculatePivotPoints(candles);
-    const vwap = calculateVWAP(candles);
+    const fibPivotPoints = calculateFibonacciPivots(candles);
+    const orderBlocks = detectOrderBlocks(candles);
 
-    // Detectar divergencias
-    const rsiDivergence = detectDivergence(closes, rsi, 5);
-    const macdDivergence = detectDivergence(closes, macd.histogram, 5);
+    // Patrones
+    const lastCandle = candles[candles.length - 1];
+    const prevCandle = candles[candles.length - 2];
+    const last3Candles = candles.slice(-3);
 
-    // Detectar acumulación
-    const accumulation = detectAccumulation(candles, 5);
-
-    // Obtener valores actuales (último índice con datos válidos)
-    const lastIndex = closes.length - 1;
-    const currentCandle = candles[lastIndex];
-    const prevCandle = candles[lastIndex - 1];
-
-    // Detectar patrones
     const patterns = {
-        hammer: isHammer(currentCandle),
-        bullishEngulfing: isBullishEngulfing(prevCandle, currentCandle),
-        doji: isDoji(currentCandle),
-        threeWhiteSoldiers: isThreeWhiteSoldiers(candles),
-        morningStar: isMorningStar(candles),
-        eveningStar: isEveningStar(candles),
-        doubleBottom: isDoubleBottom(candles, 1),
-        doubleTop: isDoubleTop(candles, 1)
+        hammer: isHammer(lastCandle),
+        bullishEngulfing: isBullishEngulfing(prevCandle, lastCandle),
+        doji: isDoji(lastCandle),
+        threeWhiteSoldiers: isThreeWhiteSoldiers(last3Candles),
+        morningStar: isMorningStar(last3Candles),
+        eveningStar: isEveningStar(last3Candles),
+        doubleBottom: isDoubleBottom(candles),
+        doubleTop: isDoubleTop(candles)
     };
+
+    // Volumen y Presión
+    const volumeSpike = hasVolumeSpike(candles);
+    const buyerPressure = calculateBuyerPressure(candles);
+    const accumulation = detectAccumulation(candles);
+
+    // Divergencias
+    const rsiDivergence = detectDivergence(closes, rsi, 10);
+    const macdDivergence = detectDivergence(closes, macd.macd, 10);
+
+    // Últimos valores
+    const lastIndex = closes.length - 1;
 
     return {
         price: closes[lastIndex],
         indicators: {
             rsi: rsi[lastIndex],
             macd: {
-                value: macd.macd[lastIndex],
+                line: macd.macd[lastIndex],
                 signal: macd.signal[lastIndex],
                 histogram: macd.histogram[lastIndex]
-            },
-            stochastic: {
-                k: stochastic.stochK[lastIndex],
-                d: stochastic.stochD[lastIndex],
-                histogram: stochastic.stochHistogram[lastIndex]
-            },
-            bollingerBands: {
-                upper: bb.upper[lastIndex],
-                middle: bb.middle[lastIndex],
-                lower: bb.lower[lastIndex]
             },
             ema20: ema20[lastIndex],
             ema50: ema50[lastIndex],
             sma200: sma200[lastIndex],
-            sma200: sma200[lastIndex],
+            bollingerBands: {
+                upper: bollingerBands.upper[lastIndex],
+                middle: bollingerBands.middle[lastIndex],
+                lower: bollingerBands.lower[lastIndex]
+            },
             atr: atr[lastIndex],
-            adx: adxData.adx[lastIndex],
-            pdi: adxData.pdi[lastIndex],
-            mdi: adxData.mdi[lastIndex],
+            adx: adx.adx[lastIndex],
+            stochastic: {
+                k: stochastic.stochK[lastIndex],
+                d: stochastic.stochD[lastIndex]
+            },
             vwap: vwap[lastIndex]
         },
         levels: {
-            support,
-            resistance,
-            pivot: pivotPoints
+            support: supportResistance.support,
+            resistance: supportResistance.resistance,
+            pivot: pivotPoints,
+            fibPivot: fibPivotPoints,
+            orderBlocks: orderBlocks
         },
         patterns,
         volume: {
-            current: currentCandle.volume,
-            average: calculateAverageVolume(candles, 20),
-            spike: hasVolumeSpike(candles, 1.5)
+            spike: volumeSpike,
+            buyerPressure
         },
-        buyerPressure,
         divergence: {
             rsi: rsiDivergence,
             macd: macdDivergence
         },
         accumulation,
-        obv: obv[lastIndex],
-        // Datos completos para gráficos
-        fullData: {
-            rsi,
-            macd,
-            stochastic,
-            bollingerBands: bb,
-            ema20,
-            ema50,
-            sma200,
-            atr,
-            obv,
-            adx: adxData,
-            vwap
-        }
+        regime: detectMarketRegime(candles) // Self-detected regime for single timeframe
     };
 }
+
+

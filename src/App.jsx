@@ -118,18 +118,30 @@ function App() {
       );
       const priceResults = await Promise.all(pricePromises);
 
-      // 2. Obtener datos de velas para análisis (1h)
+      // 2. Obtener datos de velas para análisis (1h) - Timeframe principal
       const candleData = await binanceService.getMultipleSymbolsData(symbols, '1h', 100);
 
-      // 3. Obtener datos de 4h para confirmación de tendencia
+      // 3. Obtener datos multi-timeframe para análisis profundo
+      // 4h: Tendencia intermedia
       const candleData4h = await binanceService.getMultipleSymbolsData(symbols, '4h', 50);
+      // 1d: Tendencia macro y niveles clave
+      const candleData1d = await binanceService.getMultipleSymbolsData(symbols, '1d', 50);
+      // 15m: Gatillo de entrada (momentum)
+      const candleData15m = await binanceService.getMultipleSymbolsData(symbols, '15m', 50);
 
       // 4. Realizar análisis técnico y convertir para multi-timeframe
       const multiTimeframeAnalysis = {};
       for (const symbol of symbols) {
+        multiTimeframeAnalysis[symbol] = {};
+
         if (candleData4h[symbol]?.data) {
-          const analysis4h = performTechnicalAnalysis(candleData4h[symbol].data);
-          multiTimeframeAnalysis[symbol] = { '4h': analysis4h };
+          multiTimeframeAnalysis[symbol]['4h'] = performTechnicalAnalysis(candleData4h[symbol].data);
+        }
+        if (candleData1d[symbol]?.data) {
+          multiTimeframeAnalysis[symbol]['1d'] = performTechnicalAnalysis(candleData1d[symbol].data);
+        }
+        if (candleData15m[symbol]?.data) {
+          multiTimeframeAnalysis[symbol]['15m'] = performTechnicalAnalysis(candleData15m[symbol].data);
         }
       }
 

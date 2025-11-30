@@ -67,24 +67,71 @@ function percent(v) {
  * Generar señal de trading basada en análisis técnico
  * Implementación basada en subscores por categoría para evitar double-counting
  */
-export function generateSignal(analysis, symbol, multiTimeframeData = null, mode = 'BALANCED') {
+/**
+ * Generar señal de trading basada en análisis técnico avanzado (Triple Screen + Regímenes)
+ */
+export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode = 'BALANCED') {
     const config = getSignalConfig(mode);
-    const { indicators = {}, levels = {}, patterns = {}, volume = {}, price, buyerPressure } = analysis;
+    const { indicators = {}, levels = {}, patterns = {}, volume = {}, price, buyerPressure, regime } = analysis;
 
     const reasons = [];
     const warnings = [];
 
+    // === 1. Market Regime Detection (Screen 1: Daily/4h) ===
+    // Prioritize Daily regime, fallback to 4h, then 1h (self)
+    const dailyRegime = multiTimeframeData['1d']?.regime || 'UNKNOWN';
+    const h4Regime = multiTimeframeData['4h']?.regime || 'UNKNOWN';
+    const currentRegime = dailyRegime !== 'UNKNOWN' ? dailyRegime : (h4Regime !== 'UNKNOWN' ? h4Regime : regime);
+
+    // Adjust weights based on regime
+    let activeWeights = { ...config.weights };
+    if (currentRegime === 'RANGING') {
+        activeWeights.momentum = 0.25; // Oscillators matter more in ranges
+        activeWeights.levels = 0.30;   // Support/Resistance key in ranges
+        activeWeights.trend = 0.05;    // Trend matters less
+    } else if (currentRegime === 'TRENDING_BULL') {
+        activeWeights.trend = 0.35;    // Trend is king
+        activeWeights.momentum = 0.10; // RSI can stay overbought
+        activeWeights.levels = 0.15;   // Pullbacks to support
+    }
+
+    // === 2. Triple Screen Logic ===
+
+    // Screen 1: Long Term Trend (Daily/4h)
+    let longTermTrendScore = 0;
+    const dailyEMA20 = multiTimeframeData['1d']?.indicators?.ema20;
+    const dailyEMA50 = multiTimeframeData['1d']?.indicators?.ema50;
+
+    if (dailyEMA20 && dailyEMA50) {
+        if (dailyEMA20 > dailyEMA50) longTermTrendScore = 1; // Bullish context
+        else longTermTrendScore = -1; // Bearish context
+    } else {
+        // Fallback to 4h
+        const h4EMA20 = multiTimeframeData['4h']?.indicators?.ema20;
+        const h4EMA50 = multiTimeframeData['4h']?.indicators?.ema50;
+        if (h4EMA20 && h4EMA50 && h4EMA20 > h4EMA50) longTermTrendScore = 0.8;
+    }
+
+    // Filter: In Conservative mode, DO NOT trade against Daily Trend
+    if (mode === 'CONSERVATIVE' && longTermTrendScore === -1) {
+        return null;
+    }
+
+    // Screen 2: Intermediate Setup (1h - Current Timeframe)
+    // ... (Existing logic refined) ...
+
     // === Momentum (RSI, MACD, Stochastic) ===
     let rsiScore = 0;
     if (indicators.rsi != null) {
-        // Relajado: allows signals even with higher RSI
-        // RSI < 35 = strong (1), 35-55 = moderate opportunity, >55 = no signal
-        if (indicators.rsi < 35) {
-            rsiScore = 1;
-        } else if (indicators.rsi < 55) {
-            rsiScore = clamp((55 - indicators.rsi) / 20, 0, 1);  // Moderate scoring
+        if (currentRegime === 'TRENDING_BULL') {
+            // In strong uptrend, RSI 40-60 is a buy (pullback), >70 is fine
+            if (indicators.rsi < 60 && indicators.rsi > 40) rsiScore = 1;
+            else if (indicators.rsi < 40) rsiScore = 0.8; // Deep pullback
+        } else {
+            // In range, standard RSI rules apply
+            if (indicators.rsi < 35) rsiScore = 1;
+            else if (indicators.rsi < 55) rsiScore = clamp((55 - indicators.rsi) / 20, 0, 1);
         }
-        // RSI >= 55 = rsiScore stays 0 (overbought)
     }
 
     const macdScore = (indicators.macd && indicators.macd.histogram != null) ? (indicators.macd.histogram > 0 ? 1 : 0) : 0;
@@ -92,226 +139,147 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null, mode
     let stochScore = 0;
     if (indicators.stochastic && indicators.stochastic.k != null) {
         if (indicators.stochastic.k < 20) stochScore = 1;
-        else if (indicators.stochastic.k < 40) stochScore = clamp((40 - indicators.stochastic.k) / 20, 0, 1); // Relaxed
+        else if (indicators.stochastic.k < 40) stochScore = clamp((40 - indicators.stochastic.k) / 20, 0, 1);
     }
 
     const momentumScore = clamp(0.4 * rsiScore + 0.4 * macdScore + 0.2 * stochScore, 0, 1);
-    if (momentumScore > 0) reasons.push({ text: 'Momentum positivo', weight: percent(momentumScore) });
+    if (momentumScore > 0.6) reasons.push({ text: 'Momentum favorable', weight: percent(momentumScore) });
 
     // === Trend (EMA cross, SMA200) ===
     let emaScore = 0;
     if (indicators.ema20 != null && indicators.ema50 != null) {
         if (indicators.ema20 > indicators.ema50) {
-            emaScore = 0.7; // Base score for uptrend
-            // Bonus for dip in uptrend (price < ema20) - Align with CryptoCard
-            if (price < indicators.ema20) {
-                emaScore = 1.0;
-            }
+            emaScore = 0.7;
+            if (price < indicators.ema20) emaScore = 1.0; // Dip buy
         } else if (indicators.ema50 != null && indicators.ema20 > indicators.ema50 * 0.99) {
-            // Near crossover, give some credit
             emaScore = 0.3;
         }
     }
-    const smaScore = (indicators.sma200 != null && price != null) ? (price > indicators.sma200 ? 1 : price > indicators.sma200 * 0.98 ? 0.3 : 0) : 0;
+    const smaScore = (indicators.sma200 != null && price != null) ? (price > indicators.sma200 ? 1 : 0) : 0;
 
     // VWAP Confirmation
     let vwapScore = 0;
-    if (indicators.vwap != null) {
-        if (price > indicators.vwap) {
-            vwapScore = 1;
-            reasons.push({ text: 'Precio sobre VWAP', weight: 10 });
-        }
+    if (indicators.vwap != null && price > indicators.vwap) {
+        vwapScore = 1;
+        reasons.push({ text: 'Precio sobre VWAP', weight: 10 });
     }
 
     let trendScore = clamp(0.5 * emaScore + 0.35 * smaScore + 0.15 * vwapScore, 0, 1);
-    if (trendScore > 0) reasons.push({ text: 'Tendencia favorable', weight: percent(trendScore) });
+    if (trendScore > 0.6) reasons.push({ text: 'Tendencia alcista (1h)', weight: percent(trendScore) });
 
-    // === Trend Strength (ADX) ===
-    let adxScore = 0;
-    if (indicators.adx != null) {
-        if (indicators.adx > 25) {
-            adxScore = 1; // Strong trend
-            reasons.push({ text: `Tendencia fuerte (ADX ${indicators.adx.toFixed(1)})`, weight: 20 });
-        } else if (indicators.adx > 20) {
-            adxScore = 0.5;
-        }
-    }
-    const trendStrengthScore = adxScore;
-
-    // === Levels (support, bollinger lower) ===
+    // === Levels & Order Blocks ===
     let supportScore = 0;
+    // Check standard support
     if (levels.support != null && price != null) {
-        const distanceToSupport = ((price - levels.support) / price) * 100; // percent
-        if (distanceToSupport <= 2) supportScore = 1;
-        else if (distanceToSupport <= 5) supportScore = 0.6;
-        else if (distanceToSupport <= 10) supportScore = 0.3;  // Near support = some score
-    } else if (price != null) {
-        // Fallback: if no support level calculated, assume price in middle of recent range is acceptable
-        supportScore = 0.4;  // Default score when no levels data
+        const dist = ((price - levels.support) / price) * 100;
+        if (dist <= 2) supportScore = 0.8;
     }
 
-    let bollScore = 0;
-    if (indicators.bollingerBands && indicators.bollingerBands.lower != null) {
-        const distanceToLower = ((price - indicators.bollingerBands.lower) / price) * 100;
-        if (price <= indicators.bollingerBands.lower) bollScore = 1;
-        else if (distanceToLower < 2) bollScore = 0.7;
-        else if (distanceToLower < 5) bollScore = 0.4;
-    } else if (!indicators.bollingerBands) {
-        // Fallback when bollinger bands missing
-        bollScore = 0.3;
-    }
-
-    // Pivot Points Support
-    let pivotScore = 0;
-    if (levels.pivot) {
-        // Check proximity to S1, S2 or Pivot (if bullish reversal)
-        const checkLevel = (level) => {
-            const dist = Math.abs((price - level) / price) * 100;
-            return dist < 1.5;
-        };
-        if (checkLevel(levels.pivot.s1) || checkLevel(levels.pivot.s2) || (price > levels.pivot.p && checkLevel(levels.pivot.p))) {
-            pivotScore = 0.8;
-            reasons.push({ text: 'Cerca de nivel Pivot/Soporte', weight: 15 });
+    // Check Order Blocks (Smart Money)
+    if (levels.orderBlocks && levels.orderBlocks.bullish.length > 0) {
+        const nearestOB = levels.orderBlocks.bullish[levels.orderBlocks.bullish.length - 1];
+        // Check if price is inside or near the OB
+        if (price >= nearestOB.bottom && price <= nearestOB.top * 1.01) {
+            supportScore = 1; // Strongest support signal
+            reasons.push({ text: 'Rebote en Order Block (Institucional)', weight: 35 });
         }
     }
 
-    const levelsScore = clamp(Math.max(supportScore, bollScore, pivotScore), 0, 1);
-    if (levelsScore > 0) reasons.push({ text: 'Niveles favorables', weight: percent(levelsScore) });
+    // Check Fib Pivots
+    if (levels.fibPivot) {
+        const checkFib = (level) => Math.abs((price - level) / price) * 100 < 1.0;
+        if (checkFib(levels.fibPivot.s1) || checkFib(levels.fibPivot.s2) || checkFib(levels.fibPivot.p)) {
+            supportScore = Math.max(supportScore, 0.9);
+            reasons.push({ text: 'Soporte Fibonacci', weight: 20 });
+        }
+    }
 
-    // === Volume (spike, buyer pressure) ===
+    const levelsScore = supportScore;
+
+    // === Volume ===
     const spikeScore = volume.spike ? 1 : 0;
     let buyerScore = 0;
-    if (buyerPressure && typeof buyerPressure.current === 'number') {
-        if (buyerPressure.current > 60) buyerScore = 1;
-        else if (buyerPressure.current > 50) buyerScore = (buyerPressure.current - 50) / 10; // 0..1
-    }
-    const volumeScore = clamp(0.7 * spikeScore + 0.3 * buyerScore, 0, 1);
-    if (volumeScore > 0) reasons.push({ text: 'Señal de volumen', weight: percent(volumeScore) });
+    if (buyerPressure && buyerPressure.current > 55) buyerScore = (buyerPressure.current - 50) / 10;
+    const volumeScore = clamp(0.6 * spikeScore + 0.4 * buyerScore, 0, 1);
+    if (volumeScore > 0.7) reasons.push({ text: 'Volumen comprador fuerte', weight: percent(volumeScore) });
 
     // === Patterns ===
-    const positivePatterns = ['bullishEngulfing', 'threeWhiteSoldiers', 'morningStar', 'doubleBottom', 'hammer', 'doji'];
+    const positivePatterns = ['bullishEngulfing', 'threeWhiteSoldiers', 'morningStar', 'doubleBottom', 'hammer'];
     let patternCount = 0;
     positivePatterns.forEach(p => { if (patterns[p]) patternCount += 1; });
-    const patternScore = clamp(patternCount / 3, 0, 1); // 3 patterns -> 1.0
-    if (patternScore > 0) reasons.push({ text: 'Patrones alcistas', weight: percent(patternScore) });
+    const patternScore = clamp(patternCount / 2, 0, 1);
+    if (patternScore > 0) reasons.push({ text: 'Patrón de velas alcista', weight: percent(patternScore) });
 
-    // === Divergence ===
-    let divScore = 0;
-    if (analysis.divergence) {
-        if (analysis.divergence.rsi && analysis.divergence.rsi.bullish) divScore = Math.max(divScore, analysis.divergence.rsi.strength || 0);
-        if (analysis.divergence.macd && analysis.divergence.macd.bullish) divScore = Math.max(divScore, (analysis.divergence.macd.strength || 0) * 0.8);
-    }
-    const divergenceScore = clamp(divScore, 0, 1);
-    if (divergenceScore > 0) reasons.push({ text: 'Divergencia alcista', weight: percent(divergenceScore) });
+    // === Screen 3: Trigger (15m Momentum) ===
+    let triggerScore = 0;
+    if (multiTimeframeData['15m']) {
+        const tf15 = multiTimeframeData['15m'];
+        // Check for 15m RSI turning up or MACD crossover
+        if (tf15.indicators.rsi > 30 && tf15.indicators.rsi < 70) triggerScore += 0.5;
+        if (tf15.indicators.macd.histogram > 0) triggerScore += 0.5;
 
-    // === Accumulation (Spot Gem) ===
-    let accumulationScore = 0;
-    if (analysis.accumulation && analysis.accumulation.isAccumulating) {
-        accumulationScore = 1;
-        reasons.push({ text: 'Acumulación detectada (Smart Money)', weight: 25 });
+        if (triggerScore > 0.8) reasons.push({ text: 'Gatillo 15m activado', weight: 15 });
+    } else {
+        triggerScore = 0.5; // Neutral if no data
     }
 
-    // === Dip Buying (Pullback to EMA50 in Uptrend) ===
-    // This boosts the Trend score
-    if (indicators.sma200 && price > indicators.sma200) {
-        // We are in an uptrend
-        if (indicators.ema50) {
-            const distToEma50 = ((price - indicators.ema50) / price) * 100;
-            // If price is within 1.5% of EMA50, it's a prime dip buy area
-            if (Math.abs(distToEma50) < 1.5) {
-                trendScore = clamp(trendScore + 0.3, 0, 1); // Boost trend score
-                reasons.push({ text: 'Rebote en EMA50 (Dip Buy)', weight: 30 });
-            }
-        }
-    }
-
-    // === Spot Safety Filter ===
-    // Avoid downtrends in Conservative/Balanced modes unless there's massive volume or accumulation
-    if (mode !== 'RISKY' && indicators.sma200 && price < indicators.sma200) {
-        const isReversal = patternScore > 0.7 || volumeScore > 0.8 || accumulationScore > 0.8;
-        if (!isReversal) {
-            return null; // Filter out downtrend signals for spot safety
-        }
-        warnings.push('Tendencia bajista (Precio < SMA200)');
-    }
-
-    // Combine categories with weights
-    const weights = config.weights;
+    // === Final Calculation ===
     const subscores = {
         momentum: momentumScore,
         trend: trendScore,
-        trendStrength: trendStrengthScore,
         levels: levelsScore,
         volume: volumeScore,
-        patterns: patternScore,
-        divergence: divergenceScore,
-        accumulation: accumulationScore
+        patterns: patternScore
     };
 
     let finalNormalized = 0;
     for (const k of Object.keys(subscores)) {
-        finalNormalized += (subscores[k] || 0) * (weights[k] || 0);
+        finalNormalized += (subscores[k] || 0) * (activeWeights[k] || 0);
     }
+
+    // Boost for Triple Screen Alignment
+    if (longTermTrendScore > 0 && triggerScore > 0.5) {
+        finalNormalized += 0.1; // Bonus
+        reasons.push({ text: 'Alineación Multi-Timeframe (Triple Screen)', weight: 25 });
+    }
+
+    // Regime specific adjustments
+    if (currentRegime === 'TRENDING_BULL' && trendScore > 0.7) {
+        finalNormalized += 0.1; // Trend following bonus
+    }
+
     finalNormalized = clamp(finalNormalized, 0, 1);
 
-    // Count aligned categories
-    const categoriesAligned = Object.values(subscores).filter(s => s >= config.categoryThresholdForConvergence).length;
+    // Threshold check
+    if (finalNormalized < config.scoreToEmit) return null;
 
-    // Multi-timeframe confirmation (lightweight)
-    if (multiTimeframeData && multiTimeframeData['4h']) {
-        const tf4h = multiTimeframeData['4h'];
-        if (tf4h.indicators && tf4h.indicators.ema20 != null && tf4h.indicators.ema50 != null && tf4h.indicators.ema20 > tf4h.indicators.ema50) {
-            // small boost for agreement on higher timeframe
-            finalNormalized = clamp(finalNormalized + 0.08, 0, 1);
-            reasons.push({ text: 'Confirmación 4h', weight: 8 });
-        }
-    }
-
-    // Trend-based fallback: if trend is strong (>0.5) and price is above SMA200, lower the emit threshold
-    const isTrendStrong = trendScore > 0.5 && smaScore > 0.5;
-    const effectiveThreshold = isTrendStrong ? Math.max(0.25, config.scoreToEmit - 0.08) : config.scoreToEmit;
-
-    // Fallback: if indicators are missing/NaN, use levels-based signal (price near support is good opportunity)
-    let fallbackSignal = false;
-    if (levelsScore > 0.7 && (momentumScore === 0 || trendScore === 0)) {
-        fallbackSignal = true;  // Price at support level is enough, even without indicators
-        finalNormalized = clamp(levelsScore * 0.5, 0, 1);  // Conservative score from levels
-        if (!reasons.some(r => r.text && r.text.includes('Niveles'))) {
-            reasons.push({ text: 'Precio en nivel clave de soporte', weight: 40 });
-        }
-    }
-
-    // Emit condition
-    if (!fallbackSignal && (categoriesAligned < config.requiredCategories || finalNormalized < effectiveThreshold)) {
-        return null;
-    }
-
-    // Levels: entry, stopLoss, takeProfit (use ATR when available)
+    // === Stop Loss & Take Profit Strategy ===
     const entryPrice = price;
     let stopLoss, takeProfit1, takeProfit2;
 
-    if (indicators.atr != null && indicators.atr > 0) {
-        stopLoss = price - indicators.atr * 1.5;
-        // ensure stopLoss is not far below support if support exists
-        if (levels.support && stopLoss < levels.support * 0.98) stopLoss = Math.max(stopLoss, levels.support * 0.98);
-        takeProfit1 = price + indicators.atr * 2.5;
-        takeProfit2 = price + indicators.atr * 5;
+    // ATR Based
+    const atr = indicators.atr || (price * 0.02);
+
+    // Smart Stop Loss: Below nearest Order Block or Support
+    if (levels.orderBlocks && levels.orderBlocks.bullish.length > 0) {
+        const nearestOB = levels.orderBlocks.bullish[levels.orderBlocks.bullish.length - 1];
+        stopLoss = Math.min(nearestOB.bottom * 0.995, price - atr);
+    } else if (levels.support) {
+        stopLoss = Math.min(levels.support * 0.99, price - atr);
     } else {
-        stopLoss = levels.support ? Math.max(levels.support * 0.98, price * 0.98) : price * 0.98;
-        takeProfit1 = price * 1.02;
-        takeProfit2 = price * 1.05;
+        stopLoss = price - (atr * 1.5);
     }
 
-    // Adjust TP/SL with Pivot Points if available
-    if (levels.pivot) {
-        if (levels.pivot.r1 > price && (!takeProfit1 || levels.pivot.r1 < takeProfit1)) takeProfit1 = levels.pivot.r1;
-        if (levels.pivot.r2 > price && (!takeProfit2 || levels.pivot.r2 < takeProfit2)) takeProfit2 = levels.pivot.r2;
-        // If S1 is below price, it can be a stop loss reference
-        if (levels.pivot.s1 < price && levels.pivot.s1 > stopLoss) stopLoss = levels.pivot.s1 * 0.99;
+    // Take Profit: Fib levels or ATR multiples
+    if (levels.fibPivot && levels.fibPivot.r1 > price) {
+        takeProfit1 = levels.fibPivot.r1;
+        takeProfit2 = levels.fibPivot.r2;
+    } else {
+        takeProfit1 = price + (atr * 2);
+        takeProfit2 = price + (atr * 4);
     }
 
-    const riskRewardRatio = (takeProfit1 - entryPrice) / Math.max(0.0000001, (entryPrice - stopLoss));
-
+    const riskRewardRatio = (takeProfit1 - entryPrice) / (entryPrice - stopLoss);
     const scoreOut = Math.round(finalNormalized * 100);
 
     return {
@@ -321,7 +289,6 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null, mode
         price: entryPrice,
         score: scoreOut,
         confidence: scoreOut >= 80 ? 'HIGH' : scoreOut >= 60 ? 'MEDIUM' : 'LOW',
-        categoriesAligned,
         subscores: Object.fromEntries(Object.entries(subscores).map(([k, v]) => [k, Math.round(v * 100)])),
         reasons,
         warnings,
@@ -332,22 +299,16 @@ export function generateSignal(analysis, symbol, multiTimeframeData = null, mode
             takeProfit2,
             support: levels.support,
             resistance: levels.resistance,
-            pivot: levels.pivot
+            fibPivot: levels.fibPivot
         },
         riskReward: Number(riskRewardRatio.toFixed(2)),
         indicators: {
             rsi: indicators.rsi != null ? Number(indicators.rsi.toFixed(2)) : null,
             macd: indicators.macd?.histogram != null ? Number(indicators.macd.histogram.toFixed(6)) : null,
-            atr: indicators.atr != null ? Number(indicators.atr.toFixed(8)) : null,
-            bbPosition: indicators.bollingerBands && indicators.bollingerBands.lower ?
-                ((price - indicators.bollingerBands.lower) / (indicators.bollingerBands.upper - indicators.bollingerBands.lower) * 100).toFixed(1) + '%'
-                : 'N/A',
-            buyerPressure: buyerPressure ? `${Number(buyerPressure.current.toFixed(1))}%` : 'N/A',
+            atr: Number(atr.toFixed(8)),
             adx: indicators.adx != null ? Number(indicators.adx.toFixed(1)) : null,
-            vwap: indicators.vwap != null ? Number(indicators.vwap.toFixed(2)) : null
         },
-        patterns: Object.keys(patterns).filter(key => patterns[key]),
-        volumeSpike: Boolean(volume.spike)
+        regime: currentRegime
     };
 }
 

@@ -18,7 +18,7 @@ const GEMINI_API_KEY = (import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) 
  * Llamar directamente a Gemini API (solo en desarrollo)
  */
 async function callGeminiDirectly(marketData, tradingMode = 'BALANCED') {
-    const { symbol, price, indicators, patterns, reasons, warnings } = marketData;
+    const { symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward } = marketData;
 
     let modeContext = '';
     if (tradingMode === 'CONSERVATIVE') {
@@ -34,27 +34,40 @@ ${modeContext}
 
 Analiza la siguiente oportunidad de trading:
 
-**Criptomoneda**: ${symbol}
-**Precio Actual**: $${price}
+**Contexto de Mercado**:
+- Símbolo: ${symbol}
+- Precio Actual: $${price}
+- Régimen de Mercado Detectado: ${regime || 'Desconocido'} (Importante: Ajusta tu sesgo según esto)
 
-**Indicadores Técnicos**:
+**Análisis Técnico**:
 - RSI: ${indicators.rsi || 'N/A'}
 - MACD: ${indicators.macd || 'N/A'}
-- Posición en Bandas de Bollinger: ${indicators.bbPosition || 'N/A'}
+- ADX: ${indicators.adx || 'N/A'} (Fuerza de tendencia)
 
-**Patrones Detectados**: ${patterns && patterns.length > 0 ? patterns.join(', ') : 'Ninguno'}
+**Señales Detectadas**:
+${reasons.map(r => `- ${r.text} (Peso: ${r.weight}%)`).join('\n')}
 
-**Razones para Compra**:
-${reasons.map(r => `- ${r}`).join('\n')}
+**Niveles Propuestos**:
+- Entrada: $${levels.entry}
+- Stop Loss: $${levels.stopLoss}
+- Take Profit 1: $${levels.takeProfit1}
+- Take Profit 2: $${levels.takeProfit2}
+- Ratio Riesgo/Beneficio: ${riskReward}
 
 ${warnings && warnings.length > 0 ? `**Advertencias**:\n${warnings.map(w => `- ${w}`).join('\n')}` : ''}
+
+Tu tarea:
+1. Validar la calidad de la señal considerando el Régimen de Mercado.
+2. Criticar los niveles de Stop Loss y Take Profit. ¿Son lógicos según la estructura?
+3. Dar un veredicto final.
 
 Proporciona un análisis conciso en formato JSON con la siguiente estructura:
 {
   "sentiment": "BULLISH/NEUTRAL/BEARISH",
   "recommendation": "STRONG_BUY/BUY/HOLD/AVOID",
-  "insights": ["insight1", "insight2", "insight3"],
-  "riskAssessment": "LOW/MEDIUM/HIGH"
+  "insights": ["insight1 (sobre régimen)", "insight2 (sobre niveles)", "insight3 (conclusión)"],
+  "riskAssessment": "LOW/MEDIUM/HIGH",
+  "confidenceScore": 0-100
 }
 
 Responde SOLO con el JSON, sin texto adicional.`;
