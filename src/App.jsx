@@ -3,6 +3,7 @@ import { Bell, BellOff, RefreshCw, Zap, Settings } from 'lucide-react';
 import './App.css';
 import SignalCard from './components/SignalCard';
 import CryptoCard from './components/CryptoCard';
+import CryptoChart from './components/CryptoChart';
 import CryptoSelector from './components/CryptoSelector';
 import SkeletonLoader, { SkeletonCryptoCard, SkeletonSignalCard } from './components/SkeletonLoader';
 import binanceService from './services/binanceService';
@@ -19,6 +20,7 @@ const STORAGE_KEY = 'trading_bot_symbols';
 
 function App() {
   const [symbols, setSymbols] = useState([]);
+  const [selectedChartSymbol, setSelectedChartSymbol] = useState(null);
   const [cryptoData, setCryptoData] = useState({});
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,9 @@ function App() {
         });
 
         setSymbols(parsedSymbols);
+        if (parsedSymbols.length > 0) {
+          setSelectedChartSymbol(parsedSymbols[0]);
+        }
 
         if (needsUpdate) {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedSymbols));
@@ -66,12 +71,16 @@ function App() {
         try {
           const momentumCoins = await binanceService.getTopMomentumCoins(10);
           setSymbols(momentumCoins);
+          if (momentumCoins.length > 0) {
+            setSelectedChartSymbol(momentumCoins[0]);
+          }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(momentumCoins));
         } catch (error) {
           console.error('Error loading momentum coins:', error);
           // Fallback a símbolos populares
           const fallbackSymbols = ['BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC', 'XRPUSDC'];
           setSymbols(fallbackSymbols);
+          setSelectedChartSymbol(fallbackSymbols[0]);
         }
       }
     };
@@ -457,6 +466,36 @@ function App() {
           )}
 
 
+
+
+          {/* Top Chart Section */}
+          {selectedChartSymbol && (
+            <section className="chart-section mb-xl">
+              <div className="chart-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ margin: 0 }}>Gráfico en vivo</h2>
+                <select
+                  value={selectedChartSymbol}
+                  onChange={(e) => setSelectedChartSymbol(e.target.value)}
+                  style={{
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: 'var(--text-primary)',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {symbols.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="glass-card" style={{ padding: '1rem' }}>
+                <CryptoChart symbol={selectedChartSymbol} />
+              </div>
+            </section>
+          )}
 
           {/* Crypto Prices Dashboard */}
           <section className="dashboard-section">

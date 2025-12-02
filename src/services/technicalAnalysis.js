@@ -1026,3 +1026,104 @@ export function performTechnicalAnalysis(candles) {
 }
 
 
+
+/**
+ * Calcular Supertrend
+ * @param {Array<Object>} candles - Datos de velas
+ * @param {number} period - Período ATR (típicamente 10)
+ * @param {number} multiplier - Multiplicador ATR (típicamente 3)
+ * @returns {Array<Object>} Array de { time, value, trend, color }
+ *   - trend: 1 (bullish), -1 (bearish)
+ */
+export function calculateSupertrend(candles, period = 10, multiplier = 3) {
+    if (candles.length < period) return [];
+
+    const atr = calculateATR(candles, period);
+    const supertrend = [];
+
+    // Arrays para almacenar bandas intermedias
+    const basicUpperBand = [];
+    const basicLowerBand = [];
+    const finalUpperBand = [];
+    const finalLowerBand = [];
+    const trend = []; // 1: Bullish, -1: Bearish
+
+    for (let i = 0; i < candles.length; i++) {
+        if (i < period) {
+            supertrend.push(null);
+            basicUpperBand.push(null);
+            basicLowerBand.push(null);
+            finalUpperBand.push(null);
+            finalLowerBand.push(null);
+            trend.push(null);
+            continue;
+        }
+
+        const high = candles[i].high;
+        const low = candles[i].low;
+        const close = candles[i].close;
+        const currentATR = atr[i];
+
+        // Basic Bands
+        const bub = (high + low) / 2 + (multiplier * currentATR);
+        const blb = (high + low) / 2 - (multiplier * currentATR);
+        basicUpperBand.push(bub);
+        basicLowerBand.push(blb);
+
+        // Final Bands
+        let fub = bub;
+        let flb = blb;
+
+        if (i > 0 && finalUpperBand[i - 1] !== null) {
+            if (bub < finalUpperBand[i - 1] || candles[i - 1].close > finalUpperBand[i - 1]) {
+                fub = bub;
+            } else {
+                fub = finalUpperBand[i - 1];
+            }
+        }
+
+        if (i > 0 && finalLowerBand[i - 1] !== null) {
+            if (blb > finalLowerBand[i - 1] || candles[i - 1].close < finalLowerBand[i - 1]) {
+                flb = blb;
+            } else {
+                flb = finalLowerBand[i - 1];
+            }
+        }
+
+        finalUpperBand.push(fub);
+        finalLowerBand.push(flb);
+
+        // Trend
+        let currentTrend = 1; // Default bullish
+        if (i > 0 && trend[i - 1] !== null) {
+            currentTrend = trend[i - 1];
+
+            if (currentTrend === 1) {
+                if (close < flb) {
+                    currentTrend = -1;
+                }
+            } else {
+                if (close > fub) {
+                    currentTrend = 1;
+                }
+            }
+        } else {
+            // Initial trend guess
+            currentTrend = close > fub ? 1 : -1;
+        }
+
+        trend.push(currentTrend);
+
+        // Supertrend Value
+        const stValue = currentTrend === 1 ? flb : fub;
+
+        supertrend.push({
+            time: candles[i].openTime / 1000, // Seconds for lightweight-charts
+            value: stValue,
+            trend: currentTrend,
+            color: currentTrend === 1 ? '#22c55e' : '#ef4444' // Green or Red
+        });
+    }
+
+    return supertrend;
+}

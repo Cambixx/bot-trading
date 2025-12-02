@@ -1,11 +1,5 @@
 .crypto-chart-container {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-top: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
-    overflow: hidden;
 }
 
 .chart-header {
@@ -76,5 +70,123 @@
 
     to {
         transform: rotate(360deg);
+    }
+}
+
+/* Prediction Panel */
+.prediction-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    z-index: 5;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.prediction-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.prediction-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.prediction-badge.bullish {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.prediction-badge.bearish {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.prediction-badge.neutral {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.prediction-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-item.bullish .value {
+    color: #4ade80;
+}
+
+.stat-item.bearish .value {
+    color: #f87171;
+    text-align: right;
+}
+
+.stat-item .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.stat-item .value {
+    font-weight: 600;
+}
+
+.prediction-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex;
+}
+
+.bar-fill.bullish {
+    background: #4ade80;
+    height: 100%;
+}
+
+.bar-fill.bearish {
+    background: #f87171;
+    height: 100%;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .prediction-panel {
+        position: static;
+        margin-bottom: 12px;
+        width: 100%;
+        min-width: unset;
+    }
+
+    .chart-wrapper {
+        height: 250px;
     }
 }
