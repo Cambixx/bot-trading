@@ -14,7 +14,7 @@ function CryptoCard({ crypto }) {
         return price.toLocaleString(undefined, { minimumFractionDigits: 8, maximumFractionDigits: 8 });
     };
 
-    // Calculate Market Health Score (simplified version of signal generator)
+    // Calculate Market Health Score (Actionability)
     const calculateMarketHealth = () => {
         if (!analysis || !analysis.indicators) return { score: 0, confidence: 'LOW', label: 'Neutral' };
 
@@ -22,33 +22,45 @@ function CryptoCard({ crypto }) {
         let score = 0;
 
         // RSI (0-100)
-        // 30-70 is neutral. <30 oversold (bullish), >70 overbought (bearish)
-        // For market health, we might want to show strength.
-        // Let's stick to "Opportunity" score like SignalCard (Bullish bias)
-        if (indicators.rsi < 30) score += 30; // Oversold -> Buy opportunity
-        else if (indicators.rsi < 45) score += 15;
-        else if (indicators.rsi > 70) score -= 10; // Overbought
+        // Extreme values represent opportunity (Oversold = Buy, Overbought = Sell)
+        if (indicators.rsi < 30) score += 30; // Oversold -> Buy
+        else if (indicators.rsi > 70) score += 30; // Overbought -> Sell
+        else if (indicators.rsi < 40 || indicators.rsi > 60) score += 15; // Approaching extremes
 
         // MACD
-        if (indicators.macd && indicators.macd.histogram > 0) score += 20;
+        // Strong momentum in either direction
+        if (indicators.macd && indicators.macd.histogram) {
+            if (Math.abs(indicators.macd.histogram) > 0) score += 20;
+        }
 
         // Trend (EMA)
-        if (indicators.ema20 && indicators.ema50 && indicators.ema20 > indicators.ema50) {
-            score += 20;
-            if (price < indicators.ema20) score += 10; // Dip in uptrend
+        // Strong trend in either direction
+        if (indicators.ema20 && indicators.ema50) {
+            const trendStrength = Math.abs(indicators.ema20 - indicators.ema50) / indicators.ema50;
+            if (trendStrength > 0.005) { // 0.5% separation
+                score += 20;
+                // Price action confirmation
+                if (indicators.ema20 > indicators.ema50 && price < indicators.ema20) score += 10; // Dip buy
+                else if (indicators.ema20 < indicators.ema50 && price > indicators.ema20) score += 10; // Rally sell
+            }
         }
 
         // Bollinger
-        if (indicators.bollingerBands && price <= indicators.bollingerBands.lower) score += 20;
+        // Price at bands
+        if (indicators.bollingerBands) {
+            if (price <= indicators.bollingerBands.lower || price >= indicators.bollingerBands.upper) {
+                score += 20;
+            }
+        }
 
         // Normalize to 0-100
         score = Math.max(0, Math.min(100, score));
 
         let confidence = 'LOW';
         let label = 'Neutral';
-        if (score >= 70) { confidence = 'HIGH'; label = 'Alta Oportunidad'; }
+        if (score >= 70) { confidence = 'HIGH'; label = 'Alta Volatilidad'; }
         else if (score >= 40) { confidence = 'MEDIUM'; label = 'Oportunidad Media'; }
-        else { confidence = 'LOW'; label = 'Baja Oportunidad'; }
+        else { confidence = 'LOW'; label = 'Baja Acción'; }
 
         return { score, confidence, label };
     };

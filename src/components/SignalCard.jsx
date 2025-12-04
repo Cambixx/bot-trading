@@ -1,8 +1,10 @@
-import { TrendingUp, Clock, Target, Shield, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import './SignalCard.css';
 
 function SignalCard({ signal, onSimulateBuy }) {
+    const isSell = signal.type === 'SELL';
+
     const confidenceColor = {
         HIGH: 'success',
         MEDIUM: 'warning',
@@ -24,12 +26,15 @@ function SignalCard({ signal, onSimulateBuy }) {
     };
 
     return (
-        <div className={`signal-card glass-card fade-in ${signal.confidence.toLowerCase()}-signal`}>
+        <div className={`signal-card glass-card fade-in ${signal.confidence.toLowerCase()}-signal ${isSell ? 'sell-signal' : 'buy-signal'}`}>
             {/* Header */}
             <div className="signal-header">
                 <div className="signal-symbol">
-                    <TrendingUp className="signal-icon" />
+                    {isSell ? <TrendingDown className="signal-icon text-danger" /> : <TrendingUp className="signal-icon text-success" />}
                     <span className="symbol-text">{signal.symbol.replace('USDC', '')}</span>
+                    <span className={`badge badge-${isSell ? 'danger' : 'success'} ml-sm`}>
+                        {isSell ? 'SHORT' : 'LONG'}
+                    </span>
                 </div>
                 <span className={`badge badge-${confidenceColor[signal.confidence]}`}>
                     {confidenceLabel[signal.confidence]}
@@ -39,11 +44,11 @@ function SignalCard({ signal, onSimulateBuy }) {
             {/* Price & Score */}
             <div className="signal-main">
                 <div className="signal-price">
-                    <span className="price-label">Precio de Entrada</span>
+                    <span className="price-label">{isSell ? 'Precio de Venta' : 'Precio de Entrada'}</span>
                     <span className="price-value">${formatPrice(signal.price)}</span>
                 </div>
                 <div className="signal-score">
-                    <div className="score-circle" style={{ '--score': signal.score }}>
+                    <div className="score-circle" style={{ '--score': signal.score, borderColor: isSell ? 'var(--danger)' : 'var(--success)' }}>
                         <span className="score-value">{signal.score}</span>
                     </div>
                     <span className="score-label">Score</span>
@@ -61,8 +66,8 @@ function SignalCard({ signal, onSimulateBuy }) {
                     <span className="indicator-value">{signal.indicators.macd}</span>
                 </div>
                 <div className="indicator-item">
-                    <span className="indicator-label">BB Position</span>
-                    <span className="indicator-value">{signal.indicators.bbPosition}</span>
+                    <span className="indicator-label">ADX</span>
+                    <span className="indicator-value">{signal.indicators.adx || '-'}</span>
                 </div>
             </div>
 
@@ -93,7 +98,7 @@ function SignalCard({ signal, onSimulateBuy }) {
 
             {/* Reasons */}
             <div className="signal-reasons">
-                <h4 className="reasons-title">Razones de Compra</h4>
+                <h4 className="reasons-title">Razones de {isSell ? 'Venta' : 'Compra'}</h4>
                 <ul className="reasons-list">
                     {signal.reasons.slice(0, 3).map((reason, idx) => (
                         <li key={idx} className="reason-item">
@@ -120,7 +125,7 @@ function SignalCard({ signal, onSimulateBuy }) {
                     <div className="ai-content">
                         <div className="ai-sentiment">
                             <span>Sentimiento: </span>
-                            <strong className={`text-${signal.aiAnalysis.sentiment === 'BULLISH' ? 'success' : 'warning'}`}>
+                            <strong className={`text-${signal.aiAnalysis.sentiment === 'BULLISH' ? 'success' : (signal.aiAnalysis.sentiment === 'BEARISH' ? 'danger' : 'warning')}`}>
                                 {signal.aiAnalysis.sentiment}
                             </strong>
                         </div>
@@ -140,10 +145,10 @@ function SignalCard({ signal, onSimulateBuy }) {
                         style={{
                             width: '100%',
                             padding: '0.75rem',
-                            background: 'rgba(38, 166, 154, 0.2)',
-                            border: '1px solid rgba(38, 166, 154, 0.3)',
+                            background: isSell ? 'rgba(239, 68, 68, 0.2)' : 'rgba(38, 166, 154, 0.2)',
+                            border: `1px solid ${isSell ? 'rgba(239, 68, 68, 0.3)' : 'rgba(38, 166, 154, 0.3)'}`,
                             borderRadius: '8px',
-                            color: '#26a69a',
+                            color: isSell ? '#ef4444' : '#26a69a',
                             cursor: 'pointer',
                             fontWeight: '600',
                             display: 'flex',
@@ -153,12 +158,10 @@ function SignalCard({ signal, onSimulateBuy }) {
                             transition: 'all 0.2s'
                         }}
                     >
-                        💼 Simular Compra
+                        💼 {isSell ? 'Simular Venta (Short)' : 'Simular Compra (Long)'}
                     </button>
                 </div>
             )}
-
-
 
             {/* Footer */}
             <div className="signal-footer">

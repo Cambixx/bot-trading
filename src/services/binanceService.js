@@ -249,6 +249,64 @@ class BinanceService {
       return [];
     }
   }
+  /**
+   * Suscribirse a actualizaciones de precio en tiempo real via WebSocket
+   * @param {Array<string>} symbols - Lista de símbolos a suscribir
+   * @param {Function} onMessage - Callback para manejar los mensajes
+   */
+  subscribeToTickers(symbols, onMessage) {
+    if (this.ws) {
+      this.ws.close();
+    }
+
+    // Usar Combined Streams para múltiples símbolos
+    // Formato: <symbol>@ticker
+    const streams = symbols.map(s => `${s.toLowerCase()}@ticker`).join('/');
+    const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
+
+    console.log('Conectando a WebSocket:', url);
+    this.ws = new WebSocket(url);
+
+    this.ws.onopen = () => {
+      console.log('WebSocket Conectado');
+    };
+
+    this.ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      // message.data contiene el payload del ticker
+      if (message.data) {
+        const ticker = {
+          symbol: message.data.s,
+          price: parseFloat(message.data.c),
+          priceChange: parseFloat(message.data.p),
+          priceChangePercent: parseFloat(message.data.P),
+          high24h: parseFloat(message.data.h),
+          low24h: parseFloat(message.data.l),
+          volume24h: parseFloat(message.data.v),
+          quoteVolume24h: parseFloat(message.data.q)
+        };
+        onMessage(ticker);
+      }
+    };
+
+    this.ws.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
+
+    this.ws.onclose = () => {
+      console.log('WebSocket Desconectado');
+    };
+  }
+
+  /**
+   * Cerrar conexión WebSocket
+   */
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
 }
 
 export default new BinanceService();
