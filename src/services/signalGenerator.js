@@ -210,6 +210,36 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
     const patternScore = clamp(patternCount / 2, 0, 1);
     if (patternScore > 0) reasons.push({ text: 'Patrón de velas alcista', weight: percent(patternScore) });
 
+    // === Trend Strength (ADX) ===
+    let trendStrengthScore = 0;
+    if (indicators.adx != null) {
+        if (indicators.adx > 25) {
+            trendStrengthScore = clamp((indicators.adx - 25) / 25, 0, 1); // 25->0, 50->1
+            if (trendStrengthScore > 0.6) reasons.push({ text: 'Tendencia fuerte (ADX)', weight: percent(trendStrengthScore) });
+        }
+    }
+
+    // === Divergence ===
+    let divergenceScore = 0;
+    const rsiDiv = analysis.divergence?.rsi;
+    const macdDiv = analysis.divergence?.macd;
+
+    if (rsiDiv?.bullish) {
+        divergenceScore = Math.max(divergenceScore, rsiDiv.strength || 0.5);
+        reasons.push({ text: 'Divergencia alcista RSI', weight: percent(divergenceScore) });
+    }
+    if (macdDiv?.bullish) {
+        divergenceScore = Math.max(divergenceScore, macdDiv.strength || 0.5);
+        reasons.push({ text: 'Divergencia alcista MACD', weight: percent(divergenceScore) });
+    }
+
+    // === Accumulation ===
+    let accumulationScore = 0;
+    if (analysis.accumulation?.isAccumulating) {
+        accumulationScore = analysis.accumulation.strength || 0.8;
+        reasons.push({ text: 'Acumulación detectada', weight: percent(accumulationScore) });
+    }
+
     // === Screen 3: Trigger (15m Momentum) ===
     let triggerScore = 0;
     if (multiTimeframeData['15m']) {
@@ -227,9 +257,12 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
     const subscores = {
         momentum: momentumScore,
         trend: trendScore,
+        trendStrength: trendStrengthScore,
         levels: levelsScore,
         volume: volumeScore,
-        patterns: patternScore
+        patterns: patternScore,
+        divergence: divergenceScore,
+        accumulation: accumulationScore
     };
 
     let finalNormalized = 0;
