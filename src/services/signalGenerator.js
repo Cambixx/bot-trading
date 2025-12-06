@@ -98,6 +98,8 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
         else signalType = 'BUY';
     }
 
+    console.log(`  → Bias: ${bias}, SignalType: ${signalType}, Regime: ${currentRegime}`);
+
     // In Conservative mode, enforce strict adherence to bias
     if (mode === 'CONSERVATIVE') {
         if (bias === 'NEUTRAL') return null; // No trade in ranging for conservative
