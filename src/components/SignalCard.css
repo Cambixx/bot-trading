@@ -1,5 +1,5 @@
 .signal-card {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-xl);
     position: relative;
     overflow: hidden;
 }
@@ -304,6 +304,7 @@
     color: var(--color-text-primary);
     font-weight: 600;
 }
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .signal-card {
