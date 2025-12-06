@@ -14,17 +14,30 @@
     background: var(--color-success-gradient);
 }
 
-.signal-card.high-signal::before {
+/* Buy/Long Signal - Green Theme */
+.signal-card.buy-signal {
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(17, 22, 51, 0.4) 100%);
+}
+
+.signal-card.buy-signal::before {
     background: var(--color-success-gradient);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
-.signal-card.medium-signal::before {
-    background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-light) 100%);
+/* Sell/Short Signal - Red Theme */
+.signal-card.sell-signal {
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, rgba(17, 22, 51, 0.4) 100%);
 }
 
-.signal-card.low-signal::before {
-    background: linear-gradient(135deg, var(--color-info) 0%, var(--color-info-light) 100%);
+.signal-card.sell-signal::before {
+    background: var(--color-danger-gradient);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
+
+/* Confidence indicators (optional override or adjustment if needed) */
+/* We keep confidence badges in the UI, but the card main color now reflects direction */
 
 .signal-header {
     display: flex;
@@ -360,6 +373,9 @@
 @media (max-width: 640px) {
     .signal-card {
         padding: 0.75rem;
+        box-sizing: border-box;
+        width: 100%;
+        overflow-wrap: break-word;
     }
 
     .signal-header {
@@ -383,6 +399,7 @@
 
     .price-value {
         font-size: 1.25rem;
+        word-break: break-word;
     }
 
     .signal-score {

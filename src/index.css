@@ -472,15 +472,7 @@ button {
   }
 }
 
-/* iOS Specific Fixes */
-@supports (padding: max(0px)) {
-  body {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-    padding-top: max(0rem, env(safe-area-inset-top));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-}
+
 
 /* Fix 100vh on iOS - use dynamic viewport height */
 html,

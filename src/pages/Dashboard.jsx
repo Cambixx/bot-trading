@@ -1,13 +1,10 @@
 import CryptoSelector from '../components/CryptoSelector';
-import CryptoChart from '../components/CryptoChart';
 import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
 
 function Dashboard({
     symbols,
-    selectedChartSymbol,
-    setSelectedChartSymbol,
     handleSymbolsChange,
     cryptoData,
     signals,
@@ -22,34 +19,7 @@ function Dashboard({
                 onSymbolsChange={handleSymbolsChange}
             />
 
-            {/* Top Chart Section */}
-            {selectedChartSymbol && (
-                <section className="chart-section mb-xl">
-                    <div className="chart-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                        <h2 style={{ margin: 0 }}>Gráfico en vivo</h2>
-                        <select
-                            value={selectedChartSymbol}
-                            onChange={(e) => setSelectedChartSymbol(e.target.value)}
-                            style={{
-                                padding: '0.5rem',
-                                borderRadius: '8px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                color: 'var(--text-primary)',
-                                outline: 'none',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {symbols.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="glass-card" style={{ padding: '1rem' }}>
-                        <CryptoChart symbol={selectedChartSymbol} />
-                    </div>
-                </section>
-            )}
+            {/* Top Chart Section Removed - Moved to /chart */}
 
             {/* Crypto Prices Dashboard */}
             <section className="dashboard-section">

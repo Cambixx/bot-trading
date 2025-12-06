@@ -81,9 +81,40 @@
     .sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
+        z-index: 1000;
     }
 
     .sidebar.open {
         transform: translateX(0);
     }
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 900;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .mobile-close-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        padding: 0.5rem;
+        margin-left: auto;
+        /* Push to right */
+        cursor: pointer;
+    }
+}
+
+.mobile-close-btn {
+    display: none;
+    /* Hidden on desktop */
 }

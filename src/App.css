@@ -62,7 +62,7 @@
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-lg);
+  gap: 15px;
   margin-bottom: var(--spacing-xl);
 }
 
@@ -242,7 +242,7 @@
 
   .dashboard-grid,
   .signals-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: var(--spacing-md);
     width: 100%;
     margin: 0;

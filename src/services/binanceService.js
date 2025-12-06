@@ -175,62 +175,70 @@ class BinanceService {
   }
 
   /**
-   * Obtener monedas con mejor momentum (ganadoras con volumen decente)
+   * Obtener monedas con mejores oportunidades (Alta volatilidad + Volumen)
+   * Detecta tanto oportunidades LONG (subidas) como SHORT (bajadas)
    * @param {number} limit - Número de monedas a obtener (default: 20)
-   * @returns {Promise<Array<string>>} Array de símbolos con mayor momentum
+   * @returns {Promise<Array<string>>} Array de símbolos seleccionados
    */
-  async getTopMomentumCoins(limit = 20) {
+  async getSmartOpportunityCoins(limit = 20) {
     try {
+      console.log('🔄 Iniciando escaneo inteligente de mercado...');
       // Obtener todos los tickers de 24h
       const response = await axios.get(`${BINANCE_API_BASE}/ticker/24hr`);
 
-      // Filtrar y rankear por momentum
-      const momentumCoins = response.data
+      // Filtrar y rankear por "Oportunidad" (Volatilidad + Volumen)
+      const opportunityCoins = response.data
         .filter(ticker => {
           const symbol = ticker.symbol;
           const volume = parseFloat(ticker.quoteVolume);
-          const priceChange = parseFloat(ticker.priceChangePercent);
+          const lastPrice = parseFloat(ticker.lastPrice);
           const high = parseFloat(ticker.highPrice);
           const low = parseFloat(ticker.lowPrice);
-          const lastPrice = parseFloat(ticker.lastPrice);
 
-          // Criterios de filtrado:
           // 1. Pares USDC válidos
           if (!symbol.endsWith('USDC') || symbol === 'USDC') return false;
 
-          // 2. Volumen mínimo: $10M
-          if (volume < 10000000) return false;
+          // 2. Volumen mínimo relevante ($5M para capturar más movimientos)
+          if (volume < 5000000) return false;
 
-          // 3. Volatilidad mínima: rango alto/bajo > 3%
+          // 3. Volatilidad mínima (High-Low range > 2%)
+          // Necesitamos movimiento para hacer trading
           const volatility = ((high - low) / lastPrice) * 100;
-          if (volatility < 3) return false;
-
-          // 4. Cambio positivo en 24h (solo gainers)
-          if (priceChange <= 0) return false;
+          if (volatility < 2) return false;
 
           return true;
         })
-        .map(ticker => ({
-          symbol: ticker.symbol,
-          priceChange: parseFloat(ticker.priceChangePercent),
-          volume: parseFloat(ticker.quoteVolume),
-          volatility: ((parseFloat(ticker.highPrice) - parseFloat(ticker.lowPrice)) / parseFloat(ticker.lastPrice)) * 100,
-          // Score combinado: 60% cambio de precio, 30% volatilidad, 10% volumen relativo
-          momentumScore:
-            (parseFloat(ticker.priceChangePercent) * 0.6) +
-            (((parseFloat(ticker.highPrice) - parseFloat(ticker.lowPrice)) / parseFloat(ticker.lastPrice)) * 100 * 0.3) +
-            (Math.log10(parseFloat(ticker.quoteVolume) / 1000000) * 0.1)
-        }))
-        .sort((a, b) => b.momentumScore - a.momentumScore)
+        .map(ticker => {
+          const priceChangePercent = parseFloat(ticker.priceChangePercent);
+          const volatility = ((parseFloat(ticker.highPrice) - parseFloat(ticker.lowPrice)) / parseFloat(ticker.lastPrice)) * 100;
+          const volumeScore = Math.log10(parseFloat(ticker.quoteVolume) / 1000000); // Log score para suavizar diferencias masivas de volumen
+
+          // Score de Oportunidad:
+          // 40% Magnitud del cambio (sea positivo o negativo) -> Buscamos movimiento fuerte
+          // 40% Volatilidad intradía -> Buscamos rango para operar
+          // 20% Volumen -> Buscamos liquidez
+          const score =
+            (Math.abs(priceChangePercent) * 0.4) +
+            (volatility * 0.4) +
+            (volumeScore * 2); // Factor 2 para que el volumen tenga peso relevante en la escala
+
+          return {
+            symbol: ticker.symbol,
+            score,
+            priceChange: priceChangePercent,
+            volatility
+          };
+        })
+        .sort((a, b) => b.score - a.score) // Ordenar por mayor score
         .slice(0, limit)
         .map(coin => coin.symbol);
 
-      console.log(`✅ Seleccionadas ${momentumCoins.length} monedas con mejor momentum`);
-      return momentumCoins;
+      console.log(`✅ Escaneo completado. Encontradas ${opportunityCoins.length} oportunidades.`);
+      return opportunityCoins;
     } catch (error) {
-      console.error('Error fetching momentum coins:', error.message);
-      // Fallback a monedas medianamente volátiles
-      return ['SOLUSDC', 'AVAXUSDC', 'MATICUSDC', 'LINKUSDC', 'UNIUSDC', 'ATOMUSDC', 'NEARUSDC', 'FTMUSDC', 'SANDUSDC', 'MANAUSDC'].slice(0, limit);
+      console.error('Error fetching opportunity coins:', error.message);
+      // Fallback a una lista diversa de alta capitalización y volatilidad
+      return ['BTCUSDC', 'ETHUSDC', 'SOLUSDC', 'XRPUSDC', 'DOGEUSDC', 'AVAXUSDC', 'LINKUSDC', 'MATICUSDC', 'APEUSDC', 'RUNEUSDC'];
     }
   }
 

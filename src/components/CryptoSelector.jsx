@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Star, Plus, X, TrendingUp } from 'lucide-react';
+import { Search, Star, Plus, X, TrendingUp, Zap } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import binanceService from '../services/binanceService';
 import './CryptoSelector.css';
@@ -10,9 +10,26 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [availablePairs, setAvailablePairs] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [scanning, setScanning] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const selectorRef = useRef(null);
     const { watchlist, toggleWatchlist, isFavorite } = useSettings();
+
+    const handleSmartScan = async () => {
+        if (scanning) return;
+        setScanning(true);
+        try {
+            const smartCoins = await binanceService.getSmartOpportunityCoins(12);
+            if (smartCoins && smartCoins.length > 0) {
+                // Merge with watchlist to keep favorites
+                const mergedSymbols = [...new Set([...watchlist, ...smartCoins])];
+                onSymbolsChange(mergedSymbols);
+            }
+        } catch (error) {
+            console.error('Smart scan failed:', error);
+        }
+        setScanning(false);
+    };
 
     useEffect(() => {
         if (showDropdown && availablePairs.length === 0) {
@@ -73,6 +90,15 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
                     </div>
 
                     <div className="selector-actions">
+                        <button
+                            className="btn-icon"
+                            onClick={handleSmartScan}
+                            title="Escaneo Inteligente (Detectar oportunidades)"
+                            disabled={scanning}
+                        >
+                            <Zap size={18} className={scanning ? 'spin' : ''} style={{ color: scanning ? '#fbbf24' : 'inherit' }} />
+                        </button>
+
                         <button
                             className={`btn-icon ${showFavoritesOnly ? 'active' : ''}`}
                             onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}

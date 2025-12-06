@@ -11,6 +11,7 @@ import Layout from './components/Layout';
 
 // Pages
 import Dashboard from './pages/Dashboard';
+import ChartPage from './pages/ChartPage';
 import PortfolioPage from './pages/PortfolioPage';
 import BacktestPage from './pages/BacktestPage';
 import SettingsPage from './pages/SettingsPage';
@@ -27,7 +28,7 @@ const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
 
 function AppContent() {
-  const { tradingMode, notificationsEnabled, riskPerTrade } = useSettings();
+  const { tradingMode, notificationsEnabled, riskPerTrade, watchlist } = useSettings();
 
   const [symbols, setSymbols] = useState([]);
   const [selectedChartSymbol, setSelectedChartSymbol] = useState(null);
@@ -44,43 +45,28 @@ function AppContent() {
   // Signal History Hook
   const { history, trackSignal, getStats } = useSignalHistory();
 
-  // Cargar símbolos desde localStorage o top 10 por defecto
+  // Cargar símbolos: Smart Scan + Favoritos
   useEffect(() => {
     const loadInitialSymbols = async () => {
-      const savedSymbols = localStorage.getItem(STORAGE_KEY);
+      try {
+        // Lanzar Smart Scan al inicio
+        const smartCoins = await binanceService.getSmartOpportunityCoins(12);
 
-      if (savedSymbols) {
-        let parsedSymbols = JSON.parse(savedSymbols);
-        let needsUpdate = false;
+        // Combinar con Watchlist (Favoritos)
+        // Usamos Set para evitar duplicados
+        const mergedSymbols = [...new Set([...watchlist, ...smartCoins])];
 
-        parsedSymbols = parsedSymbols.map(s => {
-          if (s.endsWith('USDT')) {
-            needsUpdate = true;
-            return s.replace('USDT', 'USDC');
-          }
-          return s;
-        });
-
-        setSymbols(parsedSymbols);
-        if (parsedSymbols.length > 0) {
-          setSelectedChartSymbol(parsedSymbols[0]);
+        setSymbols(mergedSymbols);
+        if (mergedSymbols.length > 0) {
+          setSelectedChartSymbol(mergedSymbols[0]);
         }
-
-        if (needsUpdate) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedSymbols));
-        }
-      } else {
-        try {
-          const momentumCoins = await binanceService.getTopMomentumCoins(10);
-          setSymbols(momentumCoins);
-          if (momentumCoins.length > 0) {
-            setSelectedChartSymbol(momentumCoins[0]);
-          }
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(momentumCoins));
-        } catch (error) {
-          console.error('Error loading momentum coins:', error);
-          const fallbackSymbols = ['BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'ADAUSDC', 'XRPUSDC'];
-          setSymbols(fallbackSymbols);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedSymbols));
+      } catch (error) {
+        console.error('Error loading smart coins:', error);
+        // Fallback robusto
+        const fallbackSymbols = [...new Set([...watchlist, 'BTCUSDC', 'ETHUSDC', 'SOLUSDC', 'XRPUSDC'])];
+        setSymbols(fallbackSymbols);
+        if (fallbackSymbols.length > 0) {
           setSelectedChartSymbol(fallbackSymbols[0]);
         }
       }
@@ -342,13 +328,19 @@ function AppContent() {
           <Route path="/" element={
             <Dashboard
               symbols={symbols}
-              selectedChartSymbol={selectedChartSymbol}
-              setSelectedChartSymbol={setSelectedChartSymbol}
               handleSymbolsChange={handleSymbolsChange}
               cryptoData={cryptoData}
               signals={signals}
               loading={loading}
               handleSimulateBuy={handleSimulateBuy}
+            />
+          } />
+
+          <Route path="/chart" element={
+            <ChartPage
+              symbols={symbols}
+              selectedChartSymbol={selectedChartSymbol}
+              setSelectedChartSymbol={setSelectedChartSymbol}
             />
           } />
 
