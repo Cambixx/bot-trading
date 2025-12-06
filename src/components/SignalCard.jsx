@@ -112,7 +112,7 @@ function SignalCard({ signal, onSimulateBuy }) {
             {signal.warnings && signal.warnings.length > 0 && (
                 <div className="signal-warnings">
                     <AlertTriangle className="warning-icon" />
-                    <span>{signal.warnings[0]}</span>
+                    <span>{typeof signal.warnings[0] === 'object' ? signal.warnings[0].text : signal.warnings[0]}</span>
                 </div>
             )}
 

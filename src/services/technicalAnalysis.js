@@ -1021,7 +1021,8 @@ export function performTechnicalAnalysis(candles) {
             macd: macdDivergence
         },
         accumulation,
-        regime: detectMarketRegime(candles) // Self-detected regime for single timeframe
+        regime: detectMarketRegime(candles), // Self-detected regime for single timeframe
+        choppiness: calculateChoppinessIndex(candles)[lastIndex] // 0-100
     };
 }
 
@@ -1126,4 +1127,62 @@ export function calculateSupertrend(candles, period = 10, multiplier = 3) {
     }
 
     return supertrend;
+}
+/**
+ * Calcular Choppiness Index
+ * Detecta si el mercado está en tendencia o consolidación
+ * Valores > 61.8 indican consolidación (choppy)
+ * Valores < 38.2 indican tendencia fuerte
+ * @param {Array<Object>} candles - Datos de velas
+ * @param {number} period - Período (típicamente 14)
+ * @returns {Array<number>} Choppiness Index values
+ */
+export function calculateChoppinessIndex(candles, period = 14) {
+    if (candles.length < period + 1) return [];
+
+    const ciValues = [];
+    const trValues = [];
+
+    // 1. Calcular TR para todas las velas primero
+    for (let i = 0; i < candles.length; i++) {
+        if (i === 0) {
+            trValues.push(candles[i].high - candles[i].low);
+        } else {
+            const high = candles[i].high;
+            const low = candles[i].low;
+            const prevClose = candles[i - 1].close;
+            trValues.push(Math.max(
+                high - low,
+                Math.abs(high - prevClose),
+                Math.abs(low - prevClose)
+            ));
+        }
+    }
+
+    // 2. Calcular CI
+    for (let i = 0; i < candles.length; i++) {
+        if (i < period) {
+            ciValues.push(null);
+            continue;
+        }
+
+        // Suma de TR de los últimos N periodos
+        const sumTR = trValues.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
+
+        // Max High y Min Low de los últimos N periodos
+        const periodSlice = candles.slice(i - period + 1, i + 1);
+        const maxHigh = Math.max(...periodSlice.map(c => c.high));
+        const minLow = Math.min(...periodSlice.map(c => c.low));
+
+        const range = maxHigh - minLow;
+
+        if (range === 0) {
+            ciValues.push(50); // Fallback para evitar división por cero
+        } else {
+            const ci = 100 * (Math.log10(sumTR / range) / Math.log10(period));
+            ciValues.push(ci);
+        }
+    }
+
+    return ciValues;
 }
