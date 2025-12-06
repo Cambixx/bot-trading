@@ -74,23 +74,19 @@ function AppContent() {
         // Lanzar Smart Scan al inicio
         const smartCoins = await binanceService.getSmartOpportunityCoins(12);
 
-        // Combinar con Watchlist (Favoritos)
-        // Usamos Set para evitar duplicados
-        const mergedSymbols = [...new Set([...watchlist, ...smartCoins])];
+        setSymbols(prev => {
+          const merged = [...new Set([...prev, ...smartCoins])];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          return merged;
+        });
 
-        setSymbols(mergedSymbols);
-        if (mergedSymbols.length > 0) {
-          setSelectedChartSymbol(mergedSymbols[0]);
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedSymbols));
       } catch (error) {
         console.error('Error loading smart coins:', error);
         // Fallback robusto
-        const fallbackSymbols = [...new Set([...watchlist, 'BTCUSDC', 'ETHUSDC', 'SOLUSDC', 'XRPUSDC'])];
-        setSymbols(fallbackSymbols);
-        if (fallbackSymbols.length > 0) {
-          setSelectedChartSymbol(fallbackSymbols[0]);
-        }
+        setSymbols(prev => {
+          const fallback = [...new Set([...prev, 'BTCUSDC', 'ETHUSDC', 'SOLUSDC', 'XRPUSDC'])];
+          return fallback;
+        });
       }
     };
 
@@ -320,7 +316,12 @@ function AppContent() {
       )}
 
       <div className="status-item">
-        <div className="mode-selector" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.25rem', borderRadius: '8px' }}>
+        <div
+          className="mode-selector"
+          onClick={() => window.location.href = '/settings'}
+          style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.5rem', borderRadius: '8px', cursor: 'pointer' }}
+          title="Ir a Ajustes"
+        >
           <SettingsIcon size={14} className="text-muted" />
           <span className="text-muted" style={{ fontSize: '0.85rem' }}>
             {tradingMode === 'CONSERVATIVE' && 'Conservador'}

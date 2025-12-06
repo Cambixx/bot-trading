@@ -4,48 +4,48 @@ import { performTechnicalAnalysis } from './technicalAnalysis.js';
 // Configuration presets for different trading modes
 const MODES = {
     CONSERVATIVE: {
-        categoryThresholdForConvergence: 0.25, // Stricter: needs higher subscores
-        requiredCategories: 2,                 // Needs at least 2 strong categories
-        scoreToEmit: 0.65,                     // Only high quality signals (>65)
+        categoryThresholdForConvergence: 0.25,
+        requiredCategories: 2,
+        scoreToEmit: 0.60,
         weights: {
-            momentum: 0.15,
-            trend: 0.25,      // Trend is key for safety
-            trendStrength: 0.10,
-            levels: 0.20,     // Support/Resistance crucial
-            volume: 0.10,
+            momentum: 0.20,
+            trend: 0.30,      // Trend is key for safety
+            trendStrength: 0.15,
+            levels: 0.10,     // Support/Resistance 
+            volume: 0.15,
             patterns: 0.05,
-            divergence: 0.05,
-            accumulation: 0.10 // Smart money detection
+            divergence: 0.025,
+            accumulation: 0.025
         }
     },
     BALANCED: {
         categoryThresholdForConvergence: 0.20,
         requiredCategories: 1,
-        scoreToEmit: 0.40,
+        scoreToEmit: 0.50,
         weights: {
-            momentum: 0.15,
-            trend: 0.20,
+            momentum: 0.25,
+            trend: 0.25,
             trendStrength: 0.10,
-            levels: 0.20,
-            volume: 0.15,
+            levels: 0.10,
+            volume: 0.20,
             patterns: 0.05,
-            divergence: 0.05,
-            accumulation: 0.10
+            divergence: 0.025,
+            accumulation: 0.025
         }
     },
     RISKY: {
-        categoryThresholdForConvergence: 0.15, // Looser
+        categoryThresholdForConvergence: 0.15,
         requiredCategories: 1,
-        scoreToEmit: 0.40,                     // Lower threshold (>40)
+        scoreToEmit: 0.40,
         weights: {
-            momentum: 0.25,   // Momentum is key for quick scalps
-            trend: 0.10,
+            momentum: 0.35,   // Momentum is king
+            trend: 0.15,
             trendStrength: 0.05,
-            levels: 0.15,
-            volume: 0.20,     // Volume spikes matter more
-            patterns: 0.15,   // Speculative patterns included
-            divergence: 0.05,
-            accumulation: 0.05
+            levels: 0.10,
+            volume: 0.25,     // Volatility/Volume
+            patterns: 0.05,
+            divergence: 0.025,
+            accumulation: 0.025
         }
     }
 };

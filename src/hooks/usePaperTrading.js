@@ -82,15 +82,6 @@ export function usePaperTrading() {
         const newPosition = {
             user_id: user.id,
             symbol: signal.symbol,
-            entry_price: signal.price, // Map to DB column (snake_case)? Need to check SQL. 
-            // My SQL had: symbol, type, price, quantity, timestamp, pnl, status.
-            // I need to make sure I use consistent names.
-            // SQL: symbol, type, price, quantity, status, amount (wait, did I add amount?)
-            // Let's check plan: price numeric, quantity numeric. NOT amount.
-            // I should add amount or derive it. Quantity * Price = Amount.
-            // But entry price is fixed. So I can derive quantity.
-            // Wait, SQL in plan: "price numeric not null, quantity numeric not null".
-            // I'll stick to that. price is entry price.
             price: signal.price,
             quantity: quantity,
             type: signal.type || 'BUY',
