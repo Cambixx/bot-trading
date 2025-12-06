@@ -315,7 +315,7 @@ function AppContent() {
 
       {lastUpdate && (
         <div className="status-item">
-          <span className="text-muted">Última actualización: {lastUpdate.toLocaleTimeString()}</span>
+          <span className="text-muted">Última - actualización: {lastUpdate.toLocaleTimeString()}</span>
         </div>
       )}
 
