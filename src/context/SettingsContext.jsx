@@ -1,39 +1,90 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { supabase } from '../services/supabaseClient';
+import { useAuth } from './AuthContext';
 
 const SettingsContext = createContext();
 
 export function SettingsProvider({ children }) {
+    const { user } = useAuth();
+
     // Trading Mode
-    const [tradingMode, setTradingMode] = useState(() => {
-        return localStorage.getItem('trading_mode') || 'BALANCED';
-    });
-
+    const [tradingMode, setTradingMode] = useState('BALANCED');
     // Risk Management
-    const [riskPerTrade, setRiskPerTrade] = useState(() => {
-        return Number(localStorage.getItem('risk_per_trade')) || 1000;
-    });
+    const [riskPerTrade, setRiskPerTrade] = useState(1000);
+    // Watchlist
+    const [watchlist, setWatchlist] = useState([]);
 
-    // Notifications
+    // Notifications (Local only for now)
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
-    // Watchlist
-    const [watchlist, setWatchlist] = useState(() => {
-        const saved = localStorage.getItem('watchlist');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const isLoaded = useRef(false);
 
-    // Persist settings
+    // Load settings from Supabase when user logs in
     useEffect(() => {
-        localStorage.setItem('trading_mode', tradingMode);
-    }, [tradingMode]);
+        if (!user) return;
 
-    useEffect(() => {
-        localStorage.setItem('risk_per_trade', riskPerTrade);
-    }, [riskPerTrade]);
+        const loadSettings = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('user_preferences')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
 
+                if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+                    console.error('Error loading settings:', error);
+                    return;
+                }
+
+                if (data) {
+                    setTradingMode(data.trading_mode || 'BALANCED');
+                    setRiskPerTrade(data.risk_per_trade || 1000);
+                    setWatchlist(data.watchlist || []);
+                } else {
+                    // Create default profile if not exists
+                    await supabase.from('user_preferences').insert([{
+                        user_id: user.id,
+                        trading_mode: 'BALANCED',
+                        risk_per_trade: 1000,
+                        watchlist: []
+                    }]);
+                }
+            } catch (err) {
+                console.error('Unexpected error loading settings:', err);
+            } finally {
+                isLoaded.current = true;
+            }
+        };
+
+        loadSettings();
+    }, [user]);
+
+    // Sync updates to Supabase
     useEffect(() => {
-        localStorage.setItem('watchlist', JSON.stringify(watchlist));
-    }, [watchlist]);
+        if (!user || !isLoaded.current) return;
+
+        const saveSettings = async () => {
+            try {
+                await supabase.from('user_preferences').upsert({
+                    user_id: user.id,
+                    trading_mode: tradingMode,
+                    risk_per_trade: riskPerTrade,
+                    watchlist: watchlist,
+                    updated_at: new Date()
+                });
+            } catch (err) {
+                console.error('Error saving settings:', err);
+            }
+        };
+
+        // Debounce simple to avoid too many writes? 
+        // For now direct write is fine, Supabase handles it well. 
+        // But maybe a small timeout for rapid watchlist toggles.
+        const timeoutId = setTimeout(saveSettings, 500);
+        return () => clearTimeout(timeoutId);
+
+    }, [tradingMode, riskPerTrade, watchlist, user]);
+
 
     // Request Notification Permission on mount
     useEffect(() => {

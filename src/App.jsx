@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { RefreshCw, Settings as SettingsIcon } from 'lucide-react';
 import './App.css';
 
 // Context
 import { SettingsProvider, useSettings } from './context/SettingsContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Components
 import Layout from './components/Layout';
@@ -15,6 +16,7 @@ import ChartPage from './pages/ChartPage';
 import PortfolioPage from './pages/PortfolioPage';
 import BacktestPage from './pages/BacktestPage';
 import SettingsPage from './pages/SettingsPage';
+import LoginPage from './pages/LoginPage';
 
 // Services & Hooks
 import binanceService from './services/binanceService';
@@ -26,6 +28,26 @@ import { useSignalHistory } from './hooks/useSignalHistory';
 
 const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
+
+// Componente para proteger rutas
+const PrivateRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="status-dot loading"></div>
+        <span style={{ color: 'var(--text-muted)' }}>Cargando sesión...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
 
 function AppContent() {
   const { tradingMode, notificationsEnabled, riskPerTrade, watchlist } = useSettings();
@@ -74,6 +96,20 @@ function AppContent() {
 
     loadInitialSymbols();
   }, []);
+
+  // Sincronizar favoritos (Watchlist) con la lista activa
+  useEffect(() => {
+    if (watchlist.length > 0) {
+      setSymbols(prev => {
+        const newSymbols = [...new Set([...prev, ...watchlist])];
+        if (newSymbols.length !== prev.length) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newSymbols));
+          return newSymbols;
+        }
+        return prev;
+      });
+    }
+  }, [watchlist]);
 
   // Guardar símbolos en localStorage cuando cambien
   const handleSymbolsChange = (newSymbols) => {
@@ -267,7 +303,6 @@ function AppContent() {
   // Status Bar Component (to be passed to Layout or rendered here if Layout accepts it)
   // For now, we'll render it inside the Layout via a prop or context? 
   // Actually, Layout is a wrapper. We can put the StatusBar in the Layout or keep it here and pass it down?
-  // Let's put the Status Bar in the Layout component, but it needs access to state.
   // Better approach: Render the Status Bar inside App, but positioned correctly?
   // No, that would be inside the content area. That's fine.
 
@@ -311,68 +346,78 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      <Layout>
-        <StatusBar />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
 
-        {error && (
-          <div className="error-container mb-lg">
-            <h3>Error al cargar datos</h3>
-            <p>{error}</p>
-            <button onClick={handleRefresh} className="btn-primary mt-md">
-              Intentar de nuevo
-            </button>
-          </div>
-        )}
+        <Route path="/*" element={
+          <PrivateRoute>
+            <Layout>
+              <StatusBar />
 
-        <Routes>
-          <Route path="/" element={
-            <Dashboard
-              symbols={symbols}
-              handleSymbolsChange={handleSymbolsChange}
-              cryptoData={cryptoData}
-              signals={signals}
-              loading={loading}
-              handleSimulateBuy={handleSimulateBuy}
-            />
-          } />
+              {error && (
+                <div className="error-container mb-lg">
+                  <h3>Error al cargar datos</h3>
+                  <p>{error}</p>
+                  <button onClick={handleRefresh} className="btn-primary mt-md">
+                    Intentar de nuevo
+                  </button>
+                </div>
+              )}
 
-          <Route path="/chart" element={
-            <ChartPage
-              symbols={symbols}
-              selectedChartSymbol={selectedChartSymbol}
-              setSelectedChartSymbol={setSelectedChartSymbol}
-            />
-          } />
+              <Routes>
+                <Route path="/" element={
+                  <Dashboard
+                    symbols={symbols}
+                    handleSymbolsChange={handleSymbolsChange}
+                    cryptoData={cryptoData}
+                    signals={signals}
+                    loading={loading}
+                    handleSimulateBuy={handleSimulateBuy}
+                  />
+                } />
 
-          <Route path="/portfolio" element={
-            <PortfolioPage
-              portfolio={portfolio}
-              cryptoData={cryptoData}
-              closePosition={closePosition}
-              resetPortfolio={resetPortfolio}
-              stats={getStats()}
-              history={history}
-            />
-          } />
+                <Route path="/chart" element={
+                  <ChartPage
+                    symbols={symbols}
+                    selectedChartSymbol={selectedChartSymbol}
+                    setSelectedChartSymbol={setSelectedChartSymbol}
+                  />
+                } />
 
-          <Route path="/backtest" element={
-            <BacktestPage symbols={symbols} />
-          } />
+                <Route path="/portfolio" element={
+                  <PortfolioPage
+                    portfolio={portfolio}
+                    cryptoData={cryptoData}
+                    closePosition={closePosition}
+                    resetPortfolio={resetPortfolio}
+                    stats={getStats()}
+                    history={history}
+                  />
+                } />
 
-          <Route path="/settings" element={
-            <SettingsPage />
-          } />
-        </Routes>
-      </Layout>
+                <Route path="/backtest" element={
+                  <BacktestPage symbols={symbols} />
+                } />
+
+                <Route path="/settings" element={
+                  <SettingsPage />
+                } />
+              </Routes>
+            </Layout>
+          </PrivateRoute>
+        } />
+      </Routes>
     </BrowserRouter>
   );
 }
 
 function App() {
   return (
-    <SettingsProvider>
-      <AppContent />
-    </SettingsProvider>
+    <AuthProvider>
+      <SettingsProvider>
+        <AppContent />
+      </SettingsProvider>
+    </AuthProvider>
   );
 }
 
