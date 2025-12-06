@@ -140,6 +140,8 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
         else signalType = 'BUY';
     }
 
+    console.log(`  → Bias: ${bias}, SignalType: ${signalType}, Regime: ${currentRegime}`);
+
     // Strict Trend Filter for Conservative
     if (mode === 'CONSERVATIVE') {
         if (bias === 'BULLISH' && signalType === 'SELL') return null; // No counter-trend
