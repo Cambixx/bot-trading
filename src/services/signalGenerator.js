@@ -268,35 +268,161 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
         // SCALPING: No /2 division! Raw score (max ~5.0, normalize to 1.0)
         subscores.momentum = clamp(impScore / 4.5, 0, 1);
 
-    } else {
-        // ===== STANDARD MODE Momentum Scoring =====
+    } else if (mode === 'CONSERVATIVE') {
+        // ===== CONSERVATIVE MODE: Strict trend-following =====
+        // Only high-confidence setups with strong trend alignment
+
+        // RSI - Very strict zones, looking for pullbacks in trend
         if (indicators.rsi) {
             if (signalType === 'BUY') {
-                if (bias === 'BULLISH') {
-                    if (indicators.rsi >= 40 && indicators.rsi <= 60) impScore += 0.6;
-                    if (indicators.rsi < 40) impScore += 1.0;
-                } else {
-                    if (indicators.rsi < 35) impScore += 1.0;
-                    else if (indicators.rsi < 45) impScore += 0.5;
+                // Buy only on deep pullbacks in uptrend
+                if (indicators.rsi >= 30 && indicators.rsi <= 45) impScore += 1.0; // Golden zone
+                else if (indicators.rsi < 30) impScore += 0.8; // Oversold (careful)
+            } else {
+                if (indicators.rsi >= 55 && indicators.rsi <= 70) impScore += 1.0;
+                else if (indicators.rsi > 70) impScore += 0.8;
+            }
+        }
+
+        // RSI Velocity - Must be recovering in our direction
+        if (indicators.rsiVelocity != null) {
+            if (signalType === 'BUY' && indicators.rsiVelocity > 3) {
+                impScore += 0.6; // RSI recovering
+                reasons.push({ text: 'RSI recuperando ↑', weight: 60 });
+            }
+            if (signalType === 'SELL' && indicators.rsiVelocity < -3) {
+                impScore += 0.6;
+                reasons.push({ text: 'RSI cayendo ↓', weight: 60 });
+            }
+        }
+
+        // Stochastic - Confirmation only when not extreme
+        if (indicators.stochastic?.k != null) {
+            const stochK = indicators.stochastic.k;
+            if (signalType === 'BUY' && stochK > 20 && stochK < 50) impScore += 0.5;
+            if (signalType === 'SELL' && stochK > 50 && stochK < 80) impScore += 0.5;
+        }
+
+        // MACD - Must align with direction
+        if (indicators.macd?.histogram != null) {
+            const hist = indicators.macd.histogram;
+            if (signalType === 'BUY' && hist > 0) impScore += 0.4;
+            if (signalType === 'SELL' && hist < 0) impScore += 0.4;
+        }
+
+        subscores.momentum = clamp(impScore / 2.5, 0, 1);
+
+    } else if (mode === 'RISKY') {
+        // ===== RISKY MODE: Momentum reversals and breakouts =====
+        // Looking for quick moves, accepting more risk
+
+        // RSI - Wide zones, looking for reversals or momentum
+        if (indicators.rsi) {
+            if (signalType === 'BUY') {
+                if (indicators.rsi < 30) impScore += 1.2; // Oversold reversal
+                else if (indicators.rsi >= 30 && indicators.rsi <= 50) impScore += 0.8;
+                else if (indicators.rsi > 50 && indicators.rsi < 65) impScore += 0.5; // Momentum continuation
+            } else {
+                if (indicators.rsi > 70) impScore += 1.2; // Overbought reversal
+                else if (indicators.rsi >= 50 && indicators.rsi <= 70) impScore += 0.8;
+                else if (indicators.rsi > 35 && indicators.rsi < 50) impScore += 0.5;
+            }
+        }
+
+        // RSI Velocity - Strong acceleration gets bonus
+        if (indicators.rsiVelocity != null) {
+            if (signalType === 'BUY' && indicators.rsiVelocity > 8) {
+                impScore += 1.0; // Strong acceleration
+                reasons.push({ text: 'Aceleración fuerte ↑↑', weight: 100 });
+            } else if (signalType === 'BUY' && indicators.rsiVelocity > 4) {
+                impScore += 0.5;
+            }
+            if (signalType === 'SELL' && indicators.rsiVelocity < -8) {
+                impScore += 1.0;
+                reasons.push({ text: 'Aceleración fuerte ↓↓', weight: 100 });
+            } else if (signalType === 'SELL' && indicators.rsiVelocity < -4) {
+                impScore += 0.5;
+            }
+        }
+
+        // Stochastic - Extreme zones for reversals
+        if (indicators.stochastic?.k != null && indicators.stochastic?.d != null) {
+            const stochK = indicators.stochastic.k;
+            const stochD = indicators.stochastic.d;
+            if (signalType === 'BUY') {
+                if (stochK < 20) impScore += 0.8; // Deep oversold
+                if (stochK < 30 && stochK > stochD) {
+                    impScore += 0.6; // Crossing up
+                    reasons.push({ text: 'Stoch cruce alcista', weight: 60 });
                 }
             } else {
-                if (bias === 'BEARISH') {
-                    if (indicators.rsi >= 40 && indicators.rsi <= 60) impScore += 0.6;
-                    if (indicators.rsi > 60) impScore += 1.0;
-                } else {
-                    if (indicators.rsi > 65) impScore += 1.0;
-                    else if (indicators.rsi > 55) impScore += 0.5;
+                if (stochK > 80) impScore += 0.8;
+                if (stochK > 70 && stochK < stochD) {
+                    impScore += 0.6;
+                    reasons.push({ text: 'Stoch cruce bajista', weight: 60 });
                 }
             }
         }
-        if (indicators.macd?.histogram) {
+
+        // MACD - Histogram momentum
+        if (indicators.macd?.histogram != null) {
             const hist = indicators.macd.histogram;
             if (signalType === 'BUY' && hist > 0) impScore += 0.5;
-            if (signalType === 'BUY' && hist > 0 && hist > (indicators.macd.prevHistogram || 0)) impScore += 0.5;
             if (signalType === 'SELL' && hist < 0) impScore += 0.5;
-            if (signalType === 'SELL' && hist < 0 && hist < (indicators.macd.prevHistogram || 0)) impScore += 0.5;
         }
-        subscores.momentum = clamp(impScore / 2, 0, 1);
+
+        subscores.momentum = clamp(impScore / 3.5, 0, 1);
+
+    } else {
+        // ===== BALANCED MODE: Best of both worlds =====
+        // Moderate zones, good confirmation
+
+        if (indicators.rsi) {
+            if (signalType === 'BUY') {
+                if (indicators.rsi >= 35 && indicators.rsi <= 50) impScore += 1.0; // Pullback zone
+                else if (indicators.rsi < 35) impScore += 0.8; // Oversold
+                else if (indicators.rsi > 50 && indicators.rsi < 60) impScore += 0.4; // Continuation
+            } else {
+                if (indicators.rsi >= 50 && indicators.rsi <= 65) impScore += 1.0;
+                else if (indicators.rsi > 65) impScore += 0.8;
+                else if (indicators.rsi > 40 && indicators.rsi < 50) impScore += 0.4;
+            }
+        }
+
+        // RSI Velocity
+        if (indicators.rsiVelocity != null) {
+            if (signalType === 'BUY' && indicators.rsiVelocity > 4) {
+                impScore += 0.6;
+                reasons.push({ text: 'RSI acelerando ↑', weight: 60 });
+            }
+            if (signalType === 'SELL' && indicators.rsiVelocity < -4) {
+                impScore += 0.6;
+                reasons.push({ text: 'RSI cayendo ↓', weight: 60 });
+            }
+        }
+
+        // Stochastic - Moderate zones
+        if (indicators.stochastic?.k != null && indicators.stochastic?.d != null) {
+            const stochK = indicators.stochastic.k;
+            const stochD = indicators.stochastic.d;
+            if (signalType === 'BUY' && stochK < 35 && stochK > stochD) {
+                impScore += 0.6;
+                reasons.push({ text: 'Stoch alcista', weight: 60 });
+            }
+            if (signalType === 'SELL' && stochK > 65 && stochK < stochD) {
+                impScore += 0.6;
+                reasons.push({ text: 'Stoch bajista', weight: 60 });
+            }
+        }
+
+        // MACD
+        if (indicators.macd?.histogram != null) {
+            const hist = indicators.macd.histogram;
+            if (signalType === 'BUY' && hist > 0) impScore += 0.5;
+            if (signalType === 'SELL' && hist < 0) impScore += 0.5;
+        }
+
+        subscores.momentum = clamp(impScore / 2.7, 0, 1);
     }
 
     if (subscores.momentum > 0.6) reasons.push({ text: 'Momentum fuerte', weight: percent(subscores.momentum) });
@@ -414,6 +540,91 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
         if (patterns.hammer || patterns.bullishEngulfing) {
             finalNormalized += 0.15;
             reasons.push({ text: 'Patrón de vela alcista', weight: 15 });
+        }
+    }
+
+    // ===== CONSERVATIVE MODE: Trend Confirmation Boosts =====
+    if (mode === 'CONSERVATIVE') {
+        // Strong trend alignment bonus
+        if (indicators.ema20 && indicators.ema50 && indicators.sma200) {
+            if (signalType === 'BUY' && indicators.ema20 > indicators.ema50 && price > indicators.sma200) {
+                finalNormalized += 0.20;
+                reasons.push({ text: '🛡️ Triple alineación alcista', weight: 20 });
+            }
+            if (signalType === 'SELL' && indicators.ema20 < indicators.ema50 && price < indicators.sma200) {
+                finalNormalized += 0.20;
+                reasons.push({ text: '🛡️ Triple alineación bajista', weight: 20 });
+            }
+        }
+
+        // ADX strength bonus (strong trend)
+        if (indicators.adx && indicators.adx > 30) {
+            finalNormalized += 0.15;
+            reasons.push({ text: 'Tendencia fuerte (ADX)', weight: 15 });
+        }
+
+        // Low choppiness extra bonus for conservative
+        if (choppiness < 40) {
+            finalNormalized += 0.10;
+        }
+    }
+
+    // ===== BALANCED MODE: Moderate Boosts =====
+    if (mode === 'BALANCED') {
+        // EMA alignment bonus
+        if (indicators.ema20 && indicators.ema50) {
+            if (signalType === 'BUY' && indicators.ema20 > indicators.ema50) {
+                finalNormalized += 0.12;
+                reasons.push({ text: '⚖️ EMA alineación', weight: 12 });
+            }
+            if (signalType === 'SELL' && indicators.ema20 < indicators.ema50) {
+                finalNormalized += 0.12;
+                reasons.push({ text: '⚖️ EMA alineación', weight: 12 });
+            }
+        }
+
+        // Divergence bonus
+        if (analysis.divergence?.rsi?.bullish && signalType === 'BUY') {
+            finalNormalized += 0.15;
+            reasons.push({ text: 'Divergencia RSI alcista', weight: 15 });
+        }
+        if (analysis.divergence?.rsi?.bearish && signalType === 'SELL') {
+            finalNormalized += 0.15;
+            reasons.push({ text: 'Divergencia RSI bajista', weight: 15 });
+        }
+
+        // Volume confirmation
+        if (volume.spike) {
+            finalNormalized += 0.10;
+        }
+    }
+
+    // ===== RISKY MODE: Aggressive Boosts =====
+    if (mode === 'RISKY') {
+        // Reversal pattern bonus (big reward for catching reversals)
+        if (patterns.hammer || patterns.bullishEngulfing || patterns.morningStar) {
+            finalNormalized += 0.20;
+            reasons.push({ text: '🚀 Patrón de reversión', weight: 20 });
+        }
+        if (patterns.eveningStar || patterns.doubleTop) {
+            finalNormalized += 0.20;
+            reasons.push({ text: '🚀 Patrón bajista', weight: 20 });
+        }
+
+        // Momentum acceleration bonus
+        if (subscores.momentum >= 0.7) {
+            finalNormalized += 0.15;
+            reasons.push({ text: 'Momentum explosivo', weight: 15 });
+        }
+
+        // Stochastic extreme zones bonus
+        if (indicators.stochastic?.k < 15 && signalType === 'BUY') {
+            finalNormalized += 0.10;
+            reasons.push({ text: 'Stoch extremo (oversold)', weight: 10 });
+        }
+        if (indicators.stochastic?.k > 85 && signalType === 'SELL') {
+            finalNormalized += 0.10;
+            reasons.push({ text: 'Stoch extremo (overbought)', weight: 10 });
         }
     }
 
