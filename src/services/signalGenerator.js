@@ -195,38 +195,110 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
 
     // --- 3.1 Momentum (RSI, MACD, Stoch) ---
     let impScore = 0;
-    // RSI Logic: Dynamic based on Regime
-    if (indicators.rsi) {
-        if (signalType === 'BUY') {
-            // In strong uptrend, 40-50 is a dip. In range, <30 is buy.
-            if (bias === 'BULLISH') {
-                if (indicators.rsi >= 40 && indicators.rsi <= 60) impScore += 0.6; // Good dip
-                if (indicators.rsi < 40) impScore += 1.0; // Deep dip
-            } else {
-                if (indicators.rsi < 35) impScore += 1.0;
-                else if (indicators.rsi < 45) impScore += 0.5;
-            }
-        } else { // SELL
-            if (bias === 'BEARISH') {
-                if (indicators.rsi >= 40 && indicators.rsi <= 60) impScore += 0.6; // Pullback up
-                if (indicators.rsi > 60) impScore += 1.0;
-            } else {
-                if (indicators.rsi > 65) impScore += 1.0;
-                else if (indicators.rsi > 55) impScore += 0.5;
+
+    // ===== SCALPING MODE: Enhanced Momentum Scoring =====
+    if (mode === 'SCALPING') {
+        // RSI - More generous zones for scalping
+        if (indicators.rsi) {
+            if (signalType === 'BUY') {
+                // Scalping: RSI 30-50 is a buy zone (pullback in micro-trend)
+                if (indicators.rsi >= 25 && indicators.rsi <= 45) impScore += 1.0;
+                else if (indicators.rsi < 25) impScore += 1.2; // Oversold bounce
+                else if (indicators.rsi >= 45 && indicators.rsi <= 55) impScore += 0.6; // Neutral ok
+            } else { // SELL
+                if (indicators.rsi >= 55 && indicators.rsi <= 75) impScore += 1.0;
+                else if (indicators.rsi > 75) impScore += 1.2; // Overbought reversal
+                else if (indicators.rsi >= 45 && indicators.rsi < 55) impScore += 0.6;
             }
         }
-    }
-    // MACD Logic
-    if (indicators.macd && indicators.macd.histogram) {
-        const hist = indicators.macd.histogram;
-        if (signalType === 'BUY' && hist > 0) impScore += 0.5; // Momentum shifting up
-        if (signalType === 'BUY' && hist > 0 && hist > (indicators.macd.prevHistogram || 0)) impScore += 0.5; // Growing
 
-        if (signalType === 'SELL' && hist < 0) impScore += 0.5;
-        if (signalType === 'SELL' && hist < 0 && hist < (indicators.macd.prevHistogram || 0)) impScore += 0.5; // Growing down
+        // RSI Velocity - Momentum acceleration (key for scalping!)
+        if (indicators.rsiVelocity != null) {
+            if (signalType === 'BUY' && indicators.rsiVelocity > 5) {
+                impScore += 0.8; // RSI rising fast
+                reasons.push({ text: 'RSI acelerando ↑', weight: 80 });
+            }
+            if (signalType === 'SELL' && indicators.rsiVelocity < -5) {
+                impScore += 0.8; // RSI falling fast
+                reasons.push({ text: 'RSI cayendo ↓', weight: 80 });
+            }
+        }
+
+        // Stochastic - Critical for scalping (oversold/overbought crosses)
+        if (indicators.stochastic?.k != null && indicators.stochastic?.d != null) {
+            const stochK = indicators.stochastic.k;
+            const stochD = indicators.stochastic.d;
+
+            if (signalType === 'BUY') {
+                if (stochK < 25 && stochK > stochD) {
+                    impScore += 1.0; // K crosses above D in oversold
+                    reasons.push({ text: 'Stoch cruce alcista', weight: 100 });
+                } else if (stochK < 40) {
+                    impScore += 0.5; // Low stoch, room to rise
+                }
+            } else { // SELL
+                if (stochK > 75 && stochK < stochD) {
+                    impScore += 1.0; // K crosses below D in overbought
+                    reasons.push({ text: 'Stoch cruce bajista', weight: 100 });
+                } else if (stochK > 60) {
+                    impScore += 0.5;
+                }
+            }
+        }
+
+        // MACD - Histogram momentum
+        if (indicators.macd?.histogram != null) {
+            const hist = indicators.macd.histogram;
+            if (signalType === 'BUY' && hist > 0) impScore += 0.6;
+            if (signalType === 'SELL' && hist < 0) impScore += 0.6;
+        }
+
+        // EMA9 Alignment (fast trend) - Scalping bonus
+        if (indicators.ema9 != null) {
+            if (signalType === 'BUY' && price > indicators.ema9) {
+                impScore += 0.5;
+                reasons.push({ text: 'Sobre EMA9 (micro-trend)', weight: 50 });
+            }
+            if (signalType === 'SELL' && price < indicators.ema9) {
+                impScore += 0.5;
+                reasons.push({ text: 'Bajo EMA9 (micro-trend)', weight: 50 });
+            }
+        }
+
+        // SCALPING: No /2 division! Raw score (max ~5.0, normalize to 1.0)
+        subscores.momentum = clamp(impScore / 4.5, 0, 1);
+
+    } else {
+        // ===== STANDARD MODE Momentum Scoring =====
+        if (indicators.rsi) {
+            if (signalType === 'BUY') {
+                if (bias === 'BULLISH') {
+                    if (indicators.rsi >= 40 && indicators.rsi <= 60) impScore += 0.6;
+                    if (indicators.rsi < 40) impScore += 1.0;
+                } else {
+                    if (indicators.rsi < 35) impScore += 1.0;
+                    else if (indicators.rsi < 45) impScore += 0.5;
+                }
+            } else {
+                if (bias === 'BEARISH') {
+                    if (indicators.rsi >= 40 && indicators.rsi <= 60) impScore += 0.6;
+                    if (indicators.rsi > 60) impScore += 1.0;
+                } else {
+                    if (indicators.rsi > 65) impScore += 1.0;
+                    else if (indicators.rsi > 55) impScore += 0.5;
+                }
+            }
+        }
+        if (indicators.macd?.histogram) {
+            const hist = indicators.macd.histogram;
+            if (signalType === 'BUY' && hist > 0) impScore += 0.5;
+            if (signalType === 'BUY' && hist > 0 && hist > (indicators.macd.prevHistogram || 0)) impScore += 0.5;
+            if (signalType === 'SELL' && hist < 0) impScore += 0.5;
+            if (signalType === 'SELL' && hist < 0 && hist < (indicators.macd.prevHistogram || 0)) impScore += 0.5;
+        }
+        subscores.momentum = clamp(impScore / 2, 0, 1);
     }
 
-    subscores.momentum = clamp(impScore / 2, 0, 1);
     if (subscores.momentum > 0.6) reasons.push({ text: 'Momentum fuerte', weight: percent(subscores.momentum) });
 
     // --- 3.2 Trend Quality ---
@@ -308,6 +380,41 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
     if (choppiness < 30) {
         finalNormalized += 0.1; // Trending boost
         reasons.push({ text: 'Tendencia muy limpia (Low Chop)', weight: 10 });
+    }
+
+    // ===== SCALPING MODE: Additional Boosts =====
+    if (mode === 'SCALPING') {
+        // Boost for strong momentum (key for scalping)
+        if (subscores.momentum >= 0.6) {
+            finalNormalized += 0.20;
+            reasons.push({ text: '⚡ Scalping Momentum Boost', weight: 20 });
+        }
+
+        // Boost for EMA9+EMA20 alignment
+        if (indicators.ema9 && indicators.ema20) {
+            if (signalType === 'BUY' && indicators.ema9 > indicators.ema20 && price > indicators.ema9) {
+                finalNormalized += 0.15;
+                reasons.push({ text: 'EMA9 > EMA20 (Micro-tendencia)', weight: 15 });
+            }
+            if (signalType === 'SELL' && indicators.ema9 < indicators.ema20 && price < indicators.ema9) {
+                finalNormalized += 0.15;
+                reasons.push({ text: 'EMA9 < EMA20 (Micro-tendencia)', weight: 15 });
+            }
+        }
+
+        // Volume boost for scalping (any decent volume helps)
+        if (buyerPressure?.current > 50 && signalType === 'BUY') {
+            finalNormalized += 0.10;
+        }
+        if (buyerPressure?.current < 50 && signalType === 'SELL') {
+            finalNormalized += 0.10;
+        }
+
+        // Pattern boost (Hammer, Engulfing are great for reversals)
+        if (patterns.hammer || patterns.bullishEngulfing) {
+            finalNormalized += 0.15;
+            reasons.push({ text: 'Patrón de vela alcista', weight: 15 });
+        }
     }
 
     finalNormalized = clamp(finalNormalized, 0, 1);

@@ -936,6 +936,7 @@ export function performTechnicalAnalysis(candles) {
     // Indicadores básicos
     const rsi = calculateRSI(closes);
     const macd = calculateMACD(closes);
+    const ema9 = calculateEMA(closes, 9);  // Fast EMA for scalping
     const ema20 = calculateEMA(closes, 20);
     const ema50 = calculateEMA(closes, 50);
     const sma200 = calculateSMA(closes, 200);
@@ -943,7 +944,13 @@ export function performTechnicalAnalysis(candles) {
     const atr = calculateATR(candles);
     const adx = calculateADX(candles);
     const stochastic = calculateStochastic(candles);
-    const vwap = calculateSMA(closes, 20); // Aproximación simple si no hay datos intradía reales
+    const vwap = calculateSMA(closes, 20); // Aproximación simple
+
+    // RSI Velocity (cambio en RSI últimas 3 velas - para detectar aceleración)
+    const lastIndex = closes.length - 1;
+    const rsiVelocity = (rsi[lastIndex] != null && rsi[lastIndex - 3] != null)
+        ? rsi[lastIndex] - rsi[lastIndex - 3]
+        : 0;
 
     // Niveles
     const supportResistance = findSupportResistance(candles);
@@ -976,18 +983,19 @@ export function performTechnicalAnalysis(candles) {
     const rsiDivergence = detectDivergence(closes, rsi, 10);
     const macdDivergence = detectDivergence(closes, macd.macd, 10);
 
-    // Últimos valores
-    const lastIndex = closes.length - 1;
+    // Últimos valores (lastIndex ya calculado arriba)
 
     return {
         price: closes[lastIndex],
         indicators: {
             rsi: rsi[lastIndex],
+            rsiVelocity: rsiVelocity,  // Cambio RSI últimas 3 velas
             macd: {
                 line: macd.macd[lastIndex],
                 signal: macd.signal[lastIndex],
                 histogram: macd.histogram[lastIndex]
             },
+            ema9: ema9[lastIndex],   // Fast EMA for scalping
             ema20: ema20[lastIndex],
             ema50: ema50[lastIndex],
             sma200: sma200[lastIndex],
