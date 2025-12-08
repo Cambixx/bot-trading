@@ -47,6 +47,23 @@ const MODES = {
             divergence: 0.025,
             accumulation: 0.025
         }
+    },
+    // SCALPING: Optimizado para day trading / scalping (4-5 operaciones/día)
+    // Prioriza momentum rápido y volumen, ignora tendencias largas
+    SCALPING: {
+        categoryThresholdForConvergence: 0.10,  // Muy bajo, buscamos cualquier señal
+        requiredCategories: 1,
+        scoreToEmit: 0.28,  // Umbral bajo para mayor frecuencia de señales
+        weights: {
+            momentum: 0.40,      // Momentum domina (RSI, MACD rápidos)
+            trend: 0.10,         // Tendencia tiene menos peso
+            trendStrength: 0.05,
+            levels: 0.10,        // S/R para entradas precisas
+            volume: 0.25,        // Volumen crítico para confirmar
+            patterns: 0.05,      // Patrones de vela
+            divergence: 0.025,
+            accumulation: 0.025
+        }
     }
 };
 
@@ -96,7 +113,10 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
     // For now, we penalize or abort.
     if (choppiness > 61.8) {
         if (mode === 'CONSERVATIVE') return null; // Abort in conservative
-        warnings.push({ text: 'Mercado muy lateral (Choppy)', type: 'risk' });
+        // SCALPING: Permitimos más choppiness si hay momentum fuerte
+        if (mode !== 'SCALPING') {
+            warnings.push({ text: 'Mercado muy lateral (Choppy)', type: 'risk' });
+        }
     }
 
     // 1.2 ADX Trend Strength Check
@@ -142,12 +162,13 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
 
     console.log(`  → Bias: ${bias}, SignalType: ${signalType}, Regime: ${currentRegime}`);
 
-    // Strict Trend Filter for Conservative
+    // Strict Trend Filter for Conservative (SCALPING ignora esto)
     if (mode === 'CONSERVATIVE') {
         if (bias === 'BULLISH' && signalType === 'SELL') return null; // No counter-trend
         if (bias === 'BEARISH' && signalType === 'BUY') return null;
         if (bias === 'NEUTRAL') return null;
     }
+    // SCALPING permite señales contra-tendencia si el momentum es fuerte
 
     // Filter against SMA200 (Major Trend Line)
     if (indicators.sma200) {
@@ -313,8 +334,14 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
     const atr = indicators.atr || (price * 0.02);
     let stopLoss, takeProfit1;
 
-    // Dynamic SL based on volatility state
-    const volMult = choppiness > 50 ? 2.5 : 1.5; // Wider SL in chop
+    // Dynamic SL based on volatility state and mode
+    // SCALPING usa stops más ajustados para operaciones rápidas
+    let volMult;
+    if (mode === 'SCALPING') {
+        volMult = choppiness > 50 ? 1.2 : 0.8; // Stops muy ajustados para scalping
+    } else {
+        volMult = choppiness > 50 ? 2.5 : 1.5; // Wider SL in chop for other modes
+    }
 
     if (signalType === 'BUY') {
         stopLoss = price - (atr * volMult);

@@ -327,6 +327,7 @@ function AppContent() {
             {tradingMode === 'CONSERVATIVE' && 'Conservador'}
             {tradingMode === 'BALANCED' && 'Equilibrado'}
             {tradingMode === 'RISKY' && 'Arriesgado'}
+            {tradingMode === 'SCALPING' && 'Scalping'}
           </span>
         </div>
       </div>

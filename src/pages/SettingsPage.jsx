@@ -26,7 +26,7 @@ function SettingsPage() {
                     <p className="text-muted mb-md">Define la agresividad de las señales generadas.</p>
 
                     <div className="mode-options" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                        {['CONSERVATIVE', 'BALANCED', 'RISKY'].map(mode => (
+                        {['CONSERVATIVE', 'BALANCED', 'RISKY', 'SCALPING'].map(mode => (
                             <button
                                 key={mode}
                                 onClick={() => setTradingMode(mode)}
@@ -36,6 +36,7 @@ function SettingsPage() {
                                 {mode === 'CONSERVATIVE' && '🛡️ Conservador'}
                                 {mode === 'BALANCED' && '⚖️ Equilibrado'}
                                 {mode === 'RISKY' && '🚀 Arriesgado'}
+                                {mode === 'SCALPING' && '⚡ Scalping'}
                             </button>
                         ))}
                     </div>
@@ -44,6 +45,7 @@ function SettingsPage() {
                             {tradingMode === 'CONSERVATIVE' && 'Solo opera a favor de la tendencia mayor. Menos señales, mayor tasa de acierto.'}
                             {tradingMode === 'BALANCED' && 'Equilibrio entre tendencia y momentum. Estrategia estándar.'}
                             {tradingMode === 'RISKY' && 'Busca reversiones y scalps rápidos. Más señales, mayor riesgo.'}
+                            {tradingMode === 'SCALPING' && 'Modo day trading: stops ajustados, alta frecuencia (~4-5 operaciones/día por par).'}
                         </small>
                     </div>
                 </div>
