@@ -1,8 +1,8 @@
-import { TrendingUp, TrendingDown, Activity, Target, Shield, AlertTriangle, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import './CryptoCard.css';
 
 function CryptoCard({ crypto }) {
-    const { symbol, price, priceChangePercent, volume24h, analysis } = crypto;
+    const { symbol, price, priceChangePercent, opportunity } = crypto;
     const isPositive = priceChangePercent >= 0;
 
     // Formatear precio dinámicamente según el valor
@@ -14,70 +14,21 @@ function CryptoCard({ crypto }) {
         return price.toLocaleString(undefined, { minimumFractionDigits: 8, maximumFractionDigits: 8 });
     };
 
-    // Calculate Market Health Score (Actionability)
-    const calculateMarketHealth = () => {
-        if (!analysis || !analysis.indicators) return { score: 0, confidence: 'LOW', label: 'Neutral' };
+    // Usar el score de oportunidad calculado por signalGenerator (viene de App.jsx)
+    // Este es el mismo algoritmo que se usa para las señales
+    const score = opportunity || 0;
 
-        const { indicators } = analysis;
-        let score = 0;
-
-        // RSI (0-100)
-        // Extreme values represent opportunity (Oversold = Buy, Overbought = Sell)
-        if (indicators.rsi < 30) score += 30; // Oversold -> Buy
-        else if (indicators.rsi > 70) score += 30; // Overbought -> Sell
-        else if (indicators.rsi < 40 || indicators.rsi > 60) score += 15; // Approaching extremes
-
-        // MACD
-        // Strong momentum in either direction
-        if (indicators.macd && indicators.macd.histogram) {
-            if (Math.abs(indicators.macd.histogram) > 0) score += 20;
-        }
-
-        // Trend (EMA)
-        // Strong trend in either direction
-        if (indicators.ema20 && indicators.ema50) {
-            const trendStrength = Math.abs(indicators.ema20 - indicators.ema50) / indicators.ema50;
-            if (trendStrength > 0.005) { // 0.5% separation
-                score += 20;
-                // Price action confirmation
-                if (indicators.ema20 > indicators.ema50 && price < indicators.ema20) score += 10; // Dip buy
-                else if (indicators.ema20 < indicators.ema50 && price > indicators.ema20) score += 10; // Rally sell
-            }
-        }
-
-        // Bollinger
-        // Price at bands
-        if (indicators.bollingerBands) {
-            if (price <= indicators.bollingerBands.lower || price >= indicators.bollingerBands.upper) {
-                score += 20;
-            }
-        }
-
-        // Normalize to 0-100
-        score = Math.max(0, Math.min(100, score));
-
-        let confidence = 'LOW';
-        let label = 'Neutral';
-        if (score >= 70) { confidence = 'HIGH'; label = 'Alta Volatilidad'; }
-        else if (score >= 40) { confidence = 'MEDIUM'; label = 'Oportunidad Media'; }
-        else { confidence = 'LOW'; label = 'Baja Acción'; }
-
-        return { score, confidence, label };
+    // Determinar nivel de oportunidad
+    const getOpportunityLevel = () => {
+        if (score >= 70) return { level: 'HIGH', label: 'Alta Oportunidad', color: 'success' };
+        if (score >= 50) return { level: 'MEDIUM', label: 'Oportunidad Media', color: 'warning' };
+        return { level: 'LOW', label: 'Baja Oportunidad', color: 'info' };
     };
 
-    const marketHealth = calculateMarketHealth();
-    const indicators = analysis?.indicators || {};
-    const levels = analysis?.levels || {};
-
-    // Helper for confidence colors
-    const confidenceColor = {
-        HIGH: 'success',
-        MEDIUM: 'warning',
-        LOW: 'info' // Using info for low/neutral to be less alarming than danger
-    };
+    const opportunityInfo = getOpportunityLevel();
 
     return (
-        <div className={`crypto-card glass-card fade-in ${marketHealth.confidence.toLowerCase()}-signal`}>
+        <div className={`crypto-card glass-card fade-in ${opportunityInfo.level.toLowerCase()}-signal`}>
             {/* Header */}
             <div className="crypto-header">
                 <div className="crypto-symbol">
@@ -86,70 +37,32 @@ function CryptoCard({ crypto }) {
                 </div>
                 <div className={`crypto-change ${isPositive ? 'positive' : 'negative'}`}>
                     {isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                    <span>{Math.abs(priceChangePercent).toFixed(2)}%</span>
+                    <span>{isPositive ? '+' : ''}{priceChangePercent?.toFixed(2)}%</span>
                 </div>
             </div>
 
-            {/* Price & Score */}
+            {/* Price & Score - Simplified */}
             <div className="crypto-main">
                 <div className="crypto-price-container">
-                    <span className="price-label">Precio Actual</span>
                     <span className="price-value">${formatPrice(price)}</span>
                 </div>
                 <div className="crypto-score">
-                    <div className="score-circle" style={{ '--score': marketHealth.score }}>
-                        <span className="score-value">{marketHealth.score}</span>
+                    <div
+                        className="score-circle"
+                        style={{
+                            '--score': score,
+                            borderColor: score >= 70 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--info)'
+                        }}
+                    >
+                        <span className="score-value">{score}</span>
                     </div>
-                    <span className="score-label">Score</span>
                 </div>
             </div>
 
-            {/* Indicators */}
-            {analysis && (
-                <div className="crypto-indicators-grid">
-                    <div className="indicator-item">
-                        <span className="indicator-label">RSI</span>
-                        <span className="indicator-value">{indicators.rsi ? indicators.rsi.toFixed(1) : '-'}</span>
-                    </div>
-                    <div className="indicator-item">
-                        <span className="indicator-label">MACD</span>
-                        <span className="indicator-value">{indicators.macd?.histogram ? indicators.macd.histogram.toFixed(4) : '-'}</span>
-                    </div>
-                    <div className="indicator-item">
-                        <span className="indicator-label">Vol 24h</span>
-                        <span className="indicator-value">${(volume24h / 1000000).toFixed(1)}M</span>
-                    </div>
-                </div>
-            )}
-
-            {/* Levels */}
-            {analysis && (
-                <div className="crypto-levels">
-                    <div className="level-item">
-                        <Shield className="level-icon text-info" />
-                        <div className="level-info">
-                            <span className="level-label">Soporte</span>
-                            <span className="level-value text-info">
-                                ${levels.support ? formatPrice(levels.support) : '-'}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="level-item">
-                        <Target className="level-icon text-warning" />
-                        <div className="level-info">
-                            <span className="level-label">Resistencia</span>
-                            <span className="level-value text-warning">
-                                ${levels.resistance ? formatPrice(levels.resistance) : '-'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Footer / Badge */}
             <div className="crypto-footer">
-                <span className={`badge badge-${confidenceColor[marketHealth.confidence]}`}>
-                    {marketHealth.label}
+                <span className={`badge badge-${opportunityInfo.color}`}>
+                    {opportunityInfo.label}
                 </span>
             </div>
         </div>

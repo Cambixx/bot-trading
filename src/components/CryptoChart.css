@@ -1,192 +1,284 @@
 .crypto-chart-container {
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chart-title-section {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
 }
 
 .chart-title {
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
 }
 
-.btn-close-chart {
-    background: none;
+.chart-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-success);
+}
+
+.chart-controls {
+    display: flex;
+    gap: 0.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.2rem;
+    border-radius: 6px;
+}
+
+.tf-btn {
+    padding: 0.3rem 0.5rem;
     border: none;
-    color: var(--text-muted);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
     cursor: pointer;
-    padding: 4px;
-    border-radius: 50%;
-    transition: all 0.2s;
+    border-radius: 4px;
+    transition: all 0.15s;
+}
+
+.tf-btn:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.tf-btn.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Overlay Toggles */
+.overlay-toggles {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.toggle-btn {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: 0.65rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+}
+
+.toggle-btn:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--color-text-secondary);
+}
+
+.toggle-btn.active {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #3b82f6;
+}
+
+.toggle-separator {
+    color: rgba(255, 255, 255, 0.15);
+    padding: 0 0.25rem;
+}
+
+/* Quick Info */
+.chart-quick-info {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.qi-item {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-secondary);
 }
 
-.btn-close-chart:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
+.qi-item.support {
+    color: #22c55e;
 }
 
+.qi-item.resistance {
+    color: #ef4444;
+}
+
+.qi-item.oversold {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.qi-item.overbought {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.qi-item.bullish {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.qi-item.bearish {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.qi-item.pattern {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+}
+
+/* Signal Bar */
+.signal-bar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.4rem 0.6rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.signal-bar .buy {
+    color: #22c55e;
+}
+
+.signal-bar .sell {
+    color: #ef4444;
+}
+
+.signal-bar .entry {
+    color: #f59e0b;
+}
+
+.signal-bar .sl {
+    color: #ef4444;
+}
+
+.signal-bar .tp {
+    color: #22c55e;
+}
+
+/* Chart Wrapper */
 .chart-wrapper {
-    width: 100%;
-    height: 300px;
     position: relative;
+    min-height: 320px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .chart-loading,
 .chart-error {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 10;
+    color: var(--color-text-secondary);
 }
 
 .chart-error {
-    color: #ef5350;
-    font-size: 0.9rem;
+    color: var(--color-danger);
 }
 
 .spinner {
     animation: spin 1s linear infinite;
-    color: var(--primary);
 }
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
     to {
         transform: rotate(360deg);
     }
 }
 
-/* Prediction Panel */
-.prediction-panel {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 12px;
-    z-index: 5;
-    min-width: 200px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.prediction-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.prediction-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 12px;
-}
-
-.prediction-badge.bullish {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.prediction-badge.bearish {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.prediction-badge.neutral {
-    background: rgba(148, 163, 184, 0.15);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-}
-
-.prediction-stats {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 0.8rem;
-}
-
-.stat-item {
+/* Indicator Panels */
+.indicator-panel {
     display: flex;
     flex-direction: column;
+    gap: 0.2rem;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    max-height: 100px;
+    opacity: 1;
 }
 
-.stat-item.bullish .value {
-    color: #4ade80;
-}
-
-.stat-item.bearish .value {
-    color: #f87171;
-    text-align: right;
-}
-
-.stat-item .label {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    margin-bottom: 2px;
-}
-
-.stat-item .value {
-    font-weight: 600;
-}
-
-.prediction-bar {
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+.indicator-panel.hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
     overflow: hidden;
-    display: flex;
+    pointer-events: none;
 }
 
-.bar-fill.bullish {
-    background: #4ade80;
-    height: 100%;
+.panel-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.bar-fill.bearish {
-    background: #f87171;
-    height: 100%;
+.indicator-chart {
+    min-height: 80px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
 }
 
-/* Mobile responsive adjustments */
+/* Mobile */
 @media (max-width: 768px) {
-    .prediction-panel {
-        position: static;
-        margin-bottom: 12px;
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .chart-controls {
         width: 100%;
-        min-width: unset;
+    }
+
+    .tf-btn {
+        flex: 1;
+        text-align: center;
     }
 
     .chart-wrapper {
-        height: 250px;
+        min-height: 280px;
+    }
+
+    .indicator-chart {
+        min-height: 60px;
+    }
+
+    .overlay-toggles {
+        width: 100%;
+    }
+
+    .signal-bar {
+        flex-direction: column;
+        gap: 0.3rem;
     }
 }

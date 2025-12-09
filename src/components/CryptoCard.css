@@ -1,6 +1,5 @@
 .crypto-card {
     padding: var(--spacing-md);
-    /* Reduced from lg */
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -12,7 +11,7 @@
     box-shadow: var(--shadow-lg), var(--shadow-glow-primary);
 }
 
-/* Status Borders similar to SignalCard */
+/* Status Borders */
 .crypto-card::before {
     content: '';
     position: absolute;
@@ -41,26 +40,22 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--spacing-sm);
-    /* Reduced from lg */
 }
 
 .crypto-symbol {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    /* Reduced from sm */
 }
 
 .crypto-icon {
     width: 20px;
-    /* Reduced from 24px */
     height: 20px;
     color: var(--color-primary);
 }
 
 .crypto-name {
     font-size: 1.125rem;
-    /* Reduced from 1.5rem */
     font-weight: 700;
     color: var(--color-text-primary);
 }
@@ -69,35 +64,29 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.15rem 0.5rem;
-    /* Reduced padding */
+    padding: 0.2rem 0.6rem;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    /* Reduced from 0.875rem */
+    font-size: 0.8rem;
     font-weight: 600;
 }
 
 .crypto-change.positive {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgba(16, 185, 129, 0.15);
     color: var(--color-success);
 }
 
 .crypto-change.negative {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.15);
     color: var(--color-danger);
 }
 
 .crypto-main {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    /* Center align for better vertical stack visual */
-    text-align: center;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-sm);
-    /* Reduced from lg */
     padding: var(--spacing-sm);
-    /* Reduced from md */
     background: var(--color-bg-secondary);
     border-radius: var(--radius-md);
 }
@@ -105,24 +94,11 @@
 .crypto-price-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    /* Center align price text */
-    width: 100%;
-}
-
-.price-label {
-    font-size: 0.65rem;
-    /* Reduced from 0.75rem */
-    color: var(--color-text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 2px;
-    /* Reduced from xs */
+    flex: 1;
 }
 
 .price-value {
-    font-size: 1.25rem;
-    /* Reduced from 1.75rem */
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--color-text-primary);
 }
@@ -132,28 +108,26 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    /* Reduced from sm */
 }
 
 .score-circle {
     position: relative;
-    width: 45px;
-    /* Reduced from 60px */
-    height: 45px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background: conic-gradient(var(--color-success) calc(var(--score) * 1%),
             var(--color-bg-tertiary) 0);
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2px solid transparent;
 }
 
 .score-circle::before {
     content: '';
     position: absolute;
-    width: 35px;
-    /* Reduced from 46px */
-    height: 35px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: var(--color-bg-secondary);
 }
@@ -162,132 +136,43 @@
     position: relative;
     z-index: 1;
     font-size: 1rem;
-    /* Reduced from 1.25rem */
     font-weight: 700;
-    color: var(--color-success);
-}
-
-.score-label {
-    font-size: 0.65rem;
-    /* Reduced from 0.75rem */
-    color: var(--color-text-tertiary);
-}
-
-.crypto-indicators-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xs);
-    /* Reduced from sm */
-    margin-bottom: var(--spacing-sm);
-    /* Reduced from md */
-}
-
-.indicator-item {
-    display: flex;
-    flex-direction: column;
-    padding: var(--spacing-xs);
-    /* Reduced from sm */
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-sm);
-    text-align: center;
-}
-
-.indicator-label {
-    font-size: 0.65rem;
-    /* Reduced from 0.7rem */
-    color: var(--color-text-tertiary);
-    margin-bottom: 2px;
-    /* Reduced from xs */
-}
-
-.indicator-value {
-    font-size: 0.75rem;
-    /* Reduced from 0.875rem */
-    font-weight: 600;
     color: var(--color-text-primary);
-}
-
-.crypto-levels {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    /* Reduced from sm */
-    margin-bottom: var(--spacing-sm);
-    /* Reduced from md */
-    padding: var(--spacing-sm);
-    /* Reduced from md */
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-md);
-}
-
-.level-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    /* Reduced from sm */
-}
-
-.level-icon {
-    width: 14px;
-    /* Reduced from 16px */
-    height: 14px;
-    color: var(--color-text-tertiary);
-}
-
-.level-info {
-    display: flex;
-    justify-content: space-between;
-    flex: 1;
-}
-
-.level-label {
-    font-size: 0.75rem;
-    /* Reduced from 0.875rem */
-    color: var(--color-text-secondary);
-}
-
-.level-value {
-    font-size: 0.75rem;
-    /* Reduced from 0.875rem */
-    font-weight: 600;
 }
 
 .crypto-footer {
     display: flex;
     justify-content: center;
     padding-top: var(--spacing-sm);
-    /* Reduced from md */
     border-top: 1px solid var(--color-border);
 }
 
 /* Badge styles */
 .badge {
-    padding: 0.15rem 0.5rem;
-    /* Reduced padding */
+    padding: 0.2rem 0.6rem;
     border-radius: var(--radius-full);
-    font-size: 0.65rem;
-    /* Reduced from 0.75rem */
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .badge-success {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgba(16, 185, 129, 0.15);
     color: var(--color-success);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .badge-warning {
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(245, 158, 11, 0.15);
     color: var(--color-warning);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .badge-info {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(59, 130, 246, 0.15);
     color: var(--color-info);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 /* Mobile Responsive */
@@ -296,56 +181,24 @@
         padding: 0.75rem;
         box-sizing: border-box;
         width: 100%;
-        max-width: 100%;
     }
 
     .crypto-main {
         padding: 0.5rem;
-        margin-bottom: 0.5rem;
-        flex-direction: row;
-        /* Revert to row for mobile */
-        justify-content: space-between;
-        align-items: center;
-        text-align: left;
-        gap: 0.5rem;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .crypto-price-container {
-        align-items: flex-start;
-        /* Left align price on mobile */
-        width: auto;
-        flex: 1;
-        min-width: 0;
-    }
-
-    .crypto-price-container {
-        min-width: 0;
-        /* Allow shrinking */
-        flex: 1;
     }
 
     .price-value {
         font-size: 1.125rem;
-        word-break: break-all;
-        /* Force break if needed */
-        white-space: normal;
-    }
-
-    .crypto-score {
-        flex-shrink: 0;
     }
 
     .score-circle {
-        width: 40px;
-        height: 40px;
-        flex-shrink: 0;
+        width: 42px;
+        height: 42px;
     }
 
     .score-circle::before {
-        width: 30px;
-        height: 30px;
+        width: 34px;
+        height: 34px;
     }
 
     .score-value {

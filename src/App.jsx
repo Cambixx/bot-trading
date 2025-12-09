@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { RefreshCw, Settings as SettingsIcon } from 'lucide-react';
 import './App.css';
@@ -28,6 +28,86 @@ import { useSignalHistory } from './hooks/useSignalHistory';
 
 const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
+
+// Función para enviar señales a Telegram via Netlify Function
+async function sendToTelegram(signals) {
+  try {
+    // URL de la Netlify Function (en producción será /.netlify/functions/scheduled-analysis)
+    const functionUrl = import.meta.env.PROD
+      ? '/.netlify/functions/scheduled-analysis'
+      : 'https://cambiix.netlify.app/.netlify/functions/scheduled-analysis';
+
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-notify-secret': import.meta.env.VITE_NOTIFY_SECRET || ''
+      },
+      body: JSON.stringify({ signals })
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('📱 Telegram notificación enviada:', result);
+    } else {
+      console.warn('Telegram notification failed:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error enviando a Telegram:', error);
+  }
+}
+
+// StatusBar component - memoized to prevent re-renders from parent state changes
+const StatusBar = React.memo(({ loading, error, lastUpdate, tradingMode, isRefreshing, handleRefresh }) => (
+  <div className="status-bar mb-lg">
+    <div className="status-item">
+      <div className={`status-dot ${loading ? 'loading' : error ? 'error' : ''}`} />
+      <span>{loading ? 'Analizando...' : error ? 'Error' : 'Conectado'}</span>
+    </div>
+
+    {lastUpdate && (
+      <div className="status-item">
+        <span className="text-muted">Última actualización: {lastUpdate.toLocaleTimeString()}</span>
+      </div>
+    )}
+
+    <div className="status-item">
+      <div
+        className="mode-selector"
+        onClick={() => window.location.href = '/settings'}
+        style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.5rem', borderRadius: '8px', cursor: 'pointer' }}
+        title="Ir a Ajustes"
+      >
+        <SettingsIcon size={14} className="text-muted" />
+        <span className="text-muted" style={{ fontSize: '0.85rem' }}>
+          {tradingMode === 'CONSERVATIVE' && 'Conservador'}
+          {tradingMode === 'BALANCED' && 'Equilibrado'}
+          {tradingMode === 'RISKY' && 'Arriesgado'}
+          {tradingMode === 'SCALPING' && 'Scalping'}
+        </span>
+      </div>
+    </div>
+
+    <div className="status-item gap-sm">
+      <button
+        onClick={handleRefresh}
+        className="btn-primary"
+        disabled={isRefreshing || loading}
+        title={isRefreshing || loading ? 'Actualizando...' : 'Actualizar datos'}
+        style={{
+          opacity: isRefreshing || loading ? 0.6 : 1,
+          minWidth: '40px',
+          minHeight: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <RefreshCw size={16} className={isRefreshing || loading ? 'spin' : ''} />
+      </button>
+    </div>
+  </div>
+));
 
 // Componente para proteger rutas
 const PrivateRoute = ({ children }) => {
@@ -92,6 +172,13 @@ function AppContent() {
 
     loadInitialSymbols();
   }, []);
+
+  // Set default chart symbol when symbols are loaded
+  useEffect(() => {
+    if (symbols.length > 0 && !selectedChartSymbol) {
+      setSelectedChartSymbol(symbols[0]);
+    }
+  }, [symbols, selectedChartSymbol]);
 
   // Sincronizar favoritos (Watchlist) con la lista activa
   useEffect(() => {
@@ -216,6 +303,19 @@ function AppContent() {
         newSignals.forEach(signal => showNotification(signal));
       }
 
+      // 9. Enviar señales de alta calidad a Telegram (score >= 60)
+      const TELEGRAM_THRESHOLD = 60;
+      const telegramCandidates = generatedSignals.filter(s => s.score >= TELEGRAM_THRESHOLD);
+      if (telegramCandidates.length > 0 && signals.length > 0) {
+        // Solo enviar señales NUEVAS que no estaban antes
+        const newTelegramSignals = telegramCandidates.filter(
+          newSig => !signals.some(oldSig => oldSig.symbol === newSig.symbol && oldSig.score >= TELEGRAM_THRESHOLD)
+        );
+        if (newTelegramSignals.length > 0) {
+          sendToTelegram(newTelegramSignals);
+        }
+      }
+
       // Track signals
       generatedSignals.forEach(signal => trackSignal(signal));
 
@@ -250,13 +350,18 @@ function AppContent() {
     setIsRefreshing(false);
   };
 
-  const handleSimulateBuy = (signal) => {
-    const result = openPosition(signal, riskPerTrade);
-    if (result.success) {
-      console.log('Posición abierta:', signal.symbol);
-      // Optional: Navigate to portfolio or show toast
-    } else {
-      alert(result.error);
+  const handleSimulateBuy = async (signal) => {
+    try {
+      const result = await openPosition(signal, riskPerTrade);
+      if (result.success) {
+        console.log('Posición abierta:', signal.symbol);
+        alert(`✅ Posición abierta: ${signal.symbol} a $${signal.price.toFixed(2)}`);
+      } else {
+        alert(result.error || 'Error al abrir posición');
+      }
+    } catch (err) {
+      console.error('Error en handleSimulateBuy:', err);
+      alert(err.message || 'Error inesperado al simular compra');
     }
   };
 
@@ -302,49 +407,15 @@ function AppContent() {
   // Better approach: Render the Status Bar inside App, but positioned correctly?
   // No, that would be inside the content area. That's fine.
 
-  const StatusBar = () => (
-    <div className="status-bar mb-lg">
-      <div className="status-item">
-        <div className={`status - dot ${loading ? 'loading' : error ? 'error' : ''} `} />
-        <span>{loading ? 'Analizando...' : error ? 'Error' : 'Conectado'}</span>
-      </div>
-
-      {lastUpdate && (
-        <div className="status-item">
-          <span className="text-muted">Última - actualización: {lastUpdate.toLocaleTimeString()}</span>
-        </div>
-      )}
-
-      <div className="status-item">
-        <div
-          className="mode-selector"
-          onClick={() => window.location.href = '/settings'}
-          style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.5rem', borderRadius: '8px', cursor: 'pointer' }}
-          title="Ir a Ajustes"
-        >
-          <SettingsIcon size={14} className="text-muted" />
-          <span className="text-muted" style={{ fontSize: '0.85rem' }}>
-            {tradingMode === 'CONSERVATIVE' && 'Conservador'}
-            {tradingMode === 'BALANCED' && 'Equilibrado'}
-            {tradingMode === 'RISKY' && 'Arriesgado'}
-            {tradingMode === 'SCALPING' && 'Scalping'}
-          </span>
-        </div>
-      </div>
-
-      <div className="status-item gap-sm">
-        <button
-          onClick={handleRefresh}
-          className="btn-primary"
-          disabled={isRefreshing || loading}
-          title={isRefreshing || loading ? 'Actualizando...' : 'Actualizar datos'}
-          style={{ opacity: isRefreshing || loading ? 0.6 : 1 }}
-        >
-          <RefreshCw size={16} className={isRefreshing || loading ? 'spin' : ''} />
-        </button>
-      </div>
-    </div>
-  );
+  // StatusBar props for the memoized component
+  const statusBarProps = {
+    loading,
+    error,
+    lastUpdate,
+    tradingMode,
+    isRefreshing,
+    handleRefresh
+  };
 
   return (
     <BrowserRouter>
@@ -354,7 +425,7 @@ function AppContent() {
         <Route path="/*" element={
           <PrivateRoute>
             <Layout>
-              <StatusBar />
+              <StatusBar {...statusBarProps} />
 
               {error && (
                 <div className="error-container mb-lg">
@@ -383,6 +454,7 @@ function AppContent() {
                     symbols={symbols}
                     selectedChartSymbol={selectedChartSymbol}
                     setSelectedChartSymbol={setSelectedChartSymbol}
+                    signals={signals}
                   />
                 } />
 
