@@ -295,7 +295,7 @@ async function sendGroupedTelegramNotification(signals) {
 
     // 3. Price & Score Line
     const priceStr = Number(sig.levels && sig.levels.entry ? sig.levels.entry : sig.price).toFixed(4);
-    message += `💰 *Precio:* $${escapeMarkdownV2(priceStr)}   |   🎯 *Score:* ${escapeMarkdownV2(String(sig.score))}\n`;
+    message += `💰 *Precio:* $${escapeMarkdownV2(priceStr)}   \\|   🎯 *Score:* ${escapeMarkdownV2(String(sig.score))}\n`;
 
     // 4. AI Sentiment (Optional)
     if (sig.aiAnalysis && sig.aiAnalysis.sentiment) {
@@ -336,11 +336,15 @@ async function sendGroupedTelegramNotification(signals) {
     if (!response.ok) {
       const text = await response.text();
       console.error('Failed to send Telegram notification (grouped):', text);
+      return { success: false, error: text };
     } else {
       console.log('Grouped Telegram notification sent for', signals.map(s => s.symbol).join(', '));
+      const result = await response.json();
+      return { success: true, telegramResponse: result };
     }
   } catch (error) {
     console.error('Error sending grouped Telegram notification:', error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -379,9 +383,16 @@ export async function handler(event, context) {
         return { statusCode: 200, body: JSON.stringify({ success: true, sent: 0 }) };
       }
 
-      await sendGroupedTelegramNotification(filtered);
+      const telegramResult = await sendGroupedTelegramNotification(filtered);
 
-      return { statusCode: 200, body: JSON.stringify({ success: true, sent: filtered.length }) };
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          success: telegramResult.success,
+          sent: filtered.length,
+          telegramResult
+        })
+      };
     } catch (err) {
       console.error('Error handling POST notify:', err);
       return { statusCode: 500, body: JSON.stringify({ success: false, error: err.message }) };
