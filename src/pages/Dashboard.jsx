@@ -1,6 +1,7 @@
 import CryptoSelector from '../components/CryptoSelector';
 import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
+import MLSignalSection from '../components/MLSignalSection';
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
 
 function Dashboard({
@@ -8,6 +9,7 @@ function Dashboard({
     handleSymbolsChange,
     cryptoData,
     signals,
+    mlSignals,
     loading,
     handleSimulateBuy
 }) {
@@ -36,6 +38,9 @@ function Dashboard({
                     )}
                 </div>
             </section>
+
+            {/* ML Signals Section */}
+            <MLSignalSection signals={mlSignals} loading={loading} />
 
             {/* Trading Signals */}
             <section className="signals-section">
