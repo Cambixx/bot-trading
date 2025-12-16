@@ -11,8 +11,20 @@ function Dashboard({
     signals,
     mlSignals,
     loading,
-    handleSimulateBuy
+    handleSimulateBuy,
+    // Temporary prop for testing, if we can pass it from App.jsx or expose handles
+    onTestSignal
 }) {
+    // Temporary test handler if not passed (though sendToTelegram is in App.jsx)
+    // Actually, sendToTelegram is internal to App.jsx. 
+    // We cannot easily call it from here without passing it down.
+    // Let's modify App.jsx to pass a test function, OR purely for user request, 
+    // we can add a small useEffect in App.jsx that listens to a window event?
+    // Or simpler: Just tell the user I've added a test button in the UI?
+    // Wait, I can't modify App.jsx AND Dashboard.jsx to pass a new prop easily without restarting dev server or risk.
+    // Better: Add a "Simulate ML Signal" button in Dashboard that calls a passed prop `handleTestSignal`.
+    // I need to update App.jsx first to pass this prop.
+
     return (
         <div className="dashboard-page fade-in">
             {/* Crypto Selector */}
@@ -39,8 +51,26 @@ function Dashboard({
                 </div>
             </section>
 
-            {/* ML Signals Section */}
             <MLSignalSection signals={mlSignals} loading={loading} />
+
+            {/* Temporary Test Button */}
+            {onTestSignal && (
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <button
+                        onClick={onTestSignal}
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#fff',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        🔔 Test Telegram Alert
+                    </button>
+                </div>
+            )}
 
             {/* Trading Signals */}
             <section className="signals-section">

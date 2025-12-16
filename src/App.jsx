@@ -34,9 +34,8 @@ const STORAGE_KEY = 'trading_bot_symbols';
 async function sendToTelegram(signals) {
   try {
     // URL de la Netlify Function (en producción será /.netlify/functions/scheduled-analysis)
-    const functionUrl = import.meta.env.PROD
-      ? '/.netlify/functions/scheduled-analysis'
-      : 'https://cambiix.netlify.app/.netlify/functions/scheduled-analysis';
+    // URL relativa para que el proxy de Vite (en dev) o Netlify (en prod) maneje la ruta
+    const functionUrl = '/.netlify/functions/scheduled-analysis';
 
     const response = await fetch(functionUrl, {
       method: 'POST',
@@ -444,6 +443,19 @@ function AppContent() {
   // Better approach: Render the Status Bar inside App, but positioned correctly?
   // No, that would be inside the content area. That's fine.
 
+  const handleTestSignal = () => {
+    const testSignal = {
+      symbol: 'TESTUSDC',
+      price: 99999.99,
+      score: 95,
+      signal: 'UPPER_EXTREMITY',
+      reasons: ['🤖 ML Alert: UPPER_EXTREMITY'],
+      levels: { entry: 99999.99 }
+    };
+    sendToTelegram([testSignal]);
+    alert('Test signal sent to Telegram!');
+  };
+
   // StatusBar props for the memoized component
   const statusBarProps = {
     loading,
@@ -484,6 +496,7 @@ function AppContent() {
                     mlSignals={mlSignals}
                     loading={loading}
                     handleSimulateBuy={handleSimulateBuy}
+                    onTestSignal={handleTestSignal}
                   />
                 } />
 
