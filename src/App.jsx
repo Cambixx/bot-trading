@@ -49,11 +49,15 @@ async function sendToTelegram(signals) {
     if (response.ok) {
       const result = await response.json();
       console.log('📱 Telegram notificación enviada:', result);
+      return { success: true, result };
     } else {
-      console.warn('Telegram notification failed:', await response.text());
+      const text = await response.text();
+      console.warn('Telegram notification failed:', text);
+      return { success: false, error: text };
     }
   } catch (error) {
     console.error('Error enviando a Telegram:', error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -443,7 +447,7 @@ function AppContent() {
   // Better approach: Render the Status Bar inside App, but positioned correctly?
   // No, that would be inside the content area. That's fine.
 
-  const handleTestSignal = () => {
+  const handleTestSignal = async () => {
     const testSignal = {
       symbol: 'TESTUSDC',
       price: 99999.99,
@@ -452,8 +456,21 @@ function AppContent() {
       reasons: ['🤖 ML Alert: UPPER_EXTREMITY'],
       levels: { entry: 99999.99 }
     };
-    sendToTelegram([testSignal]);
-    alert('Test signal sent to Telegram!');
+
+    const secret = import.meta.env.VITE_NOTIFY_SECRET;
+    const hasSecret = secret && secret.length > 0;
+
+    if (!hasSecret) {
+      alert('⚠️ Error: VITE_NOTIFY_SECRET está vacío en .env. La notificación fallará.');
+    }
+
+    const { success, error, result } = await sendToTelegram([testSignal]);
+
+    if (success) {
+      alert(`✅ Éxito! Notificación enviada.\nRespuesta: ${JSON.stringify(result)}`);
+    } else {
+      alert(`❌ Error al enviar.\nDetalle: ${error}\nSecret Presente: ${hasSecret}`);
+    }
   };
 
   // StatusBar props for the memoized component
