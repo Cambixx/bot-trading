@@ -264,52 +264,65 @@ async function sendGroupedTelegramNotification(signals) {
     return;
   }
 
-  // Header
-  let message = '⚡️ *NUEVAS OPORTUNIDADES DETECTADAS* ⚡️\n\n';
+  // Header styling
+  let message = '🔔 *MERCADO AL DIA* 🔔\n';
+  message += `_${escapeMarkdownV2('Detectando oportunidades en tiempo real...')}_\n\n`;
 
   for (const sig of signals) {
-    // Determine status icon based on score
-    let icon = '🟢'; // High score
-    if (sig.score < 80) icon = '🟡'; // Medium
-    if (sig.score < 60) icon = '⚪️'; // Low
+    // 1. Icon & Header
+    const isML = Array.isArray(sig.reasons) && sig.reasons.some(r => r.includes && r.includes('ML Alert'));
+    let icon = '📊';
+    let typeLabel = 'TRADING';
 
-    // Symbol and Score
-    const cleanSymbol = sig.symbol.replace('USDC', '').replace('USDT', '');
-    // Escape the pipe character or use a different separator that doesn't need escaping if possible, 
-    // but for MarkdownV2 everything needs escaping. 
-    // Easier to just escape the pipe: \|
-    message += `${icon} *${escapeMarkdownV2(cleanSymbol)}*  \\|  Score: *${escapeMarkdownV2(String(sig.score))}*\n`;
-
-    // Price
-    if (sig.levels && sig.levels.entry) {
-      message += `💰 Entrada: $${escapeMarkdownV2(Number(sig.levels.entry).toFixed(4))}\n`;
+    // Custom icons for ML signals
+    if (isML) {
+      if (sig.reasons.some(r => r.includes('UPPER_EXTREMITY'))) {
+        icon = '🔴'; // Sell/Bearish
+        typeLabel = 'ML SELL';
+      } else {
+        icon = '🟢'; // Buy/Bullish
+        typeLabel = 'ML BUY';
+      }
     } else {
-      message += `💰 Precio: $${escapeMarkdownV2(Number(sig.price).toFixed(4))}\n`;
+      if (sig.score >= 80) icon = '💎';
+      else if (sig.score >= 70) icon = '🟢';
+      else icon = '🟡';
     }
 
-    // AI Sentiment (if available)
+    // 2. Symbol Line
+    const cleanSymbol = sig.symbol.replace('USDC', '').replace('USDT', '');
+    message += `${icon} *${escapeMarkdownV2(cleanSymbol)}*   •   ${escapeMarkdownV2(typeLabel)}\n`;
+
+    // 3. Price & Score Line
+    const priceStr = Number(sig.levels && sig.levels.entry ? sig.levels.entry : sig.price).toFixed(4);
+    message += `💰 *Precio:* $${escapeMarkdownV2(priceStr)}   |   🎯 *Score:* ${escapeMarkdownV2(String(sig.score))}\n`;
+
+    // 4. AI Sentiment (Optional)
     if (sig.aiAnalysis && sig.aiAnalysis.sentiment) {
       const sentimentEmoji = sig.aiAnalysis.sentiment === 'BULLISH' ? '🐂' : '🐻';
-      message += `🧠 IA: ${sentimentEmoji} ${escapeMarkdownV2(sig.aiAnalysis.sentiment)}\n`;
+      message += `🧠 *IA:* ${sentimentEmoji} ${escapeMarkdownV2(sig.aiAnalysis.sentiment)}\n`;
     }
 
-    // Top Reasons (limit to 2)
+    // 5. Reasons (Cleaned up)
     if (sig.reasons && sig.reasons.length > 0) {
-      const reasons = sig.reasons.slice(0, 2).map(r => (typeof r === 'string' ? r : (r.text || '')));
-      message += `📊 _${escapeMarkdownV2(reasons.join(', '))}_\n`;
+      // Filter out raw ML internal strings if present
+      const readableReasons = sig.reasons.map(r => {
+        const text = typeof r === 'string' ? r : (r.text || '');
+        if (text.includes('ML Alert')) return null; // Skip raw ML alert line for cleaner look
+        return text;
+      }).filter(Boolean).slice(0, 3);
+
+      if (readableReasons.length > 0) {
+        message += `🔍 _${escapeMarkdownV2(readableReasons.join(', '))}_\n`;
+      }
     }
 
-    // Separator
-    // The separator line contains dashes which are reserved in MarkdownV2 and must be escaped.
-    // Or we can use a different character that might not need escaping? No, almost everything needs escaping.
-    // Let's use a standard separator that we escape.
-    message += `\n───────────────────\n\n`;
+    message += `───────────────────\n`;
   }
 
   // Footer
-  // Dots in dates/times must be escaped in MarkdownV2
   const timeStr = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  message += `🤖 _Bot Trading AI_  •  ${escapeMarkdownV2(timeStr)}`;
+  message += `🤖 _Generado por Trading Bot AI_  •  ${escapeMarkdownV2(timeStr)}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
