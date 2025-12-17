@@ -47,11 +47,11 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
                     </div>
                 ) : (
                     activeSignals.map((sig) => (
-                        <div key={sig.symbol} className={`ml-card ${sig.signal === 'UPPER_EXTREMITY' ? 'bearish' : 'bullish'}`}>
+                        <div key={sig.symbol} className={`ml-card ${sig.signal === 'UPPER_EXTREMITY' ? 'bullish' : 'bearish'}`}>
                             <div className="ml-card-header">
                                 <span className="symbol-name">{sig.symbol}</span>
                                 <span className="signal-badge">
-                                    {sig.signal === 'UPPER_EXTREMITY' ? 'SELL / UPPER' : 'BUY / LOWER'}
+                                    {sig.signal === 'UPPER_EXTREMITY' ? 'BUY / UPPER' : 'SELL / LOWER'}
                                 </span>
                             </div>
 
@@ -72,9 +72,9 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
 
                             <div className="ml-icon-wrapper">
                                 {sig.signal === 'UPPER_EXTREMITY' ? (
-                                    <ArrowDownCircle size={32} />
-                                ) : (
                                     <ArrowUpCircle size={32} />
+                                ) : (
+                                    <ArrowDownCircle size={32} />
                                 )}
                             </div>
                         </div>

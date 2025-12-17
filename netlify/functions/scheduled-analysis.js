@@ -277,11 +277,11 @@ async function sendGroupedTelegramNotification(signals) {
     // Custom icons for ML signals
     if (isML) {
       if (sig.reasons.some(r => r.includes('UPPER_EXTREMITY'))) {
-        icon = '🔴'; // Sell/Bearish
-        typeLabel = 'ML SELL';
-      } else {
-        icon = '🟢'; // Buy/Bullish
+        icon = '🟢'; // Buy/Bullish (Changed from Red/Sell)
         typeLabel = 'ML BUY';
+      } else {
+        icon = '🔴'; // Sell/Bearish (Changed from Green/Buy)
+        typeLabel = 'ML SELL';
       }
     } else {
       if (sig.score >= 80) icon = '💎';
