@@ -16,12 +16,12 @@ const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(proce
 // CryptoCompare API (Free, no key required for basic endpoints)
 const CRYPTOCOMPARE_API = 'https://min-api.cryptocompare.com/data/v2';
 
-// Top coins to monitor (CryptoCompare-compatible symbols)
+// Top coins to monitor (limited to 15 to respect CryptoCompare free tier rate limits)
+// Free tier: ~30 requests/min, we run every 20 min, so 15 coins is safe
 const COINS_TO_MONITOR = [
-  'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'ADA', 'DOGE', 'AVAX',
-  'DOT', 'LINK', 'POL',  // POL = Polygon (formerly MATIC)
-  'SHIB', 'LTC', 'BCH', 'UNI', 'ATOM', 'XLM', 'FIL', 'APE',
-  'NEAR', 'INJ', 'SUI', 'TAO', 'AAVE', 'MKR', 'RUNE', 'FET'
+  'BTC', 'ETH', 'SOL', 'XRP', 'DOGE',
+  'AVAX', 'LTC', 'BCH', 'SHIB', 'XLM',
+  'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE'
 ];
 
 // ==================== HELPERS ====================
@@ -357,8 +357,8 @@ export async function handler(event, context) {
         console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
       }
 
-      // Small delay to respect rate limits
-      await new Promise(r => setTimeout(r, 100));
+      // Delay to respect CryptoCompare rate limits (2.5s between requests)
+      await new Promise(r => setTimeout(r, 2500));
 
     } catch (error) {
       console.error(`Error analyzing ${symbol}:`, error.message);
