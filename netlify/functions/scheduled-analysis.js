@@ -17,12 +17,13 @@ const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 // CryptoCompare API (Free, no key required for basic endpoints)
 const CRYPTOCOMPARE_API = 'https://min-api.cryptocompare.com/data/v2';
 
-// Top 30 coins to monitor (with API key we have higher rate limits)
+// Top 40 coins to monitor (with API key we have higher rate limits)
 const COINS_TO_MONITOR = [
-  'BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'DOT',
-  'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM', 'FIL',
-  'SUI', 'TAO', 'AAVE', 'RUNE', 'MKR', 'INJ', 'FET', 'NEAR',
-  'APE', 'OP', 'ARB', 'RNDR', 'GRT', 'IMX'
+  'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX',
+  'DOT', 'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM',
+  'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE', 'MKR', 'INJ', 'FET',
+  'NEAR', 'APE', 'OP', 'ARB', 'RNDR', 'GRT', 'IMX', 'ALGO',
+  'VET', 'MANA', 'SAND', 'AXS', 'THETA', 'EOS', 'XTZ', 'EGLD'
   // Note: PEPE is not available on CryptoCompare
 ];
 
@@ -250,6 +251,10 @@ function generateSignal(symbol, candles) {
 
   // === RETURN SIGNAL ===
 
+  // Calculate Bollinger position for context
+  const bbPosition = currentPrice < bb.middle ? 'bajo' : 'alto';
+  const bbPercentage = ((currentPrice - bb.lower) / (bb.upper - bb.lower) * 100).toFixed(0);
+
   if (score >= SIGNAL_SCORE_THRESHOLD && reasons.length > 0) {
     return {
       symbol,
@@ -258,6 +263,8 @@ function generateSignal(symbol, candles) {
       type: signalType || 'WATCH',
       rsi: rsi.toFixed(1),
       macdBullish: macd.bullish,
+      priceChange1h: priceChange1h.toFixed(1),
+      bbPosition: `${bbPercentage}%`,
       reasons
     };
   }
@@ -284,22 +291,29 @@ async function sendTelegramNotification(signals) {
   for (const sig of signals.slice(0, 5)) {
     // Icon based on type
     let icon = '📊';
-    if (sig.type === 'BUY') icon = '🟢';
-    else if (sig.type === 'SELL_ALERT') icon = '🔴';
+    let typeEmoji = '';
+    if (sig.type === 'BUY') { icon = '🟢'; typeEmoji = 'COMPRA'; }
+    else if (sig.type === 'SELL_ALERT') { icon = '🔴'; typeEmoji = 'ALERTA VENTA'; }
+    else { typeEmoji = 'VIGILAR'; }
 
-    // Symbol line
-    message += `${icon} *${escapeMarkdownV2(sig.symbol)}*\n`;
+    // Symbol line with type
+    message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| ${escapeMarkdownV2(typeEmoji)}\n`;
 
-    // Price line
+    // Price and change
     const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
-    message += `💰 $${escapeMarkdownV2(priceStr)}  🎯 Score: ${escapeMarkdownV2(String(sig.score))}\n`;
+    const changeIcon = parseFloat(sig.priceChange1h) >= 0 ? '📈' : '📉';
+    const changeSign = parseFloat(sig.priceChange1h) >= 0 ? '+' : '';
+    message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange1h)}% \\(1h\\)\n`;
 
-    // RSI
-    message += `📉 RSI: ${escapeMarkdownV2(sig.rsi)}  ${sig.macdBullish ? '📈 MACD\\+' : '📉 MACD\\-'}\n`;
+    // Indicators line
+    message += `📊 RSI: ${escapeMarkdownV2(sig.rsi)} \\| BB: ${escapeMarkdownV2(sig.bbPosition)} \\| ${sig.macdBullish ? 'MACD\\+' : 'MACD\\-'}\n`;
 
-    // Reasons
+    // Score
+    message += `🎯 Score: ${escapeMarkdownV2(String(sig.score))}/100\n`;
+
+    // Top reason
     if (sig.reasons.length > 0) {
-      message += `🔍 _${escapeMarkdownV2(sig.reasons.slice(0, 2).join(', '))}_\n`;
+      message += `💡 _${escapeMarkdownV2(sig.reasons[0])}_\n`;
     }
 
     message += `───────────────────\n`;
