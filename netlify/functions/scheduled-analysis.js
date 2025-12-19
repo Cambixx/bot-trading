@@ -12,16 +12,18 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
 const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 60;
+const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 
 // CryptoCompare API (Free, no key required for basic endpoints)
 const CRYPTOCOMPARE_API = 'https://min-api.cryptocompare.com/data/v2';
 
-// Top coins to monitor (limited to 15 to respect CryptoCompare free tier rate limits)
-// Free tier: ~30 requests/min, we run every 20 min, so 15 coins is safe
+// Top 30 coins to monitor (with API key we have higher rate limits)
 const COINS_TO_MONITOR = [
-  'BTC', 'ETH', 'SOL', 'XRP', 'DOGE',
-  'AVAX', 'LTC', 'BCH', 'SHIB', 'XLM',
-  'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE'
+  'BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'DOT',
+  'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM', 'FIL',
+  'SUI', 'TAO', 'AAVE', 'RUNE', 'MKR', 'INJ', 'FET', 'NEAR',
+  'APE', 'OP', 'ARB', 'RNDR', 'GRT', 'IMX'
+  // Note: PEPE is not available on CryptoCompare
 ];
 
 // ==================== HELPERS ====================
@@ -46,7 +48,12 @@ async function fetchWithTimeout(url, timeout = 15000) {
 // ==================== CRYPTOCOMPARE DATA ====================
 
 async function getOHLCVData(symbol, limit = 100) {
-  const url = `${CRYPTOCOMPARE_API}/histohour?fsym=${symbol}&tsym=USD&limit=${limit}`;
+  // Build URL with optional API key
+  let url = `${CRYPTOCOMPARE_API}/histohour?fsym=${symbol}&tsym=USD&limit=${limit}`;
+  if (CRYPTOCOMPARE_API_KEY) {
+    url += `&api_key=${CRYPTOCOMPARE_API_KEY}`;
+  }
+
   const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
@@ -355,14 +362,18 @@ export async function handler(event, context) {
       if (signal) {
         signals.push(signal);
         console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
+        // Reduced delay since we have API key (500ms between requests)
+        await new Promise(r => setTimeout(r, 500));
+      } else {
+        // Still apply a delay even if no signal, to respect rate limits for data fetching
+        await new Promise(r => setTimeout(r, 500));
       }
-
-      // Delay to respect CryptoCompare rate limits (2.5s between requests)
-      await new Promise(r => setTimeout(r, 2500));
 
     } catch (error) {
       console.error(`Error analyzing ${symbol}:`, error.message);
       errors++;
+      // Apply a delay even on error to avoid hammering the API
+      await new Promise(r => setTimeout(r, 500));
     }
   }
 
