@@ -16,12 +16,12 @@ const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(proce
 // CryptoCompare API (Free, no key required for basic endpoints)
 const CRYPTOCOMPARE_API = 'https://min-api.cryptocompare.com/data/v2';
 
-// Top coins to monitor (by popularity/volume)
+// Top coins to monitor (CryptoCompare-compatible symbols)
 const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'ADA', 'DOGE', 'AVAX',
-  'DOT', 'LINK', 'MATIC', 'SHIB', 'LTC', 'BCH', 'UNI',
-  'ATOM', 'XLM', 'FIL', 'APE', 'NEAR', 'OP', 'ARB', 'INJ', 'SUI', 'PEPE',
-  'TAO' // Added
+  'DOT', 'LINK', 'POL',  // POL = Polygon (formerly MATIC)
+  'SHIB', 'LTC', 'BCH', 'UNI', 'ATOM', 'XLM', 'FIL', 'APE',
+  'NEAR', 'INJ', 'SUI', 'TAO', 'AAVE', 'MKR', 'RUNE', 'FET'
 ];
 
 // ==================== HELPERS ====================
