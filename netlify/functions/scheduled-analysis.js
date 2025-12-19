@@ -4,6 +4,8 @@
  * Reuses core services from source to match frontend logic.
  */
 
+console.log('--- Scheduled Analysis Module Loaded ---');
+
 import BinanceService from '../../src/services/binanceService.js';
 import { performTechnicalAnalysis } from '../../src/services/technicalAnalysis.js';
 import { generateSignal } from '../../src/services/signalGenerator.js';
@@ -103,6 +105,9 @@ async function sendGroupedTelegramNotification(signals) {
 }
 
 export async function handler(event, context) {
+  console.log('--- Scheduled Analysis Handler Started ---');
+  console.log('Event structure:', JSON.stringify({ httpMethod: event.httpMethod, path: event.path }));
+
   console.log('Starting Scheduled Analysis...');
 
   // 1. Get Opportunities
