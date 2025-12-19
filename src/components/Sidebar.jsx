@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Briefcase, FlaskConical, Settings, Zap, LineChart, X } from 'lucide-react';
 import './Sidebar.css';
 
@@ -6,12 +7,31 @@ function Sidebar({ isOpen, toggleSidebar }) {
     return (
         <>
             {/* Overlay for mobile */}
-            {isOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="sidebar-overlay"
+                        onClick={toggleSidebar}
+                    />
+                )}
+            </AnimatePresence>
 
-            <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+            <motion.aside
+                initial={false}
+                animate={{ x: isOpen || window.innerWidth > 768 ? 0 : -280 }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className={`sidebar ${isOpen ? 'open' : ''}`}
+            >
                 <div className="sidebar-header">
-                    <Zap className="logo-icon" size={28} />
-                    <span className="logo-text">TradingBot</span>
+                    <div className="logo-container">
+                        <div className="logo-box">
+                            <Zap className="logo-icon" size={20} />
+                        </div>
+                        <span className="logo-text">Trading<span className="text-primary">Bot</span></span>
+                    </div>
                     <button className="mobile-close-btn" onClick={toggleSidebar}>
                         <X size={20} />
                     </button>
@@ -24,8 +44,9 @@ function Sidebar({ isOpen, toggleSidebar }) {
                         onClick={() => window.innerWidth <= 768 && toggleSidebar()}
                         end
                     >
-                        <LayoutDashboard size={20} />
+                        <LayoutDashboard size={18} />
                         <span>Dashboard</span>
+                        {/* Dot indicator for active state if needed */}
                     </NavLink>
 
                     <NavLink
@@ -33,7 +54,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                         onClick={() => window.innerWidth <= 768 && toggleSidebar()}
                     >
-                        <LineChart size={20} />
+                        <LineChart size={18} />
                         <span>Gráfico</span>
                     </NavLink>
 
@@ -42,7 +63,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                         onClick={() => window.innerWidth <= 768 && toggleSidebar()}
                     >
-                        <Briefcase size={20} />
+                        <Briefcase size={18} />
                         <span>Cartera</span>
                     </NavLink>
 
@@ -51,7 +72,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                         onClick={() => window.innerWidth <= 768 && toggleSidebar()}
                     >
-                        <FlaskConical size={20} />
+                        <FlaskConical size={18} />
                         <span>Backtest</span>
                     </NavLink>
 
@@ -62,15 +83,17 @@ function Sidebar({ isOpen, toggleSidebar }) {
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                         onClick={() => window.innerWidth <= 768 && toggleSidebar()}
                     >
-                        <Settings size={20} />
+                        <Settings size={18} />
                         <span>Ajustes</span>
                     </NavLink>
                 </nav>
 
                 <div className="sidebar-footer">
-                    <p>v1.0.0</p>
+                    <div className="version-tag">
+                        <span>v1.0.0</span>
+                    </div>
                 </div>
-            </aside>
+            </motion.aside>
         </>
     );
 }

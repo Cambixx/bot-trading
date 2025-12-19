@@ -1,207 +1,232 @@
 .crypto-card {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     position: relative;
     overflow: hidden;
-    cursor: pointer;
-    transition: all var(--transition-base);
+    background: var(--color-bg-glass);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
 }
 
-.crypto-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg), var(--shadow-glow-primary);
-}
-
-/* Status Borders */
-.crypto-card::before {
-    content: '';
+.crypto-card-glow {
     position: absolute;
     top: 0;
     left: 0;
-    width: 4px;
+    width: 100%;
     height: 100%;
-    background: var(--color-info-gradient);
-    transition: background 0.3s ease;
+    background: radial-gradient(circle at top left, var(--color-primary-glow), transparent 70%);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    pointer-events: none;
 }
 
-.crypto-card.high-signal::before {
-    background: var(--color-success-gradient);
-}
-
-.crypto-card.medium-signal::before {
-    background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-light) 100%);
-}
-
-.crypto-card.low-signal::before {
-    background: linear-gradient(135deg, var(--color-info) 0%, var(--color-info-light) 100%);
+.crypto-card:hover .crypto-card-glow {
+    opacity: 0.5;
 }
 
 .crypto-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
+    align-items: flex-start;
 }
 
-.crypto-symbol {
+.crypto-symbol-info {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-md);
 }
 
-.crypto-icon {
-    width: 20px;
-    height: 20px;
-    color: var(--color-primary);
+.symbol-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: var(--color-bg-tertiary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary-light);
+    border: 1px solid var(--color-border);
 }
 
 .crypto-name {
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--color-text-primary);
+    display: block;
+    line-height: 1.2;
 }
 
 .crypto-change {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: var(--radius-full);
-    font-size: 0.8rem;
-    font-weight: 600;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
 }
 
 .crypto-change.positive {
-    background: rgba(16, 185, 129, 0.15);
     color: var(--color-success);
 }
 
 .crypto-change.negative {
-    background: rgba(239, 68, 68, 0.15);
     color: var(--color-danger);
+}
+
+.opportunity-badge-mini {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary);
 }
 
 .crypto-main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-light);
 }
 
-.crypto-price-container {
+.price-display {
     display: flex;
     flex-direction: column;
-    flex: 1;
+}
+
+.price-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
 }
 
 .price-value {
-    font-size: 1.35rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
     color: var(--color-text-primary);
 }
 
-.crypto-score {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.score-circle {
+.score-viz {
     position: relative;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: conic-gradient(var(--color-success) calc(var(--score) * 1%),
-            var(--color-bg-tertiary) 0);
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid transparent;
 }
 
-.score-circle::before {
-    content: '';
+.score-ring {
+    width: 100%;
+    height: 100%;
+}
+
+.ring-bg {
+    fill: none;
+    stroke: var(--color-bg-tertiary);
+    stroke-width: 3;
+}
+
+.ring-fill {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+
+.ring-fill.success {
+    stroke: var(--color-success);
+    filter: drop-shadow(0 0 4px var(--color-success-glow));
+}
+
+.ring-fill.warning {
+    stroke: var(--color-warning);
+    filter: drop-shadow(0 0 4px var(--color-warning-glow));
+}
+
+.ring-fill.info {
+    stroke: var(--color-info);
+    filter: drop-shadow(0 0 4px var(--color-info-glow));
+}
+
+.score-text {
     position: absolute;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--color-bg-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.score-value {
-    position: relative;
-    z-index: 1;
-    font-size: 1rem;
-    font-weight: 700;
+.score-num {
+    font-size: 0.875rem;
+    font-weight: 800;
     color: var(--color-text-primary);
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 0.5rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
 }
 
 .crypto-footer {
     display: flex;
-    justify-content: center;
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid var(--color-border);
+    align-items: center;
 }
 
-/* Badge styles */
-.badge {
-    padding: 0.2rem 0.6rem;
-    border-radius: var(--radius-full);
-    font-size: 0.7rem;
+.opportunity-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
-.badge-success {
-    background: rgba(16, 185, 129, 0.15);
-    color: var(--color-success);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+.status-dot-mini {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
 }
 
-.badge-warning {
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--color-warning);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+.opportunity-status.success {
+    color: var(--color-success-light);
 }
 
-.badge-info {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--color-info);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+.opportunity-status.success .status-dot-mini {
+    background: var(--color-success);
+    box-shadow: 0 0 8px var(--color-success);
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .crypto-card {
-        padding: 0.75rem;
-        box-sizing: border-box;
-        width: 100%;
-    }
+.opportunity-status.warning {
+    color: var(--color-warning-light);
+}
 
-    .crypto-main {
-        padding: 0.5rem;
-    }
+.opportunity-status.warning .status-dot-mini {
+    background: var(--color-warning);
+}
 
+.opportunity-status.info {
+    color: var(--color-info-light);
+}
+
+.opportunity-status.info .status-dot-mini {
+    background: var(--color-info);
+}
+
+@media (max-width: 640px) {
     .price-value {
-        font-size: 1.125rem;
-    }
-
-    .score-circle {
-        width: 42px;
-        height: 42px;
-    }
-
-    .score-circle::before {
-        width: 34px;
-        height: 34px;
-    }
-
-    .score-value {
-        font-size: 0.875rem;
+        font-size: 1.25rem;
     }
 }

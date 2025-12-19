@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { TrendingUp, TrendingDown, Activity, Sparkles } from 'lucide-react';
 import './CryptoCard.css';
 
 function CryptoCard({ crypto }) {
@@ -14,58 +15,74 @@ function CryptoCard({ crypto }) {
         return price.toLocaleString(undefined, { minimumFractionDigits: 8, maximumFractionDigits: 8 });
     };
 
-    // Usar el score de oportunidad calculado por signalGenerator (viene de App.jsx)
-    // Este es el mismo algoritmo que se usa para las señales
     const score = opportunity || 0;
 
-    // Determinar nivel de oportunidad
     const getOpportunityLevel = () => {
-        if (score >= 70) return { level: 'HIGH', label: 'Alta Oportunidad', color: 'success' };
-        if (score >= 50) return { level: 'MEDIUM', label: 'Oportunidad Media', color: 'warning' };
-        return { level: 'LOW', label: 'Baja Oportunidad', color: 'info' };
+        if (score >= 70) return { level: 'HIGH', label: 'Alta Oportunidad', color: 'success', icon: <Sparkles size={14} /> };
+        if (score >= 50) return { level: 'MEDIUM', label: 'Oportunidad Media', color: 'warning', icon: null };
+        return { level: 'LOW', label: 'Baja Oportunidad', color: 'info', icon: null };
     };
 
     const opportunityInfo = getOpportunityLevel();
 
     return (
-        <div className={`crypto-card glass-card fade-in ${opportunityInfo.level.toLowerCase()}-signal`}>
-            {/* Header */}
+        <motion.div
+            whileHover={{ y: -5, transition: { duration: 0.2 } }}
+            className={`crypto-card glass-card ${opportunityInfo.level.toLowerCase()}-signal`}
+        >
+            <div className="crypto-card-glow" />
+
             <div className="crypto-header">
-                <div className="crypto-symbol">
-                    <Activity className="crypto-icon" />
-                    <span className="crypto-name">{symbol.replace('USDC', '')}</span>
+                <div className="crypto-symbol-info">
+                    <div className="symbol-icon-wrapper">
+                        <Activity className="crypto-icon" size={16} />
+                    </div>
+                    <div>
+                        <span className="crypto-name">{symbol.replace('USDC', '').replace('USDT', '')}</span>
+                        <div className={`crypto-change ${isPositive ? 'positive' : 'negative'}`}>
+                            {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                            <span>{isPositive ? '+' : ''}{priceChangePercent?.toFixed(2)}%</span>
+                        </div>
+                    </div>
                 </div>
-                <div className={`crypto-change ${isPositive ? 'positive' : 'negative'}`}>
-                    {isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                    <span>{isPositive ? '+' : ''}{priceChangePercent?.toFixed(2)}%</span>
+
+                <div className="opportunity-badge-mini">
+                    {opportunityInfo.icon}
+                    <span>{opportunityInfo.level}</span>
                 </div>
             </div>
 
-            {/* Price & Score - Simplified */}
             <div className="crypto-main">
-                <div className="crypto-price-container">
+                <div className="price-display">
+                    <span className="price-label">PRECIO ACTUAL</span>
                     <span className="price-value">${formatPrice(price)}</span>
                 </div>
-                <div className="crypto-score">
-                    <div
-                        className="score-circle"
-                        style={{
-                            '--score': score,
-                            borderColor: score >= 70 ? 'var(--success)' : score >= 50 ? 'var(--warning)' : 'var(--info)'
-                        }}
-                    >
-                        <span className="score-value">{score}</span>
+
+                <div className="score-viz">
+                    <svg className="score-ring" viewBox="0 0 36 36">
+                        <path className="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <motion.path
+                            initial={{ strokeDasharray: "0, 100" }}
+                            animate={{ strokeDasharray: `${score}, 100` }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className={`ring-fill ${opportunityInfo.color}`}
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                    </svg>
+                    <div className="score-text">
+                        <span className="score-num">{score}</span>
+                        <span className="score-label">SCORE</span>
                     </div>
                 </div>
             </div>
 
-            {/* Footer / Badge */}
             <div className="crypto-footer">
-                <span className={`badge badge-${opportunityInfo.color}`}>
-                    {opportunityInfo.label}
-                </span>
+                <div className={`opportunity-status ${opportunityInfo.color}`}>
+                    <div className="status-dot-mini" />
+                    <span>{opportunityInfo.label}</span>
+                </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

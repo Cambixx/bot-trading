@@ -17,6 +17,7 @@
     "axios": "^1.6.2",
     "date-fns": "^3.0.0",
     "dotenv": "^17.2.3",
+    "framer-motion": "^12.23.26",
     "lightweight-charts": "^5.0.9",
     "lucide-react": "^0.460.0",
     "react": "^19.2.0",

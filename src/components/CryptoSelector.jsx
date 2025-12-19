@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Star, Plus, X, TrendingUp, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Star, Plus, X, TrendingUp, Zap, ChevronDown } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import binanceService from '../services/binanceService';
 import './CryptoSelector.css';
@@ -21,7 +22,6 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
         try {
             const smartCoins = await binanceService.getSmartOpportunityCoins(12);
             if (smartCoins && smartCoins.length > 0) {
-                // Merge with watchlist to keep favorites
                 const mergedSymbols = [...new Set([...watchlist, ...smartCoins])];
                 onSymbolsChange(mergedSymbols);
             }
@@ -36,16 +36,15 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
             loadAvailablePairs();
         }
 
-        // Calculate dropdown position
         if (showDropdown && selectorRef.current) {
             const rect = selectorRef.current.getBoundingClientRect();
             setDropdownPosition({
-                top: rect.bottom + 8, // 8px gap
-                left: rect.left + 24, // Account for selector padding
-                width: Math.min(500, rect.width - 48)
+                top: rect.bottom + 8,
+                left: rect.left,
+                width: rect.width
             });
         }
-    }, [showDropdown, selectorRef]);
+    }, [showDropdown]);
 
     const loadAvailablePairs = async () => {
         setLoading(true);
@@ -80,130 +79,156 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
     );
 
     return (
-        <>
-            <div className="crypto-selector glass-card mb-lg" ref={selectorRef}>
+        <div className="crypto-selector-container">
+            <div className="crypto-selector glass-card" ref={selectorRef}>
                 <div className="selector-header">
                     <div className="selector-title">
-                        <TrendingUp size={20} className="title-icon" />
-                        <h3>Activos Monitoreados</h3>
-                        <span className="badge">{selectedSymbols.length}</span>
+                        <div className="title-icon-box">
+                            <TrendingUp size={16} />
+                        </div>
+                        <h3>Monitoreo</h3>
+                        <span className="count-badge">{selectedSymbols.length}</span>
                     </div>
 
                     <div className="selector-actions">
-                        <button
-                            className="btn-icon"
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`action-btn scan-btn ${scanning ? 'scanning' : ''}`}
                             onClick={handleSmartScan}
-                            title="Escaneo Inteligente (Detectar oportunidades)"
                             disabled={scanning}
                         >
-                            <Zap size={18} className={scanning ? 'spin' : ''} style={{ color: scanning ? '#fbbf24' : 'inherit' }} />
-                        </button>
+                            <Zap size={14} className={scanning ? 'spin' : ''} />
+                            <span>Scan</span>
+                        </motion.button>
 
-                        <button
-                            className={`btn-icon ${showFavoritesOnly ? 'active' : ''}`}
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`action-btn fav-btn ${showFavoritesOnly ? 'active' : ''}`}
                             onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                            title={showFavoritesOnly ? "Mostrar todos" : "Mostrar favoritos"}
                         >
-                            <Star size={18} fill={showFavoritesOnly ? '#fbbf24' : 'none'} />
-                        </button>
+                            <Star size={14} fill={showFavoritesOnly ? 'currentColor' : 'none'} />
+                        </motion.button>
 
-                        <button
-                            className="btn-add-crypto"
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="btn-add-main"
                             onClick={() => setShowDropdown(!showDropdown)}
                         >
-                            <Plus size={16} />
-                            Agregar
-                        </button>
+                            <Plus size={14} />
+                            <span>Agregar</span>
+                        </motion.button>
                     </div>
                 </div>
 
-                <div className="selected-symbols">
-                    {displayedSymbols.length === 0 ? (
-                        <div className="empty-state">
-                            <p>No hay activos {showFavoritesOnly ? 'favoritos' : 'monitoreados'}</p>
-                        </div>
-                    ) : (
-                        displayedSymbols.map(symbol => (
-                            <div key={symbol} className="symbol-pill">
-                                <button
-                                    className="star-btn"
-                                    onClick={() => toggleWatchlist(symbol)}
-                                    title={isFavorite(symbol) ? "Quitar de favoritos" : "Agregar a favoritos"}
+                <div className="selected-symbols-grid">
+                    <AnimatePresence>
+                        {displayedSymbols.length === 0 ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="empty-selection"
+                            >
+                                <p>No hay activos {showFavoritesOnly ? 'favoritos' : 'monitoreados'}</p>
+                            </motion.div>
+                        ) : (
+                            displayedSymbols.map(symbol => (
+                                <motion.div
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    key={symbol}
+                                    className="symbol-pill-premium"
                                 >
-                                    <Star
-                                        size={14}
-                                        fill={isFavorite(symbol) ? '#fbbf24' : 'none'}
-                                        color={isFavorite(symbol) ? '#fbbf24' : 'currentColor'}
-                                    />
-                                </button>
-                                <span className="symbol-name">{symbol.replace('USDC', '')}</span>
-                                <span className="symbol-quote">USDC</span>
-                                <button
-                                    className="remove-btn"
-                                    onClick={() => handleRemoveSymbol(symbol)}
-                                    title="Eliminar"
-                                >
-                                    <X size={14} />
-                                </button>
-                            </div>
-                        ))
-                    )}
+                                    <button
+                                        className={`favorite-toggle ${isFavorite(symbol) ? 'active' : ''}`}
+                                        onClick={() => toggleWatchlist(symbol)}
+                                    >
+                                        <Star size={12} fill={isFavorite(symbol) ? 'currentColor' : 'none'} />
+                                    </button>
+                                    <span className="pill-name">{symbol.replace('USDC', '').replace('USDT', '')}</span>
+                                    <button
+                                        className="pill-remove"
+                                        onClick={() => handleRemoveSymbol(symbol)}
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </motion.div>
+                            ))
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
-            {/* Dropdown as Portal */}
-            {showDropdown && (
-                <div
-                    className="selector-dropdown"
-                    style={{
-                        top: `${dropdownPosition.top}px`,
-                        left: `${dropdownPosition.left}px`,
-                        width: `${dropdownPosition.width}px`
-                    }}
-                >
-                    <div className="dropdown-header">
-                        <div className="search-box">
-                            <Search size={16} />
+            <AnimatePresence>
+                {showDropdown && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        className="selector-dropdown-premium"
+                        style={{
+                            top: `${dropdownPosition.top}px`,
+                            left: `${dropdownPosition.left}px`,
+                            width: `${dropdownPosition.width}px`
+                        }}
+                    >
+                        <div className="dropdown-search">
+                            <Search size={16} className="search-icon" />
                             <input
                                 type="text"
-                                placeholder="Buscar cripto..."
+                                placeholder="Busca un activo (BTC, ETH...)"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 autoFocus
                             />
+                            <button className="close-btn" onClick={() => setShowDropdown(false)}>
+                                <X size={16} />
+                            </button>
                         </div>
-                        <button
-                            onClick={() => setShowDropdown(false)}
-                            className="close-dropdown-btn"
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
 
-                    <div className="pairs-list">
-                        {loading ? (
-                            <div className="loading-pairs">Cargando...</div>
-                        ) : filteredPairs.length === 0 ? (
-                            <div className="no-results">No se encontraron resultados</div>
-                        ) : (
-                            filteredPairs.map(pair => (
-                                <div
-                                    key={pair.symbol}
-                                    className={`pair-item ${selectedSymbols.includes(pair.symbol) ? 'selected' : ''}`}
-                                    onClick={() => !selectedSymbols.includes(pair.symbol) && handleAddSymbol(pair.symbol)}
-                                >
-                                    <span className="pair-name">{pair.baseAsset}</span>
-                                    <span className="pair-quote">/{pair.quoteAsset}</span>
-                                    {selectedSymbols.includes(pair.symbol) && (
-                                        <span className="selected-check">✓</span>
-                                    )}
+                        <div className="pairs-scroll-area">
+                            {loading ? (
+                                <div className="loading-dropdown">
+                                    <div className="drop-loader" />
+                                    <span>Actualizando activos...</span>
                                 </div>
-                            ))
-                        )}
-                    </div>
-                </div>
+                            ) : filteredPairs.length === 0 ? (
+                                <div className="no-pairs">No se encontraron activos</div>
+                            ) : (
+                                <div className="pairs-grid-mini">
+                                    {filteredPairs.map(pair => (
+                                        <motion.div
+                                            whileHover={{ x: 4 }}
+                                            key={pair.symbol}
+                                            className={`pair-row ${selectedSymbols.includes(pair.symbol) ? 'selected' : ''}`}
+                                            onClick={() => !selectedSymbols.includes(pair.symbol) && handleAddSymbol(pair.symbol)}
+                                        >
+                                            <div className="pair-info">
+                                                <span className="b-asset">{pair.baseAsset}</span>
+                                                <span className="q-asset">/{pair.quoteAsset}</span>
+                                            </div>
+                                            {selectedSymbols.includes(pair.symbol) ? (
+                                                <div className="selected-dot" />
+                                            ) : (
+                                                <Plus size={14} className="add-plus" />
+                                            )}
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {showDropdown && (
+                <div className="dropdown-backdrop" onClick={() => setShowDropdown(false)} />
             )}
-        </>
+        </div>
     );
 }
 

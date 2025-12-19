@@ -1,85 +1,120 @@
-import React from 'react';
-import { ArrowUpCircle, ArrowDownCircle, Activity, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUpCircle, ArrowDownCircle, Activity, Info, TrendingUp, TrendingDown } from 'lucide-react';
 import './MLSignalSection.css';
 
-/**
- * ML Signal Section Component
- * Displays signals from the Machine Learning Moving Average indicator
- * Props:
- *  - signals: Array of signal objects { symbol, type, value, upper, lower, timestamp }
- *  - loading: boolean
- */
 const MLSignalSection = ({ signals = [], loading = false }) => {
-
-    if (loading) {
-        return (
-            <div className="ml-signal-section glass-card">
-                <div className="ml-header">
-                    <h3><Activity className="icon-pulse" size={20} /> ML Momentum Signals</h3>
-                </div>
-                <div className="ml-loading">
-                    <div className="skeleton-signal"></div>
-                    <div className="skeleton-signal"></div>
-                    <div className="skeleton-signal"></div>
-                </div>
-            </div>
-        );
-    }
-
-    // Filter only active signals (UPPER or LOWER extremity)
-    // You might want to show "Neutral" status for watched coins too, strictly optional.
-    // For now, let's show all passing signals.
     const activeSignals = signals.filter(s => s.signal === 'UPPER_EXTREMITY' || s.signal === 'LOWER_EXTREMITY');
 
     return (
-        <div className="ml-signal-section glass-card fade-in">
+        <div className="ml-signal-section glass-card">
             <div className="ml-header">
-                <h3><Activity className="icon-pulse" size={20} /> ML Momentum Signals (LuxAlgo Logic)</h3>
-                <span className="badge-count">{activeSignals.length} Active</span>
+                <div className="header-left">
+                    <div className="ml-icon-box">
+                        <Activity className="icon-pulse" size={18} />
+                    </div>
+                    <div className="header-text">
+                        <h3>ML Momentum Signals</h3>
+                        <div className="model-info">
+                            <Info size={12} />
+                            <span>GPR & RBF Kernel Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="header-right">
+                    <span className="active-badge">
+                        <span className="pulse-dot"></span>
+                        {activeSignals.length} Active
+                    </span>
+                </div>
             </div>
 
             <div className="ml-grid">
-                {activeSignals.length === 0 ? (
-                    <div className="no-ml-signals">
-                        <AlertCircle size={24} className="text-muted" />
-                        <p>No extreme momentum signals detected currently.</p>
-                        <small className="text-muted">Analyzing market using GPR & RBF Kernel...</small>
-                    </div>
-                ) : (
-                    activeSignals.map((sig) => (
-                        <div key={sig.symbol} className={`ml-card ${sig.signal === 'UPPER_EXTREMITY' ? 'bullish' : 'bearish'}`}>
-                            <div className="ml-card-header">
-                                <span className="symbol-name">{sig.symbol}</span>
-                                <span className="signal-badge">
-                                    {sig.signal === 'UPPER_EXTREMITY' ? 'BUY / UPPER' : 'SELL / LOWER'}
-                                </span>
-                            </div>
-
-                            <div className="ml-values">
-                                <div className="ml-row">
-                                    <span>Price:</span>
-                                    <strong>{sig.close?.toFixed(2)}</strong>
-                                </div>
-                                <div className="ml-row">
-                                    <span>Model Range:</span>
-                                    <small>{sig.lower?.toFixed(2)} - {sig.upper?.toFixed(2)}</small>
-                                </div>
-                                <div className="ml-row">
-                                    <span>GPR Value:</span>
-                                    <span>{sig.value?.toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            <div className="ml-icon-wrapper">
-                                {sig.signal === 'UPPER_EXTREMITY' ? (
-                                    <ArrowUpCircle size={32} />
-                                ) : (
-                                    <ArrowDownCircle size={32} />
-                                )}
-                            </div>
+                <AnimatePresence mode="popLayout">
+                    {loading ? (
+                        <div className="ml-loading-grid">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="skeleton-signal-premium"></div>
+                            ))}
                         </div>
-                    ))
-                )}
+                    ) : activeSignals.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="no-ml-signals"
+                        >
+                            <div className="no-signals-content">
+                                <div className="radar-animation">
+                                    <div className="circle c1"></div>
+                                    <div className="circle c2"></div>
+                                    <div className="circle c3"></div>
+                                    <Activity size={24} className="radar-icon" />
+                                </div>
+                                <p>Escaneando anomalías estadísticas...</p>
+                                <span className="text-muted">No se detectan extremos de momento en este momento.</span>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        activeSignals.map((sig) => (
+                            <motion.div
+                                layout
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                whileHover={{ y: -5 }}
+                                key={sig.symbol}
+                                className={`ml-card-premium ${sig.signal === 'UPPER_EXTREMITY' ? 'bullish' : 'bearish'}`}
+                            >
+                                <div className="card-glow" />
+
+                                <div className="ml-card-header-premium">
+                                    <div className="symbol-vignette">
+                                        <span className="symbol-name">{sig.symbol.replace('USDT', '').replace('USDC', '')}</span>
+                                        <div className="model-badge">ALGO MOD</div>
+                                    </div>
+                                    <div className={`signal-label ${sig.signal === 'UPPER_EXTREMITY' ? 'buy' : 'sell'}`}>
+                                        {sig.signal === 'UPPER_EXTREMITY' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                                        {sig.signal === 'UPPER_EXTREMITY' ? 'LONG' : 'SHORT'}
+                                    </div>
+                                </div>
+
+                                <div className="ml-card-body-premium">
+                                    <div className="data-row">
+                                        <span className="label">Predictive Value</span>
+                                        <span className="value">{sig.value?.toFixed(4)}</span>
+                                    </div>
+                                    <div className="data-row">
+                                        <span className="label">Band Range</span>
+                                        <span className="value range">{sig.lower?.toFixed(2)} - {sig.upper?.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="price-box-ml">
+                                        <span className="price-label">EXE PRICE</span>
+                                        <span className="price-val">${sig.close?.toFixed(4)}</span>
+                                    </div>
+                                </div>
+
+                                <div className="ml-card-footer-premium">
+                                    <div className="visual-indicator">
+                                        <div className="bar-bg">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: '100%' }}
+                                                className="bar-fill"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="icon-indicator">
+                                        {sig.signal === 'UPPER_EXTREMITY' ? (
+                                            <ArrowUpCircle size={24} className="text-success" />
+                                        ) : (
+                                            <ArrowDownCircle size={24} className="text-danger" />
+                                        )}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

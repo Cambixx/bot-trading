@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import './SignalCard.css';
 
@@ -13,8 +14,8 @@ function SignalCard({ signal, onSimulateBuy }) {
 
     const confidenceLabel = {
         HIGH: 'Alta Confianza',
-        MEDIUM: 'Confianza Media',
-        LOW: 'Baja Confianza'
+        MEDIUM: 'Media',
+        LOW: 'Baja'
     };
 
     const formatPrice = (price) => {
@@ -26,155 +27,109 @@ function SignalCard({ signal, onSimulateBuy }) {
     };
 
     return (
-        <div className={`signal-card glass-card fade-in ${signal.confidence.toLowerCase()}-signal ${isSell ? 'sell-signal' : 'buy-signal'}`}>
-            {/* Header */}
-            <div className="signal-header">
-                <div className="signal-symbol">
-                    {isSell ? <TrendingDown className="signal-icon text-danger" /> : <TrendingUp className="signal-icon text-success" />}
-                    <span className="symbol-text">{signal.symbol.replace('USDC', '')}</span>
-                    <span className={`badge badge-${isSell ? 'danger' : 'success'} ml-sm`}>
-                        {isSell ? 'SHORT' : 'LONG'}
-                    </span>
-                </div>
-                <span className={`badge badge-${confidenceColor[signal.confidence]}`}>
-                    {confidenceLabel[signal.confidence]}
-                </span>
-            </div>
+        <motion.div
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            className={`signal-card-premium ${isSell ? 'sell' : 'buy'}`}
+        >
+            <div className="card-accent-bar" />
 
-            {/* Price & Score */}
-            <div className="signal-main">
-                <div className="signal-price">
-                    <span className="price-label">{isSell ? 'Precio de Venta' : 'Precio de Entrada'}</span>
-                    <span className="price-value">${formatPrice(signal.price)}</span>
-                </div>
-                <div className="signal-score">
-                    <div className="score-circle" style={{ '--score': signal.score, borderColor: isSell ? 'var(--danger)' : 'var(--success)' }}>
-                        <span className="score-value">{signal.score}</span>
+            <div className="signal-header-premium">
+                <div className="symbol-meta">
+                    <div className="symbol-badge-box">
+                        <Zap size={14} className="zap-icon" />
+                        <span className="symbol-name">{signal.symbol.replace('USDC', '').replace('USDT', '')}</span>
                     </div>
-                    <span className="score-label">Score</span>
+                    <div className={`trade-type-badge ${isSell ? 'sell' : 'buy'}`}>
+                        {isSell ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                        <span>{isSell ? 'SHORT' : 'LONG'}</span>
+                    </div>
+                </div>
+
+                <div className={`confidence-badge-premium ${confidenceColor[signal.confidence]}`}>
+                    <Sparkles size={12} />
+                    <span>{confidenceLabel[signal.confidence]}</span>
                 </div>
             </div>
 
-            {/* Indicators */}
-            <div className="signal-indicators">
-                <div className="indicator-item">
-                    <span className="indicator-label">RSI</span>
-                    <span className="indicator-value">{signal.indicators.rsi}</span>
+            <div className="signal-main-premium">
+                <div className="price-stack">
+                    <span className="stack-label">{isSell ? 'SELL AT' : 'BUY AT'}</span>
+                    <span className="stack-value">${formatPrice(signal.price)}</span>
                 </div>
-                <div className="indicator-item">
-                    <span className="indicator-label">MACD</span>
-                    <span className="indicator-value">{signal.indicators.macd}</span>
-                </div>
-                <div className="indicator-item">
-                    <span className="indicator-label">ADX</span>
-                    <span className="indicator-value">{signal.indicators.adx || '-'}</span>
-                </div>
-            </div>
 
-            {/* Levels */}
-            <div className="signal-levels">
-                <div className="level-item">
-                    <Target className="level-icon" />
-                    <div className="level-info">
-                        <span className="level-label">Take Profit 1</span>
-                        <span className="level-value text-success">${formatPrice(signal.levels.takeProfit1)}</span>
-                    </div>
-                </div>
-                <div className="level-item">
-                    <Target className="level-icon" />
-                    <div className="level-info">
-                        <span className="level-label">Take Profit 2</span>
-                        <span className="level-value text-success">${formatPrice(signal.levels.takeProfit2)}</span>
-                    </div>
-                </div>
-                <div className="level-item">
-                    <Shield className="level-icon text-danger" />
-                    <div className="level-info">
-                        <span className="level-label">Stop Loss</span>
-                        <span className="level-value text-danger">${formatPrice(signal.levels.stopLoss)}</span>
+                <div className="score-viz-small">
+                    <div className="score-ring-mini" style={{ '--score': signal.score }}>
+                        <span className="score-val">{signal.score}</span>
                     </div>
                 </div>
             </div>
 
-            {/* Reasons */}
-            <div className="signal-reasons">
-                <h4 className="reasons-title">Razones de {isSell ? 'Venta' : 'Compra'}</h4>
-                <ul className="reasons-list">
-                    {signal.reasons.slice(0, 3).map((reason, idx) => (
-                        <li key={idx} className="reason-item">
-                            {typeof reason === 'object' ? reason.text : reason}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            {/* Warnings if any */}
-            {signal.warnings && signal.warnings.length > 0 && (
-                <div className="signal-warnings">
-                    <AlertTriangle className="warning-icon" />
-                    <span>{typeof signal.warnings[0] === 'object' ? signal.warnings[0].text : signal.warnings[0]}</span>
-                </div>
-            )}
-
-            {/* AI Analysis if available */}
-            {signal.aiAnalysis && (
-                <div className="ai-analysis">
-                    <div className="ai-badge">
-                        <span>🤖 AI Analysis</span>
+            <div className="levels-grid-premium">
+                <div className="level-box tp">
+                    <div className="level-header">
+                        <Target size={14} />
+                        <span>TAKE PROFIT</span>
                     </div>
-                    <div className="ai-content">
-                        <div className="ai-sentiment">
-                            <span>Sentimiento: </span>
-                            <strong className={`text-${signal.aiAnalysis.sentiment === 'BULLISH' ? 'success' : (signal.aiAnalysis.sentiment === 'BEARISH' ? 'danger' : 'warning')}`}>
-                                {signal.aiAnalysis.sentiment}
-                            </strong>
+                    <div className="level-values">
+                        <div className="tp-val">
+                            <span className="val-label">TP1</span>
+                            <span className="val-num">${formatPrice(signal.levels.takeProfit1)}</span>
                         </div>
-                        {signal.aiAnalysis.insights && signal.aiAnalysis.insights.length > 0 && (
-                            <p className="ai-insight">{signal.aiAnalysis.insights[0]}</p>
-                        )}
+                        <div className="tp-val">
+                            <span className="val-label">TP2</span>
+                            <span className="val-num">${formatPrice(signal.levels.takeProfit2)}</span>
+                        </div>
                     </div>
                 </div>
-            )}
 
-            {/* Actions */}
-            {onSimulateBuy && (
-                <div className="signal-actions" style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
-                    <button
-                        className="btn-simulate"
-                        onClick={() => onSimulateBuy(signal)}
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            background: isSell ? 'rgba(239, 68, 68, 0.2)' : 'rgba(38, 166, 154, 0.2)',
-                            border: `1px solid ${isSell ? 'rgba(239, 68, 68, 0.3)' : 'rgba(38, 166, 154, 0.3)'}`,
-                            borderRadius: '8px',
-                            color: isSell ? '#ef4444' : '#26a69a',
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        💼 {isSell ? 'Simular Venta (Short)' : 'Simular Compra (Long)'}
-                    </button>
-                </div>
-            )}
-
-            {/* Footer */}
-            <div className="signal-footer">
-                <div className="footer-item">
-                    <Clock className="footer-icon" />
-                    <span className="footer-text">{format(new Date(signal.timestamp), 'HH:mm:ss')}</span>
-                </div>
-                <div className="footer-item">
-                    <span className="footer-label">R:R</span>
-                    <span className="footer-value">{signal.riskReward}</span>
+                <div className="level-box sl">
+                    <div className="level-header">
+                        <Shield size={14} />
+                        <span>STOP LOSS</span>
+                    </div>
+                    <span className="sl-val">${formatPrice(signal.levels.stopLoss)}</span>
                 </div>
             </div>
-        </div>
+
+            <div className="signal-content-premium">
+                {/* Indicators Row */}
+                <div className="indicators-row-premium">
+                    <div className="ind-pill">RSI: {signal.indicators.rsi}</div>
+                    <div className="ind-pill">ADX: {signal.indicators.adx || '-'}</div>
+                    <div className="ind-pill">RR: {signal.riskReward}</div>
+                </div>
+
+                {/* AI Insights if available */}
+                {signal.aiAnalysis && (
+                    <div className="ai-insight-box">
+                        <div className="ai-insight-header">
+                            <div className="ai-tag">AI INSIGHT</div>
+                            <div className={`ai-sentiment-dot ${signal.aiAnalysis.sentiment.toLowerCase()}`} />
+                        </div>
+                        <p className="ai-text">{signal.aiAnalysis.insights?.[0] || "Confirming momentum trajectory..."}</p>
+                    </div>
+                )}
+            </div>
+
+            <div className="signal-footer-premium">
+                <div className="time-stamp">
+                    <Clock size={12} />
+                    <span>{format(new Date(signal.timestamp), 'HH:mm')}</span>
+                </div>
+
+                {onSimulateBuy && (
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`btn-execute-premium ${isSell ? 'sell' : 'buy'}`}
+                        onClick={() => onSimulateBuy(signal)}
+                    >
+                        <span>SIMULATE</span>
+                        <ArrowRight size={14} />
+                    </motion.button>
+                )}
+            </div>
+        </motion.div>
     );
 }
 
