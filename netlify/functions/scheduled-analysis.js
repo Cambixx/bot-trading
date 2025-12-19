@@ -50,13 +50,20 @@ async function getOHLCVData(symbol, limit = 100) {
   const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
-    throw new Error(`CryptoCompare API error: ${response.status}`);
+    throw new Error(`CryptoCompare HTTP error: ${response.status}`);
   }
 
   const json = await response.json();
 
-  if (json.Response !== 'Success' || !json.Data?.Data) {
-    throw new Error(`CryptoCompare data error for ${symbol}`);
+  // Detailed error logging
+  if (json.Response !== 'Success') {
+    console.error(`CryptoCompare API Response for ${symbol}:`, json.Message || json.Response);
+    throw new Error(`CryptoCompare: ${json.Message || 'Unknown error'}`);
+  }
+
+  if (!json.Data?.Data || json.Data.Data.length === 0) {
+    console.error(`CryptoCompare no data for ${symbol}`);
+    throw new Error(`No data available for ${symbol}`);
   }
 
   // Transform to standard candle format
