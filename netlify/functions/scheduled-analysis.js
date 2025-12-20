@@ -403,4 +403,4 @@ const scheduledHandler = async (event) => {
 
 // Export the scheduled function using Netlify's schedule helper
 // Cron: "*/20 * * * *" = Every 20 minutes
-export const handler = schedule("*/20 * * * *", scheduledHandler);
+export const handler = schedule("*/45 * * * *", scheduledHandler);
