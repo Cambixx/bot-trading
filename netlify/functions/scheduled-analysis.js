@@ -5,6 +5,11 @@
  * Runs every 20 minutes to detect opportunities and send Telegram alerts.
  */
 
+// Netlify Scheduled Function Configuration (REQUIRED for Netlify to recognize schedule)
+export const config = {
+  schedule: "*/20 * * * *"  // Every 20 minutes
+};
+
 console.log('--- CryptoCompare Advanced Analysis Module Loaded ---');
 
 // Environment Configuration
