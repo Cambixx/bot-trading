@@ -5,10 +5,7 @@
  * Runs every 20 minutes to detect opportunities and send Telegram alerts.
  */
 
-// Netlify Scheduled Function Configuration (REQUIRED for Netlify to recognize schedule)
-export const config = {
-  schedule: "*/20 * * * *"  // Every 20 minutes
-};
+import { schedule } from "@netlify/functions";
 
 console.log('--- CryptoCompare Advanced Analysis Module Loaded ---');
 
@@ -54,7 +51,6 @@ async function fetchWithTimeout(url, timeout = 15000) {
 // ==================== CRYPTOCOMPARE DATA ====================
 
 async function getOHLCVData(symbol, limit = 100) {
-  // Build URL with optional API key
   let url = `${CRYPTOCOMPARE_API}/histohour?fsym=${symbol}&tsym=USD&limit=${limit}`;
   if (CRYPTOCOMPARE_API_KEY) {
     url += `&api_key=${CRYPTOCOMPARE_API_KEY}`;
@@ -68,20 +64,16 @@ async function getOHLCVData(symbol, limit = 100) {
 
   const json = await response.json();
 
-  // Detailed error logging
   if (json.Response !== 'Success') {
-    console.error(`CryptoCompare API Response for ${symbol}:`, json.Message || json.Response);
     throw new Error(`CryptoCompare: ${json.Message || 'Unknown error'}`);
   }
 
   if (!json.Data?.Data || json.Data.Data.length === 0) {
-    console.error(`CryptoCompare no data for ${symbol}`);
     throw new Error(`No data available for ${symbol}`);
   }
 
-  // Transform to standard candle format
   return json.Data.Data.map(candle => ({
-    time: candle.time * 1000, // Convert to ms
+    time: candle.time * 1000,
     open: candle.open,
     high: candle.high,
     low: candle.low,
@@ -104,7 +96,6 @@ function calculateRSI(closes, period = 14) {
     losses.push(change < 0 ? -change : 0);
   }
 
-  // Use last 'period' values
   const recentGains = gains.slice(-period);
   const recentLosses = losses.slice(-period);
 
@@ -138,12 +129,10 @@ function calculateMACD(closes) {
 
   const macdLine = ema12 - ema26;
 
-  // For signal line, we'd need historical MACD values
-  // Simplified: use current MACD line and check if positive/negative
   return {
     value: macdLine,
     bullish: macdLine > 0,
-    histogram: macdLine // Simplified
+    histogram: macdLine
   };
 }
 
@@ -177,7 +166,6 @@ function generateSignal(symbol, candles) {
   const currentPrice = closes[closes.length - 1];
   const prevPrice = closes[closes.length - 2];
 
-  // Calculate indicators
   const rsi = calculateRSI(closes, 14);
   const macd = calculateMACD(closes);
   const bb = calculateBollingerBands(closes, 20, 2);
@@ -190,40 +178,29 @@ function generateSignal(symbol, candles) {
   let signalType = null;
 
   // === BULLISH SIGNALS ===
-
-  // RSI Oversold
   if (rsi < 30) {
     score += 25;
     reasons.push(`RSI sobreventa: ${rsi.toFixed(1)}`);
     signalType = 'BUY';
-  } else if (rsi < 40 && rsi > closes.length > 1 ? calculateRSI(closes.slice(0, -1), 14) : 0) {
-    // RSI recovering from low
-    score += 15;
-    reasons.push(`RSI recuperándose: ${rsi.toFixed(1)}`);
-    signalType = signalType || 'BUY';
   }
 
-  // MACD Bullish
   if (macd.bullish && macd.value > 0) {
     score += 20;
     reasons.push('MACD positivo');
     signalType = signalType || 'BUY';
   }
 
-  // Price near lower Bollinger Band
   if (currentPrice <= bb.lower * 1.01) {
     score += 20;
     reasons.push('Precio en banda inferior Bollinger');
     signalType = 'BUY';
   }
 
-  // Price above SMA50 (trend confirmation)
   if (sma50 && currentPrice > sma50) {
     score += 10;
     reasons.push('Sobre SMA50');
   }
 
-  // Price momentum (1h gain)
   const priceChange1h = ((currentPrice - prevPrice) / prevPrice) * 100;
   if (priceChange1h > 2) {
     score += 15;
@@ -232,22 +209,18 @@ function generateSignal(symbol, candles) {
   }
 
   // === BEARISH / WARNING SIGNALS ===
-
-  // RSI Overbought
   if (rsi > 70) {
     score += 20;
     reasons.push(`RSI sobrecompra: ${rsi.toFixed(1)}`);
     signalType = 'SELL_ALERT';
   }
 
-  // Price near upper Bollinger Band
   if (currentPrice >= bb.upper * 0.99) {
     score += 15;
     reasons.push('Precio en banda superior Bollinger');
     signalType = signalType || 'SELL_ALERT';
   }
 
-  // Strong drop
   if (priceChange1h < -3) {
     score += 20;
     reasons.push(`Caída 1h: ${priceChange1h.toFixed(1)}%`);
@@ -255,9 +228,6 @@ function generateSignal(symbol, candles) {
   }
 
   // === RETURN SIGNAL ===
-
-  // Calculate Bollinger position for context
-  const bbPosition = currentPrice < bb.middle ? 'bajo' : 'alto';
   const bbPercentage = ((currentPrice - bb.lower) / (bb.upper - bb.lower) * 100).toFixed(0);
 
   if (score >= SIGNAL_SCORE_THRESHOLD && reasons.length > 0) {
@@ -289,34 +259,26 @@ async function sendTelegramNotification(signals) {
     return { success: true, sent: 0 };
   }
 
-  // Build message
   let message = '🔔 *ANÁLISIS TÉCNICO AUTOMÁTICO* 🔔\n';
-  message += `_${escapeMarkdownV2('Indicadores: RSI, MACD, Bollinger')}_\n\n`;
+  message += `_${escapeMarkdownV2('RSI • MACD • Bollinger')}_\n\n`;
 
   for (const sig of signals.slice(0, 5)) {
-    // Icon based on type
     let icon = '📊';
     let typeEmoji = '';
     if (sig.type === 'BUY') { icon = '🟢'; typeEmoji = 'COMPRA'; }
     else if (sig.type === 'SELL_ALERT') { icon = '🔴'; typeEmoji = 'ALERTA VENTA'; }
     else { typeEmoji = 'VIGILAR'; }
 
-    // Symbol line with type
     message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| ${escapeMarkdownV2(typeEmoji)}\n`;
 
-    // Price and change
     const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
     const changeIcon = parseFloat(sig.priceChange1h) >= 0 ? '📈' : '📉';
     const changeSign = parseFloat(sig.priceChange1h) >= 0 ? '+' : '';
     message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange1h)}% \\(1h\\)\n`;
 
-    // Indicators line
     message += `📊 RSI: ${escapeMarkdownV2(sig.rsi)} \\| BB: ${escapeMarkdownV2(sig.bbPosition)} \\| ${sig.macdBullish ? 'MACD\\+' : 'MACD\\-'}\n`;
-
-    // Score
     message += `🎯 Score: ${escapeMarkdownV2(String(sig.score))}/100\n`;
 
-    // Top reason
     if (sig.reasons.length > 0) {
       message += `💡 _${escapeMarkdownV2(sig.reasons[0])}_\n`;
     }
@@ -324,7 +286,6 @@ async function sendTelegramNotification(signals) {
     message += `───────────────────\n`;
   }
 
-  // Footer
   const timeStr = new Date().toLocaleTimeString('es-ES', {
     hour: '2-digit',
     minute: '2-digit',
@@ -332,7 +293,6 @@ async function sendTelegramNotification(signals) {
   });
   message += `🤖 _Ejecutado cada 20 min_ • ${escapeMarkdownV2(timeStr)}`;
 
-  // Send
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
   try {
@@ -361,9 +321,9 @@ async function sendTelegramNotification(signals) {
   }
 }
 
-// ==================== HANDLER ====================
+// ==================== MAIN ANALYSIS FUNCTION ====================
 
-export async function handler(event, context) {
+async function runAnalysis() {
   console.log('--- CryptoCompare Advanced Analysis Started ---');
   console.log('Time:', new Date().toISOString());
 
@@ -371,7 +331,6 @@ export async function handler(event, context) {
   let analyzed = 0;
   let errors = 0;
 
-  // Analyze each coin
   for (const symbol of COINS_TO_MONITOR) {
     try {
       const candles = await getOHLCVData(symbol, 100);
@@ -381,24 +340,19 @@ export async function handler(event, context) {
       if (signal) {
         signals.push(signal);
         console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
-        // Reduced delay since we have API key (500ms between requests)
-        await new Promise(r => setTimeout(r, 500));
-      } else {
-        // Still apply a delay even if no signal, to respect rate limits for data fetching
-        await new Promise(r => setTimeout(r, 500));
       }
+
+      await new Promise(r => setTimeout(r, 500));
 
     } catch (error) {
       console.error(`Error analyzing ${symbol}:`, error.message);
       errors++;
-      // Apply a delay even on error to avoid hammering the API
       await new Promise(r => setTimeout(r, 500));
     }
   }
 
   console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
 
-  // Send notifications
   let telegramResult = { success: true, sent: 0 };
   if (signals.length > 0) {
     telegramResult = await sendTelegramNotification(signals);
@@ -407,15 +361,26 @@ export async function handler(event, context) {
   }
 
   return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      success: true,
-      analyzed,
-      signals: signals.length,
-      errors,
-      telegram: telegramResult,
-      timestamp: new Date().toISOString()
-    })
+    success: true,
+    analyzed,
+    signals: signals.length,
+    errors,
+    telegram: telegramResult,
+    timestamp: new Date().toISOString()
   };
 }
+
+// ==================== SCHEDULED HANDLER (Netlify) ====================
+
+// This is the scheduled handler that runs every 20 minutes
+const scheduledHandler = async (event) => {
+  const result = await runAnalysis();
+
+  return {
+    statusCode: 200
+  };
+};
+
+// Export the scheduled function using Netlify's schedule helper
+// Cron: "*/20 * * * *" = Every 20 minutes
+export const handler = schedule("*/20 * * * *", scheduledHandler);
