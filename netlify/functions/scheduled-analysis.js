@@ -13,7 +13,7 @@ console.log('--- CryptoCompare Advanced Analysis Module Loaded ---');
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 60;
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70; // Raised to 70 for fewer, stronger alerts
 const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 
 // CryptoCompare API (Free, no key required for basic endpoints)
@@ -178,52 +178,64 @@ function generateSignal(symbol, candles) {
   let signalType = null;
 
   // === BULLISH SIGNALS ===
+  // Priority 1: RSI (most important indicator)
   if (rsi < 30) {
-    score += 25;
-    reasons.push(`RSI sobreventa: ${rsi.toFixed(1)}`);
+    score += 30; // Increased weight
+    reasons.unshift(`⚡ RSI sobreventa: ${rsi.toFixed(1)}`); // unshift = first position
+    signalType = 'BUY';
+  } else if (rsi < 40) {
+    score += 15;
+    reasons.push(`RSI bajo: ${rsi.toFixed(1)}`);
+  }
+
+  // Priority 2: Bollinger Bands
+  if (currentPrice <= bb.lower * 1.01) {
+    score += 20;
+    reasons.push('📉 Precio en banda inferior Bollinger');
     signalType = 'BUY';
   }
 
+  // Priority 3: MACD
   if (macd.bullish && macd.value > 0) {
-    score += 20;
+    score += 15; // Reduced weight
     reasons.push('MACD positivo');
     signalType = signalType || 'BUY';
   }
 
-  if (currentPrice <= bb.lower * 1.01) {
-    score += 20;
-    reasons.push('Precio en banda inferior Bollinger');
-    signalType = 'BUY';
-  }
-
   if (sma50 && currentPrice > sma50) {
     score += 10;
-    reasons.push('Sobre SMA50');
+    // Don't add to reasons - less important
   }
 
   const priceChange1h = ((currentPrice - prevPrice) / prevPrice) * 100;
-  if (priceChange1h > 2) {
+  if (priceChange1h > 3) { // Increased threshold
     score += 15;
-    reasons.push(`Subida 1h: +${priceChange1h.toFixed(1)}%`);
+    reasons.push(`Subida fuerte 1h: +${priceChange1h.toFixed(1)}%`);
     signalType = signalType || 'BUY';
   }
 
   // === BEARISH / WARNING SIGNALS ===
+  // Priority 1: RSI (most important)
   if (rsi > 70) {
-    score += 20;
-    reasons.push(`RSI sobrecompra: ${rsi.toFixed(1)}`);
+    score += 25; // Increased weight
+    reasons.unshift(`⚡ RSI sobrecompra: ${rsi.toFixed(1)}`); // unshift = first position
     signalType = 'SELL_ALERT';
+
+    // Extra points for extreme RSI
+    if (rsi > 80) score += 10;
   }
 
+  // Priority 2: Bollinger Bands
   if (currentPrice >= bb.upper * 0.99) {
     score += 15;
-    reasons.push('Precio en banda superior Bollinger');
+    reasons.push('📈 Precio en banda superior Bollinger');
     signalType = signalType || 'SELL_ALERT';
   }
 
+  // Priority 3: Strong drop
   if (priceChange1h < -3) {
     score += 20;
-    reasons.push(`Caída 1h: ${priceChange1h.toFixed(1)}%`);
+    reasons.push(`Caída fuerte 1h: ${priceChange1h.toFixed(1)}%`);
     signalType = 'SELL_ALERT';
   }
 
@@ -237,6 +249,7 @@ function generateSignal(symbol, candles) {
       score,
       type: signalType || 'WATCH',
       rsi: rsi.toFixed(1),
+      rsiValue: rsi, // Raw value for sorting
       macdBullish: macd.bullish,
       priceChange1h: priceChange1h.toFixed(1),
       bbPosition: `${bbPercentage}%`,
@@ -262,7 +275,14 @@ async function sendTelegramNotification(signals) {
   let message = '🔔 *ANÁLISIS TÉCNICO AUTOMÁTICO* 🔔\n';
   message += `_${escapeMarkdownV2('RSI • MACD • Bollinger')}_\n\n`;
 
-  for (const sig of signals.slice(0, 5)) {
+  // Sort signals by RSI extremity (most extreme first)
+  const sortedSignals = [...signals].sort((a, b) => {
+    const extremityA = Math.abs(a.rsiValue - 50);
+    const extremityB = Math.abs(b.rsiValue - 50);
+    return extremityB - extremityA;
+  });
+
+  for (const sig of sortedSignals.slice(0, 5)) {
     let icon = '📊';
     let typeEmoji = '';
     if (sig.type === 'BUY') { icon = '🟢'; typeEmoji = 'COMPRA'; }
