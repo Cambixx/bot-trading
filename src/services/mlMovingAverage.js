@@ -280,43 +280,123 @@ export function calculateMLMovingAverage(prices, config = {}) {
 
     if (!prevResult || !currResult) return null;
 
-    // Determine OS state
-    // Pine: `os := close > upper and out > out[1] ? 1 : close < lower and out < out[1] ? 0 : os`
-    // Note: `out[1]` means previous `out`.
+    // Core GPR values
     const prevOut = prevResult.out;
     const currOut = currResult.out;
     const currClose = currResult.close;
     const currUpper = currResult.upper;
     const currLower = currResult.lower;
 
-    // We assume 'os' starts at 0 (or some default). We can't know the TRUE historical OS w/o running full history.
-    // However, the signal triggers on CHANGE of OS.
-    // Let's return the conditions directly.
+    // === NEW: Calculate additional metrics ===
 
-    // Pine Logic interpretation:
-    // os switches to 1 (Bull/High) if Price > Upper AND AlgoCurve Rising.
-    // os switches to 0 (Bear/Low)  if Price < Lower AND AlgoCurve Falling.
-    // Otherwise holds previous state.
+    // 1. Momentum Velocity (% change of GPR curve)
+    const velocity = ((currOut - prevOut) / prevOut) * 100;
+    const isRising = currOut > prevOut;
+    const isFalling = currOut < prevOut;
 
-    // Return discrete signal:
-    // 'UPPER_EXTREMITY' if close > upper && currOut > prevOut
-    // 'LOWER_EXTREMITY' if close < lower && currOut < prevOut
+    // 2. Band Width (for confidence calculation)
+    const bandWidth = currUpper - currLower;
+    const bandWidthPercent = (bandWidth / currOut) * 100;
 
+    // 3. Signal Strength (how far from band in %)
+    let signalStrength = 0;
+    let deviation = 0;
+
+    if (currClose > currUpper) {
+        deviation = ((currClose - currUpper) / currUpper) * 100;
+        signalStrength = Math.min(100, Math.round(deviation * 20)); // Scale to 0-100
+    } else if (currClose < currLower) {
+        deviation = ((currLower - currClose) / currLower) * 100;
+        signalStrength = Math.min(100, Math.round(deviation * 20));
+    }
+
+    // 4. Confidence Score (inverse of band width - tighter bands = higher confidence)
+    // Typical band width is 1-5%, so we invert and scale
+    const confidence = Math.max(20, Math.min(100, Math.round(100 - (bandWidthPercent * 10))));
+
+    // 5. Calculate RSI for cross-validation (simple RSI approximation)
+    const recentPrices = prices.slice(-15);
+    let gains = 0, losses = 0;
+    for (let i = 1; i < recentPrices.length; i++) {
+        const change = recentPrices[i] - recentPrices[i - 1];
+        if (change > 0) gains += change;
+        else losses -= change;
+    }
+    const avgGain = gains / 14;
+    const avgLoss = losses / 14;
+    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+    const rsi = 100 - (100 / (1 + rs));
+
+    // 6. SMA20 for trend filter
+    const sma20 = prices.slice(-20).reduce((a, b) => a + b, 0) / 20;
+    const aboveSMA20 = currClose > sma20;
+    const trendDirection = aboveSMA20 ? 'BULLISH' : 'BEARISH';
+
+    // === Determine Signal with Enhanced Logic ===
     let signal = null;
-    if (currClose > currUpper && currOut > prevOut) {
-        signal = 'UPPER_EXTREMITY'; // Potential Overbought / Sell? or Breakout?
-        // In LuxAlgo image: "Upper Extremity" (Blue) and "Lower Extremity" (Red).
-        // Usually Upper=Sell Risk, Lower=Buy Opp.
-    } else if (currClose < currLower && currOut < prevOut) {
+    let signalQuality = 'WEAK';
+    let rsiConfirmed = false;
+    let trendAligned = false;
+
+    // UPPER_EXTREMITY: Price above upper band + curve rising
+    if (currClose > currUpper && isRising) {
+        signal = 'UPPER_EXTREMITY';
+
+        // RSI confirmation (>70 = confirmed overbought)
+        rsiConfirmed = rsi > 70;
+
+        // Trend alignment (bearish trend = better for sells)
+        trendAligned = !aboveSMA20; // Better to sell when below SMA
+
+        // Signal quality
+        if (rsiConfirmed && signalStrength > 50) signalQuality = 'STRONG';
+        else if (rsiConfirmed || signalStrength > 30) signalQuality = 'MODERATE';
+    }
+    // LOWER_EXTREMITY: Price below lower band + curve falling
+    else if (currClose < currLower && isFalling) {
         signal = 'LOWER_EXTREMITY';
+
+        // RSI confirmation (<30 = confirmed oversold)
+        rsiConfirmed = rsi < 30;
+
+        // Trend alignment (bullish trend = better for buys)
+        trendAligned = aboveSMA20; // Better to buy when above SMA
+
+        // Signal quality
+        if (rsiConfirmed && signalStrength > 50) signalQuality = 'STRONG';
+        else if (rsiConfirmed || signalStrength > 30) signalQuality = 'MODERATE';
+    }
+
+    // Calculate final score (0-100)
+    let score = 0;
+    if (signal) {
+        score += signalStrength; // Base score from deviation
+        if (rsiConfirmed) score += 25; // RSI confirmation bonus
+        if (trendAligned) score += 15; // Trend alignment bonus
+        if (Math.abs(velocity) > 0.5) score += 10; // Strong velocity bonus
+        score = Math.min(100, Math.round(score));
     }
 
     return {
+        // Original values
         value: currOut,
         upper: currUpper,
         lower: currLower,
         signal,
         prevValue: prevOut,
-        price: currClose
+        price: currClose,
+
+        // NEW: Enhanced metrics
+        signalStrength,
+        signalQuality,
+        score,
+        velocity: velocity.toFixed(2),
+        confidence,
+        rsi: rsi.toFixed(1),
+        rsiConfirmed,
+        trendDirection,
+        trendAligned,
+        bandWidthPercent: bandWidthPercent.toFixed(2),
+        deviation: deviation.toFixed(2)
     };
 }

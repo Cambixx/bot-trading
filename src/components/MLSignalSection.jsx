@@ -69,7 +69,9 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
                                 <div className="ml-card-header-premium">
                                     <div className="symbol-vignette">
                                         <span className="symbol-name">{sig.symbol.replace('USDT', '').replace('USDC', '')}</span>
-                                        <div className="model-badge">ALGO MOD</div>
+                                        <div className={`quality-badge ${(sig.signalQuality || 'WEAK').toLowerCase()}`}>
+                                            {sig.signalQuality || 'SIGNAL'}
+                                        </div>
                                     </div>
                                     <div className={`signal-label ${sig.signal === 'UPPER_EXTREMITY' ? 'buy' : 'sell'}`}>
                                         {sig.signal === 'UPPER_EXTREMITY' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
@@ -78,18 +80,55 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
                                 </div>
 
                                 <div className="ml-card-body-premium">
+                                    {/* Score Bar */}
+                                    <div className="score-bar-container">
+                                        <div className="score-label">
+                                            <span>Score</span>
+                                            <span className="score-value">{sig.score || 0}/100</span>
+                                        </div>
+                                        <div className="score-bar">
+                                            <motion.div
+                                                className="score-fill"
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${sig.score || 0}%` }}
+                                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Confirmation Badges */}
+                                    <div className="confirmation-badges">
+                                        {sig.rsiConfirmed && (
+                                            <span className="badge confirmed">✓ RSI {sig.rsi}</span>
+                                        )}
+                                        {sig.trendAligned && (
+                                            <span className="badge aligned">✓ Trend</span>
+                                        )}
+                                        {sig.confidence > 70 && (
+                                            <span className="badge high-conf">🎯 {sig.confidence}%</span>
+                                        )}
+                                    </div>
+
                                     <div className="data-row">
-                                        <span className="label">Predictive Value</span>
-                                        <span className="value">{sig.value?.toFixed(4)}</span>
+                                        <span className="label">RSI</span>
+                                        <span className={`value ${sig.rsi > 70 ? 'overbought' : sig.rsi < 30 ? 'oversold' : ''}`}>
+                                            {sig.rsi}
+                                        </span>
                                     </div>
                                     <div className="data-row">
-                                        <span className="label">Band Range</span>
-                                        <span className="value range">{sig.lower?.toFixed(2)} - {sig.upper?.toFixed(2)}</span>
+                                        <span className="label">Trend</span>
+                                        <span className={`value ${sig.trendDirection === 'BULLISH' ? 'bullish' : 'bearish'}`}>
+                                            {sig.trendDirection === 'BULLISH' ? '📈' : '📉'} {sig.trendDirection}
+                                        </span>
+                                    </div>
+                                    <div className="data-row">
+                                        <span className="label">Velocity</span>
+                                        <span className="value">{sig.velocity}%</span>
                                     </div>
 
                                     <div className="price-box-ml">
                                         <span className="price-label">EXE PRICE</span>
-                                        <span className="price-val">${sig.close?.toFixed(4)}</span>
+                                        <span className="price-val">${sig.close?.toFixed(4) || sig.price?.toFixed(4)}</span>
                                     </div>
                                 </div>
 
@@ -98,7 +137,7 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
                                         <div className="bar-bg">
                                             <motion.div
                                                 initial={{ width: 0 }}
-                                                animate={{ width: '100%' }}
+                                                animate={{ width: `${sig.signalStrength || 50}%` }}
                                                 className="bar-fill"
                                             />
                                         </div>
