@@ -16,17 +16,17 @@ const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() 
 const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70; // Raised to 70 for fewer, stronger alerts
 const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 
-// Binance API (Free, high rate limits for public data)
-const BINANCE_API = 'https://api.binance.com/api/v3';
+// Bybit API V5 (Free, permissive for public market data)
+const BYBIT_API = 'https://api.bybit.com/v5/market';
 
-// Top coins to monitor (Binance format: SYMBOL + USDT)
+// Top coins to monitor (Bybit format: SYMBOL + USDT)
 const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX',
   'DOT', 'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM',
   'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE', 'MKR', 'INJ', 'FET',
   'NEAR', 'APE', 'OP', 'ARB', 'RNDR', 'GRT', 'IMX', 'ALGO',
   'VET', 'MANA', 'SAND', 'AXS', 'THETA', 'EOS', 'XTZ', 'EGLD',
-  'PEPE' // PEPE is available on Binance
+  'PEPE'
 ];
 
 // ==================== HELPERS ====================
@@ -48,53 +48,56 @@ async function fetchWithTimeout(url, timeout = 15000) {
   }
 }
 
-// ==================== BINANCE DATA ====================
+// ==================== BYBIT DATA ====================
 
 async function getOHLCVData(symbol, limit = 300) {
-  const binanceSymbol = `${symbol}USDT`;
-  const url = `${BINANCE_API}/klines?symbol=${binanceSymbol}&interval=1h&limit=${limit}`;
+  const bybitSymbol = `${symbol}USDT`;
+  // Bybit V5: /mark/kline?category=spot&symbol=BTCUSDT&interval=60&limit=300
+  const url = `${BYBIT_API}/kline?category=spot&symbol=${bybitSymbol}&interval=60&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
-    throw new Error(`Binance HTTP error: ${response.status}`);
+    throw new Error(`Bybit HTTP error: ${response.status}`);
   }
 
   const json = await response.json();
 
-  if (!Array.isArray(json)) {
-    throw new Error(`Binance: Invalid response for ${symbol}`);
+  if (json.retCode !== 0 || !json.result?.list) {
+    throw new Error(`Bybit error ${json.retCode}: ${json.retMsg || 'Invalid response'}`);
   }
 
-  return json.map(candle => ({
-    time: candle[0],
+  // Bybit returns list in reverse chronological order (newest first)
+  // We need it in chronological order (oldest first) for indicator functions
+  return json.result.list.map(candle => ({
+    time: parseInt(candle[0]),
     open: parseFloat(candle[1]),
     high: parseFloat(candle[2]),
     low: parseFloat(candle[3]),
     close: parseFloat(candle[4]),
     volume: parseFloat(candle[5])
-  }));
+  })).reverse();
 }
 
 // Fetch daily candles for multi-timeframe analysis
 async function getDailyCandles(symbol, limit = 30) {
-  const binanceSymbol = `${symbol}USDT`;
-  const url = `${BINANCE_API}/klines?symbol=${binanceSymbol}&interval=1d&limit=${limit}`;
+  const bybitSymbol = `${symbol}USDT`;
+  const url = `${BYBIT_API}/kline?category=spot&symbol=${bybitSymbol}&interval=D&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
   if (!response.ok) return null;
 
   const json = await response.json();
-  if (!Array.isArray(json)) return null;
+  if (json.retCode !== 0 || !json.result?.list) return null;
 
-  return json.map(candle => ({
-    time: candle[0],
+  return json.result.list.map(candle => ({
+    time: parseInt(candle[0]),
     open: parseFloat(candle[1]),
     high: parseFloat(candle[2]),
     low: parseFloat(candle[3]),
     close: parseFloat(candle[4]),
     volume: parseFloat(candle[5])
-  }));
+  })).reverse();
 }
 
 // Analyze daily trend for multi-timeframe confirmation
@@ -596,7 +599,7 @@ async function sendTelegramNotification(signals) {
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
 async function runAnalysis() {
-  console.log('--- Binance Advanced Analysis Started ---');
+  console.log('--- Bybit Advanced Analysis Started ---');
   console.log('Time:', new Date().toISOString());
 
   const signals = [];
