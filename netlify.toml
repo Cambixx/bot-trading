@@ -13,7 +13,7 @@
 # Scheduled function for automatic trading signal analysis
 [[scheduled_functions]]
   function = "scheduled-analysis"
-  cron = "*/20 * * * *"
+  cron = "0 * * * *"
 
 [[redirects]]
   from = "/api/check-analysis"
