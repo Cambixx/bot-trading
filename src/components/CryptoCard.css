@@ -160,6 +160,11 @@
     filter: drop-shadow(0 0 4px var(--color-info-glow));
 }
 
+.ring-fill.danger {
+    stroke: var(--color-danger);
+    filter: drop-shadow(0 0 4px var(--color-danger-glow));
+}
+
 .score-text {
     position: absolute;
     display: flex;
@@ -194,39 +199,40 @@
     font-weight: 600;
 }
 
+.opportunity-status.success {
+    color: var(--color-success);
+}
+.opportunity-status.success .status-dot-mini {
+    background: var(--color-success);
+    box-shadow: 0 0 8px var(--color-success-glow);
+}
+
+.opportunity-status.warning {
+    color: var(--color-warning);
+}
+.opportunity-status.warning .status-dot-mini {
+    background: var(--color-warning);
+    box-shadow: 0 0 8px var(--color-warning-glow);
+}
+
+.opportunity-status.info {
+    color: var(--color-info);
+}
+.opportunity-status.info .status-dot-mini {
+    background: var(--color-info);
+    box-shadow: 0 0 8px var(--color-info-glow);
+}
+
+.opportunity-status.danger {
+    color: var(--color-danger);
+}
+.opportunity-status.danger .status-dot-mini {
+    background: var(--color-danger);
+    box-shadow: 0 0 8px var(--color-danger-glow);
+}
+
 .status-dot-mini {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-}
-
-.opportunity-status.success {
-    color: var(--color-success-light);
-}
-
-.opportunity-status.success .status-dot-mini {
-    background: var(--color-success);
-    box-shadow: 0 0 8px var(--color-success);
-}
-
-.opportunity-status.warning {
-    color: var(--color-warning-light);
-}
-
-.opportunity-status.warning .status-dot-mini {
-    background: var(--color-warning);
-}
-
-.opportunity-status.info {
-    color: var(--color-info-light);
-}
-
-.opportunity-status.info .status-dot-mini {
-    background: var(--color-info);
-}
-
-@media (max-width: 640px) {
-    .price-value {
-        font-size: 1.25rem;
-    }
 }

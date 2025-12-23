@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Activity, Sparkles } from 'lucide-react';
 import './CryptoCard.css';
 
 function CryptoCard({ crypto }) {
-    const { symbol, price, priceChangePercent, opportunity } = crypto;
+    const { symbol, price, priceChangePercent, opportunity, opportunityType } = crypto;
     const isPositive = priceChangePercent >= 0;
 
     // Formatear precio dinámicamente según el valor
@@ -18,8 +18,18 @@ function CryptoCard({ crypto }) {
     const score = opportunity || 0;
 
     const getOpportunityLevel = () => {
-        if (score >= 70) return { level: 'HIGH', label: 'Alta Oportunidad', color: 'success', icon: <Sparkles size={14} /> };
-        if (score >= 50) return { level: 'MEDIUM', label: 'Oportunidad Media', color: 'warning', icon: null };
+        if (score >= 70) {
+            if (opportunityType === 'SHORT') {
+                return { level: 'HIGH', label: 'Alta Oportunidad (Short)', color: 'danger', icon: <TrendingDown size={14} /> };
+            }
+            return { level: 'HIGH', label: 'Alta Oportunidad (Long)', color: 'success', icon: <Sparkles size={14} /> };
+        }
+        if (score >= 50) {
+            if (opportunityType === 'SHORT') {
+                return { level: 'MEDIUM', label: 'Oportunidad Media (Short)', color: 'warning', icon: null };
+            }
+            return { level: 'MEDIUM', label: 'Oportunidad Media (Long)', color: 'warning', icon: null };
+        }
         return { level: 'LOW', label: 'Baja Oportunidad', color: 'info', icon: null };
     };
 

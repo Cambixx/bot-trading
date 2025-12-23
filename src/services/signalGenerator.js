@@ -650,7 +650,7 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
 
     // === Stop Loss & Take Profit Strategy ===
     const atr = indicators.atr || (price * 0.02);
-    let stopLoss, takeProfit1;
+    let stopLoss, takeProfit1, takeProfit2;
 
     // Dynamic SL based on volatility state and mode
     // SCALPING usa stops más ajustados para operaciones rápidas

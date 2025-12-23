@@ -305,20 +305,45 @@ function AppContent() {
       priceResults.forEach(({ symbol, data }) => {
         if (data) {
           const analysis = candleData[symbol]?.data ? performTechnicalAnalysis(candleData[symbol].data) : null;
-          let opportunityScore = 0;
+          // Calcular Scores Bidireccionales (Long y Short)
+          let longScore = 0;
+          let shortScore = 0;
+
           if (analysis?.indicators) {
             const ind = analysis.indicators;
-            if (ind.rsi < 30) opportunityScore += 30;
-            else if (ind.rsi < 45) opportunityScore += 15;
-            else if (ind.rsi > 70) opportunityScore -= 10;
-            if (ind.macd?.histogram > 0) opportunityScore += 20;
-            if (ind.ema20 && ind.ema50 && ind.ema20 > ind.ema50) {
-              opportunityScore += 20;
-              if (data.price < ind.ema20) opportunityScore += 10;
+
+            // 1. RSI (Oscilador)
+            if (ind.rsi < 30) longScore += 30;      // Sobreventa -> Long
+            else if (ind.rsi < 45) longScore += 15;
+            
+            if (ind.rsi > 70) shortScore += 30;     // Sobrecompra -> Short
+            else if (ind.rsi > 55) shortScore += 15;
+
+            // 2. MACD (Momentum)
+            if (ind.macd?.histogram > 0) longScore += 20;
+            else shortScore += 20;
+
+            // 3. Tendencia (EMAs)
+            if (ind.ema20 && ind.ema50) {
+              if (ind.ema20 > ind.ema50) {
+                longScore += 20; // Tendencia Alcista
+                if (data.price < ind.ema20) longScore += 10; // Pullback
+              } else {
+                shortScore += 20; // Tendencia Bajista
+                if (data.price > ind.ema20) shortScore += 10; // Rebote a media
+              }
             }
-            if (ind.bollingerBands && data.price <= ind.bollingerBands.lower) opportunityScore += 20;
-            opportunityScore = Math.max(0, Math.min(100, opportunityScore));
+
+            // 4. Bandas de Bollinger (Reversión)
+            if (ind.bollingerBands) {
+              if (data.price <= ind.bollingerBands.lower) longScore += 20;
+              if (data.price >= ind.bollingerBands.upper) shortScore += 20;
+            }
           }
+
+          const finalScore = Math.max(longScore, shortScore);
+          const opportunityType = longScore >= shortScore ? 'LONG' : 'SHORT';
+          const opportunityScore = Math.min(100, finalScore);
 
           cryptoPrices[symbol] = {
             symbol,
@@ -328,7 +353,8 @@ function AppContent() {
             high24h: data.high24h,
             low24h: data.low24h,
             analysis: analysis,
-            opportunity: opportunityScore
+            opportunity: opportunityScore,
+            opportunityType: opportunityType // 'LONG' | 'SHORT'
           };
         }
       });
