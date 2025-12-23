@@ -149,7 +149,7 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
                                     >
                                         <Star size={12} fill={isFavorite(symbol) ? 'currentColor' : 'none'} />
                                     </button>
-                                    <span className="pill-name">{symbol.replace('USDC', '').replace('USDT', '')}</span>
+                                    <span className="pill-name">{(symbol || '').replace('USDC', '').replace('USDT', '')}</span>
                                     <button
                                         className="pill-remove"
                                         onClick={() => handleRemoveSymbol(symbol)}

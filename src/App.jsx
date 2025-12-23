@@ -27,8 +27,12 @@ import { enrichSignalWithAI } from './services/aiAnalysis';
 import { usePaperTrading } from './hooks/usePaperTrading';
 import { useSignalHistory } from './hooks/useSignalHistory';
 
-const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
+
+// AI Cache to prevent redundant calls
+const aiAnalysisCache = new Map();
+const AI_CACHE_TTL = 30 * 60 * 1000; // 30 minutos de caché para análisis de IA
 
 // Función para enviar señales a Telegram via Netlify Function
 async function sendToTelegram(signals) {
@@ -265,7 +269,7 @@ function AppContent() {
             symbol: s.symbol,
             price: s.price,
             score: 99, // High score to show Green icon
-            reasons: [`🤖 ML Alert: ${s.signal === 'UPPER_EXTREMITY' ? 'SHORT 🔴' : 'LONG 🟢'} (${s.signal.replace('_', ' ')})`],
+            reasons: [`🤖 ML Alert: ${s.signal === 'UPPER_EXTREMITY' ? 'SHORT 🔴' : s.signal === 'LOWER_EXTREMITY' ? 'LONG 🟢' : 'NEUTRAL ⚪'} (${(s.signal || '').replace(/_/g, ' ') || 'SIN SEÑAL'})`],
             levels: { entry: s.price }
           }));
           sendToTelegram(telegramPayload);
@@ -275,7 +279,7 @@ function AppContent() {
       // 5. Generar señales
       let generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis, tradingMode);
 
-      // 5.1 Enriquecer señales con IA
+      // 5.1 Enriquecer señales con IA (Optimizado con Caché)
       const highQualitySignals = generatedSignals
         .filter(s => s.score >= 60)
         .sort((a, b) => b.score - a.score)
@@ -285,14 +289,44 @@ function AppContent() {
         console.log(`Enriqueciendo ${highQualitySignals.length} señales con IA...`);
         for (const signal of highQualitySignals) {
           try {
+            // Verificar caché
+            const cacheKey = `${signal.symbol}-${signal.type}`;
+            const cachedAnalysis = aiAnalysisCache.get(cacheKey);
+            const now = Date.now();
+
+            if (cachedAnalysis && (now - cachedAnalysis.timestamp < AI_CACHE_TTL)) {
+               console.log(`💡 Usando análisis IA en caché para ${signal.symbol}`);
+               const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
+               if (index !== -1) {
+                   generatedSignals[index] = {
+                       ...signal,
+                       aiAnalysis: cachedAnalysis.data,
+                       aiEnriched: true
+                   };
+               }
+               continue; // Saltar llamada a API
+            }
+
+            // Si no hay caché, llamar a API
             const enrichedSignal = await enrichSignalWithAI(signal, {
               rsi: signal.indicators.rsi,
               macd: signal.indicators.macd
             }, tradingMode);
+
+            // Guardar en caché si fue exitoso
+            if (enrichedSignal.aiEnriched && enrichedSignal.aiAnalysis) {
+                aiAnalysisCache.set(cacheKey, {
+                    timestamp: now,
+                    data: enrichedSignal.aiAnalysis
+                });
+            }
+
             const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
             if (index !== -1) generatedSignals[index] = enrichedSignal;
+
+            // Rate limiting manual
             if (highQualitySignals.indexOf(signal) < highQualitySignals.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Aumentado a 2s por seguridad
             }
           } catch (err) {
             console.error(`Error enriching signal for ${signal.symbol}: `, err);

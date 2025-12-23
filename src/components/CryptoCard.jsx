@@ -61,7 +61,7 @@ function CryptoCard({ crypto }) {
                         <Activity className="crypto-icon" size={16} />
                     </div>
                     <div>
-                        <span className="crypto-name">{symbol.replace('USDC', '').replace('USDT', '')}</span>
+                        <span className="crypto-name">{(symbol || '').replace('USDC', '').replace('USDT', '')}</span>
                         <div className={`crypto-change ${isPositive ? 'positive' : 'negative'}`}>
                             {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                             <span>{isPositive ? '+' : ''}{priceChangePercent?.toFixed(2)}%</span>

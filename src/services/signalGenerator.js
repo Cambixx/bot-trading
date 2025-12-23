@@ -88,6 +88,9 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
     const config = getSignalConfig(mode);
     const { indicators = {}, levels = {}, patterns = {}, volume = {}, price, buyerPressure, regime, choppiness } = analysis;
     
+    // Initialize dynamic weights
+    let dynamicWeights = { ...config.weights };
+
     const reasons = [];
     const warnings = [];
     let signalType = 'BUY';
@@ -99,19 +102,26 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
     // GATE 1: REGIME & FILTER (Noisy Market check)
     // ============================================
 
-    // 1.1 Choppiness Index Check
-    if (choppiness > 61.8) {
-        if (mode === 'CONSERVATIVE') return null; // Abort in conservative
-        // SCALPING: Permitimos más choppiness si hay momentum fuerte
-        if (mode !== 'SCALPING') {
-            warnings.push({ text: 'Mercado muy lateral (Choppy)', type: 'risk' });
-        }
-    }
+    const isChoppy = choppiness > 60;
 
-    // 1.2 ADX Trend Strength Check
-    if (indicators.adx != null && indicators.adx < 20) {
-        if (mode === 'CONSERVATIVE') return null;
-        warnings.push({ text: 'Tendencia muy débil (ADX < 20)', type: 'risk' });
+    if (isChoppy) {
+        if (mode === 'CONSERVATIVE') return null; // Abort in conservative
+        
+        // RANGING MARKET: Strategy Switch -> Mean Reversion
+        warnings.push({ text: 'Mercado Lateral - Reversión activada', type: 'warning' });
+        
+        // Adjust weights: Kill Trend, Boost Momentum/Levels
+        dynamicWeights.trend = 0;
+        dynamicWeights.trendStrength = 0;
+        dynamicWeights.momentum = Math.min(1, dynamicWeights.momentum * 1.5);
+        dynamicWeights.levels = Math.min(1, dynamicWeights.levels * 1.5);
+    } else {
+        // TRENDING MARKET
+        // Check for weak trend
+        if (indicators.adx != null && indicators.adx < 20) {
+            if (mode === 'CONSERVATIVE') return null;
+            warnings.push({ text: 'Tendencia débil (ADX < 20)', type: 'risk' });
+        }
     }
 
     // ============================================
@@ -123,27 +133,47 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
     const h4Regime = multiTimeframeData['4h']?.regime || 'UNKNOWN';
     const currentRegime = dailyRegime !== 'UNKNOWN' ? dailyRegime : (h4Regime !== 'UNKNOWN' ? h4Regime : regime);
 
-    let bias = 'NEUTRAL';
-    // Prioritize Daily Regime
-    if (dailyRegime === 'TRENDING_BULL') bias = 'BULLISH';
-    else if (dailyRegime === 'TRENDING_BEAR') bias = 'BEARISH';
-    else {
-        // Fallback to 4h or SMA200 check
-        if (h4Regime === 'TRENDING_BULL') bias = 'BULLISH';
-        else if (h4Regime === 'TRENDING_BEAR') bias = 'BEARISH';
-        else if (indicators.sma200) {
-            if (price > indicators.sma200) bias = 'BULLISH';
-            else bias = 'BEARISH';
+    if (isChoppy) {
+        // === REVERSION STRATEGY ===
+        // Ignore trend bias, look for band extremes
+        if (indicators.bollingerBands) {
+             const bb = indicators.bollingerBands;
+             // Allow 1% tolerance
+             if (price <= bb.lower * 1.01) signalType = 'BUY';
+             else if (price >= bb.upper * 0.99) signalType = 'SELL';
+             else {
+                 // Secondary check: RSI Extremes
+                 if (indicators.rsi < 30) signalType = 'BUY';
+                 else if (indicators.rsi > 70) signalType = 'SELL';
+                 else return null; // No reversion signal found in chop
+             }
+        } else {
+            return null; // Cannot trade chop without bands
         }
-    }
+    } else {
+        // === TREND FOLLOWING STRATEGY ===
+        let bias = 'NEUTRAL';
+        // Prioritize Daily Regime
+        if (dailyRegime === 'TRENDING_BULL') bias = 'BULLISH';
+        else if (dailyRegime === 'TRENDING_BEAR') bias = 'BEARISH';
+        else {
+            // Fallback to 4h or SMA200 check
+            if (h4Regime === 'TRENDING_BULL') bias = 'BULLISH';
+            else if (h4Regime === 'TRENDING_BEAR') bias = 'BEARISH';
+            else if (indicators.sma200) {
+                if (price > indicators.sma200) bias = 'BULLISH';
+                else bias = 'BEARISH';
+            }
+        }
 
-    // Initial Signal Direction
-    if (bias === 'BULLISH') signalType = 'BUY';
-    else if (bias === 'BEARISH') signalType = 'SELL';
-    else {
-        // Flat market: mean reversion?
-        if (indicators.ema50 && price < indicators.ema50) signalType = 'SELL';
-        else signalType = 'BUY';
+        // Initial Signal Direction
+        if (bias === 'BULLISH') signalType = 'BUY';
+        else if (bias === 'BEARISH') signalType = 'SELL';
+        else {
+            // Flat market but not choppy? Unlikely, but fallback
+            if (indicators.ema50 && price < indicators.ema50) signalType = 'SELL';
+            else signalType = 'BUY';
+        }
     }
 
     // Strict Trend Filter for Conservative
@@ -171,7 +201,7 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
 
     let score = 0;
     const subscores = {};
-    const w = config.weights;
+    const w = dynamicWeights;
 
     // --- 3.1 Momentum (RSI, MACD, Stoch) ---
     let impScore = 0;

@@ -281,7 +281,7 @@ function CryptoChart({ symbol, signal }) {
             {/* Header */}
             <div className="chart-header">
                 <div className="chart-title-section">
-                    <span className="chart-title">{symbol.replace('USDC', '')}</span>
+                    <span className="chart-title">{(symbol || '').replace('USDC', '')}</span>
                     {currentPrice && <span className="chart-price">${formatPrice(currentPrice)}</span>}
                 </div>
                 <div className="chart-controls">

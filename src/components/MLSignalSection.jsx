@@ -68,7 +68,7 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
 
                                 <div className="ml-card-header-premium">
                                     <div className="symbol-vignette">
-                                        <span className="symbol-name">{sig.symbol.replace('USDT', '').replace('USDC', '')}</span>
+                                        <span className="symbol-name">{(sig.symbol || '').replace('USDT', '').replace('USDC', '')}</span>
                                         <div className={`quality-badge ${(sig.signalQuality || 'WEAK').toLowerCase()}`}>
                                             {sig.signalQuality || 'SIGNAL'}
                                         </div>

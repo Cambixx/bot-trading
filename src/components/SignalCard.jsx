@@ -37,7 +37,7 @@ function SignalCard({ signal, onSimulateBuy }) {
                 <div className="symbol-meta">
                     <div className="symbol-badge-box">
                         <Zap size={14} className="zap-icon" />
-                        <span className="symbol-name">{signal.symbol.replace('USDC', '').replace('USDT', '')}</span>
+                        <span className="symbol-name">{(signal.symbol || '').replace('USDC', '').replace('USDT', '')}</span>
                     </div>
                     <div className={`trade-type-badge ${isSell ? 'sell' : 'buy'}`}>
                         {isSell ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
