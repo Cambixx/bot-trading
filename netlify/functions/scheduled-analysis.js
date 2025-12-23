@@ -23,7 +23,7 @@ const MEXC_API = 'https://api.mexc.com/api/v3';
 const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX',
   'DOT', 'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM',
-  'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE', 'MKR', 'INJ', 'FET',
+  'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE', 'INJ', 'FET',
   'NEAR', 'APE', 'OP', 'ARB', 'RENDER', 'GRT', 'IMX', 'ALGO',
   'VET', 'MANA', 'SAND', 'AXS', 'XTZ', 'EGLD', 'PEPE'
 ];
