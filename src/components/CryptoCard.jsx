@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Activity, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Sparkles, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import './CryptoCard.css';
 
 function CryptoCard({ crypto }) {
@@ -16,21 +16,34 @@ function CryptoCard({ crypto }) {
     };
 
     const score = opportunity || 0;
+    const isShort = opportunityType === 'SHORT';
 
     const getOpportunityLevel = () => {
+        const directionLabel = isShort ? 'SHORT' : 'LONG';
+        const DirectionIcon = isShort ? ArrowDownCircle : ArrowUpCircle;
+
         if (score >= 70) {
-            if (opportunityType === 'SHORT') {
-                return { level: 'HIGH', label: 'Alta Oportunidad (Short)', color: 'danger', icon: <TrendingDown size={14} /> };
-            }
-            return { level: 'HIGH', label: 'Alta Oportunidad (Long)', color: 'success', icon: <Sparkles size={14} /> };
+            return { 
+                level: 'HIGH', 
+                label: `Alta Oportunidad (${directionLabel})`, 
+                color: isShort ? 'danger' : 'success', 
+                icon: <DirectionIcon size={14} /> 
+            };
         }
         if (score >= 50) {
-            if (opportunityType === 'SHORT') {
-                return { level: 'MEDIUM', label: 'Oportunidad Media (Short)', color: 'warning', icon: null };
-            }
-            return { level: 'MEDIUM', label: 'Oportunidad Media (Long)', color: 'warning', icon: null };
+            return { 
+                level: 'MEDIUM', 
+                label: `Oportunidad Media (${directionLabel})`, 
+                color: isShort ? 'danger' : 'success', 
+                icon: <DirectionIcon size={14} /> 
+            };
         }
-        return { level: 'LOW', label: 'Baja Oportunidad', color: 'info', icon: null };
+        return { 
+            level: 'LOW', 
+            label: 'Baja Oportunidad', 
+            color: 'info', 
+            icon: null 
+        };
     };
 
     const opportunityInfo = getOpportunityLevel();
@@ -38,7 +51,7 @@ function CryptoCard({ crypto }) {
     return (
         <motion.div
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            className={`crypto-card glass-card ${opportunityInfo.level.toLowerCase()}-signal`}
+            className={`crypto-card glass-card signal-${opportunityInfo.color}`}
         >
             <div className="crypto-card-glow" />
 
