@@ -701,6 +701,26 @@ async function sendTelegramNotification(signals) {
 
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
+async function processCoin(symbol) {
+  try {
+    // Fetch 1h and Daily data in parallel
+    const [candles, dailyCandles] = await Promise.all([
+      getOHLCVData(symbol, 300),
+      getDailyCandles(symbol, 50)
+    ]);
+
+    const signal = generateSignal(symbol, candles, dailyCandles);
+    if (signal) {
+      console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
+      return signal;
+    }
+  } catch (error) {
+    console.error(`Error analyzing ${symbol}:`, error.message);
+    throw error; // Propagate to be counted
+  }
+  return null;
+}
+
 async function runAnalysis() {
   console.log('--- MEXC Advanced Analysis Started ---');
   console.log('Time:', new Date().toISOString());
@@ -709,24 +729,29 @@ async function runAnalysis() {
   let analyzed = 0;
   let errors = 0;
 
-  for (const symbol of COINS_TO_MONITOR) {
-    try {
-      const candles = await getOHLCVData(symbol, 300);
-      const dailyCandles = await getDailyCandles(symbol, 50); // Fetch daily context
-      analyzed++;
+  // Process in batches to avoid rate limits but speed up execution
+  const BATCH_SIZE = 5;
+  
+  for (let i = 0; i < COINS_TO_MONITOR.length; i += BATCH_SIZE) {
+    const batch = COINS_TO_MONITOR.slice(i, i + BATCH_SIZE);
+    console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(COINS_TO_MONITOR.length / BATCH_SIZE)}...`);
 
-      const signal = generateSignal(symbol, candles, dailyCandles);
-      if (signal) {
-        signals.push(signal);
-        console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
-      }
+    const promises = batch.map(symbol => 
+      processCoin(symbol)
+        .then(res => {
+          analyzed++;
+          if (res) signals.push(res);
+        })
+        .catch(err => {
+          errors++;
+        })
+    );
 
-      await new Promise(r => setTimeout(r, 500));
-
-    } catch (error) {
-      console.error(`Error analyzing ${symbol}:`, error.message);
-      errors++;
-      await new Promise(r => setTimeout(r, 500));
+    await Promise.all(promises);
+    
+    // Short delay between batches
+    if (i + BATCH_SIZE < COINS_TO_MONITOR.length) {
+      await new Promise(r => setTimeout(r, 1000));
     }
   }
 
