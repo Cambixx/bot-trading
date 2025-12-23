@@ -16,10 +16,10 @@ const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() 
 const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70; // Raised to 70 for fewer, stronger alerts
 const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 
-// Bybit API V5 (Free, permissive for public market data)
-const BYBIT_API = 'https://api.bybit.com/v5/market';
+// MEXC API V3 (Highly permissive for public market data)
+const MEXC_API = 'https://api.mexc.com/api/v3';
 
-// Top coins to monitor (Bybit format: SYMBOL + USDT)
+// Top coins to monitor (MEXC format: SYMBOL + USDT)
 const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX',
   'DOT', 'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM',
@@ -39,7 +39,12 @@ async function fetchWithTimeout(url, timeout = 15000) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
     clearTimeout(id);
     return response;
   } catch (error) {
@@ -48,56 +53,54 @@ async function fetchWithTimeout(url, timeout = 15000) {
   }
 }
 
-// ==================== BYBIT DATA ====================
+// ==================== MEXC DATA ====================
 
 async function getOHLCVData(symbol, limit = 300) {
-  const bybitSymbol = `${symbol}USDT`;
-  // Bybit V5: /mark/kline?category=spot&symbol=BTCUSDT&interval=60&limit=300
-  const url = `${BYBIT_API}/kline?category=spot&symbol=${bybitSymbol}&interval=60&limit=${limit}`;
+  const mexcSymbol = `${symbol}USDT`;
+  // MEXC V3: /klines?symbol=BTCUSDT&interval=1h&limit=300
+  const url = `${MEXC_API}/klines?symbol=${mexcSymbol}&interval=1h&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
-    throw new Error(`Bybit HTTP error: ${response.status}`);
+    throw new Error(`MEXC HTTP error: ${response.status}`);
   }
 
   const json = await response.json();
 
-  if (json.retCode !== 0 || !json.result?.list) {
-    throw new Error(`Bybit error ${json.retCode}: ${json.retMsg || 'Invalid response'}`);
+  if (!Array.isArray(json)) {
+    throw new Error(`MEXC: Invalid response for ${symbol}`);
   }
 
-  // Bybit returns list in reverse chronological order (newest first)
-  // We need it in chronological order (oldest first) for indicator functions
-  return json.result.list.map(candle => ({
+  return json.map(candle => ({
     time: parseInt(candle[0]),
     open: parseFloat(candle[1]),
     high: parseFloat(candle[2]),
     low: parseFloat(candle[3]),
     close: parseFloat(candle[4]),
     volume: parseFloat(candle[5])
-  })).reverse();
+  }));
 }
 
 // Fetch daily candles for multi-timeframe analysis
 async function getDailyCandles(symbol, limit = 30) {
-  const bybitSymbol = `${symbol}USDT`;
-  const url = `${BYBIT_API}/kline?category=spot&symbol=${bybitSymbol}&interval=D&limit=${limit}`;
+  const mexcSymbol = `${symbol}USDT`;
+  const url = `${MEXC_API}/klines?symbol=${mexcSymbol}&interval=1d&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
   if (!response.ok) return null;
 
   const json = await response.json();
-  if (json.retCode !== 0 || !json.result?.list) return null;
+  if (!Array.isArray(json)) return null;
 
-  return json.result.list.map(candle => ({
+  return json.map(candle => ({
     time: parseInt(candle[0]),
     open: parseFloat(candle[1]),
     high: parseFloat(candle[2]),
     low: parseFloat(candle[3]),
     close: parseFloat(candle[4]),
     volume: parseFloat(candle[5])
-  })).reverse();
+  }));
 }
 
 // Analyze daily trend for multi-timeframe confirmation
@@ -599,7 +602,7 @@ async function sendTelegramNotification(signals) {
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
 async function runAnalysis() {
-  console.log('--- Bybit Advanced Analysis Started ---');
+  console.log('--- MEXC Advanced Analysis Started ---');
   console.log('Time:', new Date().toISOString());
 
   const signals = [];
