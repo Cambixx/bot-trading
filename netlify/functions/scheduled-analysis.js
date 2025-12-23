@@ -24,9 +24,8 @@ const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX',
   'DOT', 'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM',
   'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE', 'MKR', 'INJ', 'FET',
-  'NEAR', 'APE', 'OP', 'ARB', 'RNDR', 'GRT', 'IMX', 'ALGO',
-  'VET', 'MANA', 'SAND', 'AXS', 'THETA', 'EOS', 'XTZ', 'EGLD',
-  'PEPE'
+  'NEAR', 'APE', 'OP', 'ARB', 'RENDER', 'GRT', 'IMX', 'ALGO',
+  'VET', 'MANA', 'SAND', 'AXS', 'XTZ', 'EGLD', 'PEPE'
 ];
 
 // ==================== HELPERS ====================
