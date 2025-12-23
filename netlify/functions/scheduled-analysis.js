@@ -57,8 +57,8 @@ async function fetchWithTimeout(url, timeout = 15000) {
 
 async function getOHLCVData(symbol, limit = 300) {
   const mexcSymbol = `${symbol}USDT`;
-  // MEXC V3: /klines?symbol=BTCUSDT&interval=1h&limit=300
-  const url = `${MEXC_API}/klines?symbol=${mexcSymbol}&interval=1h&limit=${limit}`;
+  // MEXC V3: /klines?symbol=BTCUSDT&interval=60m&limit=300
+  const url = `${MEXC_API}/klines?symbol=${mexcSymbol}&interval=60m&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
 
