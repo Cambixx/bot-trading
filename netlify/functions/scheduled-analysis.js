@@ -50,7 +50,7 @@ async function fetchWithTimeout(url, timeout = 15000) {
 
 // ==================== CRYPTOCOMPARE DATA ====================
 
-async function getOHLCVData(symbol, limit = 300) {
+async function getOHLCVData(symbol, limit = 100) {
   let url = `${CRYPTOCOMPARE_API}/histohour?fsym=${symbol}&tsym=USD&limit=${limit}`;
   if (CRYPTOCOMPARE_API_KEY) {
     url += `&api_key=${CRYPTOCOMPARE_API_KEY}`;
@@ -237,138 +237,87 @@ function calculateVolumeSMA(candles, period = 20) {
   return volumes.reduce((a, b) => a + b, 0) / period;
 }
 
+// Detect RSI divergence - one of the most powerful trading signals
+function detectRSIDivergence(candles, closes) {
+  if (candles.length < 30) return null;
 
-
-// ==================== SIGNAL GENERATION ====================
-
-// Detect regular and hidden RSI divergences
-function detectDivergences(candles, closes) {
-  if (candles.length < 50) return [];
-
-  const lookback = 30; // Look deeper for divergences
+  // Get price and RSI data for last 20 periods
+  const lookback = 20;
+  const recentCandles = candles.slice(-lookback);
   const recentCloses = closes.slice(-lookback);
 
-  // Calculate RSI sequence
+  // Calculate RSI for each point in the lookback period
   const rsiValues = [];
-  // Need enough data for RSI calculation
-  const rsiStartIndex = closes.length - lookback - 15;
-  if (rsiStartIndex < 0) return [];
-
-  for (let i = rsiStartIndex; i < closes.length; i++) {
-    // This is a bit inefficient (recalculating full RSI each step) but safe given function structure
-    // Optimally we'd calc all RSIs once. Let's rely on the main simple logic for now or optimize slightly
-    // Actually, let's just use the RSI function which returns scalar, so we loop:
-    const subset = closes.slice(0, i + 1);
-    const val = calculateRSI(subset, 14);
-    if (val !== null) rsiValues.push({ index: i, value: val });
+  for (let i = 14; i <= closes.length; i++) {
+    const rsi = calculateRSI(closes.slice(0, i), 14);
+    if (rsi !== null) rsiValues.push(rsi);
   }
 
-  // We need at least lookback amount of RSI values aligned with closes
-  if (rsiValues.length < lookback) return [];
+  if (rsiValues.length < lookback) return null;
 
-  // Align RSI with Price for the lookback window
-  const alignedRSI = rsiValues.slice(-lookback);
-  const alignedPrice = recentCloses.map((price, idx) => ({
-    index: closes.length - lookback + idx,
-    value: price
-  }));
+  const recentRSI = rsiValues.slice(-lookback);
 
-  // Find pivots
-  const findPivots = (data, isHigh) => {
-    const pivots = [];
-    // Check 2 bars left/right for pivot
+  // Find local lows and highs in the last 10-15 candles
+  const findLocalExtremes = (data, isLow = true) => {
+    const extremes = [];
     for (let i = 2; i < data.length - 2; i++) {
-      const curr = data[i].value;
-      if (isHigh) {
-        if (curr > data[i - 1].value && curr > data[i - 2].value &&
-          curr > data[i + 1].value && curr > data[i + 2].value) {
-          pivots.push(data[i]);
+      if (isLow) {
+        if (data[i] < data[i - 1] && data[i] < data[i - 2] &&
+          data[i] < data[i + 1] && data[i] < data[i + 2]) {
+          extremes.push({ index: i, value: data[i] });
         }
       } else {
-        if (curr < data[i - 1].value && curr < data[i - 2].value &&
-          curr < data[i + 1].value && curr < data[i + 2].value) {
-          pivots.push(data[i]);
+        if (data[i] > data[i - 1] && data[i] > data[i - 2] &&
+          data[i] > data[i + 1] && data[i] > data[i + 2]) {
+          extremes.push({ index: i, value: data[i] });
         }
       }
     }
-    return pivots;
+    return extremes;
   };
 
-  const priceHighs = findPivots(alignedPrice, true);
-  const priceLows = findPivots(alignedPrice, false);
-  const rsiHighs = findPivots(alignedRSI, true);
-  const rsiLows = findPivots(alignedRSI, false);
+  const priceLows = findLocalExtremes(recentCloses, true);
+  const priceHighs = findLocalExtremes(recentCloses, false);
+  const rsiLows = findLocalExtremes(recentRSI, true);
+  const rsiHighs = findLocalExtremes(recentRSI, false);
 
-  const divergences = [];
-
-  // Helper to check conditions
-  const checkDiv = (p1, p2, r1, r2, type, name) => {
-    // Ensure sufficient time separation but not too far
-    const timeDiff = Math.abs(p2.index - p1.index);
-    if (timeDiff < 5 || timeDiff > 40) return; // Must be at least 5 candles apart
-
-    // Ensure strict pivot matching within tolerance (2 candles)
-    const match1 = Math.abs(p1.index - r1.index) <= 2;
-    const match2 = Math.abs(p2.index - r2.index) <= 2;
-
-    if (match1 && match2) {
-      divergences.push({ type, name, strength: Math.abs(r1.value - r2.value) });
-    }
-  };
-
-  // 1. Regular Bullish: Price Lower Low, RSI Higher Low
+  // Bullish Divergence: Price makes lower low, RSI makes higher low
   if (priceLows.length >= 2 && rsiLows.length >= 2) {
-    const p2 = priceLows[priceLows.length - 1]; // Recent
-    const p1 = priceLows[priceLows.length - 2]; // Previous
-    const r2 = rsiLows[rsiLows.length - 1];
-    const r1 = rsiLows[rsiLows.length - 2];
+    const lastPriceLow = priceLows[priceLows.length - 1];
+    const prevPriceLow = priceLows[priceLows.length - 2];
+    const lastRSILow = rsiLows[rsiLows.length - 1];
+    const prevRSILow = rsiLows[rsiLows.length - 2];
 
-    if (p2.value < p1.value && r2.value > r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BULLISH', 'Regular Bullish Divergence');
+    // Price lower low + RSI higher low = bullish divergence
+    if (lastPriceLow.value < prevPriceLow.value &&
+      lastRSILow.value > prevRSILow.value &&
+      Math.abs(lastPriceLow.index - lastRSILow.index) <= 3) {
+      return { type: 'BULLISH', strength: Math.abs(lastRSILow.value - prevRSILow.value) };
     }
   }
 
-  // 2. Regular Bearish: Price Higher High, RSI Lower High
+  // Bearish Divergence: Price makes higher high, RSI makes lower high
   if (priceHighs.length >= 2 && rsiHighs.length >= 2) {
-    const p2 = priceHighs[priceHighs.length - 1];
-    const p1 = priceHighs[priceHighs.length - 2];
-    const r2 = rsiHighs[rsiHighs.length - 1];
-    const r1 = rsiHighs[rsiHighs.length - 2];
+    const lastPriceHigh = priceHighs[priceHighs.length - 1];
+    const prevPriceHigh = priceHighs[priceHighs.length - 2];
+    const lastRSIHigh = rsiHighs[rsiHighs.length - 1];
+    const prevRSIHigh = rsiHighs[rsiHighs.length - 2];
 
-    if (p2.value > p1.value && r2.value < r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BEARISH', 'Regular Bearish Divergence');
+    // Price higher high + RSI lower high = bearish divergence
+    if (lastPriceHigh.value > prevPriceHigh.value &&
+      lastRSIHigh.value < prevRSIHigh.value &&
+      Math.abs(lastPriceHigh.index - lastRSIHigh.index) <= 3) {
+      return { type: 'BEARISH', strength: Math.abs(prevRSIHigh.value - lastRSIHigh.value) };
     }
   }
 
-  // 3. Hidden Bullish: Price Higher Low, RSI Lower Low (Trend Continuation)
-  if (priceLows.length >= 2 && rsiLows.length >= 2) {
-    const p2 = priceLows[priceLows.length - 1];
-    const p1 = priceLows[priceLows.length - 2];
-    const r2 = rsiLows[rsiLows.length - 1];
-    const r1 = rsiLows[rsiLows.length - 2];
-
-    if (p2.value > p1.value && r2.value < r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BULLISH', 'Hidden Bullish Divergence (Trend Cont.)');
-    }
-  }
-
-  // 4. Hidden Bearish: Price Lower High, RSI Higher High (Trend Continuation)
-  if (priceHighs.length >= 2 && rsiHighs.length >= 2) {
-    const p2 = priceHighs[priceHighs.length - 1];
-    const p1 = priceHighs[priceHighs.length - 2];
-    const r2 = rsiHighs[rsiHighs.length - 1];
-    const r1 = rsiHighs[rsiHighs.length - 2];
-
-    if (p2.value < p1.value && r2.value > r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BEARISH', 'Hidden Bearish Divergence (Trend Cont.)');
-    }
-  }
-
-  return divergences;
+  return null;
 }
 
+// ==================== SIGNAL GENERATION ====================
+
 function generateSignal(symbol, candles) {
-  if (!candles || candles.length < 200) return null; // Need 200 for EMA200
+  if (!candles || candles.length < 50) return null;
 
   const closes = candles.map(c => c.close);
   const currentPrice = closes[closes.length - 1];
@@ -378,122 +327,113 @@ function generateSignal(symbol, candles) {
   const rsi = calculateRSI(closes, 14);
   const macd = calculateMACD(closes);
   const bb = calculateBollingerBands(closes, 20, 2);
-  const ema200 = calculateEMA(closes, 200); // Trend Filter
-  const ema50 = calculateEMA(closes, 50);
+  const sma50 = calculateSMA(closes, 50);
 
   // Advanced indicators
+  const atr = calculateATR(candles, 14);
   const volumeSMA = calculateVolumeSMA(candles, 20);
   const currentVolume = candles[candles.length - 1].volume;
-  const divergences = detectDivergences(candles, closes);
+  const divergence = detectRSIDivergence(candles, closes);
 
-  if (!rsi || !macd || !bb || !ema200) return null;
+  if (!rsi || !macd || !bb) return null;
 
   let score = 0;
   const reasons = [];
-  let signalType = null; // BUY, SELL_ALERT, WATCH
+  let signalType = null;
 
-  // Trend Direction (EMA 200)
-  const isUptrend = currentPrice > ema200;
-
-  // Volume Validation
+  // Volume multiplier: high volume confirms signals
   const volumeRatio = volumeSMA ? currentVolume / volumeSMA : 1;
-  const volumeMultiplier = volumeRatio > 1.5 ? 1.2 : (volumeRatio > 1.0 ? 1.05 : 0.95);
+  const volumeMultiplier = volumeRatio > 1.5 ? 1.3 : (volumeRatio > 1.0 ? 1.1 : 0.9);
 
-  // === 1. DIVERGENCES (High Weight) ===
-  if (divergences.length > 0) {
-    const sortedDivs = divergences.sort((a, b) => b.strength - a.strength); // Strongest first
-    const bestDiv = sortedDivs[0];
-
-    if (bestDiv.type === 'BULLISH') {
-      // Filter: Only take Regular Bullish if RSI < 45 (Not too high)
-      // Filter: Only take Hidden Bullish if in Uptrend (EMA200)
-      if (bestDiv.name.includes('Hidden')) {
-        if (isUptrend) {
-          score += 35;
-          reasons.unshift(`💎 ${bestDiv.name}`);
-          signalType = 'BUY';
-        }
-      } else {
-        // Regular divergence - good for reversal
-        if (rsi < 50) {
-          score += 30;
-          reasons.unshift(`🔥 ${bestDiv.name}`);
-          signalType = 'BUY';
-        }
-      }
-    } else if (bestDiv.type === 'BEARISH') {
-      if (bestDiv.name.includes('Hidden')) {
-        if (!isUptrend) {
-          score += 35;
-          reasons.unshift(`🔻 ${bestDiv.name}`);
-          signalType = 'SELL_ALERT';
-        }
-      } else {
-        if (rsi > 50) {
-          score += 30;
-          reasons.unshift(`⚠️ ${bestDiv.name}`);
-          signalType = 'SELL_ALERT';
-        }
-      }
+  // === DIVERGENCE SIGNALS (HIGHEST PRIORITY) ===
+  if (divergence) {
+    if (divergence.type === 'BULLISH') {
+      score += 40; // Very high weight for divergence
+      reasons.unshift(`� DIVERGENCIA ALCISTA detectada`);
+      signalType = 'BUY';
+    } else if (divergence.type === 'BEARISH') {
+      score += 40;
+      reasons.unshift(`🔥 DIVERGENCIA BAJISTA detectada`);
+      signalType = 'SELL_ALERT';
     }
   }
 
-  // === 2. MACD + BOLLINGER COMBO (Squeeze & Breakout) ===
-  const bbWidth = (bb.upper - bb.lower) / bb.middle;
-  const isSqueeze = bbWidth < 0.05; // Low volatility
-
-  // Bullish Breakout w/ MACD
-  if (currentPrice > bb.upper && macd.bullish && macd.histogram > 0) {
-    if (isUptrend) {
-      score += 25;
-      reasons.push('🚀 Breakout Bollinger + MACD Bullish (Tendencia)');
-      signalType = signalType || 'BUY';
-    } else {
-      score += 15;
-      reasons.push('🚀 Breakout Bollinger + MACD Bullish');
-    }
-  }
-
-  // Reversal from Lower Band
-  if (currentPrice <= bb.lower * 1.005 && currentPrice > prevPrice && macd.bullish) {
-    score += 20;
-    reasons.push('🛡️ Rebote en Bollinger Inferior + MACD');
-    signalType = signalType || 'BUY';
-  }
-
-  // === 3. RSI EXTREME ZONES ===
+  // === BULLISH SIGNALS ===
+  // Priority 1: RSI
   if (rsi < 30) {
-    score += 25;
-    reasons.push(`⚡ RSI Sobreventa extrema (${rsi.toFixed(1)})`);
+    score += 30;
+    reasons.push(`⚡ RSI sobreventa: ${rsi.toFixed(1)}`);
     signalType = signalType || 'BUY';
-  } else if (rsi > 70) {
+  } else if (rsi < 40 && !signalType) {
+    score += 15;
+    reasons.push(`RSI bajo: ${rsi.toFixed(1)}`);
+  }
+
+  // Priority 2: Bollinger Bands
+  if (currentPrice <= bb.lower * 1.01) {
+    score += 20;
+    reasons.push('📉 Precio en banda inferior Bollinger');
+    signalType = signalType || 'BUY';
+  }
+
+  // Priority 3: MACD
+  if (macd.bullish && macd.value > 0) {
+    score += 12;
+    reasons.push('MACD positivo');
+    signalType = signalType || 'BUY';
+  }
+
+  // Trend confirmation
+  if (sma50 && currentPrice > sma50) {
+    score += 8;
+  }
+
+  const priceChange1h = ((currentPrice - prevPrice) / prevPrice) * 100;
+  if (priceChange1h > 3) {
+    score += 15;
+    reasons.push(`Subida fuerte 1h: +${priceChange1h.toFixed(1)}%`);
+    signalType = signalType || 'BUY';
+  }
+
+  // === BEARISH / WARNING SIGNALS ===
+  // Priority 1: RSI
+  if (rsi > 70) {
     score += 25;
-    reasons.push(`⚠️ RSI Sobrecompra (${rsi.toFixed(1)})`);
+    if (!reasons.some(r => r.includes('DIVERGENCIA'))) {
+      reasons.unshift(`⚡ RSI sobrecompra: ${rsi.toFixed(1)}`);
+    }
+    signalType = signalType || 'SELL_ALERT';
+
+    // Extra points for extreme RSI
+    if (rsi > 80) score += 10;
+  }
+
+  // Priority 2: Bollinger Bands
+  if (currentPrice >= bb.upper * 0.99) {
+    score += 15;
+    reasons.push('📈 Precio en banda superior Bollinger');
     signalType = signalType || 'SELL_ALERT';
   }
 
-  // === 4. TREND CONFLUENCE ===
-  if (signalType === 'BUY' && isUptrend) {
-    score += 15;
-    reasons.push('✅ A favor de tendencia principal (EMA200)');
+  // Priority 3: Strong drop
+  if (priceChange1h < -3) {
+    score += 20;
+    reasons.push(`Caída fuerte 1h: ${priceChange1h.toFixed(1)}%`);
+    signalType = signalType || 'SELL_ALERT';
   }
 
-  if (signalType === 'SELL_ALERT' && !isUptrend) {
-    score += 15;
-    reasons.push('✅ A favor de tendencia bajista (EMA200)');
-  }
-
-  // Apply Volume Multiplier
+  // Apply volume multiplier to score
   score = Math.round(score * volumeMultiplier);
-  if (volumeRatio > 1.5) reasons.push(`📊 Alto Volumen x${volumeRatio.toFixed(1)}`);
 
-  // Final Decision Threshold
+  // Add volume confirmation info
+  if (volumeRatio > 1.5) {
+    reasons.push(`📊 Volumen alto: ${(volumeRatio * 100).toFixed(0)}%`);
+  }
+
+  // === RETURN SIGNAL ===
   const bbPercentage = ((currentPrice - bb.lower) / (bb.upper - bb.lower) * 100).toFixed(0);
 
-  // Need higher score for non-trend trades
-  const effectiveThreshold = isUptrend ? SIGNAL_SCORE_THRESHOLD : SIGNAL_SCORE_THRESHOLD + 10;
-
-  if (score >= effectiveThreshold && reasons.length > 0) {
+  if (score >= SIGNAL_SCORE_THRESHOLD && reasons.length > 0) {
     return {
       symbol,
       price: currentPrice,
@@ -502,9 +442,9 @@ function generateSignal(symbol, candles) {
       rsi: rsi.toFixed(1),
       rsiValue: rsi,
       macdBullish: macd.bullish,
-      priceChange1h: ((currentPrice - prevPrice) / prevPrice * 100).toFixed(2),
+      priceChange1h: priceChange1h.toFixed(1),
       bbPosition: `${bbPercentage}%`,
-      hasDivergence: divergences.length > 0,
+      hasDivergence: divergence !== null,
       volumeConfirmed: volumeRatio > 1.2,
       reasons
     };
@@ -613,7 +553,7 @@ async function runAnalysis() {
 
   for (const symbol of COINS_TO_MONITOR) {
     try {
-      const candles = await getOHLCVData(symbol, 300);
+      const candles = await getOHLCVData(symbol, 100);
       analyzed++;
 
       const signal = generateSignal(symbol, candles);
@@ -622,12 +562,12 @@ async function runAnalysis() {
         console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
       }
 
-      await new Promise(r => setTimeout(r, 4000));
+      await new Promise(r => setTimeout(r, 500));
 
     } catch (error) {
       console.error(`Error analyzing ${symbol}:`, error.message);
       errors++;
-      await new Promise(r => setTimeout(r, 4000));
+      await new Promise(r => setTimeout(r, 500));
     }
   }
 
@@ -662,5 +602,5 @@ const scheduledHandler = async (event) => {
 };
 
 // Export the scheduled function using Netlify's schedule helper
-// Cron: "0 * * * *" = Every hour
-export const handler = schedule("0 * * * *", scheduledHandler);
+// Cron: "*/20 * * * *" = Every 20 minutes
+export const handler = schedule("*/45 * * * *", scheduledHandler);
