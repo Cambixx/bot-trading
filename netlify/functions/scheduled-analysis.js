@@ -604,7 +604,7 @@ function generateSignal(symbol, candles, dailyCandles) {
 
 // ==================== TELEGRAM ====================
 
-async function sendTelegramNotification(signals) {
+export async function sendTelegramNotification(signals) {
   if (!TELEGRAM_ENABLED || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.log('Telegram disabled or missing credentials');
     return { success: false, reason: 'disabled' };
