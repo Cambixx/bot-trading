@@ -62,7 +62,7 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
                                 exit={{ scale: 0.9, opacity: 0 }}
                                 whileHover={{ y: -5 }}
                                 key={sig.symbol}
-                                className={`ml-card-premium ${sig.signal === 'UPPER_EXTREMITY' ? 'bullish' : 'bearish'}`}
+                                className={`ml-card-premium ${sig.signal === 'UPPER_EXTREMITY' ? 'bearish' : 'bullish'}`}
                             >
                                 <div className="card-glow" />
 
@@ -73,9 +73,9 @@ const MLSignalSection = ({ signals = [], loading = false }) => {
                                             {sig.signalQuality || 'SIGNAL'}
                                         </div>
                                     </div>
-                                    <div className={`signal-label ${sig.signal === 'UPPER_EXTREMITY' ? 'buy' : 'sell'}`}>
-                                        {sig.signal === 'UPPER_EXTREMITY' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                                        {sig.signal === 'UPPER_EXTREMITY' ? 'LONG' : 'SHORT'}
+                                    <div className={`signal-label ${sig.signal === 'UPPER_EXTREMITY' ? 'sell' : 'buy'}`}>
+                                        {sig.signal === 'UPPER_EXTREMITY' ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                                        {sig.signal === 'UPPER_EXTREMITY' ? 'SHORT' : 'LONG'}
                                     </div>
                                 </div>
 

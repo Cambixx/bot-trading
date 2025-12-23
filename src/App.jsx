@@ -265,7 +265,7 @@ function AppContent() {
             symbol: s.symbol,
             price: s.price,
             score: 99, // High score to show Green icon
-            reasons: [`🤖 ML Alert: ${s.signal.replace('_', ' ')}`],
+            reasons: [`🤖 ML Alert: ${s.signal === 'UPPER_EXTREMITY' ? 'SHORT 🔴' : 'LONG 🟢'} (${s.signal.replace('_', ' ')})`],
             levels: { entry: s.price }
           }));
           sendToTelegram(telegramPayload);
