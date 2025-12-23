@@ -234,6 +234,66 @@ function calculateVolumeSMA(candles, period = 20) {
   return volumes.reduce((a, b) => a + b, 0) / period;
 }
 
+function calculateADX(candles, period = 14) {
+  if (candles.length < period * 2) return null;
+
+  const tr = [];
+  const dmPlus = [];
+  const dmMinus = [];
+
+  for (let i = 1; i < candles.length; i++) {
+    const high = candles[i].high;
+    const low = candles[i].low;
+    const prevClose = candles[i - 1].close;
+    const prevHigh = candles[i - 1].high;
+    const prevLow = candles[i - 1].low;
+
+    tr.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
+    
+    const moveUp = high - prevHigh;
+    const moveDown = prevLow - low;
+
+    if (moveUp > 0 && moveUp > moveDown) {
+      dmPlus.push(moveUp);
+    } else {
+      dmPlus.push(0);
+    }
+
+    if (moveDown > 0 && moveDown > moveUp) {
+      dmMinus.push(moveDown);
+    } else {
+      dmMinus.push(0);
+    }
+  }
+
+  // Smoothed averages
+  const smooth = (data, p) => {
+    let smoothed = [data.slice(0, p).reduce((a, b) => a + b, 0)];
+    for (let i = p; i < data.length; i++) {
+      smoothed.push(smoothed[i - 1] - (smoothed[i - 1] / p) + data[i]);
+    }
+    return smoothed;
+  };
+
+  const trSmooth = smooth(tr, period);
+  const dmPlusSmooth = smooth(dmPlus, period);
+  const dmMinusSmooth = smooth(dmMinus, period);
+
+  const dx = [];
+  for (let i = 0; i < trSmooth.length; i++) {
+    const diPlus = (dmPlusSmooth[i] / trSmooth[i]) * 100;
+    const diMinus = (dmMinusSmooth[i] / trSmooth[i]) * 100;
+    const sum = diPlus + diMinus;
+    if (sum === 0) dx.push(0);
+    else dx.push(Math.abs(diPlus - diMinus) / sum * 100);
+  }
+
+  // ADX is SMA of DX
+  if (dx.length < period) return null;
+  const adx = dx.slice(-period).reduce((a, b) => a + b, 0) / period;
+  return adx;
+}
+
 
 
 // ==================== SIGNAL GENERATION ====================
@@ -364,7 +424,7 @@ function detectDivergences(candles, closes) {
   return divergences;
 }
 
-function generateSignal(symbol, candles) {
+function generateSignal(symbol, candles, dailyCandles) {
   if (!candles || candles.length < 200) return null; // Need 200 for EMA200
 
   const closes = candles.map(c => c.close);
@@ -377,24 +437,41 @@ function generateSignal(symbol, candles) {
   const bb = calculateBollingerBands(closes, 20, 2);
   const ema200 = calculateEMA(closes, 200); // Trend Filter
   const ema50 = calculateEMA(closes, 50);
+  const adx = calculateADX(candles, 14);
+  const atr = calculateATR(candles, 14);
+
+  // Daily Trend Context
+  const dailyAnalysis = analyzeDailyTrend(dailyCandles);
+  const dailyTrend = dailyAnalysis ? dailyAnalysis.trend : 'NEUTRAL';
 
   // Advanced indicators
   const volumeSMA = calculateVolumeSMA(candles, 20);
   const currentVolume = candles[candles.length - 1].volume;
   const divergences = detectDivergences(candles, closes);
 
-  if (!rsi || !macd || !bb || !ema200) return null;
+  if (!rsi || !macd || !bb || !ema200 || !adx || !atr) return null;
 
   let score = 0;
   const reasons = [];
   let signalType = null; // BUY, SELL_ALERT, WATCH
 
-  // Trend Direction (EMA 200)
-  const isUptrend = currentPrice > ema200;
-
+  // Trend Direction (EMA 200 on 1h)
+  const isUptrend1h = currentPrice > ema200;
+  
   // Volume Validation
   const volumeRatio = volumeSMA ? currentVolume / volumeSMA : 1;
   const volumeMultiplier = volumeRatio > 1.5 ? 1.2 : (volumeRatio > 1.0 ? 1.05 : 0.95);
+
+  // === 0. TREND & MOMENTUM CONFLUENCE (Foundation) ===
+  // Strong ADX indicates strong trend
+  const strongTrend = adx > 25;
+  
+  if (dailyTrend === 'BULLISH' && isUptrend1h) {
+    score += 20;
+    reasons.push('📈 Tendencia Alcista (Diario + 1h)');
+  } else if (dailyTrend === 'BEARISH' && !isUptrend1h) {
+    score += 20; // Bearish confluence
+  }
 
   // === 1. DIVERGENCES (High Weight) ===
   if (divergences.length > 0) {
@@ -405,7 +482,7 @@ function generateSignal(symbol, candles) {
       // Filter: Only take Regular Bullish if RSI < 45 (Not too high)
       // Filter: Only take Hidden Bullish if in Uptrend (EMA200)
       if (bestDiv.name.includes('Hidden')) {
-        if (isUptrend) {
+        if (isUptrend1h && dailyTrend !== 'BEARISH') {
           score += 35;
           reasons.unshift(`💎 ${bestDiv.name}`);
           signalType = 'BUY';
@@ -420,7 +497,7 @@ function generateSignal(symbol, candles) {
       }
     } else if (bestDiv.type === 'BEARISH') {
       if (bestDiv.name.includes('Hidden')) {
-        if (!isUptrend) {
+        if (!isUptrend1h && dailyTrend !== 'BULLISH') {
           score += 35;
           reasons.unshift(`🔻 ${bestDiv.name}`);
           signalType = 'SELL_ALERT';
@@ -441,21 +518,28 @@ function generateSignal(symbol, candles) {
 
   // Bullish Breakout w/ MACD
   if (currentPrice > bb.upper && macd.bullish && macd.histogram > 0) {
-    if (isUptrend) {
-      score += 25;
-      reasons.push('🚀 Breakout Bollinger + MACD Bullish (Tendencia)');
+    if (isUptrend1h && strongTrend) {
+      score += 30;
+      reasons.push('🚀 Breakout Bollinger + MACD + ADX');
       signalType = signalType || 'BUY';
-    } else {
+    } else if (isUptrend1h) {
       score += 15;
-      reasons.push('🚀 Breakout Bollinger + MACD Bullish');
+      reasons.push('🚀 Breakout Bollinger + MACD');
     }
   }
 
-  // Reversal from Lower Band
+  // Reversal from Lower Band (Mean Reversion)
+  // Best in ranging markets (Low ADX) or Pullback in Uptrend
   if (currentPrice <= bb.lower * 1.005 && currentPrice > prevPrice && macd.bullish) {
-    score += 20;
-    reasons.push('🛡️ Rebote en Bollinger Inferior + MACD');
-    signalType = signalType || 'BUY';
+    if (isUptrend1h) {
+      score += 25;
+      reasons.push('🛡️ Rebote en Bollinger Inferior (Tendencia)');
+      signalType = signalType || 'BUY';
+    } else if (adx < 20) {
+      score += 20;
+      reasons.push('🛡️ Rebote en Bollinger Inferior (Rango)');
+      signalType = signalType || 'BUY';
+    }
   }
 
   // === 3. RSI EXTREME ZONES ===
@@ -469,17 +553,6 @@ function generateSignal(symbol, candles) {
     signalType = signalType || 'SELL_ALERT';
   }
 
-  // === 4. TREND CONFLUENCE ===
-  if (signalType === 'BUY' && isUptrend) {
-    score += 15;
-    reasons.push('✅ A favor de tendencia principal (EMA200)');
-  }
-
-  if (signalType === 'SELL_ALERT' && !isUptrend) {
-    score += 15;
-    reasons.push('✅ A favor de tendencia bajista (EMA200)');
-  }
-
   // Apply Volume Multiplier
   score = Math.round(score * volumeMultiplier);
   if (volumeRatio > 1.5) reasons.push(`📊 Alto Volumen x${volumeRatio.toFixed(1)}`);
@@ -487,10 +560,25 @@ function generateSignal(symbol, candles) {
   // Final Decision Threshold
   const bbPercentage = ((currentPrice - bb.lower) / (bb.upper - bb.lower) * 100).toFixed(0);
 
-  // Need higher score for non-trend trades
-  const effectiveThreshold = isUptrend ? SIGNAL_SCORE_THRESHOLD : SIGNAL_SCORE_THRESHOLD + 10;
+  // Dynamic Threshold based on Trend Agreement
+  let effectiveThreshold = SIGNAL_SCORE_THRESHOLD;
+  if (signalType === 'BUY' && dailyTrend === 'BEARISH') effectiveThreshold += 15; // Harder to buy in downtrend
+  if (signalType === 'SELL_ALERT' && dailyTrend === 'BULLISH') effectiveThreshold += 15; // Harder to sell in uptrend
 
   if (score >= effectiveThreshold && reasons.length > 0) {
+    
+    // Calculate Stop Loss & Take Profit (ATR Based)
+    // Buy Logic
+    let sl, tp;
+    if (signalType === 'BUY') {
+      sl = currentPrice - (atr * 2); // Loose stop to avoid noise
+      tp = currentPrice + (atr * 3); // 1.5R initial target
+    } else {
+      // Short/Sell logic (Hypothetical for alerts)
+      sl = currentPrice + (atr * 2);
+      tp = currentPrice - (atr * 3);
+    }
+
     return {
       symbol,
       price: currentPrice,
@@ -498,11 +586,15 @@ function generateSignal(symbol, candles) {
       type: signalType || 'WATCH',
       rsi: rsi.toFixed(1),
       rsiValue: rsi,
+      adx: adx.toFixed(1),
+      dailyTrend,
       macdBullish: macd.bullish,
       priceChange1h: ((currentPrice - prevPrice) / prevPrice * 100).toFixed(2),
       bbPosition: `${bbPercentage}%`,
       hasDivergence: divergences.length > 0,
       volumeConfirmed: volumeRatio > 1.2,
+      sl: sl.toFixed(4),
+      tp: tp.toFixed(4),
       reasons
     };
   }
@@ -546,7 +638,16 @@ async function sendTelegramNotification(signals) {
     const changeSign = parseFloat(sig.priceChange1h) >= 0 ? '+' : '';
     message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange1h)}% \\(1h\\)\n`;
 
+    // Trend & ADX
+    const trendIcon = sig.dailyTrend === 'BULLISH' ? '🚀' : (sig.dailyTrend === 'BEARISH' ? '🐻' : '⚖️');
+    message += `📅 Trend: ${trendIcon} ${escapeMarkdownV2(sig.dailyTrend)} \\| ADX: ${escapeMarkdownV2(sig.adx)}\n`;
+
     message += `📊 RSI: ${escapeMarkdownV2(sig.rsi)} \\| BB: ${escapeMarkdownV2(sig.bbPosition)} \\| ${sig.macdBullish ? 'MACD\\+' : 'MACD\\-'}\n`;
+
+    // SL / TP
+    if (sig.sl && sig.tp) {
+       message += `🛑 SL: ${escapeMarkdownV2(sig.sl)} \\| 🎯 TP: ${escapeMarkdownV2(sig.tp)}\n`;
+    }
 
     // Show special badges for divergence and volume
     let badges = [];
@@ -611,9 +712,10 @@ async function runAnalysis() {
   for (const symbol of COINS_TO_MONITOR) {
     try {
       const candles = await getOHLCVData(symbol, 300);
+      const dailyCandles = await getDailyCandles(symbol, 50); // Fetch daily context
       analyzed++;
 
-      const signal = generateSignal(symbol, candles);
+      const signal = generateSignal(symbol, candles, dailyCandles);
       if (signal) {
         signals.push(signal);
         console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
@@ -629,35 +731,13 @@ async function runAnalysis() {
   }
 
   console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
-
-  let telegramResult = { success: true, sent: 0 };
-  if (signals.length > 0) {
-    telegramResult = await sendTelegramNotification(signals);
-  } else {
-    console.log('No significant signals detected this cycle');
-  }
-
+  
+  await sendTelegramNotification(signals);
+  
   return {
-    success: true,
-    analyzed,
-    signals: signals.length,
-    errors,
-    telegram: telegramResult,
-    timestamp: new Date().toISOString()
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Analysis complete', signals })
   };
 }
 
-// ==================== SCHEDULED HANDLER (Netlify) ====================
-
-// This is the scheduled handler that runs every 20 minutes
-const scheduledHandler = async (event) => {
-  const result = await runAnalysis();
-
-  return {
-    statusCode: 200
-  };
-};
-
-// Export the scheduled function using Netlify's schedule helper
-// Cron: "0 * * * *" = Every hour
-export const handler = schedule("0 * * * *", scheduledHandler);
+export const handler = schedule('*/20 * * * *', runAnalysis);
