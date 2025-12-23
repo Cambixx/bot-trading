@@ -622,12 +622,12 @@ async function runAnalysis() {
         console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
       }
 
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 4000));
 
     } catch (error) {
       console.error(`Error analyzing ${symbol}:`, error.message);
       errors++;
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 4000));
     }
   }
 
