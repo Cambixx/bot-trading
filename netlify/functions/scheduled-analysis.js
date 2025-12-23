@@ -16,17 +16,17 @@ const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() 
 const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70; // Raised to 70 for fewer, stronger alerts
 const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 
-// CryptoCompare API (Free, no key required for basic endpoints)
-const CRYPTOCOMPARE_API = 'https://min-api.cryptocompare.com/data/v2';
+// Binance API (Free, high rate limits for public data)
+const BINANCE_API = 'https://api.binance.com/api/v3';
 
-// Top 40 coins to monitor (with API key we have higher rate limits)
+// Top coins to monitor (Binance format: SYMBOL + USDT)
 const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX',
   'DOT', 'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM',
   'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE', 'MKR', 'INJ', 'FET',
   'NEAR', 'APE', 'OP', 'ARB', 'RNDR', 'GRT', 'IMX', 'ALGO',
-  'VET', 'MANA', 'SAND', 'AXS', 'THETA', 'EOS', 'XTZ', 'EGLD'
-  // Note: PEPE is not available on CryptoCompare
+  'VET', 'MANA', 'SAND', 'AXS', 'THETA', 'EOS', 'XTZ', 'EGLD',
+  'PEPE' // PEPE is available on Binance
 ];
 
 // ==================== HELPERS ====================
@@ -48,60 +48,52 @@ async function fetchWithTimeout(url, timeout = 15000) {
   }
 }
 
-// ==================== CRYPTOCOMPARE DATA ====================
+// ==================== BINANCE DATA ====================
 
 async function getOHLCVData(symbol, limit = 300) {
-  let url = `${CRYPTOCOMPARE_API}/histohour?fsym=${symbol}&tsym=USD&limit=${limit}`;
-  if (CRYPTOCOMPARE_API_KEY) {
-    url += `&api_key=${CRYPTOCOMPARE_API_KEY}`;
-  }
+  const binanceSymbol = `${symbol}USDT`;
+  const url = `${BINANCE_API}/klines?symbol=${binanceSymbol}&interval=1h&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
-    throw new Error(`CryptoCompare HTTP error: ${response.status}`);
+    throw new Error(`Binance HTTP error: ${response.status}`);
   }
 
   const json = await response.json();
 
-  if (json.Response !== 'Success') {
-    throw new Error(`CryptoCompare: ${json.Message || 'Unknown error'}`);
+  if (!Array.isArray(json)) {
+    throw new Error(`Binance: Invalid response for ${symbol}`);
   }
 
-  if (!json.Data?.Data || json.Data.Data.length === 0) {
-    throw new Error(`No data available for ${symbol}`);
-  }
-
-  return json.Data.Data.map(candle => ({
-    time: candle.time * 1000,
-    open: candle.open,
-    high: candle.high,
-    low: candle.low,
-    close: candle.close,
-    volume: candle.volumefrom
+  return json.map(candle => ({
+    time: candle[0],
+    open: parseFloat(candle[1]),
+    high: parseFloat(candle[2]),
+    low: parseFloat(candle[3]),
+    close: parseFloat(candle[4]),
+    volume: parseFloat(candle[5])
   }));
 }
 
 // Fetch daily candles for multi-timeframe analysis
 async function getDailyCandles(symbol, limit = 30) {
-  let url = `${CRYPTOCOMPARE_API}/histoday?fsym=${symbol}&tsym=USD&limit=${limit}`;
-  if (CRYPTOCOMPARE_API_KEY) {
-    url += `&api_key=${CRYPTOCOMPARE_API_KEY}`;
-  }
+  const binanceSymbol = `${symbol}USDT`;
+  const url = `${BINANCE_API}/klines?symbol=${binanceSymbol}&interval=1d&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
   if (!response.ok) return null;
 
   const json = await response.json();
-  if (json.Response !== 'Success' || !json.Data?.Data) return null;
+  if (!Array.isArray(json)) return null;
 
-  return json.Data.Data.map(candle => ({
-    time: candle.time * 1000,
-    open: candle.open,
-    high: candle.high,
-    low: candle.low,
-    close: candle.close,
-    volume: candle.volumefrom
+  return json.map(candle => ({
+    time: candle[0],
+    open: parseFloat(candle[1]),
+    high: parseFloat(candle[2]),
+    low: parseFloat(candle[3]),
+    close: parseFloat(candle[4]),
+    volume: parseFloat(candle[5])
   }));
 }
 
@@ -604,7 +596,7 @@ async function sendTelegramNotification(signals) {
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
 async function runAnalysis() {
-  console.log('--- CryptoCompare Advanced Analysis Started ---');
+  console.log('--- Binance Advanced Analysis Started ---');
   console.log('Time:', new Date().toISOString());
 
   const signals = [];
