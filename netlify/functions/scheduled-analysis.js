@@ -19,13 +19,11 @@ const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 // MEXC API V3 (Highly permissive for public market data)
 const MEXC_API = 'https://api.mexc.com/api/v3';
 
-// Top coins to monitor (MEXC format: SYMBOL + USDT)
+// Top 20 Liquidity Coins (Sniper Focus)
 const COINS_TO_MONITOR = [
-  'BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX',
-  'DOT', 'LINK', 'LTC', 'BCH', 'SHIB', 'XLM', 'UNI', 'ATOM',
-  'FIL', 'SUI', 'TAO', 'AAVE', 'RUNE', 'INJ', 'FET',
-  'NEAR', 'APE', 'OP', 'ARB', 'RENDER', 'GRT', 'IMX', 'ALGO',
-  'VET', 'MANA', 'SAND', 'AXS', 'XTZ', 'EGLD', 'PEPE'
+  'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX',
+  'TRX', 'LINK', 'DOT', 'MATIC', 'LTC', 'BCH', 'UNI',
+  'APT', 'NEAR', 'FIL', 'ATOM', 'ARB'
 ];
 
 // ==================== HELPERS ====================
@@ -54,22 +52,15 @@ async function fetchWithTimeout(url, timeout = 15000) {
 
 // ==================== MEXC DATA ====================
 
-async function getOHLCVData(symbol, limit = 300) {
+async function getCandles(symbol, interval, limit = 100) {
   const mexcSymbol = `${symbol}USDT`;
-  // MEXC V3: /klines?symbol=BTCUSDT&interval=60m&limit=300
-  const url = `${MEXC_API}/klines?symbol=${mexcSymbol}&interval=60m&limit=${limit}`;
+  const url = `${MEXC_API}/klines?symbol=${mexcSymbol}&interval=${interval}&limit=${limit}`;
 
   const response = await fetchWithTimeout(url);
 
-  if (!response.ok) {
-    throw new Error(`MEXC HTTP error: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`MEXC HTTP error: ${response.status}`);
   const json = await response.json();
-
-  if (!Array.isArray(json)) {
-    throw new Error(`MEXC: Invalid response for ${symbol}`);
-  }
+  if (!Array.isArray(json)) throw new Error(`MEXC: Invalid response for ${symbol}`);
 
   return json.map(candle => ({
     time: parseInt(candle[0]),
@@ -79,55 +70,6 @@ async function getOHLCVData(symbol, limit = 300) {
     close: parseFloat(candle[4]),
     volume: parseFloat(candle[5])
   }));
-}
-
-// Fetch daily candles for multi-timeframe analysis
-async function getDailyCandles(symbol, limit = 30) {
-  const mexcSymbol = `${symbol}USDT`;
-  const url = `${MEXC_API}/klines?symbol=${mexcSymbol}&interval=1d&limit=${limit}`;
-
-  const response = await fetchWithTimeout(url);
-  if (!response.ok) return null;
-
-  const json = await response.json();
-  if (!Array.isArray(json)) return null;
-
-  return json.map(candle => ({
-    time: parseInt(candle[0]),
-    open: parseFloat(candle[1]),
-    high: parseFloat(candle[2]),
-    low: parseFloat(candle[3]),
-    close: parseFloat(candle[4]),
-    volume: parseFloat(candle[5])
-  }));
-}
-
-// Analyze daily trend for multi-timeframe confirmation
-function analyzeDailyTrend(dailyCandles) {
-  if (!dailyCandles || dailyCandles.length < 20) return null;
-
-  const closes = dailyCandles.map(c => c.close);
-  const sma20 = calculateSMA(closes, 20);
-  const currentPrice = closes[closes.length - 1];
-  const prevPrice = closes[closes.length - 2];
-
-  if (!sma20) return null;
-
-  const aboveSMA = currentPrice > sma20;
-  const priceChange = ((currentPrice - prevPrice) / prevPrice) * 100;
-
-  // Determine trend
-  let trend = 'NEUTRAL';
-  if (aboveSMA && priceChange > 0) trend = 'BULLISH';
-  else if (!aboveSMA && priceChange < 0) trend = 'BEARISH';
-  else if (aboveSMA) trend = 'BULLISH_WEAK';
-  else trend = 'BEARISH_WEAK';
-
-  return {
-    trend,
-    aboveSMA20: aboveSMA,
-    dailyChange: priceChange.toFixed(1)
-  };
 }
 
 // ==================== TECHNICAL INDICATORS ====================
@@ -249,7 +191,7 @@ function calculateADX(candles, period = 14) {
     const prevLow = candles[i - 1].low;
 
     tr.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
-    
+
     const moveUp = high - prevHigh;
     const moveDown = prevLow - low;
 
@@ -294,311 +236,158 @@ function calculateADX(candles, period = 14) {
   return adx;
 }
 
+// ==================== SIGNAL GENERATION (SNIPER MODE) ====================
 
+// Trend Analysis Helper
+function analyzeTrend(candles, periodSMA = 20, periodEMA = 200) {
+  if (!candles || candles.length < periodEMA) return 'UNKNOWN';
+  const closes = candles.map(c => c.close);
+  const lastClose = closes[closes.length - 1];
 
-// ==================== SIGNAL GENERATION ====================
+  const sma = calculateSMA(closes, periodSMA);
+  const ema = calculateEMA(closes, periodEMA);
 
-// Detect regular and hidden RSI divergences
-function detectDivergences(candles, closes) {
-  if (candles.length < 50) return [];
-
-  const lookback = 30; // Look deeper for divergences
-  const recentCloses = closes.slice(-lookback);
-
-  // Calculate RSI sequence
-  const rsiValues = [];
-  // Need enough data for RSI calculation
-  const rsiStartIndex = closes.length - lookback - 15;
-  if (rsiStartIndex < 0) return [];
-
-  for (let i = rsiStartIndex; i < closes.length; i++) {
-    // This is a bit inefficient (recalculating full RSI each step) but safe given function structure
-    // Optimally we'd calc all RSIs once. Let's rely on the main simple logic for now or optimize slightly
-    // Actually, let's just use the RSI function which returns scalar, so we loop:
-    const subset = closes.slice(0, i + 1);
-    const val = calculateRSI(subset, 14);
-    if (val !== null) rsiValues.push({ index: i, value: val });
-  }
-
-  // We need at least lookback amount of RSI values aligned with closes
-  if (rsiValues.length < lookback) return [];
-
-  // Align RSI with Price for the lookback window
-  const alignedRSI = rsiValues.slice(-lookback);
-  const alignedPrice = recentCloses.map((price, idx) => ({
-    index: closes.length - lookback + idx,
-    value: price
-  }));
-
-  // Find pivots
-  const findPivots = (data, isHigh) => {
-    const pivots = [];
-    // Check 2 bars left/right for pivot
-    for (let i = 2; i < data.length - 2; i++) {
-      const curr = data[i].value;
-      if (isHigh) {
-        if (curr > data[i - 1].value && curr > data[i - 2].value &&
-          curr > data[i + 1].value && curr > data[i + 2].value) {
-          pivots.push(data[i]);
-        }
-      } else {
-        if (curr < data[i - 1].value && curr < data[i - 2].value &&
-          curr < data[i + 1].value && curr < data[i + 2].value) {
-          pivots.push(data[i]);
-        }
-      }
-    }
-    return pivots;
-  };
-
-  const priceHighs = findPivots(alignedPrice, true);
-  const priceLows = findPivots(alignedPrice, false);
-  const rsiHighs = findPivots(alignedRSI, true);
-  const rsiLows = findPivots(alignedRSI, false);
-
-  const divergences = [];
-
-  // Helper to check conditions
-  const checkDiv = (p1, p2, r1, r2, type, name) => {
-    // Ensure sufficient time separation but not too far
-    const timeDiff = Math.abs(p2.index - p1.index);
-    if (timeDiff < 5 || timeDiff > 40) return; // Must be at least 5 candles apart
-
-    // Ensure strict pivot matching within tolerance (2 candles)
-    const match1 = Math.abs(p1.index - r1.index) <= 2;
-    const match2 = Math.abs(p2.index - r2.index) <= 2;
-
-    if (match1 && match2) {
-      divergences.push({ type, name, strength: Math.abs(r1.value - r2.value) });
-    }
-  };
-
-  // 1. Regular Bullish: Price Lower Low, RSI Higher Low
-  if (priceLows.length >= 2 && rsiLows.length >= 2) {
-    const p2 = priceLows[priceLows.length - 1]; // Recent
-    const p1 = priceLows[priceLows.length - 2]; // Previous
-    const r2 = rsiLows[rsiLows.length - 1];
-    const r1 = rsiLows[rsiLows.length - 2];
-
-    if (p2.value < p1.value && r2.value > r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BULLISH', 'Regular Bullish Divergence');
-    }
-  }
-
-  // 2. Regular Bearish: Price Higher High, RSI Lower High
-  if (priceHighs.length >= 2 && rsiHighs.length >= 2) {
-    const p2 = priceHighs[priceHighs.length - 1];
-    const p1 = priceHighs[priceHighs.length - 2];
-    const r2 = rsiHighs[rsiHighs.length - 1];
-    const r1 = rsiHighs[rsiHighs.length - 2];
-
-    if (p2.value > p1.value && r2.value < r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BEARISH', 'Regular Bearish Divergence');
-    }
-  }
-
-  // 3. Hidden Bullish: Price Higher Low, RSI Lower Low (Trend Continuation)
-  if (priceLows.length >= 2 && rsiLows.length >= 2) {
-    const p2 = priceLows[priceLows.length - 1];
-    const p1 = priceLows[priceLows.length - 2];
-    const r2 = rsiLows[rsiLows.length - 1];
-    const r1 = rsiLows[rsiLows.length - 2];
-
-    if (p2.value > p1.value && r2.value < r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BULLISH', 'Hidden Bullish Divergence (Trend Cont.)');
-    }
-  }
-
-  // 4. Hidden Bearish: Price Lower High, RSI Higher High (Trend Continuation)
-  if (priceHighs.length >= 2 && rsiHighs.length >= 2) {
-    const p2 = priceHighs[priceHighs.length - 1];
-    const p1 = priceHighs[priceHighs.length - 2];
-    const r2 = rsiHighs[rsiHighs.length - 1];
-    const r1 = rsiHighs[rsiHighs.length - 2];
-
-    if (p2.value < p1.value && r2.value > r1.value) {
-      checkDiv(p1, p2, r1, r2, 'BEARISH', 'Hidden Bearish Divergence (Trend Cont.)');
-    }
-  }
-
-  return divergences;
+  if (lastClose > sma && lastClose > ema) return 'BULLISH';
+  if (lastClose < sma && lastClose < ema) return 'BEARISH';
+  return 'NEUTRAL';
 }
 
-function generateSignal(symbol, candles, dailyCandles) {
-  if (!candles || candles.length < 200) return null; // Need 200 for EMA200
+function generateSniperSignal(symbol, candles1h, candles4h, candles1d) {
+  // 1. DATA VALIDATION
+  if (!candles1h || candles1h.length < 200 || !candles4h || candles4h.length < 50 || !candles1d || candles1d.length < 50) {
+    return null;
+  }
 
-  const closes = candles.map(c => c.close);
-  const currentPrice = closes[closes.length - 1];
-  const prevPrice = closes[closes.length - 2];
+  const price = candles1h[candles1h.length - 1].close;
 
-  // Core indicators
-  const rsi = calculateRSI(closes, 14);
-  const macd = calculateMACD(closes);
-  const bb = calculateBollingerBands(closes, 20, 2);
-  const ema200 = calculateEMA(closes, 200); // Trend Filter
-  const ema50 = calculateEMA(closes, 50);
-  const adx = calculateADX(candles, 14);
-  const atr = calculateATR(candles, 14);
+  // 2. CONTEXT (THE GREEN LIGHT)
+  // Daily Trend
+  const closes1d = candles1d.map(c => c.close);
+  const dailySMA20 = calculateSMA(closes1d, 20);
+  const dailyTrend = price > dailySMA20 ? 'BULLISH' : 'BEARISH';
 
-  // Daily Trend Context
-  const dailyAnalysis = analyzeDailyTrend(dailyCandles);
-  const dailyTrend = dailyAnalysis ? dailyAnalysis.trend : 'NEUTRAL';
+  // 4H Trend (Structure)
+  const closes4h = candles4h.map(c => c.close);
+  const ema200_4h = calculateEMA(closes4h, 200);
+  const ema50_4h = calculateEMA(closes4h, 50);
+  const structureTrend = price > ema200_4h ? 'BULLISH' : 'BEARISH';
 
-  // Advanced indicators
-  const volumeSMA = calculateVolumeSMA(candles, 20);
-  const currentVolume = candles[candles.length - 1].volume;
-  const divergences = detectDivergences(candles, closes);
+  // HARD GATE: Trend Alignment
+  if (dailyTrend !== structureTrend) return null; // No Conflict Allowed
+  const marketBias = dailyTrend; // 'BULLISH' or 'BEARISH'
 
-  if (!rsi || !macd || !bb || !ema200 || !adx || !atr) return null;
+  // 3. SETUPS
+  // Indicators for 1H (Trigger)
+  const closes1h = candles1h.map(c => c.close);
+  const rsi1h = calculateRSI(closes1h, 14);
+  const macd1h = calculateMACD(closes1h);
+  const atr1h = calculateATR(candles1h, 14);
+  const adx1h = calculateADX(candles1h, 14);
+  const volumeSMA = calculateVolumeSMA(candles1h, 20);
+  const currentVolume = candles1h[candles1h.length - 1].volume;
 
+  // Indicators for 4H (Context)
+  const bb4h = calculateBollingerBands(closes4h, 20, 2);
+  const adx4h = calculateADX(candles4h, 14);
+
+  let signal = null;
+  let reasons = [];
   let score = 0;
-  const reasons = [];
-  let signalType = null; // BUY, SELL_ALERT, WATCH
 
-  // Trend Direction (EMA 200 on 1h)
-  const isUptrend1h = currentPrice > ema200;
-  
-  // Volume Validation
-  const volumeRatio = volumeSMA ? currentVolume / volumeSMA : 1;
-  const volumeMultiplier = volumeRatio > 1.5 ? 1.2 : (volumeRatio > 1.0 ? 1.05 : 0.95);
+  // --- SETUP A: GOLDEN PULLBACK (Trend Continuation) ---
+  // Context: Strong Trend (ADX 4h > 20)
+  if (adx4h > 20) {
+    if (marketBias === 'BULLISH') {
+      // Price dipping to 4H EMA 50 (Support Area)
+      const distToEma50 = Math.abs(price - ema50_4h) / price;
+      const isNearSupport = distToEma50 < 0.015; // Within 1.5%
 
-  // === 0. TREND & MOMENTUM CONFLUENCE (Foundation) ===
-  // Strong ADX indicates strong trend
-  const strongTrend = adx > 25;
-  
-  if (dailyTrend === 'BULLISH' && isUptrend1h) {
-    score += 20;
-    reasons.push('📈 Tendencia Alcista (Diario + 1h)');
-  } else if (dailyTrend === 'BEARISH' && !isUptrend1h) {
-    score += 20; // Bearish confluence
+      // Trigger: 1H Oversold
+      if (isNearSupport && rsi1h < 45) {
+        // Sniper Entry
+        signal = 'BUY';
+        score = 85;
+        reasons.push('🟢 Setup A: Golden Pullback');
+        reasons.push(`Trend fuerte (ADX 4H: ${adx4h.toFixed(1)})`);
+        reasons.push(`Rebote en EMA50 4H + RSI 1H Sobreventa (${rsi1h.toFixed(1)})`);
+      }
+    }
+    // (Short setup logic omitted for spot, but can be added if needed)
   }
 
-  // === 1. DIVERGENCES (High Weight) ===
-  if (divergences.length > 0) {
-    const sortedDivs = divergences.sort((a, b) => b.strength - a.strength); // Strongest first
-    const bestDiv = sortedDivs[0];
+  // --- SETUP B: VOLATILITY BREAKOUT (Squeeze) ---
+  // Context: BB Squeeze on 4H
+  const bbWidth = (bb4h.upper - bb4h.lower) / bb4h.middle;
+  const isSqueeze = bbWidth < 0.10; // Expanded slightly for crypto
 
-    if (bestDiv.type === 'BULLISH') {
-      // Filter: Only take Regular Bullish if RSI < 45 (Not too high)
-      // Filter: Only take Hidden Bullish if in Uptrend (EMA200)
-      if (bestDiv.name.includes('Hidden')) {
-        if (isUptrend1h && dailyTrend !== 'BEARISH') {
-          score += 35;
-          reasons.unshift(`💎 ${bestDiv.name}`);
-          signalType = 'BUY';
-        }
-      } else {
-        // Regular divergence - good for reversal
-        if (rsi < 50) {
-          score += 30;
-          reasons.unshift(`🔥 ${bestDiv.name}`);
-          signalType = 'BUY';
-        }
-      }
-    } else if (bestDiv.type === 'BEARISH') {
-      if (bestDiv.name.includes('Hidden')) {
-        if (!isUptrend1h && dailyTrend !== 'BULLISH') {
-          score += 35;
-          reasons.unshift(`🔻 ${bestDiv.name}`);
-          signalType = 'SELL_ALERT';
-        }
-      } else {
-        if (rsi > 50) {
-          score += 30;
-          reasons.unshift(`⚠️ ${bestDiv.name}`);
-          signalType = 'SELL_ALERT';
-        }
+  if (isSqueeze) {
+    // Breakout Condition
+    if (marketBias === 'BULLISH' && price > bb4h.upper) {
+      // Confirmation: Volume + MACD
+      const isVolSpike = currentVolume > (volumeSMA * 1.5);
+      if (isVolSpike && macd1h.histogram > 0) {
+        signal = 'BUY';
+        score = 90;
+        reasons.push('🚀 Setup B: Volatility Breakout');
+        reasons.push(`Squeeze 4H (Width: ${(bbWidth * 100).toFixed(2)}%)`);
+        reasons.push(`Ruptura con Volumen (x${(currentVolume / volumeSMA).toFixed(1)}) y MACD`);
       }
     }
   }
 
-  // === 2. MACD + BOLLINGER COMBO (Squeeze & Breakout) ===
-  const bbWidth = (bb.upper - bb.lower) / bb.middle;
-  const isSqueeze = bbWidth < 0.05; // Low volatility
+  // 4. RISK MANAGEMENT (THE SHIELD)
+  if (signal) {
+    // Filter: Avoid Extreme Choppiness if not a breakout
+    if (!reasons[0].includes('Breakout') && adx1h < 15) return null;
 
-  // Bullish Breakout w/ MACD
-  if (currentPrice > bb.upper && macd.bullish && macd.histogram > 0) {
-    if (isUptrend1h && strongTrend) {
-      score += 30;
-      reasons.push('🚀 Breakout Bollinger + MACD + ADX');
-      signalType = signalType || 'BUY';
-    } else if (isUptrend1h) {
-      score += 15;
-      reasons.push('🚀 Breakout Bollinger + MACD');
-    }
-  }
-
-  // Reversal from Lower Band (Mean Reversion)
-  // Best in ranging markets (Low ADX) or Pullback in Uptrend
-  if (currentPrice <= bb.lower * 1.005 && currentPrice > prevPrice && macd.bullish) {
-    if (isUptrend1h) {
-      score += 25;
-      reasons.push('🛡️ Rebote en Bollinger Inferior (Tendencia)');
-      signalType = signalType || 'BUY';
-    } else if (adx < 20) {
-      score += 20;
-      reasons.push('🛡️ Rebote en Bollinger Inferior (Rango)');
-      signalType = signalType || 'BUY';
-    }
-  }
-
-  // === 3. RSI EXTREME ZONES ===
-  if (rsi < 30) {
-    score += 25;
-    reasons.push(`⚡ RSI Sobreventa extrema (${rsi.toFixed(1)})`);
-    signalType = signalType || 'BUY';
-  } else if (rsi > 70) {
-    score += 25;
-    reasons.push(`⚠️ RSI Sobrecompra (${rsi.toFixed(1)})`);
-    signalType = signalType || 'SELL_ALERT';
-  }
-
-  // Apply Volume Multiplier
-  score = Math.round(score * volumeMultiplier);
-  if (volumeRatio > 1.5) reasons.push(`📊 Alto Volumen x${volumeRatio.toFixed(1)}`);
-
-  // Final Decision Threshold
-  const bbPercentage = ((currentPrice - bb.lower) / (bb.upper - bb.lower) * 100).toFixed(0);
-
-  // Dynamic Threshold based on Trend Agreement
-  let effectiveThreshold = SIGNAL_SCORE_THRESHOLD;
-  if (signalType === 'BUY' && dailyTrend === 'BEARISH') effectiveThreshold += 15; // Harder to buy in downtrend
-  if (signalType === 'SELL_ALERT' && dailyTrend === 'BULLISH') effectiveThreshold += 15; // Harder to sell in uptrend
-
-  if (score >= effectiveThreshold && reasons.length > 0) {
-    
-    // Calculate Stop Loss & Take Profit (ATR Based)
-    // Buy Logic
-    let sl, tp;
-    if (signalType === 'BUY') {
-      sl = currentPrice - (atr * 2); // Loose stop to avoid noise
-      tp = currentPrice + (atr * 3); // 1.5R initial target
-    } else {
-      // Short/Sell logic (Hypothetical for alerts)
-      sl = currentPrice + (atr * 2);
-      tp = currentPrice - (atr * 3);
-    }
+    // Calculate Position Sizing Logic
+    const atr = calculateATR(candles4h, 14); // Use 4H ATR for wider safe stops
+    const stopLoss = price - (atr * 2.0); // 2 ATR Stop
+    const risk = price - stopLoss;
+    const takeProfit = price + (risk * 2.5); // 2.5R Target
 
     return {
       symbol,
-      price: currentPrice,
+      type: signal,
+      price,
       score,
-      type: signalType || 'WATCH',
-      rsi: rsi.toFixed(1),
-      rsiValue: rsi,
-      adx: adx.toFixed(1),
-      dailyTrend,
-      macdBullish: macd.bullish,
-      priceChange1h: ((currentPrice - prevPrice) / prevPrice * 100).toFixed(2),
-      bbPosition: `${bbPercentage}%`,
-      hasDivergence: divergences.length > 0,
-      volumeConfirmed: volumeRatio > 1.2,
-      sl: sl.toFixed(4),
-      tp: tp.toFixed(4),
-      reasons
+      confidence: 'HIGH', // Sniper is always High confidence
+      reasons,
+      levels: {
+        entry: price,
+        stopLoss: Number(stopLoss.toFixed(4)),
+        takeProfit: Number(takeProfit.toFixed(4))
+      },
+      indicators: {
+        rsi: Number(rsi1h.toFixed(1)),
+        adx: Number(adx4h.toFixed(1)),
+        trend: marketBias
+      }
     };
   }
 
+  return null;
+}
+
+async function processCoin(symbol) {
+  try {
+    // SNIPER DATA: 1H, 4H, 1D
+    const [candles1h, candles4h, candles1d] = await Promise.all([
+      getCandles(symbol, '60m', 200),
+      getCandles(symbol, '4h', 100),
+      getCandles(symbol, '1d', 50)
+    ]);
+
+    const signal = generateSniperSignal(symbol, candles1h, candles4h, candles1d);
+
+    if (signal) {
+      console.log(`🎯 SNIPER SIGNAL: ${symbol} [${signal.type}] Score: ${signal.score}`);
+      return signal;
+    }
+  } catch (error) {
+    console.error(`Error analyzing ${symbol}:`, error.message);
+    // Don't throw to keep batch processing alive
+  }
   return null;
 }
 
@@ -614,52 +403,29 @@ export async function sendTelegramNotification(signals) {
     return { success: true, sent: 0 };
   }
 
-  let message = '🔔 *ANÁLISIS TÉCNICO AUTOMÁTICO* 🔔\n';
-  message += `_${escapeMarkdownV2('RSI • MACD • Bollinger')}_\n\n`;
+  let message = '🎯 *SNIPER SIGNAL ACTIVE* 🎯\n\n';
 
-  // Sort signals by RSI extremity (most extreme first)
-  const sortedSignals = [...signals].sort((a, b) => {
-    const extremityA = Math.abs(a.rsiValue - 50);
-    const extremityB = Math.abs(b.rsiValue - 50);
-    return extremityB - extremityA;
-  });
+  for (const sig of signals) {
+    let icon = '🟢';
+    if (sig.type === 'SELL') icon = '🔴';
 
-  for (const sig of sortedSignals.slice(0, 5)) {
-    let icon = '📊';
-    let typeEmoji = '';
-    if (sig.type === 'BUY') { icon = '🟢'; typeEmoji = 'COMPRA'; }
-    else if (sig.type === 'SELL_ALERT') { icon = '🔴'; typeEmoji = 'ALERTA VENTA'; }
-    else { typeEmoji = 'VIGILAR'; }
+    message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| SCORE: ${sig.score}\n`;
+    message += `💰 Entry: $${escapeMarkdownV2(sig.price.toFixed(4))}\n`;
 
-    message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| ${escapeMarkdownV2(typeEmoji)}\n`;
+    // Levels
+    const levels = sig.levels;
+    message += `🛑 SL: $${escapeMarkdownV2(levels.stopLoss)} \\(2.0 ATR\\)\n`;
+    message += `🎯 TP: $${escapeMarkdownV2(levels.takeProfit)} \\(2.5R\\)\n`;
 
-    const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
-    const changeIcon = parseFloat(sig.priceChange1h) >= 0 ? '📈' : '📉';
-    const changeSign = parseFloat(sig.priceChange1h) >= 0 ? '+' : '';
-    message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange1h)}% \\(1h\\)\n`;
+    // Indicators
+    const inds = sig.indicators;
+    message += `📊 Trend: ${inds.trend} \\| RSI: ${inds.rsi} \\| ADX: ${inds.adx}\n`;
 
-    // Trend & ADX
-    const trendIcon = sig.dailyTrend === 'BULLISH' ? '🚀' : (sig.dailyTrend === 'BEARISH' ? '🐻' : '⚖️');
-    message += `📅 Trend: ${trendIcon} ${escapeMarkdownV2(sig.dailyTrend)} \\| ADX: ${escapeMarkdownV2(sig.adx)}\n`;
-
-    message += `📊 RSI: ${escapeMarkdownV2(sig.rsi)} \\| BB: ${escapeMarkdownV2(sig.bbPosition)} \\| ${sig.macdBullish ? 'MACD\\+' : 'MACD\\-'}\n`;
-
-    // SL / TP
-    if (sig.sl && sig.tp) {
-       message += `🛑 SL: ${escapeMarkdownV2(sig.sl)} \\| 🎯 TP: ${escapeMarkdownV2(sig.tp)}\n`;
-    }
-
-    // Show special badges for divergence and volume
-    let badges = [];
-    if (sig.hasDivergence) badges.push('🔥DIV');
-    if (sig.volumeConfirmed) badges.push('📊VOL');
-    const badgeStr = badges.length > 0 ? ` ${badges.join(' ')}` : '';
-
-    message += `🎯 Score: ${escapeMarkdownV2(String(sig.score))}/100${escapeMarkdownV2(badgeStr)}\n`;
-
-    if (sig.reasons.length > 0) {
-      message += `💡 _${escapeMarkdownV2(sig.reasons[0])}_\n`;
-    }
+    // Reasons
+    message += `\n📝 _Logic:_\n`;
+    sig.reasons.forEach(r => {
+      message += `• ${escapeMarkdownV2(r)}\n`;
+    });
 
     message += `───────────────────\n`;
   }
@@ -669,7 +435,7 @@ export async function sendTelegramNotification(signals) {
     minute: '2-digit',
     timeZone: 'Europe/Madrid'
   });
-  message += `🤖 _Análisis avanzado_ • ${escapeMarkdownV2(timeStr)}`;
+  message += `🤖 _CryptoSniper Bot_ • ${escapeMarkdownV2(timeStr)}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -701,68 +467,53 @@ export async function sendTelegramNotification(signals) {
 
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
-async function processCoin(symbol) {
-  try {
-    // Fetch 1h and Daily data in parallel
-    const [candles, dailyCandles] = await Promise.all([
-      getOHLCVData(symbol, 300),
-      getDailyCandles(symbol, 50)
-    ]);
-
-    const signal = generateSignal(symbol, candles, dailyCandles);
-    if (signal) {
-      console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
-      return signal;
-    }
-  } catch (error) {
-    console.error(`Error analyzing ${symbol}:`, error.message);
-    throw error; // Propagate to be counted
-  }
-  return null;
-}
-
 async function runAnalysis() {
-  console.log('--- MEXC Advanced Analysis Started ---');
+  console.log('--- SNIPER MODE ANALYSIS STARTED ---');
   console.log('Time:', new Date().toISOString());
 
   const signals = [];
   let analyzed = 0;
   let errors = 0;
 
-  // Process in batches to avoid rate limits but speed up execution
-  const BATCH_SIZE = 5;
-  
+  // Process in batches
+  const BATCH_SIZE = 3;
+
   for (let i = 0; i < COINS_TO_MONITOR.length; i += BATCH_SIZE) {
     const batch = COINS_TO_MONITOR.slice(i, i + BATCH_SIZE);
     console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(COINS_TO_MONITOR.length / BATCH_SIZE)}...`);
 
-    const promises = batch.map(symbol => 
+    const promises = batch.map(symbol =>
       processCoin(symbol)
         .then(res => {
           analyzed++;
           if (res) signals.push(res);
         })
         .catch(err => {
+          console.error(`Failed ${symbol}:`, err.message);
           errors++;
         })
     );
 
     await Promise.all(promises);
-    
-    // Short delay between batches
+
+    // Delay between batches
     if (i + BATCH_SIZE < COINS_TO_MONITOR.length) {
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 2000));
     }
   }
 
   console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
-  
-  await sendTelegramNotification(signals);
-  
+
+  if (signals.length > 0) {
+    await sendTelegramNotification(signals);
+  } else {
+    console.log('No Sniper Signals found this run.');
+  }
+
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: 'Analysis complete', signals })
+    body: JSON.stringify({ message: 'Sniper Analysis complete', signals })
   };
 }
 
-export const handler = schedule('*/20 * * * *', runAnalysis);
+export const handler = schedule('*/30 * * * *', runAnalysis);
