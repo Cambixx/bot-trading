@@ -67,14 +67,15 @@ Proporciona un análisis conciso en formato JSON con la siguiente estructura:
   "recommendation": "STRONG_BUY/BUY/HOLD/AVOID",
   "insights": ["insight1 (sobre régimen)", "insight2 (sobre niveles)", "insight3 (conclusión)"],
   "riskAssessment": "LOW/MEDIUM/HIGH",
-  "confidenceScore": 0-100
+  "confidenceScore": 0-100,
+  "reasoning": "Step-by-step reasoning explaining the recommendation"
 }
 
-Responde SOLO con el JSON, sin texto adicional.`;
+Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "reasoning" con tu proceso de pensamiento.`;
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash-preview:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: {
@@ -207,6 +208,7 @@ export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode
         patterns: signal.patterns,
         reasons: signal.reasons,
         warnings: signal.warnings,
+        levels: signal.levels,
         ...technicalData
     };
 

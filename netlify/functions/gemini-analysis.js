@@ -93,14 +93,16 @@ Proporciona un análisis conciso en formato JSON con la siguiente estructura:
   "sentiment": "BULLISH/NEUTRAL/BEARISH",
   "recommendation": "STRONG_BUY/BUY/HOLD/AVOID",
   "insights": ["insight1", "insight2", "insight3"],
-  "riskAssessment": "LOW/MEDIUM/HIGH"
+  "riskAssessment": "LOW/MEDIUM/HIGH",
+  "reasoning": "Step-by-step reasoning explaining the recommendation"
 }
 
-Responde SOLO con el JSON, sin texto adicional.`;
+Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "reasoning" con tu proceso de pensamiento.`;
 
         // Llamar a Gemini API (usando formato correcto según documentación oficial)
+        // Actualizado a Gemini 3.0 Flash Preview para mayor velocidad y razonamiento
         const response = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash-preview:generateContent',
             {
                 method: 'POST',
                 headers: {

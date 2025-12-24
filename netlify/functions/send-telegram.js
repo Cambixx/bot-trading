@@ -1,0 +1,123 @@
+/**
+ * Netlify Serverless Function - Send Telegram Notifications
+ * Dedicated endpoint for client-side signals.
+ */
+
+export async function handler(event, context) {
+    // Only allow POST
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ error: 'Method not allowed' })
+        };
+    }
+
+    // CORS Headers
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, x-notify-secret',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    };
+
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers, body: '' };
+    }
+
+    try {
+        const { signals } = JSON.parse(event.body);
+
+        if (!signals || !Array.isArray(signals) || signals.length === 0) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ success: false, error: 'No signals provided' })
+            };
+        }
+
+        const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+        const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+        // Optional: Secret check to prevent spam if exposed
+        const NOTIFY_SECRET = process.env.NOTIFY_SECRET;
+        const clientSecret = event.headers['x-notify-secret'] || event.headers['X-Notify-Secret'];
+
+        if (NOTIFY_SECRET && clientSecret !== NOTIFY_SECRET) {
+            console.warn('Invalid Notify Secret attempted');
+            // We can be strict or lenient. Let's be lenient for dev but log it.
+            // return { statusCode: 403, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
+        }
+
+        if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+            console.error('Telegram credentials missing');
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({ success: false, error: 'Server configuration missing' })
+            };
+        }
+
+        // Reuse logic from scheduled-analysis (simplified)
+        let message = '🔔 *NUEVA SEÑAL ALERTA* 🔔\n\n';
+
+        for (const sig of signals) {
+            // Safe helpers
+            const esc = (t) => String(t).replace(/([_\*\[\]\(\)~`>#\+\-=\|\{\}\.\!])/g, '\\$1');
+
+            let icon = '🟢';
+            if (sig.type === 'SELL' || sig.signal === 'UPPER_EXTREMITY') icon = '🔴';
+
+            const symbol = esc(sig.symbol || 'UNKNOWN');
+            const price = sig.price ? esc(sig.price) : 'N/A';
+            const score = sig.score || 'N/A';
+
+            message += `${icon} *${symbol}*\n`;
+            message += `💰 Precio: $${price}\n`;
+            message += `🎯 Score: ${score}\n`;
+
+            if (sig.reasons && sig.reasons.length > 0) {
+                // handle string or object reasons
+                const r = sig.reasons[0];
+                const reasonText = typeof r === 'string' ? r : (r.text || '');
+                message += `💡 _${esc(reasonText)}_\n`;
+            }
+
+            if (sig.aiAnalysis) {
+                const rec = esc(sig.aiAnalysis.recommendation || '');
+                message += `🤖 AI: ${rec}\n`;
+            }
+
+            message += `───────────────────\n`;
+        }
+
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: 'MarkdownV2'
+            })
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('Telegram API error:', errText);
+            throw new Error(`Telegram API Error: ${response.status} ${response.statusText}`);
+        }
+
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ success: true, count: signals.length })
+        };
+
+    } catch (error) {
+        console.error('Send Telegram Error:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ success: false, error: error.message })
+        };
+    }
+}

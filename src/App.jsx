@@ -37,9 +37,8 @@ const AI_CACHE_TTL = 30 * 60 * 1000; // 30 minutos de caché para análisis de I
 // Función para enviar señales a Telegram via Netlify Function
 async function sendToTelegram(signals) {
   try {
-    // URL de la Netlify Function (en producción será /.netlify/functions/scheduled-analysis)
-    // URL relativa para que el proxy de Vite (en dev) o Netlify (en prod) maneje la ruta
-    const functionUrl = '/.netlify/functions/scheduled-analysis';
+    // URL de la Netlify Function (Nueva función dedicada para envío directo)
+    const functionUrl = '/.netlify/functions/send-telegram';
 
     const response = await fetch(functionUrl, {
       method: 'POST',
@@ -295,16 +294,16 @@ function AppContent() {
             const now = Date.now();
 
             if (cachedAnalysis && (now - cachedAnalysis.timestamp < AI_CACHE_TTL)) {
-               console.log(`💡 Usando análisis IA en caché para ${signal.symbol}`);
-               const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
-               if (index !== -1) {
-                   generatedSignals[index] = {
-                       ...signal,
-                       aiAnalysis: cachedAnalysis.data,
-                       aiEnriched: true
-                   };
-               }
-               continue; // Saltar llamada a API
+              console.log(`💡 Usando análisis IA en caché para ${signal.symbol}`);
+              const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
+              if (index !== -1) {
+                generatedSignals[index] = {
+                  ...signal,
+                  aiAnalysis: cachedAnalysis.data,
+                  aiEnriched: true
+                };
+              }
+              continue; // Saltar llamada a API
             }
 
             // Si no hay caché, llamar a API
@@ -315,10 +314,10 @@ function AppContent() {
 
             // Guardar en caché si fue exitoso
             if (enrichedSignal.aiEnriched && enrichedSignal.aiAnalysis) {
-                aiAnalysisCache.set(cacheKey, {
-                    timestamp: now,
-                    data: enrichedSignal.aiAnalysis
-                });
+              aiAnalysisCache.set(cacheKey, {
+                timestamp: now,
+                data: enrichedSignal.aiAnalysis
+              });
             }
 
             const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
@@ -349,7 +348,7 @@ function AppContent() {
             // 1. RSI (Oscilador)
             if (ind.rsi < 30) longScore += 30;      // Sobreventa -> Long
             else if (ind.rsi < 45) longScore += 15;
-            
+
             if (ind.rsi > 70) shortScore += 30;     // Sobrecompra -> Short
             else if (ind.rsi > 55) shortScore += 15;
 

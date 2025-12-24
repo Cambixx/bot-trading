@@ -272,6 +272,16 @@ class BinanceService {
     const streams = symbols.map(s => `${s.toLowerCase()}@ticker`).join('/');
     const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
 
+    // Evitar reconexión si la URL es la misma y el socket está abierto o conectando
+    if (this.ws && this.ws.url === url && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+      console.log('WebSocket ya conectado a estos streams. ' + streams.split('/').length + ' pares.');
+      return;
+    }
+
+    if (this.ws) {
+      this.ws.close();
+    }
+
     console.log('Conectando a WebSocket:', url);
     this.ws = new WebSocket(url);
 
