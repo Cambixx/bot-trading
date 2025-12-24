@@ -110,12 +110,7 @@ function Dashboard({
             variants={containerVariants}
             className="dashboard-page"
         >
-            {/* Market Oracle Hero Section */}
-            <motion.div variants={itemVariants}>
-                <MarketOracle analysis={oracleData} loading={oracleLoading} />
-            </motion.div>
-
-            {/* Crypto Selector */}
+            {/* 1. Crypto Selector & Market (Top Priority) */}
             <motion.div variants={itemVariants}>
                 <CryptoSelector
                     selectedSymbols={symbols}
@@ -123,7 +118,23 @@ function Dashboard({
                 />
             </motion.div>
 
-            {/* Crypto Prices Dashboard */}
+            {/* 2. Market Oracle (Macro Analysis) */}
+            <motion.div variants={itemVariants}>
+                <MarketOracle analysis={oracleData} loading={oracleLoading} />
+            </motion.div>
+
+            {/* 3. AI Tools Section: Doctor + Hunter */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                <motion.div variants={itemVariants}>
+                    <TradeDoctor defaultSymbol={symbols[0]} availableSymbols={symbols} />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <PatternHunter defaultSymbol={symbols[0]} availableSymbols={symbols} />
+                </motion.div>
+            </div>
+
+            {/* 4. Crypto Prices Dashboard */}
             <motion.section variants={itemVariants} className="dashboard-section">
                 <div className="section-header">
                     <TrendingUp size={20} className="text-primary" />
@@ -141,17 +152,6 @@ function Dashboard({
                     )}
                 </div>
             </motion.section>
-
-            {/* AI Tools Section: Doctor + Hunter */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                <motion.div variants={itemVariants}>
-                    <TradeDoctor defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <PatternHunter defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                </motion.div>
-            </div>
 
             <motion.div variants={itemVariants}>
                 <MLSignalSection signals={mlSignals} loading={loading} />
