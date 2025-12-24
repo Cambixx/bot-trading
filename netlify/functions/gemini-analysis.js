@@ -223,8 +223,52 @@ export async function handler(event, context) {
             console.error(`❌ Gemini API Error (${response.status}):`, errorText);
 
             if (response.status === 429) {
-                console.warn('⚠️ Gemini Rate Limit Hit (429).');
-                // ... (existing 429 logic if any, or just throw to let client handle)
+                console.warn('⚠️ Gemini Rate Limit Hit (429). Returning Fallback.');
+
+                let fallbackAnalysis = null;
+
+                if (mode === 'MARKET_ORACLE') {
+                    fallbackAnalysis = {
+                        marketState: 'CHOPPY',
+                        headline: 'Market Analysis Paused',
+                        summary: 'High demand on AI services. System cooling down. Proceed with caution.',
+                        strategy: 'WAIT',
+                        sentimentScore: 50
+                    };
+                } else if (mode === 'TRADE_DOCTOR') {
+                    fallbackAnalysis = {
+                        diagnosis: "System Overload",
+                        symptoms: ["API Rate Limit Hit", "High Traffic"],
+                        prescription: "Wait 60 seconds and retry diagnostic.",
+                        prognosis: "Temporary congestion",
+                        healthScore: 50
+                    };
+                } else if (mode === 'PATTERN_HUNTER') {
+                    fallbackAnalysis = {
+                        detected: false,
+                        patterns: [],
+                        summary: "Radar jammed (Rate Limit). Retrying scan..."
+                    };
+                } else {
+                    // Default
+                    fallbackAnalysis = {
+                        sentiment: 'NEUTRAL',
+                        recommendation: 'HOLD',
+                        insights: ['System busy, try again later.'],
+                        riskAssessment: 'MEDIUM'
+                    };
+                }
+
+                return {
+                    statusCode: 200, // Return 200 so frontend renders the fallback
+                    headers,
+                    body: JSON.stringify({
+                        success: true,
+                        analysis: fallbackAnalysis,
+                        timestamp: new Date().toISOString(),
+                        isFallback: true
+                    })
+                };
             }
 
             return {
