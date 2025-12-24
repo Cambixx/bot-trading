@@ -1,0 +1,264 @@
+.trade-doctor-container {
+    margin-bottom: 2rem;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 77, 77, 0.2);
+    background: linear-gradient(180deg, rgba(20, 20, 30, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
+}
+
+.doctor-header {
+    background: rgba(255, 77, 77, 0.05);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 77, 77, 0.1);
+}
+
+.doctor-identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.icon-box-medical {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 77, 77, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 77, 77, 0.2);
+}
+
+.doctor-identity h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ffcccc;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 0.7rem;
+    color: rgba(255, 204, 204, 0.6);
+    text-transform: uppercase;
+}
+
+.patient-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.doctor-select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+}
+
+.doctor-select:hover {
+    border-color: #ff4d4d;
+}
+
+.doctor-select option {
+    background: #1a1a2e;
+    color: white;
+}
+
+.doctor-body {
+    padding: 2rem;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Empty State */
+.doctor-empty-state {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.diagnose-btn {
+    margin-top: 1rem;
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+}
+
+.diagnose-btn:hover:not(:disabled) {
+    background: #ff6666;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 77, 77, 0.4);
+}
+
+.diagnose-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Loading */
+.doctor-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: #ff4d4d;
+}
+
+/* Report */
+.medical-report {
+    width: 100%;
+}
+
+.report-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 1.5rem;
+}
+
+.health-score-bloq {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.score-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.diagnosis-main {
+    flex: 1;
+}
+
+.diagnosis-main h4 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 700;
+}
+
+.label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+/* Report Grid */
+.report-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.symptoms-box {
+    grid-row: span 2;
+    background: rgba(255, 77, 77, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 77, 77, 0.1);
+}
+
+.box-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #ff4d4d;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.symptoms-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.symptoms-box li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.prescription-box,
+.prognosis-box {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.prescription-box p,
+.prognosis-box p {
+    margin: 0;
+    color: white;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.new-consult-btn {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.new-consult-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+}

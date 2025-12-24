@@ -99,6 +99,66 @@ export async function handler(event, context) {
               "sentimentScore": 0-100 (0=Pánico Extremo, 100=Euforia)
             }`;
 
+        } else if (mode === 'TRADE_DOCTOR') {
+            // PROMPT FOR TRADE DOCTOR (DIAGNOSTIC)
+            prompt = `Eres "Dr. Market", un cirujano de trading cínico, directo y extremadamente perspicaz. 
+            Tu paciente es el par ${symbol}.
+            
+            DATOS DEL PACIENTE:
+            - Precio: $${price}
+            - RSI: ${indicators?.rsi || 'N/A'}
+            - MACD: ${indicators?.macd || 'N/A'}
+            - Bandas Bollinger: ${indicators?.bbPosition || 'N/A'}
+            - Señales Previas: ${reasons ? reasons.map(r => r).join(', ') : 'Ninguna'}
+
+            Tu tarea es realizar un DIAGNÓSTICO MÉDICO del chart:
+            1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Tendencia Aguda", "Fiebre de FOMO", "Soporte Fracturado").
+            2. SÍNTOMAS: Lista 3 evidencias técnicas que apoyan tu diagnóstico.
+            3. RECETA: ¿Qué debe hacer el trader? (ej: "Reposo absoluto (No operar)", "Inyección de liquidez en $X (Long)", "Amputación de pérdidas (Stop Loss)").
+            4. PRONÓSTICO: ¿Sobrevivirá a las próximas 4 horas?
+
+            Responde SOLO con este JSON:
+            {
+              "diagnosis": "Diagnóstico médico creativo y técnico",
+              "symptoms": ["Síntoma 1", "Síntoma 2", "Síntoma 3"],
+              "prescription": "Consejo de acción directo",
+              "prognosis": "Predicción a corto plazo",
+              "healthScore": 0-100 (0=Muerto/Crash, 100=Atleta Olímpico/Pump)
+            }`;
+
+        } else if (mode === 'PATTERN_HUNTER') {
+            // PROMPT FOR PATTERN HUNTER (GEOMETRIC ANALYSIS)
+            const { prices } = inputData;
+
+            prompt = `Eres "The Pattern Hunter", un algoritmo de IA especializado en reconocimiento de patrones gráficos (Chartismo).
+            
+            Se te proporciona una serie de precios (Close prices) de un activo:
+            [${prices.slice(-60).join(', ')}]
+            
+            Tu tarea es visualizar la geometría de estos números y buscar patrones clásicos:
+            - Hombro-Cabeza-Hombro (H&S) o Inverso
+            - Doble Techo / Doble Suelo
+            - Cuñas (Wedges) Alcistas/Bajistas
+            - Banderas (Flags) y Banderines (Pennants)
+            - Triángulos (Ascendentes/Descendentes/Simétricos)
+
+            Analiza la ESTRUCTURA.
+            Si no detectas nada claro, sé honesto y di "Ningún patrón claro".
+
+            Responde SOLO con este JSON:
+            {
+              "detected": true/false,
+              "patterns": [
+                { 
+                  "name": "Nombre del Patrón (ej: Bull Flag)", 
+                  "confidence": "High/Medium/Low", 
+                  "signal": "BULLISH/BEARISH",
+                  "description": "Breve explicación de dónde se ve el patrón."
+                }
+              ],
+              "summary": "Resumen general de la estructura de precios."
+            }`;
+
         } else {
             // STANDARD PROMPT (SINGLE ASSET)
             prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot (comprar bajo, vender alto).
@@ -159,9 +219,19 @@ export async function handler(event, context) {
         );
 
         if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Gemini API error:', errorData);
-            throw new Error(`Gemini API failed: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error(`❌ Gemini API Error (${response.status}):`, errorText);
+
+            if (response.status === 429) {
+                console.warn('⚠️ Gemini Rate Limit Hit (429).');
+                // ... (existing 429 logic if any, or just throw to let client handle)
+            }
+
+            return {
+                statusCode: response.status,
+                headers, // Include headers for CORS
+                body: JSON.stringify({ success: false, error: `Gemini API Error: ${response.statusText}`, details: errorText })
+            };
         }
 
         const data = await response.json();

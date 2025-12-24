@@ -48,6 +48,61 @@ async function callGeminiDirectly(inputData, tradingMode = 'BALANCED') {
               "strategy": "BREAKOUTS / DIPS / SCALPING / WAIT",
               "sentimentScore": 0-100 (0=Pánico Extremo, 100=Euforia)
             }`;
+    } else if (mode === 'TRADE_DOCTOR') {
+        prompt = `Eres "Dr. Market", un cirujano de trading cínico, directo y extremadamente perspicaz. 
+            Tu paciente es el par ${symbol}.
+            
+            DATOS DEL PACIENTE:
+            - Precio: $${price}
+            - RSI: ${indicators?.rsi || 'N/A'}
+            - MACD: ${indicators?.macd || 'N/A'}
+            - Bandas Bollinger: ${indicators?.bbPosition || 'N/A'}
+            - Señales Previas: ${reasons ? reasons.map(r => r).join(', ') : 'Ninguna'}
+
+            Tu tarea es realizar un DIAGNÓSTICO MÉDICO del chart:
+            1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Tendencia Aguda", "Fiebre de FOMO", "Soporte Fracturado").
+            2. SÍNTOMAS: Lista 3 evidencias técnicas que apoyan tu diagnóstico.
+            3. RECETA: ¿Qué debe hacer el trader? (ej: "Reposo absoluto (No operar)", "Inyección de liquidez en $X (Long)", "Amputación de pérdidas (Stop Loss)").
+            4. PRONÓSTICO: ¿Sobrevivirá a las próximas 4 horas?
+
+            Responde SOLO con este JSON:
+            {
+              "diagnosis": "Diagnóstico médico creativo y técnico",
+              "symptoms": ["Síntoma 1", "Síntoma 2", "Síntoma 3"],
+              "prescription": "Consejo de acción directo",
+              "prognosis": "Predicción a corto plazo",
+              "healthScore": 0-100 (0=Muerto/Crash, 100=Atleta Olímpico/Pump)
+            }`;
+    } else if (mode === 'PATTERN_HUNTER') {
+        const { prices } = inputData;
+        prompt = `Eres "The Pattern Hunter", un algoritmo de IA especializado en reconocimiento de patrones gráficos (Chartismo).
+            
+            Se te proporciona una serie de precios (Close prices) de un activo:
+            [${prices.slice(-60).join(', ')}]
+            
+            Tu tarea es visualizar la geometría de estos números y buscar patrones clásicos:
+            - Hombro-Cabeza-Hombro (H&S) o Inverso
+            - Doble Techo / Doble Suelo
+            - Cuñas (Wedges) Alcistas/Bajistas
+            - Banderas (Flags) y Banderines (Pennants)
+            - Triángulos (Ascendentes/Descendentes/Simétricos)
+
+            Analiza la ESTRUCTURA.
+            Si no detectas nada claro, sé honesto y di "Ningún patrón claro".
+
+            Responde SOLO con este JSON:
+            {
+              "detected": true/false,
+              "patterns": [
+                { 
+                  "name": "Nombre del Patrón (ej: Bull Flag)", 
+                  "confidence": "High/Medium/Low", 
+                  "signal": "BULLISH/BEARISH",
+                  "description": "Breve explicación de dónde se ve el patrón."
+                }
+              ],
+              "summary": "Resumen general de la estructura de precios."
+            }`;
     } else {
         // ... (Existing Single Asset Prompt Code - Re-adding context logic)
         let modeContext = '';
@@ -144,6 +199,28 @@ Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "
                         },
                         timestamp: new Date().toISOString()
                     };
+                } else if (mode === 'TRADE_DOCTOR') {
+                    return {
+                        success: true,
+                        analysis: {
+                            diagnosis: "System Overload",
+                            symptoms: ["API Rate Limit Hit", "High Traffic"],
+                            prescription: "Wait 60 seconds and retry diagnostic.",
+                            prognosis: "Temporary congestion",
+                            healthScore: 50
+                        },
+                        timestamp: new Date().toISOString()
+                    };
+                } else if (mode === 'PATTERN_HUNTER') {
+                    return {
+                        success: true,
+                        analysis: {
+                            detected: false,
+                            patterns: [],
+                            summary: "Radar jammed (Rate Limit). Retrying scan..."
+                        },
+                        timestamp: new Date().toISOString()
+                    };
                 }
             }
             const errorData = await response.text();
@@ -173,6 +250,20 @@ Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "
                     summary: 'AI Analysis failed to parse. Proceed with caution.',
                     strategy: 'WAIT',
                     sentimentScore: 50
+                };
+            } else if (mode === 'TRADE_DOCTOR') {
+                analysis = {
+                    diagnosis: "Diagnostic Unavailable",
+                    symptoms: ["AI Connection Failed", "Parsing Error"],
+                    prescription: "Check console logs.",
+                    prognosis: "Unknown",
+                    healthScore: 50
+                };
+            } else if (mode === 'PATTERN_HUNTER') {
+                analysis = {
+                    detected: false,
+                    patterns: [],
+                    summary: "Pattern detection unavailable check logs."
                 };
             } else {
                 analysis = {
@@ -251,6 +342,41 @@ export async function getMarketOracleAnalysis(topCoins) {
     const marketData = {
         mode: 'MARKET_ORACLE',
         marketData: { topCoins }
+    };
+
+    return await getAIAnalysis(marketData);
+}
+
+/**
+ * Obtener DIAGNÓSTICO DE TRADE DOCTOR
+ * @param {string} symbol - Símbolo a diagnosticar
+ * @param {number} price - Precio actual
+ * @param {Object} technicals - Datos técnicos (RSI, MACD, etc)
+ * @returns {Promise<Object>} Diagnóstico médico
+ */
+export async function getTradeDoctorAnalysis(symbol, price, technicals) {
+    const marketData = {
+        mode: 'TRADE_DOCTOR',
+        symbol,
+        price,
+        indicators: technicals.indicators || {},
+        reasons: technicals.reasons || []
+    };
+
+    return await getAIAnalysis(marketData);
+}
+
+/**
+ * Obtener ANÁLISIS DE PATRONES
+ * @param {string} symbol - Símbolo
+ * @param {Array<number>} prices - Array de precios de cierre (últimas ~100 velas)
+ * @returns {Promise<Object>} Análisis de patrones
+ */
+export async function getPatternAnalysis(symbol, prices) {
+    const marketData = {
+        mode: 'PATTERN_HUNTER',
+        symbol,
+        prices: prices || [] // Enviamos el array crudo
     };
 
     return await getAIAnalysis(marketData);

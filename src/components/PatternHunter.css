@@ -1,0 +1,232 @@
+.pattern-hunter-container {
+    margin-bottom: 2rem;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 157, 0.2);
+    background: linear-gradient(180deg, rgba(5, 20, 15, 0.95) 0%, rgba(0, 10, 5, 0.98) 100%);
+    position: relative;
+}
+
+.hunter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 255, 157, 0.1);
+    background: rgba(0, 255, 157, 0.03);
+}
+
+.hunter-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.hunter-icon {
+    color: #00ff9d;
+}
+
+.hunter-title h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #00ff9d;
+    text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+}
+
+.hunter-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.hunter-select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.hunter-select option {
+    background: #05140f;
+    color: #00ff9d;
+}
+
+.scan-btn {
+    background: transparent;
+    border: 1px solid #00ff9d;
+    color: #00ff9d;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.scan-btn:hover:not(:disabled) {
+    background: rgba(0, 255, 157, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+}
+
+.scan-btn.scanning {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.hunter-body {
+    padding: 1.5rem;
+    min-height: 200px;
+}
+
+.hunter-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: rgba(0, 255, 157, 0.3);
+    padding: 2rem;
+}
+
+.target-icon {
+    opacity: 0.5;
+}
+
+/* Radar Animation */
+.radar-animation {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    margin: 0 auto;
+    position: relative;
+    background:
+        radial-gradient(circle, rgba(0, 255, 157, 0.1) 2px, transparent 2px),
+        radial-gradient(circle, rgba(0, 255, 157, 0.1) 2px, transparent 2px);
+    background-size: 30px 30px;
+    overflow: hidden;
+}
+
+.radar-sweep {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff9d);
+    transform-origin: 0 0;
+    animation: radar-sweep 2s infinite linear;
+    box-shadow: 0 0 20px #00ff9d;
+}
+
+@keyframes radar-sweep {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Results */
+.scan-summary {
+    display: flex;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.8rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #ccc;
+    align-items: start;
+}
+
+.info-icon {
+    margin-top: 3px;
+    color: #00ff9d;
+    flex-shrink: 0;
+}
+
+.patterns-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pattern-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 3px solid #666;
+    padding: 1rem;
+    border-radius: 0 6px 6px 0;
+}
+
+.pat-bull {
+    border-left-color: #00ff9d;
+    background: linear-gradient(90deg, rgba(0, 255, 157, 0.05), transparent);
+}
+
+.pat-bear {
+    border-left-color: #ff4d4d;
+    background: linear-gradient(90deg, rgba(255, 77, 77, 0.05), transparent);
+}
+
+.pat-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.pat-name {
+    font-weight: 700;
+    color: white;
+    font-size: 1rem;
+}
+
+.pat-conf {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pat-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.no-patterns {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+    padding: 1rem;
+}
+
+.scan-timestamp {
+    text-align: right;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.2);
+    margin-top: 1rem;
+}
