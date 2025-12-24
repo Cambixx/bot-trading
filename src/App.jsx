@@ -246,7 +246,7 @@ function AppContent() {
         if (candleData[symbol]?.data && candleData[symbol].data.length >= 30) {
           const closes = candleData[symbol].data.map(c => c.close);
           const mlResult = calculateMLMovingAverage(closes, { window: 30, forecast: 2 });
-          if (mlResult) {
+          if (mlResult && mlResult.score >= 40) { // Filter out weak signals (<40)
             calculatedMlSignals.push({
               symbol,
               ...mlResult,
