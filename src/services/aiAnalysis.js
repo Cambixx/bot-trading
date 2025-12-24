@@ -17,19 +17,49 @@ const GEMINI_API_KEY = (import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) 
 /**
  * Llamar directamente a Gemini API (solo en desarrollo)
  */
-async function callGeminiDirectly(marketData, tradingMode = 'BALANCED') {
-    const { symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward } = marketData;
+async function callGeminiDirectly(inputData, tradingMode = 'BALANCED') {
+    const { mode, symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward, marketData: globalMarketData } = inputData;
 
-    let modeContext = '';
-    if (tradingMode === 'CONSERVATIVE') {
-        modeContext = 'El usuario opera en modo CONSERVADOR. Prioriza la preservación de capital. Sé escéptico con señales débiles y busca confirmación de tendencia fuerte.';
-    } else if (tradingMode === 'RISKY') {
-        modeContext = 'El usuario opera en modo ARRIESGADO. Busca oportunidades de alto rendimiento/riesgo. Acepta mayor volatilidad si el potencial de subida es alto.';
+    let prompt = '';
+
+    if (mode === 'MARKET_ORACLE') {
+        const { topCoins } = globalMarketData || {};
+        prompt = `Eres un estratega jefe de mercado de criptomonedas (Chief Market Strategist).
+            Tu trabajo es analizar la "Salud del Mercado" global y dar una directriz clara para el día.
+
+            DATOS DEL MERCADO GLOBAL (Top Assets):
+            ${JSON.stringify(topCoins, null, 2)}
+
+            Tu tarea:
+            1. Analizar el SENTIMIENTO GENERAL (¿Están subiendo las alts? ¿Bitcoin está absorbiendo liquidez? ¿Hay miedo?).
+            2. Definir el ESTADO DEL MERCADO:
+               - RISK_ON: Todo sube, buscar longs agresivos.
+               - RISK_OFF: Todo baja, buscar shorts o cash.
+               - CHOPPY: Rango/Indecisión, cuidado con falsos breakouts.
+               - ALT_SEASON: BTC estable/baja, Alts vuelan.
+            3. Redactar un TITULAR periodístico corto e impactante.
+            4. Escribir un RESUMEN narrativo de 2 frases explicando el "Por qué".
+
+            Responde SOLO con este JSON:
+            {
+              "marketState": "RISK_ON / RISK_OFF / CHOPPY / ALT_SEASON",
+              "headline": "Titular corto y directo (max 6 palabras)",
+              "summary": "Resumen narrativo del estado del mercado (max 2 frases).",
+              "strategy": "BREAKOUTS / DIPS / SCALPING / WAIT",
+              "sentimentScore": 0-100 (0=Pánico Extremo, 100=Euforia)
+            }`;
     } else {
-        modeContext = 'El usuario opera en modo EQUILIBRADO. Busca un balance entre riesgo y beneficio.';
-    }
+        // ... (Existing Single Asset Prompt Code - Re-adding context logic)
+        let modeContext = '';
+        if (tradingMode === 'CONSERVATIVE') {
+            modeContext = 'El usuario opera en modo CONSERVADOR. Prioriza la preservación de capital. Sé escéptico con señales débiles y busca confirmación de tendencia fuerte.';
+        } else if (tradingMode === 'RISKY') {
+            modeContext = 'El usuario opera en modo ARRIESGADO. Busca oportunidades de alto rendimiento/riesgo. Acepta mayor volatilidad si el potencial de subida es alto.';
+        } else {
+            modeContext = 'El usuario opera en modo EQUILIBRADO. Busca un balance entre riesgo y beneficio.';
+        }
 
-    const prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot.
+        prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot.
 ${modeContext}
 
 Analiza la siguiente oportunidad de trading:
@@ -45,14 +75,14 @@ Analiza la siguiente oportunidad de trading:
 - ADX: ${indicators.adx || 'N/A'} (Fuerza de tendencia)
 
 **Señales Detectadas**:
-${reasons.map(r => `- ${r.text} (Peso: ${r.weight}%)`).join('\n')}
+${reasons && reasons.length > 0 ? reasons.map(r => `- ${r.text} (Peso: ${r.weight}%)`).join('\n') : 'N/A'}
 
-**Niveles Propuestos**:
-- Entrada: $${levels.entry}
+**Niveles Propuestos (si existen)**:
+${levels ? `- Entrada: $${levels.entry}
 - Stop Loss: $${levels.stopLoss}
 - Take Profit 1: $${levels.takeProfit1}
-- Take Profit 2: $${levels.takeProfit2}
-- Ratio Riesgo/Beneficio: ${riskReward}
+- Take Profit 2: $${levels.takeProfit2}` : ''}
+- Ratio Riesgo/Beneficio: ${riskReward || 'N/A'}
 
 ${warnings && warnings.length > 0 ? `**Advertencias**:\n${warnings.map(w => `- ${w}`).join('\n')}` : ''}
 
@@ -72,10 +102,11 @@ Proporciona un análisis conciso en formato JSON con la siguiente estructura:
 }
 
 Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "reasoning" con tu proceso de pensamiento.`;
+    }
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash-preview:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: {
@@ -98,24 +129,31 @@ Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "
         );
 
         if (!response.ok) {
-            const errorData = await response.text();
-            console.error(`Gemini API error (${response.status}):`, errorData);
-
-            // Handle rate limiting specifically
+            // Fallback on Rate Limit
             if (response.status === 429) {
-                throw new Error('Rate limit exceeded - too many requests');
+                console.warn('⚠️ Gemini Rate Limit Hit (429). Using Fallback.');
+                if (mode === 'MARKET_ORACLE') {
+                    return {
+                        success: true,
+                        analysis: {
+                            marketState: 'CHOPPY',
+                            headline: 'Market Analysis Paused',
+                            summary: 'High demand on AI services. Market data suggests mixed signals. Proceed with caution.',
+                            strategy: 'WAIT',
+                            sentimentScore: 50
+                        },
+                        timestamp: new Date().toISOString()
+                    };
+                }
             }
-
+            const errorData = await response.text();
             throw new Error(`Gemini API failed: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log('Gemini API response:', data); // Debug logging
-
         const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!generatedText) {
-            console.error('No text in Gemini response:', JSON.stringify(data, null, 2));
             throw new Error('No response from Gemini');
         }
 
@@ -127,12 +165,23 @@ Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "
             analysis = JSON.parse(jsonText);
         } catch (parseError) {
             console.error('Error parsing Gemini response:', generatedText);
-            analysis = {
-                sentiment: 'NEUTRAL',
-                recommendation: 'HOLD',
-                insights: ['Análisis no disponible, usar solo indicadores técnicos'],
-                riskAssessment: 'MEDIUM'
-            };
+            // Default Fallback
+            if (mode === 'MARKET_ORACLE') {
+                analysis = {
+                    marketState: 'CHOPPY',
+                    headline: 'Market Uncertain',
+                    summary: 'AI Analysis failed to parse. Proceed with caution.',
+                    strategy: 'WAIT',
+                    sentimentScore: 50
+                };
+            } else {
+                analysis = {
+                    sentiment: 'NEUTRAL',
+                    recommendation: 'HOLD',
+                    insights: ['Análisis no disponible.'],
+                    riskAssessment: 'MEDIUM'
+                };
+            }
         }
 
         return {
@@ -191,6 +240,20 @@ export async function getAIAnalysis(marketData, tradingMode = 'BALANCED') {
             analysis: null
         };
     }
+}
+
+/**
+ * Obtener análisis de ORÁCULO DE MERCADO (Macro)
+ * @param {Array} topCoins - Array de Top Criptos con stats
+ * @returns {Promise<Object>} Análisis de estado del mercado
+ */
+export async function getMarketOracleAnalysis(topCoins) {
+    const marketData = {
+        mode: 'MARKET_ORACLE',
+        marketData: { topCoins }
+    };
+
+    return await getAIAnalysis(marketData);
 }
 
 /**

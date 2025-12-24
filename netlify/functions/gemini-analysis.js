@@ -51,9 +51,9 @@ export async function handler(event, context) {
         }
 
         // Parsear datos del request
-        let marketData;
+        let inputData;
         try {
-            marketData = JSON.parse(event.body);
+            inputData = JSON.parse(event.body);
         } catch (parseError) {
             console.error('Error parsing request body:', parseError);
             return {
@@ -66,43 +66,76 @@ export async function handler(event, context) {
             };
         }
 
-        const { symbol, price, indicators, patterns, reasons, warnings } = marketData;
+        const { mode, symbol, price, indicators, patterns, reasons, warnings, marketData: globalMarketData } = inputData;
 
-        // Construir prompt para Gemini
-        const prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot (comprar bajo, vender alto).
+        let prompt = '';
 
-Analiza la siguiente oportunidad de trading:
+        if (mode === 'MARKET_ORACLE') {
+            // PROMPT FOR MARKET ORACLE (MACRO ANALYSIS)
+            const { topCoins, volume24h, dominance } = globalMarketData || {};
 
-**Criptomoneda**: ${symbol}
-**Precio Actual**: $${price}
+            prompt = `Eres un estratega jefe de mercado de criptomonedas (Chief Market Strategist).
+            Tu trabajo es analizar la "Salud del Mercado" global y dar una directriz clara para el día.
 
-**Indicadores Técnicos**:
-- RSI: ${indicators.rsi || 'N/A'}
-- MACD: ${indicators.macd || 'N/A'}
-- Posición en Bandas de Bollinger: ${indicators.bbPosition || 'N/A'}
+            DATOS DEL MERCADO GLOBAL (Top Assets):
+            ${JSON.stringify(topCoins, null, 2)}
 
-**Patrones Detectados**: ${patterns && patterns.length > 0 ? patterns.join(', ') : 'Ninguno'}
+            Tu tarea:
+            1. Analizar el SENTIMIENTO GENERAL (¿Están subiendo las alts? ¿Bitcoin está absorbiendo liquidez? ¿Hay miedo?).
+            2. Definir el ESTADO DEL MERCADO:
+               - RISK_ON: Todo sube, buscar longs agresivos.
+               - RISK_OFF: Todo baja, buscar shorts o cash.
+               - CHOPPY: Rango/Indecisión, cuidado con falsos breakouts.
+               - ALT_SEASON: BTC estable/baja, Alts vuelan.
+            3. Redactar un TITULAR periodístico corto e impactante.
+            4. Escribir un RESUMEN narrativo de 2 frases explicando el "Por qué".
 
-**Razones para Compra**:
-${reasons.map(r => `- ${r}`).join('\n')}
+            Responde SOLO con este JSON:
+            {
+              "marketState": "RISK_ON / RISK_OFF / CHOPPY / ALT_SEASON",
+              "headline": "Titular corto y directo (max 6 palabras)",
+              "summary": "Resumen narrativo del estado del mercado (max 2 frases).",
+              "strategy": "BREAKOUTS / DIPS / SCALPING / WAIT",
+              "sentimentScore": 0-100 (0=Pánico Extremo, 100=Euforia)
+            }`;
 
-${warnings && warnings.length > 0 ? `**Advertencias**:\n${warnings.map(w => `- ${w}`).join('\n')}` : ''}
+        } else {
+            // STANDARD PROMPT (SINGLE ASSET)
+            prompt = `Eres un experto analista de trading de criptomonedas especializado en day trading en spot (comprar bajo, vender alto).
 
-Proporciona un análisis conciso en formato JSON con la siguiente estructura:
-{
-  "sentiment": "BULLISH/NEUTRAL/BEARISH",
-  "recommendation": "STRONG_BUY/BUY/HOLD/AVOID",
-  "insights": ["insight1", "insight2", "insight3"],
-  "riskAssessment": "LOW/MEDIUM/HIGH",
-  "reasoning": "Step-by-step reasoning explaining the recommendation"
-}
+            Analiza la siguiente oportunidad de trading:
 
-Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "reasoning" con tu proceso de pensamiento.`;
+            **Criptomoneda**: ${symbol}
+            **Precio Actual**: $${price}
+
+            **Indicadores Técnicos**:
+            - RSI: ${indicators?.rsi || 'N/A'}
+            - MACD: ${indicators?.macd || 'N/A'}
+            - Posición en Bandas de Bollinger: ${indicators?.bbPosition || 'N/A'}
+
+            **Patrones Detectados**: ${patterns && patterns.length > 0 ? patterns.join(', ') : 'Ninguno'}
+
+            **Razones para Compra**:
+            ${reasons ? reasons.map(r => `- ${r}`).join('\n') : 'N/A'}
+
+            ${warnings && warnings.length > 0 ? `**Advertencias**:\n${warnings.map(w => `- ${w}`).join('\n')}` : ''}
+
+            Proporciona un análisis conciso en formato JSON con la siguiente estructura:
+            {
+              "sentiment": "BULLISH/NEUTRAL/BEARISH",
+              "recommendation": "STRONG_BUY/BUY/HOLD/AVOID",
+              "insights": ["insight1", "insight2", "insight3"],
+              "riskAssessment": "LOW/MEDIUM/HIGH",
+              "reasoning": "Step-by-step reasoning explaining the recommendation"
+            }
+
+            Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "reasoning" con tu proceso de pensamiento.`;
+        }
 
         // Llamar a Gemini API (usando formato correcto según documentación oficial)
-        // Actualizado a Gemini 3.0 Flash Preview para mayor velocidad y razonamiento
+        // Usamos Gemini 2.0 Flash (Stable)
         const response = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash-preview:generateContent',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
             {
                 method: 'POST',
                 headers: {

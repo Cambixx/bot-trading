@@ -1,10 +1,16 @@
+import { useState, useEffect } from 'react'; // Ensure React hooks are imported
 import { motion } from 'framer-motion';
 import { LayoutDashboard, TrendingUp, Zap } from 'lucide-react';
 import CryptoSelector from '../components/CryptoSelector';
 import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
 import MLSignalSection from '../components/MLSignalSection';
+import MarketOracle from '../components/MarketOracle'; // Import Oracle
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
+
+// Services
+import binanceService from '../services/binanceService';
+import { getMarketOracleAnalysis } from '../services/aiAnalysis';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -38,6 +44,63 @@ function Dashboard({
     loading,
     handleSimulateBuy
 }) {
+    const [oracleData, setOracleData] = useState(null);
+    const [oracleLoading, setOracleLoading] = useState(true);
+
+    // Fetch Market Oracle Data (Once on mount)
+    useEffect(() => {
+        const fetchOracleData = async () => {
+            try {
+                // 1. Get Top 5 Coins by Volume for Market Breadth
+                const topSymbols = await binanceService.getTopCryptosByVolume(5);
+
+                // 2. Get 24h Stats for these coins
+                const statsPromises = topSymbols.map(sym => binanceService.getCurrentPrice(sym));
+                const topStats = await Promise.all(statsPromises);
+
+                // 3. Prepare data for AI
+                const marketInput = topStats.map(s => ({
+                    symbol: s.symbol,
+                    change: s.priceChangePercent + '%',
+                    vol: (s.quoteVolume24h / 1000000).toFixed(1) + 'M'
+                }));
+
+                // 4. Call AI (Check if we have cached data first? Service handles it if we implement cache there, 
+                // but for now let's rely on component state to not re-fetch on re-renders)
+                // Note: In a real app we'd cache this longer key in localStorage or Service.
+
+                // Check LocalStorage cache for Oracle to save tokens
+                const cachedOracle = localStorage.getItem('oracle_cache');
+                const cachedTimestamp = localStorage.getItem('oracle_timestamp');
+                const NOW = Date.now();
+                const CACHE_DURATION = 60 * 60 * 1000; // 1 Hour
+
+                if (cachedOracle && cachedTimestamp && (NOW - Number(cachedTimestamp) < CACHE_DURATION)) {
+                    console.log('🔮 Using Cached Oracle Data');
+                    setOracleData(JSON.parse(cachedOracle));
+                    setOracleLoading(false);
+                } else {
+                    console.log('🔮 Fetching New Oracle Analysis...');
+                    const aiResult = await getMarketOracleAnalysis(marketInput);
+
+                    if (aiResult.success && aiResult.analysis) {
+                        setOracleData(aiResult.analysis);
+                        // Save to cache
+                        localStorage.setItem('oracle_cache', JSON.stringify(aiResult.analysis));
+                        localStorage.setItem('oracle_timestamp', String(NOW));
+                    }
+                    setOracleLoading(false);
+                }
+
+            } catch (error) {
+                console.error('Error fetching Oracle data:', error);
+                setOracleLoading(false);
+            }
+        };
+
+        fetchOracleData();
+    }, []); // Empty dependency array -> Run once on mount
+
     return (
         <motion.div
             initial="hidden"
@@ -45,6 +108,11 @@ function Dashboard({
             variants={containerVariants}
             className="dashboard-page"
         >
+            {/* Market Oracle Hero Section */}
+            <motion.div variants={itemVariants}>
+                <MarketOracle analysis={oracleData} loading={oracleLoading} />
+            </motion.div>
+
             {/* Crypto Selector */}
             <motion.div variants={itemVariants}>
                 <CryptoSelector
