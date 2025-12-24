@@ -123,17 +123,6 @@ function Dashboard({
                 />
             </motion.div>
 
-            {/* AI Tools Section: Doctor + Hunter */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                <motion.div variants={itemVariants}>
-                    <TradeDoctor defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <PatternHunter defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                </motion.div>
-            </div>
-
             {/* Crypto Prices Dashboard */}
             <motion.section variants={itemVariants} className="dashboard-section">
                 <div className="section-header">
@@ -152,6 +141,17 @@ function Dashboard({
                     )}
                 </div>
             </motion.section>
+
+            {/* AI Tools Section: Doctor + Hunter */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                <motion.div variants={itemVariants}>
+                    <TradeDoctor defaultSymbol={symbols[0]} availableSymbols={symbols} />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <PatternHunter defaultSymbol={symbols[0]} availableSymbols={symbols} />
+                </motion.div>
+            </div>
 
             <motion.div variants={itemVariants}>
                 <MLSignalSection signals={mlSignals} loading={loading} />
