@@ -187,41 +187,37 @@ Responde SOLO con el JSON, sin texto adicional. Asegúrate de incluir el campo "
             // Fallback on Rate Limit
             if (response.status === 429) {
                 console.warn('⚠️ Gemini Rate Limit Hit (429). Using Fallback.');
+                let fallbackAnalysis = null;
+
                 if (mode === 'MARKET_ORACLE') {
-                    return {
-                        success: true,
-                        analysis: {
-                            marketState: 'CHOPPY',
-                            headline: 'Market Analysis Paused',
-                            summary: 'High demand on AI services. Market data suggests mixed signals. Proceed with caution.',
-                            strategy: 'WAIT',
-                            sentimentScore: 50
-                        },
-                        timestamp: new Date().toISOString()
+                    fallbackAnalysis = {
+                        marketState: 'CHOPPY',
+                        headline: 'Market Analysis Paused',
+                        summary: 'High demand on AI services. System cooling down. Proceed with caution.',
+                        strategy: 'WAIT',
+                        sentimentScore: 50
                     };
                 } else if (mode === 'TRADE_DOCTOR') {
-                    return {
-                        success: true,
-                        analysis: {
-                            diagnosis: "System Overload",
-                            symptoms: ["API Rate Limit Hit", "High Traffic"],
-                            prescription: "Wait 60 seconds and retry diagnostic.",
-                            prognosis: "Temporary congestion",
-                            healthScore: 50
-                        },
-                        timestamp: new Date().toISOString()
+                    fallbackAnalysis = {
+                        diagnosis: "System Overload",
+                        symptoms: ["API Rate Limit Hit", "High Traffic"],
+                        prescription: "Wait 60 seconds and retry diagnostic.",
+                        prognosis: "Temporary congestion",
+                        healthScore: 50
                     };
                 } else if (mode === 'PATTERN_HUNTER') {
-                    return {
-                        success: true,
-                        analysis: {
-                            detected: false,
-                            patterns: [],
-                            summary: "Radar jammed (Rate Limit). Retrying scan..."
-                        },
-                        timestamp: new Date().toISOString()
+                    fallbackAnalysis = {
+                        detected: false,
+                        patterns: [],
+                        summary: "Radar jammed (Rate Limit). Retrying scan..."
                     };
                 }
+
+                return {
+                    success: true,
+                    analysis: fallbackAnalysis,
+                    timestamp: new Date().toISOString()
+                };
             }
             const errorData = await response.text();
             throw new Error(`Gemini API failed: ${response.status} ${response.statusText}`);
