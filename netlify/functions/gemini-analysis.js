@@ -195,7 +195,7 @@ export async function handler(event, context) {
         // Llamar a Gemini API (usando formato correcto según documentación oficial)
         // Usamos Gemini 2.0 Flash (Stable)
         const response = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
             {
                 method: 'POST',
                 headers: {
