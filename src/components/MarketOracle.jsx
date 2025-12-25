@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, TrendingUp, TrendingDown, Activity, AlertTriangle, CloudRain, Sun, Zap } from 'lucide-react';
+import { Brain, TrendingUp, TrendingDown, Activity, AlertTriangle, CloudRain, Sun, Zap, RefreshCw } from 'lucide-react';
 import './MarketOracle.css';
 
-const MarketOracle = ({ analysis, loading }) => {
+const MarketOracle = ({ analysis, loading, onRefresh }) => {
     // Definir configuración visual según el estado del mercado
     const getStateConfig = (state) => {
         switch (state) {
@@ -75,6 +75,14 @@ const MarketOracle = ({ analysis, loading }) => {
                         <Brain size={18} className="text-gradient" />
                     </div>
                     <span className="oracle-name">THE MARKET ORACLE</span>
+                    <button
+                        className={`oracle-refresh-btn ${loading ? 'loading' : ''}`}
+                        onClick={onRefresh}
+                        disabled={loading}
+                        title="Actualizar análisis (consume créditos)"
+                    >
+                        <RefreshCw size={14} />
+                    </button>
                 </div>
 
                 <div className="sentiment-meter">

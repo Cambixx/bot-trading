@@ -51,7 +51,7 @@ function Dashboard({
 
     // Fetch Market Oracle Data (Once on mount)
     useEffect(() => {
-        const fetchOracleData = async () => {
+        const initOracle = async () => {
             try {
                 // 1. Get Top 5 Coins by Volume for Market Breadth
                 const topSymbols = await binanceService.getTopCryptosByVolume(5);
@@ -75,27 +75,47 @@ function Dashboard({
                 const cachedOracle = localStorage.getItem('oracle_cache_v2');
                 const cachedTimestamp = localStorage.getItem('oracle_timestamp_v2');
                 const NOW = Date.now();
-                const CACHE_DURATION = 60 * 60 * 1000; // 1 Hour
+                const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 Hours
+
+                // Define refresh function (moved inside to have access to setOracleData)
+                window.refreshOracle = async () => {
+                    setOracleLoading(true);
+                    try {
+                        console.log('🔮 Fetching Fresh Market Data & AI Analysis...');
+
+                        // 1. Get Fresh Top 5 Coins
+                        const freshTopSymbols = await binanceService.getTopCryptosByVolume(5);
+                        const statsPromises = freshTopSymbols.map(sym => binanceService.getCurrentPrice(sym));
+                        const freshStats = await Promise.all(statsPromises);
+
+                        const freshInput = freshStats.map(s => ({
+                            symbol: s.symbol,
+                            change: s.priceChangePercent + '%',
+                            vol: (s.quoteVolume24h / 1000000).toFixed(1) + 'M'
+                        }));
+
+                        const aiResult = await getMarketOracleAnalysis(freshInput);
+                        if (aiResult.success && aiResult.analysis) {
+                            setOracleData(aiResult.analysis);
+                            localStorage.setItem('oracle_cache_v2', JSON.stringify(aiResult.analysis));
+                            localStorage.setItem('oracle_timestamp_v2', String(Date.now()));
+                        }
+                    } catch (error) {
+                        console.error('Error refreshing Oracle:', error);
+                    }
+                    setOracleLoading(false);
+                };
 
                 if (cachedOracle && cachedTimestamp && (NOW - Number(cachedTimestamp) < CACHE_DURATION)) {
                     console.log('🔮 Using Cached Oracle Data');
                     setOracleData(JSON.parse(cachedOracle));
                     setOracleLoading(false);
                 } else {
-                    console.log('🔮 Fetching New Oracle Analysis...');
-                    const aiResult = await getMarketOracleAnalysis(marketInput);
-
-                    if (aiResult.success && aiResult.analysis) {
-                        setOracleData(aiResult.analysis);
-                        // Save to cache
-                        localStorage.setItem('oracle_cache_v2', JSON.stringify(aiResult.analysis));
-                        localStorage.setItem('oracle_timestamp_v2', String(NOW));
-                    }
-                    setOracleLoading(false);
+                    await window.refreshOracle();
                 }
 
             } catch (error) {
-                console.error('Error fetching Oracle data:', error);
+                console.error('Error fetching Oracle initial data:', error);
                 setOracleData({
                     marketState: 'CHOPPY',
                     headline: 'Oracle Connection Failed',
@@ -107,7 +127,7 @@ function Dashboard({
             }
         };
 
-        fetchOracleData();
+        initOracle();
     }, []); // Empty dependency array -> Run once on mount
 
     return (
@@ -127,7 +147,11 @@ function Dashboard({
 
             {/* 2. Market Oracle (Macro Analysis) */}
             <motion.div variants={itemVariants}>
-                <MarketOracle analysis={oracleData} loading={oracleLoading} />
+                <MarketOracle
+                    analysis={oracleData}
+                    loading={oracleLoading}
+                    onRefresh={() => window.refreshOracle && window.refreshOracle()}
+                />
             </motion.div>
 
             {/* 3. AI Tools Section: Doctor + Hunter */}
