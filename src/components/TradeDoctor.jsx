@@ -153,20 +153,20 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
                             <div className="symptoms-box">
                                 <div className="box-title"><AlertCircle size={14} /> SYMPTOMS</div>
                                 <ul>
-                                    {report.symptoms.map((sym, i) => (
+                                    {report.symptoms && report.symptoms.map ? report.symptoms.map((sym, i) => (
                                         <li key={i}>{sym}</li>
-                                    ))}
+                                    )) : <li>No symptoms detailed.</li>}
                                 </ul>
                             </div>
 
                             <div className="prescription-box">
                                 <div className="box-title"><FileText size={14} /> PRESCRIPTION</div>
-                                <p>{report.prescription}</p>
+                                <p>{report.prescription || "No prescription available."}</p>
                             </div>
 
                             <div className="prognosis-box">
                                 <div className="box-title"><Thermometer size={14} /> PROGNOSIS (4H)</div>
-                                <p>{report.prognosis}</p>
+                                <p>{report.prognosis || "No prognosis available."}</p>
                             </div>
                         </div>
 

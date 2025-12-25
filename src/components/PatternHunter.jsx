@@ -100,7 +100,7 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
                             <p>{result.summary}</p>
                         </div>
 
-                        {result.detected && result.patterns.length > 0 ? (
+                        {result.detected && result.patterns && result.patterns.length > 0 ? (
                             <div className="patterns-list">
                                 {result.patterns.map((pat, idx) => (
                                     <motion.div
