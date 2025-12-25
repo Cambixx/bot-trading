@@ -72,8 +72,8 @@ function Dashboard({
                 // Note: In a real app we'd cache this longer key in localStorage or Service.
 
                 // Check LocalStorage cache for Oracle to save tokens
-                const cachedOracle = localStorage.getItem('oracle_cache');
-                const cachedTimestamp = localStorage.getItem('oracle_timestamp');
+                const cachedOracle = localStorage.getItem('oracle_cache_v2');
+                const cachedTimestamp = localStorage.getItem('oracle_timestamp_v2');
                 const NOW = Date.now();
                 const CACHE_DURATION = 60 * 60 * 1000; // 1 Hour
 
@@ -88,14 +88,21 @@ function Dashboard({
                     if (aiResult.success && aiResult.analysis) {
                         setOracleData(aiResult.analysis);
                         // Save to cache
-                        localStorage.setItem('oracle_cache', JSON.stringify(aiResult.analysis));
-                        localStorage.setItem('oracle_timestamp', String(NOW));
+                        localStorage.setItem('oracle_cache_v2', JSON.stringify(aiResult.analysis));
+                        localStorage.setItem('oracle_timestamp_v2', String(NOW));
                     }
                     setOracleLoading(false);
                 }
 
             } catch (error) {
                 console.error('Error fetching Oracle data:', error);
+                setOracleData({
+                    marketState: 'CHOPPY',
+                    headline: 'Oracle Connection Failed',
+                    summary: 'Unable to reach AI services. Displaying offline data.',
+                    strategy: 'WAIT',
+                    sentimentScore: 50
+                });
                 setOracleLoading(false);
             }
         };

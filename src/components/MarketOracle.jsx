@@ -51,10 +51,16 @@ const MarketOracle = ({ analysis, loading }) => {
         );
     }
 
-    if (!analysis) return null; // Si no hay datos y no carga, no mostrar nada (o mostrar error)
+    const safeAnalysis = analysis || {
+        marketState: 'CHOPPY',
+        headline: 'Oracle Offline',
+        summary: 'Waiting for market data connection...',
+        strategy: 'WAIT',
+        sentimentScore: 50
+    };
 
-    const { marketState, headline, summary, strategy, sentimentScore } = analysis;
-    const config = getStateConfig(marketState);
+    const { marketState, headline, summary, strategy, sentimentScore } = safeAnalysis;
+    const config = getStateConfig(marketState || 'CHOPPY');
 
     return (
         <motion.div
