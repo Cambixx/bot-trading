@@ -261,4 +261,27 @@
     .report-grid {
         grid-template-columns: 1fr;
     }
+
+    .report-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .diagnosis-main h4 {
+        font-size: 1.2rem;
+    }
+
+    .doctor-header {
+        padding: 1rem;
+    }
+
+    .doctor-identity {
+        gap: 0.5rem;
+    }
+
+    .doctor-identity h3 {
+        font-size: 0.9rem;
+    }
 }
