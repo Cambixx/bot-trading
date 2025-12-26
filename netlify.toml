@@ -11,9 +11,8 @@
   external_node_modules = ["axios"]
 
 # Scheduled function for automatic trading signal analysis
-[[scheduled_functions]]
-  function = "scheduled-analysis"
-  cron = "*/20 * * * *"
+[functions."scheduled-analysis"]
+  schedule = "*/30 * * * *"
 
 [[redirects]]
   from = "/api/check-analysis"
