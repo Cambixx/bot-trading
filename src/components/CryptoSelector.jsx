@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Star, Plus, X, TrendingUp, Zap, ChevronDown } from 'lucide-react';
+import { Search, Star, Plus, X, TrendingUp, Zap, ChevronDown, Monitor, Smartphone } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import binanceService from '../services/binanceService';
 import './CryptoSelector.css';
@@ -13,8 +13,16 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
     const [loading, setLoading] = useState(false);
     const [scanning, setScanning] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const selectorRef = useRef(null);
     const { watchlist, toggleWatchlist, isFavorite } = useSettings();
+
+    // Detección de Mobile
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleSmartScan = async () => {
         if (scanning) return;
@@ -36,7 +44,7 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
             loadAvailablePairs();
         }
 
-        if (showDropdown && selectorRef.current) {
+        if (showDropdown && selectorRef.current && !isMobile) {
             const rect = selectorRef.current.getBoundingClientRect();
             setDropdownPosition({
                 top: rect.bottom + 8,
@@ -44,7 +52,7 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
                 width: rect.width
             });
         }
-    }, [showDropdown]);
+    }, [showDropdown, isMobile]);
 
     const loadAvailablePairs = async () => {
         setLoading(true);
@@ -62,7 +70,7 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
             onSymbolsChange([...selectedSymbols, symbol]);
         }
         setSearchTerm('');
-        setShowDropdown(false);
+        if (!isMobile) setShowDropdown(false);
     };
 
     const handleRemoveSymbol = (symbol) => {
@@ -78,27 +86,69 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
         pair.symbol.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // Componente de Lista de Pares (Reutilizable)
+    const PairsList = () => (
+        <div className="pairs-scroll-area">
+            {loading ? (
+                <div className="loading-dropdown">
+                    <div className="drop-loader" />
+                    <span>Actualizando activos...</span>
+                </div>
+            ) : filteredPairs.length === 0 ? (
+                <div className="no-pairs">No se encontraron activos</div>
+            ) : (
+                <div className="pairs-grid-mini">
+                    {filteredPairs.map(pair => {
+                        const isSelected = selectedSymbols.includes(pair.symbol);
+                        return (
+                            <motion.div
+                                whileHover={!isSelected ? { scale: 1.02, y: -2 } : {}}
+                                whileTap={!isSelected ? { scale: 0.98 } : {}}
+                                key={pair.symbol}
+                                className={`pair-row ${isSelected ? 'selected' : ''}`}
+                                onClick={() => !isSelected && handleAddSymbol(pair.symbol)}
+                            >
+                                <div className="pair-info">
+                                    <span className="b-asset">{pair.baseAsset}</span>
+                                    <span className="q-asset">/{pair.quoteAsset}</span>
+                                </div>
+                                {isSelected ? (
+                                    <div className="selected-dot" />
+                                ) : (
+                                    <Plus size={14} className="add-plus" />
+                                )}
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="crypto-selector-container">
             <div className="crypto-selector glass-card" ref={selectorRef}>
                 <div className="selector-header">
                     <div className="selector-title">
                         <div className="title-icon-box">
-                            <TrendingUp size={16} />
+                            <TrendingUp size={20} />
                         </div>
-                        <h3>Monitoreo</h3>
-                        <span className="count-badge">{selectedSymbols.length}</span>
+                        <div className="title-text">
+                            <h3>Monitoreo</h3>
+                            <span className="count-badge">{selectedSymbols.length} Activos</span>
+                        </div>
                     </div>
 
                     <div className="selector-actions">
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className={`action-btn scan-btn ${scanning ? 'scanning' : ''}`}
+                            className={`action-btn scan-btn ${scanning ? 'active' : ''}`}
                             onClick={handleSmartScan}
                             disabled={scanning}
+                            title="Escaneo Inteligente"
                         >
-                            <Zap size={14} className={scanning ? 'spin' : ''} />
+                            <Zap size={16} className={scanning ? 'spin' : ''} />
                             <span>Scan</span>
                         </motion.button>
 
@@ -107,8 +157,9 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
                             whileTap={{ scale: 0.95 }}
                             className={`action-btn fav-btn ${showFavoritesOnly ? 'active' : ''}`}
                             onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                            title="Ver Favoritos"
                         >
-                            <Star size={14} fill={showFavoritesOnly ? 'currentColor' : 'none'} />
+                            <Star size={16} fill={showFavoritesOnly ? 'currentColor' : 'none'} />
                         </motion.button>
 
                         <motion.button
@@ -117,19 +168,21 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
                             className="btn-add-main"
                             onClick={() => setShowDropdown(!showDropdown)}
                         >
-                            <Plus size={14} />
+                            <Plus size={18} />
                             <span>Agregar</span>
                         </motion.button>
                     </div>
                 </div>
 
                 <div className="selected-symbols-grid">
-                    <AnimatePresence>
+                    <AnimatePresence mode="popLayout">
                         {displayedSymbols.length === 0 ? (
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
                                 className="empty-selection"
+                                key="empty"
                             >
                                 <p>No hay activos {showFavoritesOnly ? 'favoritos' : 'monitoreados'}</p>
                             </motion.div>
@@ -147,14 +200,14 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
                                         className={`favorite-toggle ${isFavorite(symbol) ? 'active' : ''}`}
                                         onClick={() => toggleWatchlist(symbol)}
                                     >
-                                        <Star size={12} fill={isFavorite(symbol) ? 'currentColor' : 'none'} />
+                                        <Star size={14} fill={isFavorite(symbol) ? 'currentColor' : 'none'} />
                                     </button>
                                     <span className="pill-name">{(symbol || '').replace('USDC', '').replace('USDT', '')}</span>
                                     <button
                                         className="pill-remove"
                                         onClick={() => handleRemoveSymbol(symbol)}
                                     >
-                                        <X size={12} />
+                                        <X size={14} />
                                     </button>
                                 </motion.div>
                             ))
@@ -165,67 +218,77 @@ function CryptoSelector({ selectedSymbols, onSymbolsChange }) {
 
             <AnimatePresence>
                 {showDropdown && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className="selector-dropdown-premium"
-                        style={{
-                            top: `${dropdownPosition.top}px`,
-                            left: `${dropdownPosition.left}px`,
-                            width: `${dropdownPosition.width}px`
-                        }}
-                    >
-                        <div className="dropdown-search">
-                            <Search size={16} className="search-icon" />
-                            <input
-                                type="text"
-                                placeholder="Busca un activo (BTC, ETH...)"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                autoFocus
-                            />
-                            <button className="close-btn" onClick={() => setShowDropdown(false)}>
-                                <X size={16} />
-                            </button>
-                        </div>
-
-                        <div className="pairs-scroll-area">
-                            {loading ? (
-                                <div className="loading-dropdown">
-                                    <div className="drop-loader" />
-                                    <span>Actualizando activos...</span>
+                    <>
+                        {isMobile ? (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="mobile-drawer-overlay"
+                                    onClick={() => setShowDropdown(false)}
+                                />
+                                <motion.div
+                                    initial={{ y: '100%' }}
+                                    animate={{ y: 0 }}
+                                    exit={{ y: '100%' }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                    className="mobile-drawer"
+                                >
+                                    <div className="drawer-handle" />
+                                    <div className="dropdown-search">
+                                        <div className="search-input-wrapper">
+                                            <Search size={18} />
+                                            <input
+                                                type="text"
+                                                placeholder="Busca un activo..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                autoFocus
+                                            />
+                                        </div>
+                                        <button className="action-btn" onClick={() => setShowDropdown(false)}>
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                    <PairsList />
+                                </motion.div>
+                            </>
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                className="selector-dropdown-premium"
+                                style={{
+                                    top: `${dropdownPosition.top}px`,
+                                    left: `${dropdownPosition.left}px`,
+                                    width: `${dropdownPosition.width}px`
+                                }}
+                            >
+                                <div className="dropdown-search">
+                                    <div className="search-input-wrapper">
+                                        <Search size={16} />
+                                        <input
+                                            type="text"
+                                            placeholder="Busca un activo (BTC, ETH...)"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <button className="action-btn" onClick={() => setShowDropdown(false)}>
+                                        <X size={16} />
+                                    </button>
                                 </div>
-                            ) : filteredPairs.length === 0 ? (
-                                <div className="no-pairs">No se encontraron activos</div>
-                            ) : (
-                                <div className="pairs-grid-mini">
-                                    {filteredPairs.map(pair => (
-                                        <motion.div
-                                            whileHover={{ x: 4 }}
-                                            key={pair.symbol}
-                                            className={`pair-row ${selectedSymbols.includes(pair.symbol) ? 'selected' : ''}`}
-                                            onClick={() => !selectedSymbols.includes(pair.symbol) && handleAddSymbol(pair.symbol)}
-                                        >
-                                            <div className="pair-info">
-                                                <span className="b-asset">{pair.baseAsset}</span>
-                                                <span className="q-asset">/{pair.quoteAsset}</span>
-                                            </div>
-                                            {selectedSymbols.includes(pair.symbol) ? (
-                                                <div className="selected-dot" />
-                                            ) : (
-                                                <Plus size={14} className="add-plus" />
-                                            )}
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
+                                <PairsList />
+                            </motion.div>
+                        )}
+                    </>
                 )}
             </AnimatePresence>
 
-            {showDropdown && (
+            {showDropdown && !isMobile && (
                 <div className="dropdown-backdrop" onClick={() => setShowDropdown(false)} />
             )}
         </div>
