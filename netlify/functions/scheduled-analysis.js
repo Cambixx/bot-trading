@@ -22,9 +22,9 @@ const MEXC_API = 'https://api.mexc.com/api/v3';
 // Top 20 Liquidity Coins (Sniper Focus)
 const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX',
-  'TRX', 'LINK', 'DOT', 'MATIC', 'LTC', 'BCH', 'UNI',
-  'APT', 'NEAR', 'FIL', 'ATOM', 'ARB', 'OP', 'NEAR', 'HBAR',
-  'PEPE', 'ORDI', 'WIF', 'FET', 'RNDR', 'SUI', 'SEI', 'INJ',
+  'TRX', 'LINK', 'DOT', 'POL', 'LTC', 'BCH', 'UNI',
+  'APT', 'NEAR', 'FIL', 'ATOM', 'ARB', 'OP', 'HBAR',
+  'PEPE', 'ORDI', 'WIF', 'FET', 'RENDER', 'SUI', 'SEI', 'INJ',
   'TIA', 'BONK', 'PYTH', 'JUP', 'DYM', 'STRK', 'ENA', 'W', 'TNSR'
 ];
 
