@@ -534,12 +534,17 @@ async function runAnalysis() {
     }
   }
 
-  console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
+  console.log('--------------------------------------------------');
+  console.log(`📊 RESUMEN FINAL:`);
+  console.log(`✅ Monedas Analizadas: ${analyzed}`);
+  console.log(`🎯 Señales Encontradas: ${signals.length}`);
+  console.log(`❌ Errores: ${errors}`);
+  console.log('--------------------------------------------------');
 
   if (signals.length > 0) {
     await sendTelegramNotification(signals);
   } else {
-    console.log('No Sniper Signals found this run.');
+    console.log('ℹ️ No se encontraron señales en esta ejecución.');
   }
 
   return {
