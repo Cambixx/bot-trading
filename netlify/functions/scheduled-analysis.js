@@ -23,7 +23,9 @@ const MEXC_API = 'https://api.mexc.com/api/v3';
 const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX',
   'TRX', 'LINK', 'DOT', 'MATIC', 'LTC', 'BCH', 'UNI',
-  'APT', 'NEAR', 'FIL', 'ATOM', 'ARB'
+  'APT', 'NEAR', 'FIL', 'ATOM', 'ARB', 'OP', 'NEAR', 'HBAR',
+  'PEPE', 'ORDI', 'WIF', 'FET', 'RNDR', 'SUI', 'SEI', 'INJ',
+  'TIA', 'BONK', 'PYTH', 'JUP', 'DYM', 'STRK', 'ENA', 'W', 'TNSR'
 ];
 
 // ==================== HELPERS ====================
@@ -208,11 +210,12 @@ function calculateADX(candles, period = 14) {
     }
   }
 
-  // Smoothed averages
+  // Smoothed averages (Wilder's Smoothing)
   const smooth = (data, p) => {
     let smoothed = [data.slice(0, p).reduce((a, b) => a + b, 0)];
     for (let i = p; i < data.length; i++) {
-      smoothed.push(smoothed[i - 1] - (smoothed[i - 1] / p) + data[i]);
+      const prev = smoothed[smoothed.length - 1];
+      smoothed.push(prev - (prev / p) + data[i]);
     }
     return smoothed;
   };
@@ -223,6 +226,10 @@ function calculateADX(candles, period = 14) {
 
   const dx = [];
   for (let i = 0; i < trSmooth.length; i++) {
+    if (trSmooth[i] === 0) {
+      dx.push(0);
+      continue;
+    }
     const diPlus = (dmPlusSmooth[i] / trSmooth[i]) * 100;
     const diMinus = (dmMinusSmooth[i] / trSmooth[i]) * 100;
     const sum = diPlus + diMinus;
@@ -272,9 +279,16 @@ function generateSniperSignal(symbol, candles1h, candles4h, candles1d) {
   const ema50_4h = calculateEMA(closes4h, 50);
   const structureTrend = price > ema200_4h ? 'BULLISH' : 'BEARISH';
 
-  // HARD GATE: Trend Alignment
-  if (dailyTrend !== structureTrend) return null; // No Conflict Allowed
-  const marketBias = dailyTrend; // 'BULLISH' or 'BEARISH'
+  // RELAXED GATE: Trend Alignment
+  // We prioritize it, but if 4H and 1H are aligned, we can signal even if 1D is contrary (Scalp mode)
+  let trendAlignmentScore = 0;
+  if (dailyTrend === structureTrend) {
+    trendAlignmentScore = 15; // Bonus for full alignment
+  } else {
+    trendAlignmentScore = -5; // Penalty for daily counter-trend
+  }
+
+  const marketBias = structureTrend; // Focus on 4H structure
 
   // 3. SETUPS
   // Indicators for 1H (Trigger)
@@ -295,24 +309,23 @@ function generateSniperSignal(symbol, candles1h, candles4h, candles1d) {
   let score = 0;
 
   // --- SETUP A: GOLDEN PULLBACK (Trend Continuation) ---
-  // Context: Strong Trend (ADX 4h > 20)
-  if (adx4h > 20) {
+  // Context: Emerging Trend (ADX 4h > 14) - Lowered from 18
+  if (adx4h > 14) {
     if (marketBias === 'BULLISH') {
       // Price dipping to 4H EMA 50 (Support Area)
       const distToEma50 = Math.abs(price - ema50_4h) / price;
-      const isNearSupport = distToEma50 < 0.015; // Within 1.5%
+      const isNearSupport = distToEma50 < 0.025; // Expanded from 1.5% to 2.5%
 
-      // Trigger: 1H Oversold
-      if (isNearSupport && rsi1h < 45) {
+      // Trigger: 1H Oversold or near oversold
+      if (isNearSupport && rsi1h < 48) {
         // Sniper Entry
         signal = 'BUY';
-        score = 85;
+        score = 75 + trendAlignmentScore; // Base lowered, but bonus possible
         reasons.push('🟢 Setup A: Golden Pullback');
-        reasons.push(`Trend fuerte (ADX 4H: ${adx4h.toFixed(1)})`);
-        reasons.push(`Rebote en EMA50 4H + RSI 1H Sobreventa (${rsi1h.toFixed(1)})`);
+        reasons.push(`Trend activo (ADX 4H: ${adx4h.toFixed(1)})`);
+        reasons.push(`Rebote en zona EMA50 4H + RSI 1H (${rsi1h.toFixed(1)})`);
       }
     }
-    // (Short setup logic omitted for spot, but can be added if needed)
   }
 
   // --- SETUP B: VOLATILITY BREAKOUT (Squeeze) ---
@@ -324,34 +337,53 @@ function generateSniperSignal(symbol, candles1h, candles4h, candles1d) {
     // Breakout Condition
     if (marketBias === 'BULLISH' && price > bb4h.upper) {
       // Confirmation: Volume + MACD
-      const isVolSpike = currentVolume > (volumeSMA * 1.5);
-      if (isVolSpike && macd1h.histogram > 0) {
+      const isVolSpike = currentVolume > (volumeSMA * 1.3); // Lowered from 1.5
+      if (isVolSpike && macd1h.histogram > -0.01) { // More permissive MACD
         signal = 'BUY';
-        score = 90;
+        score = 80 + trendAlignmentScore;
         reasons.push('🚀 Setup B: Volatility Breakout');
         reasons.push(`Squeeze 4H (Width: ${(bbWidth * 100).toFixed(2)}%)`);
-        reasons.push(`Ruptura con Volumen (x${(currentVolume / volumeSMA).toFixed(1)}) y MACD`);
+        reasons.push(`Ruptura con Volumen y MACD`);
       }
     }
   }
 
+  // --- SETUP C: EXTREME REVERSAL (Contratrend / Mean Reversion) ---
+  if (!signal && rsi1h < 26) {
+    // Trigger on extreme oversold regardless of daily trend
+    signal = 'BUY';
+    score = 70;
+    reasons.push('⚡ Setup C: Extreme Reversal');
+    reasons.push(`Sobreventa Extrema RSI 1H (${rsi1h.toFixed(1)})`);
+    reasons.push(`Posible rebote técnico por pánico`);
+  }
+
   // 4. RISK MANAGEMENT (THE SHIELD)
   if (signal) {
-    // Filter: Avoid Extreme Choppiness if not a breakout
-    if (!reasons[0].includes('Breakout') && adx1h < 15) return null;
+    // Score Gate
+    if (score < SIGNAL_SCORE_THRESHOLD) {
+      console.log(`[${symbol}] Signal rejected by score: ${score} < ${SIGNAL_SCORE_THRESHOLD}`);
+      return null;
+    }
+
+    // Filter: Avoid Extreme Choppiness if not a breakout/reversal
+    if (!reasons[0].includes('Breakout') && !reasons[0].includes('Reversal') && adx1h < 15) {
+      console.log(`[${symbol}] Rejected: Choppy ADX 1H (${adx1h.toFixed(1)})`);
+      return null;
+    }
 
     // Calculate Position Sizing Logic
-    const atr = calculateATR(candles4h, 14); // Use 4H ATR for wider safe stops
-    const stopLoss = price - (atr * 2.0); // 2 ATR Stop
+    const atr = calculateATR(candles4h, 14);
+    const stopLoss = price - (atr * 2.0);
     const risk = price - stopLoss;
-    const takeProfit = price + (risk * 2.5); // 2.5R Target
+    const takeProfit = price + (risk * 2.5);
 
     return {
       symbol,
       type: signal,
       price,
       score,
-      confidence: 'HIGH', // Sniper is always High confidence
+      confidence: score > 85 ? 'HIGH' : 'MEDIUM',
       reasons,
       levels: {
         entry: price,
@@ -374,8 +406,8 @@ async function processCoin(symbol) {
     // SNIPER DATA: 1H, 4H, 1D
     const [candles1h, candles4h, candles1d] = await Promise.all([
       getCandles(symbol, '60m', 200),
-      getCandles(symbol, '4h', 100),
-      getCandles(symbol, '1d', 50)
+      getCandles(symbol, '4h', 200), // Increased from 100
+      getCandles(symbol, '1d', 100)  // Increased from 50
     ]);
 
     const signal = generateSniperSignal(symbol, candles1h, candles4h, candles1d);
