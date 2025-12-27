@@ -567,4 +567,4 @@ async function runAnalysis() {
   };
 }
 
-export const handler = schedule('*/15 * * * *', runAnalysis);
+export const handler = schedule('*/30 * * * *', runAnalysis);
