@@ -447,28 +447,30 @@ export async function sendTelegramNotification(signals) {
     return { success: true, sent: 0 };
   }
 
-  let message = '🎯 *DAY TRADING SIGNAL* 🎯\n\n';
+  // Using HTML parse mode (much easier than MarkdownV2)
+  let message = '🎯 <b>DAY TRADING SIGNAL</b> 🎯\n\n';
 
   for (const sig of signals) {
     let icon = '🟢';
     if (sig.type === 'SELL') icon = '🔴';
 
-    message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| SCORE: ${sig.score}\n`;
-    message += `💰 Entry: \$${escapeMarkdownV2(String(sig.price.toFixed(4)))}\n`;
+    message += `${icon} <b>${sig.symbol}</b> | SCORE: ${sig.score}\n`;
+    message += `💰 Entry: $${sig.price.toFixed(4)}\n`;
 
     // Levels
     const levels = sig.levels;
-    message += `🛑 SL: \$${escapeMarkdownV2(String(levels.stopLoss))} \\(1\.5 ATR\\)\n`;
-    message += `🎯 TP: \$${escapeMarkdownV2(String(levels.takeProfit))} \\(2:1 R\\)\n`;
+    message += `🛑 SL: $${levels.stopLoss} (1.5 ATR)\n`;
+    message += `🎯 TP: $${levels.takeProfit} (2:1 R)\n`;
 
     // Indicators
     const inds = sig.indicators;
-    message += `📊 Trend: ${escapeMarkdownV2(inds.trend)} \\| RSI: ${escapeMarkdownV2(String(inds.rsi15m || inds.rsi || 0))} \\| ADX: ${escapeMarkdownV2(String(inds.adx))}\n`;
+    const rsiVal = inds.rsi15m || inds.rsi || 0;
+    message += `📊 Trend: ${inds.trend} | RSI: ${rsiVal} | ADX: ${inds.adx}\n`;
 
     // Reasons
-    message += `\n📝 _Logic:_\n`;
+    message += `\n📝 <i>Logic:</i>\n`;
     sig.reasons.forEach(r => {
-      message += `• ${escapeMarkdownV2(r)}\n`;
+      message += `• ${r}\n`;
     });
 
     message += `───────────────────\n`;
@@ -479,7 +481,7 @@ export async function sendTelegramNotification(signals) {
     minute: '2-digit',
     timeZone: 'Europe/Madrid'
   });
-  message += `🤖 _CryptoSniper Bot_ • ${escapeMarkdownV2(timeStr)}`;
+  message += `🤖 <i>Day Trading Bot</i> • ${timeStr}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -490,7 +492,7 @@ export async function sendTelegramNotification(signals) {
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text: message,
-        parse_mode: 'MarkdownV2'
+        parse_mode: 'HTML'
       })
     });
 
