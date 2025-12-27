@@ -257,6 +257,86 @@
     color: white;
 }
 
+/* Levels Box */
+.levels-box {
+    grid-column: span 2;
+    background: rgba(0, 255, 157, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid rgba(0, 255, 157, 0.2);
+}
+
+.levels-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.level-item {
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.level-item.entry {
+    border-bottom: 2px solid #00b4ff;
+}
+
+.level-item.stop {
+    border-bottom: 2px solid #ff4d4d;
+}
+
+.level-item.target {
+    border-bottom: 2px solid #00ff9d;
+}
+
+.level-label {
+    display: block;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.25rem;
+}
+
+.level-value {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+}
+
+/* Tradability Badge */
+.tradability-badge {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tradability-badge.high {
+    background: rgba(0, 255, 157, 0.2);
+    color: #00ff9d;
+    border: 1px solid rgba(0, 255, 157, 0.3);
+}
+
+.tradability-badge.medium {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.tradability-badge.low {
+    background: rgba(255, 77, 77, 0.2);
+    color: #ff4d4d;
+    border: 1px solid rgba(255, 77, 77, 0.3);
+}
+
 @media (max-width: 768px) {
     .report-grid {
         grid-template-columns: 1fr;

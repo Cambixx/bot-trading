@@ -18,12 +18,38 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
         setResult(null);
 
         try {
-            // Fetch candles
+            // Fetch OHLCV candles (not just close prices)
             const klines = await binanceService.getKlines(selectedSymbol, '1h', 60);
-            const closePrices = klines.map(k => k.close);
 
-            // Call AI
-            const response = await getPatternAnalysis(selectedSymbol, closePrices);
+            // Build structured OHLCV data for better pattern detection
+            const ohlcvData = klines.map(k => ({
+                open: k.open,
+                high: k.high,
+                low: k.low,
+                close: k.close,
+                volume: k.volume
+            }));
+
+            // Calculate volume context
+            const volumes = klines.map(k => k.volume);
+            const avgVolume = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
+            const recentVolume = volumes.slice(-5).reduce((a, b) => a + b, 0) / 5;
+            const volumeTrend = recentVolume > avgVolume ? 'INCREASING' : 'DECREASING';
+
+            // Current price context
+            const currentPrice = klines[klines.length - 1].close;
+            const priceRange = {
+                high24h: Math.max(...klines.slice(-24).map(k => k.high)),
+                low24h: Math.min(...klines.slice(-24).map(k => k.low)),
+                current: currentPrice
+            };
+
+            // Call AI with enhanced data
+            const response = await getPatternAnalysis(selectedSymbol, ohlcvData, {
+                volumeTrend,
+                avgVolume,
+                priceRange
+            });
 
             if (response.success && response.analysis) {
                 setResult(response.analysis);
@@ -115,6 +141,20 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
                                             <span className={`pat-conf ${pat.confidence.toLowerCase()}`}>{pat.confidence} Conf.</span>
                                         </div>
                                         <p className="pat-desc">{pat.description}</p>
+
+                                        {(pat.breakoutLevel || pat.target) && (
+                                            <div className="pat-levels-mini">
+                                                {pat.breakoutLevel && <div><span>Breakout:</span> {pat.breakoutLevel}</div>}
+                                                {pat.target && <div><span>Target:</span> {pat.target}</div>}
+                                                {pat.stopLoss && <div><span>SL:</span> {pat.stopLoss}</div>}
+                                            </div>
+                                        )}
+
+                                        {pat.volumeConfirmed !== undefined && (
+                                            <div className={`pat-volume-tag ${pat.volumeConfirmed ? 'confirmed' : 'unconfirmed'}`}>
+                                                {pat.volumeConfirmed ? '✓ Volume Confirmed' : '⚠ Low Volume'}
+                                            </div>
+                                        )}
                                     </motion.div>
                                 ))}
                             </div>
@@ -124,11 +164,31 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
                             </div>
                         )}
 
-                        {lastScan && (
-                            <div className="scan-timestamp">
-                                Last Scan: {lastScan.toLocaleTimeString()}
+                        {result.keyLevels && (
+                            <div className="hunter-key-levels">
+                                <div className="key-level">
+                                    <span className="lvl-label">Resistance</span>
+                                    <span className="lvl-val">{result.keyLevels.resistance}</span>
+                                </div>
+                                <div className="key-level">
+                                    <span className="lvl-label">Support</span>
+                                    <span className="lvl-val">{result.keyLevels.support}</span>
+                                </div>
                             </div>
                         )}
+
+                        <div className="hunter-footer-info">
+                            {result.actionable && (
+                                <div className={`action-badge ${result.actionable.toLowerCase()}`}>
+                                    Action: {result.actionable}
+                                </div>
+                            )}
+                            {lastScan && (
+                                <div className="scan-timestamp">
+                                    Last Scan: {lastScan.toLocaleTimeString()}
+                                </div>
+                            )}
+                        </div>
                     </motion.div>
                 )}
             </div>

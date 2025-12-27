@@ -243,6 +243,55 @@ class BinanceService {
   }
 
   /**
+   * Obtener estadísticas globales del mercado (Market Breadth)
+   * @returns {Promise<Object>} Datos globales del mercado
+   */
+  async getMarketBreadth() {
+    try {
+      const response = await axios.get(`${BINANCE_API_BASE}/ticker/24hr`);
+      const allTickers = response.data.filter(t => t.symbol.endsWith('USDC'));
+
+      if (allTickers.length === 0) return null;
+
+      // 1. Calcular Volumen Total USDC en Binance
+      const totalVolume = allTickers.reduce((sum, t) => sum + parseFloat(t.quoteVolume), 0);
+
+      // 2. Calcular Dominancia de BTC (basada en volumen en Binance como proxy)
+      const btcTicker = allTickers.find(t => t.symbol === 'BTCUSDC');
+      const btcVol = btcTicker ? parseFloat(btcTicker.quoteVolume) : 0;
+      const btcDominance = ((btcVol / totalVolume) * 100).toFixed(1);
+
+      // 3. Promedio de cambio del mercado (Top 20 por volumen)
+      const top20 = allTickers
+        .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+        .slice(0, 20);
+
+      const avgChange = top20.reduce((sum, t) => sum + parseFloat(t.priceChangePercent), 0) / top20.length;
+
+      // 4. Ganadores y Perdedores Extremos
+      const sortedByChange = [...allTickers].sort((a, b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent));
+      const topGainers = sortedByChange.slice(0, 5).map(t => ({ symbol: t.symbol, change: t.priceChangePercent }));
+      const topLosers = sortedByChange.slice(-5).reverse().map(t => ({ symbol: t.symbol, change: t.priceChangePercent }));
+
+      return {
+        btcDominance,
+        totalVolumeUSD: (totalVolume / 1000000).toFixed(1) + 'M',
+        marketAvgChange: avgChange.toFixed(2) + '%',
+        topGainers,
+        topLosers,
+        topCoins: top20.map(t => ({
+          symbol: t.symbol,
+          change: t.priceChangePercent + '%',
+          vol: (parseFloat(t.quoteVolume) / 1000000).toFixed(1) + 'M'
+        }))
+      };
+    } catch (error) {
+      console.error('Error fetching market breadth:', error.message);
+      return null;
+    }
+  }
+
+  /**
    * Obtener lista de todos los pares USDC disponibles
    * @returns {Promise<Array>} Array de objetos con symbol y baseAsset
    */

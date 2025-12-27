@@ -21,22 +21,28 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
     let prompt = '';
 
     if (mode === 'MARKET_ORACLE') {
-        const { topCoins } = globalMarketData || {};
+        const { topCoins, btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers } = globalMarketData || {};
+
         prompt = `Eres un estratega jefe de mercado de criptomonedas (Chief Market Strategist).
             Tu trabajo es analizar la "Salud del Mercado" global y dar una directriz clara para el día.
 
-            DATOS DEL MERCADO GLOBAL (Top Assets):
-            ${JSON.stringify(topCoins, null, 2)}
+            DATOS DEL MERCADO GLOBAL:
+            - Dominancia BTC: ${btcDominance}% (Si sube, BTC absorbe liquidez; si baja, dinero fluye a Alts)
+            - Volumen Total 24h: $${totalVolumeUSD}
+            - Cambio Promedio Mercado: ${marketAvgChange}
+            
+            GANADORES (Heat): ${topGainers?.map(g => `${g.symbol} (${g.change}%)`).join(', ')}
+            PERDEDORES: ${topLosers?.map(l => `${l.symbol} (${l.change}%)`).join(', ')}
+            
+            DETALLE TOP ASSETS:
+            ${JSON.stringify(topCoins?.slice(0, 10), null, 2)}
 
             Tu tarea:
-            1. Analizar el SENTIMIENTO GENERAL (¿Están subiendo las alts? ¿Bitcoin está absorbiendo liquidez? ¿Hay miedo?).
-            2. Definir el ESTADO DEL MERCADO:
-               - RISK_ON: Todo sube, buscar longs agresivos.
-               - RISK_OFF: Todo baja, buscar shorts o cash.
-               - CHOPPY: Rango/Indecisión, cuidado con falsos breakouts.
-               - ALT_SEASON: BTC estable/baja, Alts vuelan.
-            3. Redactar un TITULAR periodístico corto e impactante.
-            4. Escribir un RESUMEN narrativo de 2 frases explicando el "Por qué".
+            1. Analizar el SENTIMIENTO GENERAL: ¿Hay apetito por el riesgo (Risk-On) o miedo (Risk-Off)?
+            2. Definir el ESTADO DEL MERCADO: RISK_ON, RISK_OFF, CHOPPY, ALT_SEASON.
+            3. Redactar un TITULAR impactante basado en los datos.
+            4. Escribir un RESUMEN narrativo explicando el flujo de dinero (BTC vs Alts).
+            5. Sugerir 2-3 "MONEDAS A VIGILAR" hoy y el TIME-FRAME sugerido (ej: 15m para Scalping, 1H para Intraday).
 
             Responde SOLO con este JSON:
             {
@@ -44,62 +50,104 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
               "headline": "Titular corto y directo (max 6 palabras)",
               "summary": "Resumen narrativo del estado del mercado (max 2 frases).",
               "strategy": "BREAKOUTS / DIPS / SCALPING / WAIT",
-              "sentimentScore": 0-100 (0=Pánico Extremo, 100=Euforia)
+              "sentimentScore": 0-100 (0=Pánico, 100=Euforia),
+              "coinsToWatch": ["BTCUSDC", "SYMBOL"],
+              "suggestedTimeframe": "15m / 1h / 4h",
+              "volatility": "LOW / MEDIUM / HIGH"
             }`;
     } else if (mode === 'TRADE_DOCTOR') {
-        prompt = `Eres "Dr. Market", un cirujano de trading cínico, directo y extremadamente perspicaz. 
-            Tu paciente es el par ${symbol}.
+        prompt = `Eres "Dr. Market", un cirujano de day trading cínico, directo y extremadamente perspicaz.
+            Tu paciente es el par ${symbol} a $${price}.
             
-            DATOS DEL PACIENTE:
-            - Precio: $${price}
-            - RSI: ${indicators?.rsi || 'N/A'}
-            - MACD: ${indicators?.macd || 'N/A'}
-            - Bandas Bollinger: ${indicators?.bbPosition || 'N/A'}
-            - Señales Previas: ${reasons ? reasons.map(r => r).join(', ') : 'Ninguna'}
+            DATOS CLÍNICOS MULTI-TIMEFRAME:
+            📊 RSI 15m: ${indicators?.rsi15m || 'N/A'} | RSI 1H: ${indicators?.rsi1h || 'N/A'}
+            📈 MACD 15m: ${indicators?.macd15m || 'N/A'} | MACD 1H: ${indicators?.macd1h || 'N/A'}
+            📉 Bollinger: ${indicators?.bbPosition || 'N/A'}
+            💪 ADX 1H: ${indicators?.adx1h || 'N/A'} (Fuerza de tendencia)
+            🔥 Tendencia 1H: ${indicators?.trend1h || 'N/A'}
+            📊 ATR 1H: ${indicators?.atr1h || 'N/A'} (${indicators?.atrPercent || 'N/A'} volatilidad)
+            📢 Volumen: ${indicators?.volumeRatio || 'N/A'} (Estado: ${indicators?.volumeStatus || 'N/A'})
 
-            Tu tarea es realizar un DIAGNÓSTICO MÉDICO del chart:
-            1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Tendencia Aguda", "Fiebre de FOMO", "Soporte Fracturado").
-            2. SÍNTOMAS: Lista 3 evidencias técnicas que apoyan tu diagnóstico.
-            3. RECETA: ¿Qué debe hacer el trader? (ej: "Reposo absoluto (No operar)", "Inyección de liquidez en $X (Long)", "Amputación de pérdidas (Stop Loss)").
-            4. PRONÓSTICO: ¿Sobrevivirá a las próximas 4 horas?
+            Tu tarea como ESPECIALISTA EN DAY TRADING:
+            1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Momentum", "Fiebre de FOMO", "Consolidación Lateral", "Breakout Inminente").
+            2. SÍNTOMAS: Lista 3-4 evidencias técnicas que apoyan tu diagnóstico usando los datos multi-timeframe.
+            3. RECETA: ¿Qué debe hacer el trader AHORA? Sé específico (ej: "Long si rompe $X con stop en $Y", "Esperar pullback a EMA21", "No tocar, muy choppy").
+            4. NIVELES CRÍTICOS: Sugiere Entry, Stop Loss y Take Profit basados en el ATR.
+            5. PRONÓSTICO: ¿Qué esperar en las próximas 1-4 horas?
 
             Responde SOLO con este JSON:
             {
               "diagnosis": "Diagnóstico médico creativo y técnico",
-              "symptoms": ["Síntoma 1", "Síntoma 2", "Síntoma 3"],
-              "prescription": "Consejo de acción directo",
-              "prognosis": "Predicción a corto plazo",
-              "healthScore": 0-100 (0=Muerto/Crash, 100=Atleta Olímpico/Pump)
+              "symptoms": ["Síntoma 1 con datos", "Síntoma 2 con datos", "Síntoma 3 con datos"],
+              "prescription": "Consejo de acción directo y específico",
+              "levels": {
+                "entry": "Precio de entrada sugerido o 'Esperar'",
+                "stopLoss": "Nivel de SL basado en ATR",
+                "takeProfit": "Nivel de TP con ratio R:R"
+              },
+              "prognosis": "Predicción a corto plazo (1-4h)",
+              "tradability": "HIGH/MEDIUM/LOW (qué tan operable es ahora)",
+              "healthScore": 0-100 (0=Crash inminente, 100=Pump fuerte)
             }`;
     } else if (mode === 'PATTERN_HUNTER') {
-        const { prices } = inputData;
-        prompt = `Eres "The Pattern Hunter", un algoritmo de IA especializado en reconocimiento de patrones gráficos (Chartismo).
-            
-            Se te proporciona una serie de precios (Close prices) de un activo:
-            [${prices.slice(-60).join(', ')}]
-            
-            Tu tarea es visualizar la geometría de estos números y buscar patrones clásicos:
-            - Hombro-Cabeza-Hombro (H&S) o Inverso
-            - Doble Techo / Doble Suelo
-            - Cuñas (Wedges) Alcistas/Bajistas
-            - Banderas (Flags) y Banderines (Pennants)
-            - Triángulos (Ascendentes/Descendentes/Simétricos)
+        const { prices, context } = inputData;
+        // prices can be array of close prices OR array of OHLCV objects
+        const isOHLCV = prices && prices[0] && typeof prices[0] === 'object';
 
-            Analiza la ESTRUCTURA.
-            Si no detectas nada claro, sé honesto y di "Ningún patrón claro".
+        let priceData = '';
+        if (isOHLCV) {
+            // Format OHLCV for better pattern detection
+            const last20 = prices.slice(-20);
+            priceData = last20.map((c, i) =>
+                `${i + 1}: O:${c.open?.toFixed(2)} H:${c.high?.toFixed(2)} L:${c.low?.toFixed(2)} C:${c.close?.toFixed(2)} V:${(c.volume / 1000).toFixed(0)}k`
+            ).join('\n');
+        } else if (prices && Array.isArray(prices)) {
+            priceData = prices.slice(-30).join(', ');
+        } else {
+            priceData = 'No price data available';
+        }
+
+        prompt = `Eres "The Pattern Hunter", un algoritmo de IA especializado en análisis técnico y reconocimiento de patrones gráficos para DAY TRADING.
+            
+            DATOS OHLCV (Últimas 20 velas, 1H):
+            ${priceData}
+            
+            CONTEXTO DE VOLUMEN:
+            ${context ? `Tendencia: ${context.volumeTrend}, Volumen promedio: ${context.avgVolume?.toFixed(0)}` : 'No disponible'}
+            ${context?.priceRange ? `Rango 24h: $${context.priceRange.low24h?.toFixed(2)} - $${context.priceRange.high24h?.toFixed(2)} | Actual: $${context.priceRange.current?.toFixed(2)}` : ''}
+            
+            Tu tarea es analizar la ESTRUCTURA DE PRECIOS y buscar:
+            1. PATRONES CLÁSICOS: H&S, Doble Techo/Suelo, Cuñas, Banderas, Triángulos
+            2. SOPORTES Y RESISTENCIAS: Niveles clave basados en los highs/lows
+            3. BREAKOUT ZONES: Dónde se activaría el patrón
+            4. TARGETS: Objetivo estimado basado en el patrón
+            
+            IMPORTANTE: 
+            - El volumen DEBE confirmar los patrones (volumen creciente en breakouts)
+            - Sé HONESTO: si no hay patrón claro, dilo
+            - Da NIVELES ESPECÍFICOS para operar
 
             Responde SOLO con este JSON:
             {
               "detected": true/false,
               "patterns": [
                 { 
-                  "name": "Nombre del Patrón (ej: Bull Flag)", 
+                  "name": "Nombre del Patrón", 
                   "confidence": "High/Medium/Low", 
                   "signal": "BULLISH/BEARISH",
-                  "description": "Breve explicación de dónde se ve el patrón."
+                  "description": "Dónde se ve el patrón",
+                  "breakoutLevel": "Precio de activación",
+                  "target": "Objetivo del patrón",
+                  "stopLoss": "Stop sugerido",
+                  "volumeConfirmed": true/false
                 }
               ],
-              "summary": "Resumen general de la estructura de precios."
+              "keyLevels": {
+                "resistance": "Nivel de resistencia principal",
+                "support": "Nivel de soporte principal"
+              },
+              "summary": "Resumen ejecutivo para day trading",
+              "actionable": "NOW/WAIT/AVOID"
             }`;
     } else {
         let modeContext = '';
@@ -242,16 +290,22 @@ export async function getAIAnalysis(marketData, tradingMode = 'BALANCED') {
     }
 }
 
-export async function getMarketOracleAnalysis(topCoins) {
-    return await getAIAnalysis({ mode: 'MARKET_ORACLE', marketData: { topCoins } });
+export async function getMarketOracleAnalysis(marketData) {
+    return await getAIAnalysis({ mode: 'MARKET_ORACLE', marketData });
 }
 
 export async function getTradeDoctorAnalysis(symbol, price, technicals) {
-    return await getAIAnalysis({ mode: 'TRADE_DOCTOR', symbol, price, indicators: technicals.indicators || {}, reasons: technicals.reasons || [] });
+    return await getAIAnalysis({
+        mode: 'TRADE_DOCTOR',
+        symbol,
+        price,
+        indicators: technicals.indicators || {},
+        reasons: technicals.reasons || []
+    });
 }
 
-export async function getPatternAnalysis(symbol, prices) {
-    return await getAIAnalysis({ mode: 'PATTERN_HUNTER', symbol, prices: prices || [] });
+export async function getPatternAnalysis(symbol, prices, context) {
+    return await getAIAnalysis({ mode: 'PATTERN_HUNTER', symbol, prices: prices || [], context });
 }
 
 export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode = 'BALANCED') {

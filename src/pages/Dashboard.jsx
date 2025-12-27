@@ -83,21 +83,26 @@ function Dashboard({
                     try {
                         console.log('🔮 Fetching Fresh Market Data & AI Analysis...');
 
-                        // 1. Get Fresh Top 5 Coins
-                        const freshTopSymbols = await binanceService.getTopCryptosByVolume(5);
-                        const statsPromises = freshTopSymbols.map(sym => binanceService.getCurrentPrice(sym));
-                        const freshStats = await Promise.all(statsPromises);
+                        // 1. Get Market Breadth (More comprehensive than just Top 5)
+                        const marketBreadth = await binanceService.getMarketBreadth();
 
-                        const freshInput = freshStats.map(s => ({
-                            symbol: s.symbol,
-                            change: s.priceChangePercent + '%',
-                            vol: (s.quoteVolume24h / 1000000).toFixed(1) + 'M'
-                        }));
+                        if (!marketBreadth) throw new Error('Failed to fetch market breadth');
 
-                        const aiResult = await getMarketOracleAnalysis(freshInput);
+                        // 2. Call AI with breadth data
+                        const aiResult = await getMarketOracleAnalysis(marketBreadth);
+
                         if (aiResult.success && aiResult.analysis) {
-                            setOracleData(aiResult.analysis);
-                            localStorage.setItem('oracle_cache_v2', JSON.stringify(aiResult.analysis));
+                            // Merge marketBreadth stats into analysis for UI display if needed
+                            const enrichedAnalysis = {
+                                ...aiResult.analysis,
+                                stats: {
+                                    btcDominance: marketBreadth.btcDominance,
+                                    totalVolume: marketBreadth.totalVolumeUSD,
+                                    marketAvgChange: marketBreadth.marketAvgChange
+                                }
+                            };
+                            setOracleData(enrichedAnalysis);
+                            localStorage.setItem('oracle_cache_v2', JSON.stringify(enrichedAnalysis));
                             localStorage.setItem('oracle_timestamp_v2', String(Date.now()));
                         }
                     } catch (error) {

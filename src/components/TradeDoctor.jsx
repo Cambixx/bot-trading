@@ -23,35 +23,100 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
         setReport(null);
 
         try {
-            // 1. Fetch Fresh Data (Last 100 candles for indicators)
-            const klines = await binanceService.getKlines(selectedSymbol, '1h', 100);
-            const price = parseFloat(klines[klines.length - 1].close);
-            const closePrices = klines.map(k => k.close);
+            // 1. Fetch Multi-Timeframe Data (15m, 1H, 4H)
+            const [klines15m, klines1h, klines4h] = await Promise.all([
+                binanceService.getKlines(selectedSymbol, '15m', 100),
+                binanceService.getKlines(selectedSymbol, '1h', 100),
+                binanceService.getKlines(selectedSymbol, '4h', 50)
+            ]);
 
-            // 2. Calculate Basic Indicators locally to send to AI
-            const rsiArray = calculateRSI(closePrices);
-            const rsiVal = rsiArray[rsiArray.length - 1];
+            const price = parseFloat(klines15m[klines15m.length - 1].close);
 
-            const macdObj = calculateMACD(closePrices);
-            const macdVal = macdObj.macd[macdObj.macd.length - 1];
+            // 2. Calculate Indicators for each timeframe
+            const closes15m = klines15m.map(k => k.close);
+            const closes1h = klines1h.map(k => k.close);
+            const closes4h = klines4h.map(k => k.close);
 
-            const bbObj = calculateBollingerBands(closePrices);
-            const upper = bbObj.upper[bbObj.upper.length - 1];
-            const lower = bbObj.lower[bbObj.lower.length - 1];
+            // RSI
+            const rsi15m = calculateRSI(closes15m);
+            const rsi1h = calculateRSI(closes1h);
 
+            // MACD
+            const macd15m = calculateMACD(closes15m);
+            const macd1h = calculateMACD(closes1h);
+
+            // Bollinger Bands
+            const bb1h = calculateBollingerBands(closes1h);
+            const bb4h = calculateBollingerBands(closes4h);
+
+            // ADX (from technicalAnalysis if available, else skip)
+            let adx1h = null;
+            try {
+                const { calculateADX } = await import('../services/technicalAnalysis');
+                const adxResult = calculateADX(klines1h, 14);
+                adx1h = adxResult.adx[adxResult.adx.length - 1];
+            } catch (e) {
+                console.log('ADX not available');
+            }
+
+            // ATR for volatility context
+            let atr1h = null;
+            try {
+                const { calculateATR } = await import('../services/technicalAnalysis');
+                const atrResult = calculateATR(klines1h, 14);
+                atr1h = atrResult[atrResult.length - 1];
+            } catch (e) {
+                console.log('ATR not available');
+            }
+
+            // Volume Analysis
+            const volumes1h = klines1h.map(k => k.volume);
+            const avgVolume = volumes1h.slice(-20).reduce((a, b) => a + b, 0) / 20;
+            const currentVolume = volumes1h[volumes1h.length - 1];
+            const volumeRatio = (currentVolume / avgVolume).toFixed(2);
+
+            // BB Position
+            const upper1h = bb1h.upper[bb1h.upper.length - 1];
+            const lower1h = bb1h.lower[bb1h.lower.length - 1];
             let bbPos = "Middle";
-            if (price > upper) bbPos = "Above Upper Band";
-            if (price < lower) bbPos = "Below Lower Band";
+            if (price > upper1h) bbPos = "Above Upper Band (Overbought Zone)";
+            else if (price < lower1h) bbPos = "Below Lower Band (Oversold Zone)";
+            else if (price > (upper1h + lower1h) / 2) bbPos = "Upper Half";
+            else bbPos = "Lower Half";
 
+            // EMA Trend Context
+            const ema21_1h = closes1h.slice(-21).reduce((a, b) => a + b, 0) / 21;
+            const ema50_1h = closes1h.slice(-50).reduce((a, b) => a + b, 0) / 50;
+            const trend1h = price > ema21_1h ? (price > ema50_1h ? 'BULLISH' : 'WEAK BULLISH') : (price < ema50_1h ? 'BEARISH' : 'WEAK BEARISH');
+
+            // 3. Build comprehensive technicals object
             const technicals = {
                 indicators: {
-                    rsi: rsiVal ? rsiVal.toFixed(2) : 'N/A',
-                    macd: macdVal ? macdVal.toFixed(4) : 'N/A',
-                    bbPosition: bbPos
+                    // Multi-timeframe RSI
+                    rsi15m: rsi15m[rsi15m.length - 1]?.toFixed(1) || 'N/A',
+                    rsi1h: rsi1h[rsi1h.length - 1]?.toFixed(1) || 'N/A',
+                    // MACD
+                    macd15m: macd15m.histogram[macd15m.histogram.length - 1]?.toFixed(4) || 'N/A',
+                    macd1h: macd1h.histogram[macd1h.histogram.length - 1]?.toFixed(4) || 'N/A',
+                    // Bollinger
+                    bbPosition: bbPos,
+                    // Trend
+                    adx1h: adx1h?.toFixed(1) || 'N/A',
+                    trend1h: trend1h,
+                    // Volatility
+                    atr1h: atr1h?.toFixed(4) || 'N/A',
+                    atrPercent: atr1h ? ((atr1h / price) * 100).toFixed(2) + '%' : 'N/A',
+                    // Volume
+                    volumeRatio: volumeRatio + 'x avg',
+                    volumeStatus: currentVolume > avgVolume * 1.5 ? 'HIGH' : currentVolume < avgVolume * 0.5 ? 'LOW' : 'NORMAL'
+                },
+                context: {
+                    timeframes: '15m/1H/4H',
+                    tradingStyle: 'Day Trading / Scalping'
                 }
             };
 
-            // 3. Call The Doctor
+            // 4. Call The Doctor with enhanced data
             const result = await getTradeDoctorAnalysis(selectedSymbol, price, technicals);
 
             if (result.success && result.analysis) {
@@ -62,7 +127,7 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
 
         } catch (err) {
             console.error(err);
-            setError("Failed to fetch patient data.");
+            setError("Failed to fetch patient data: " + err.message);
         } finally {
             setLoading(false);
         }
@@ -164,9 +229,34 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
                                 <p>{report.prescription || "No prescription available."}</p>
                             </div>
 
+                            {report.levels && (
+                                <div className="levels-box">
+                                    <div className="box-title">🎯 TRADE LEVELS</div>
+                                    <div className="levels-grid">
+                                        <div className="level-item entry">
+                                            <span className="level-label">Entry</span>
+                                            <span className="level-value">{report.levels.entry}</span>
+                                        </div>
+                                        <div className="level-item stop">
+                                            <span className="level-label">Stop Loss</span>
+                                            <span className="level-value">{report.levels.stopLoss}</span>
+                                        </div>
+                                        <div className="level-item target">
+                                            <span className="level-label">Take Profit</span>
+                                            <span className="level-value">{report.levels.takeProfit}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="prognosis-box">
-                                <div className="box-title"><Thermometer size={14} /> PROGNOSIS (4H)</div>
+                                <div className="box-title"><Thermometer size={14} /> PROGNOSIS (1-4H)</div>
                                 <p>{report.prognosis || "No prognosis available."}</p>
+                                {report.tradability && (
+                                    <div className={`tradability-badge ${report.tradability.toLowerCase()}`}>
+                                        Tradability: {report.tradability}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

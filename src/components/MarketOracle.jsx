@@ -117,10 +117,43 @@ const MarketOracle = ({ analysis, loading, onRefresh }) => {
                     </div>
                 </div>
 
-                {/* Right: Narrative */}
+                {/* Middle: Narrative */}
                 <div className="oracle-narrative-col">
                     <h2 className="oracle-headline">"{headline}"</h2>
                     <p className="oracle-summary">{summary}</p>
+
+                    {safeAnalysis.coinsToWatch && safeAnalysis.coinsToWatch.length > 0 && (
+                        <div className="watch-pills">
+                            <span className="watch-label">WATCH:</span>
+                            {safeAnalysis.coinsToWatch.map(coin => (
+                                <span key={coin} className="watch-pill">{coin}</span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Right: Detailed Stats */}
+                <div className="oracle-stats-col">
+                    {safeAnalysis.stats && (
+                        <div className="stats-grid">
+                            <div className="stat-item">
+                                <span className="stat-label">BTC DOM</span>
+                                <span className="stat-val">{safeAnalysis.stats.btcDominance}%</span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">VOL 24H</span>
+                                <span className="stat-val">{safeAnalysis.stats.totalVolume}</span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">TF</span>
+                                <span className="stat-val">{safeAnalysis.suggestedTimeframe || '1H'}</span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">VOLATILITY</span>
+                                <span className={`stat-val ${safeAnalysis.volatility?.toLowerCase()}`}>{safeAnalysis.volatility || 'N/A'}</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
             </div>

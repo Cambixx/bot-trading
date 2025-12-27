@@ -125,29 +125,9 @@
 /* Content Grid */
 .oracle-content {
     display: grid;
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 200px 1fr 200px;
     gap: 2rem;
-}
-
-@media (max-width: 768px) {
-    .oracle-content {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .oracle-top-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .oracle-headline {
-        font-size: 1.4rem;
-    }
-
-    .oracle-summary {
-        font-size: 0.9rem;
-    }
+    align-items: center;
 }
 
 /* Status Column */
@@ -157,17 +137,6 @@
     gap: 1rem;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     padding-right: 2rem;
-}
-
-@media (max-width: 768px) {
-    .oracle-status-col {
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        padding-right: 0;
-        padding-bottom: 1.5rem;
-        flex-direction: row;
-        justify-content: space-between;
-    }
 }
 
 .status-badge {
@@ -229,6 +198,76 @@
     max-width: 600px;
 }
 
+/* Watch Pills */
+.watch-pills {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.watch-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.watch-pill {
+    background: rgba(138, 43, 226, 0.1);
+    color: #b19cd9;
+    padding: 0.1rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 1px solid rgba(138, 43, 226, 0.2);
+    font-family: 'Space Mono', monospace;
+}
+
+/* Stats Column (Right) */
+.oracle-stats-col {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.stat-label {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-val {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    font-family: 'Space Mono', monospace;
+}
+
+.stat-val.high {
+    color: #00ff9d;
+}
+
+/* For dominance it depends, but high dominance is clear */
+.stat-val.low {
+    color: #ff4d4d;
+}
+
 /* Loading State */
 .shimmer-line {
     background: rgba(255, 255, 255, 0.05);
@@ -239,4 +278,45 @@
 .shimmer-box {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
+}
+
+@media (max-width: 1024px) {
+    .oracle-content {
+        grid-template-columns: 180px 1fr;
+    }
+
+    .oracle-stats-col {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .oracle-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .oracle-top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .oracle-headline {
+        font-size: 1.4rem;
+    }
+
+    .oracle-status-col {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-right: 0;
+        padding-bottom: 1.5rem;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .oracle-stats-col {
+        grid-column: span 1;
+    }
 }
