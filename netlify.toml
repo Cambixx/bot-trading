@@ -10,10 +10,6 @@
   node_bundler = "esbuild"
   external_node_modules = ["axios"]
 
-# Scheduled function for automatic trading signal analysis
-[functions."scheduled-analysis"]
-  schedule = "*/30 * * * *"
-
 [[redirects]]
   from = "/api/check-analysis"
   to = "/.netlify/functions/scheduled-analysis"
