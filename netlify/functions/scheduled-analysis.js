@@ -1,13 +1,11 @@
 /**
- * Netlify Scheduled Function - Advanced Background Trading Analysis
- * Uses CryptoCompare API (free, serverless-friendly) for OHLCV data.
- * Implements real technical indicators: RSI, MACD, Bollinger Bands.
- * Runs every 20 minutes to detect opportunities and send Telegram alerts.
+ * Netlify Scheduled Function - Day Trading Signal Analysis
+ * Uses MEXC API for OHLCV data with 15m/1H/4H timeframes.
+ * Implements momentum, pullback, and breakout setups for intraday trading.
+ * Runs every 15 minutes to detect quick opportunities and send Telegram alerts.
  */
 
 import { schedule } from "@netlify/functions";
-
-console.log('--- CryptoCompare Advanced Analysis Module Loaded ---');
 
 // Environment Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -259,124 +257,138 @@ function analyzeTrend(candles, periodSMA = 20, periodEMA = 200) {
   return 'NEUTRAL';
 }
 
-function generateSniperSignal(symbol, candles1h, candles4h, candles1d) {
+function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
   // 1. DATA VALIDATION
-  if (!candles1h || candles1h.length < 200 || !candles4h || candles4h.length < 50 || !candles1d || candles1d.length < 50) {
+  if (!candles15m || candles15m.length < 100 || !candles1h || candles1h.length < 100 || !candles4h || candles4h.length < 50) {
     return null;
   }
 
-  const price = candles1h[candles1h.length - 1].close;
+  const price = candles15m[candles15m.length - 1].close;
 
-  // 2. CONTEXT (THE GREEN LIGHT)
-  // Daily Trend
-  const closes1d = candles1d.map(c => c.close);
-  const dailySMA20 = calculateSMA(closes1d, 20);
-  const dailyTrend = price > dailySMA20 ? 'BULLISH' : 'BEARISH';
-
+  // 2. CONTEXT - Multi-timeframe analysis
   // 4H Trend (Structure)
   const closes4h = candles4h.map(c => c.close);
-  const ema200_4h = calculateEMA(closes4h, 200);
   const ema50_4h = calculateEMA(closes4h, 50);
-  const structureTrend = price > ema200_4h ? 'BULLISH' : 'BEARISH';
+  const structureTrend = price > ema50_4h ? 'BULLISH' : 'BEARISH';
 
-  // RELAXED GATE: Trend Alignment
-  // We prioritize it, but if 4H and 1H are aligned, we can signal even if 1D is contrary (Scalp mode)
-  let trendAlignmentScore = 0;
-  if (dailyTrend === structureTrend) {
-    trendAlignmentScore = 15; // Bonus for full alignment
-  } else {
-    trendAlignmentScore = -5; // Penalty for daily counter-trend
-  }
-
-  const marketBias = structureTrend; // Focus on 4H structure
-
-  // 3. SETUPS
-  // Indicators for 1H (Trigger)
+  // 1H Trend (Intermediate)
   const closes1h = candles1h.map(c => c.close);
+  const ema21_1h = calculateEMA(closes1h, 21);
+  const ema50_1h = calculateEMA(closes1h, 50);
+  const trend1h = price > ema21_1h ? 'BULLISH' : 'BEARISH';
+
+  // 15m Indicators (Trigger)
+  const closes15m = candles15m.map(c => c.close);
+  const rsi15m = calculateRSI(closes15m, 14);
   const rsi1h = calculateRSI(closes1h, 14);
-  const macd1h = calculateMACD(closes1h);
+  const macd15m = calculateMACD(closes15m);
+  const ema9_15m = calculateEMA(closes15m, 9);
+  const ema21_15m = calculateEMA(closes15m, 21);
   const atr1h = calculateATR(candles1h, 14);
   const adx1h = calculateADX(candles1h, 14);
-  const volumeSMA = calculateVolumeSMA(candles1h, 20);
-  const currentVolume = candles1h[candles1h.length - 1].volume;
+  const volumeSMA = calculateVolumeSMA(candles15m, 20);
+  const currentVolume = candles15m[candles15m.length - 1].volume;
+  const bb1h = calculateBollingerBands(closes1h, 20, 2);
 
-  // Indicators for 4H (Context)
-  const bb4h = calculateBollingerBands(closes4h, 20, 2);
-  const adx4h = calculateADX(candles4h, 14);
+  // Trend Alignment Score
+  let trendScore = 0;
+  if (structureTrend === 'BULLISH' && trend1h === 'BULLISH') trendScore = 15;
+  else if (structureTrend === trend1h) trendScore = 10;
+  else trendScore = -5;
+
+  const marketBias = trend1h; // Focus on 1H for day trading
 
   let signal = null;
   let reasons = [];
   let score = 0;
 
-  // --- SETUP A: GOLDEN PULLBACK (Trend Continuation) ---
-  // Context: Emerging Trend (ADX 4h > 14) - Lowered from 18
-  if (adx4h > 14) {
-    if (marketBias === 'BULLISH') {
-      // Price dipping to 4H EMA 50 (Support Area)
-      const distToEma50 = Math.abs(price - ema50_4h) / price;
-      const isNearSupport = distToEma50 < 0.025; // Expanded from 1.5% to 2.5%
+  // --- SETUP A: MOMENTUM BURST (New - Day Trading) ---
+  // RSI cruza 50 desde abajo con volumen
+  const prevRsi15m = calculateRSI(closes15m.slice(0, -1), 14);
+  const rsiCrossUp = prevRsi15m < 50 && rsi15m >= 50;
+  const isVolSpike = currentVolume > (volumeSMA * 1.5);
 
-      // Trigger: 1H Oversold or near oversold
-      if (isNearSupport && rsi1h < 48) {
-        // Sniper Entry
-        signal = 'BUY';
-        score = 75 + trendAlignmentScore; // Base lowered, but bonus possible
-        reasons.push('🟢 Setup A: Golden Pullback');
-        reasons.push(`Trend activo (ADX 4H: ${adx4h.toFixed(1)})`);
-        reasons.push(`Rebote en zona EMA50 4H + RSI 1H (${rsi1h.toFixed(1)})`);
-      }
-    }
-  }
-
-  // --- SETUP B: VOLATILITY BREAKOUT (Squeeze) ---
-  // Context: BB Squeeze on 4H
-  const bbWidth = (bb4h.upper - bb4h.lower) / bb4h.middle;
-  const isSqueeze = bbWidth < 0.10; // Expanded slightly for crypto
-
-  if (isSqueeze) {
-    // Breakout Condition
-    if (marketBias === 'BULLISH' && price > bb4h.upper) {
-      // Confirmation: Volume + MACD
-      const isVolSpike = currentVolume > (volumeSMA * 1.3); // Lowered from 1.5
-      if (isVolSpike && macd1h.histogram > -0.01) { // More permissive MACD
-        signal = 'BUY';
-        score = 80 + trendAlignmentScore;
-        reasons.push('🚀 Setup B: Volatility Breakout');
-        reasons.push(`Squeeze 4H (Width: ${(bbWidth * 100).toFixed(2)}%)`);
-        reasons.push(`Ruptura con Volumen y MACD`);
-      }
-    }
-  }
-
-  // --- SETUP C: EXTREME REVERSAL (Contratrend / Mean Reversion) ---
-  if (!signal && rsi1h < 26) {
-    // Trigger on extreme oversold regardless of daily trend
+  if (marketBias === 'BULLISH' && rsiCrossUp && isVolSpike && price > ema21_15m) {
     signal = 'BUY';
-    score = 70;
-    reasons.push('⚡ Setup C: Extreme Reversal');
-    reasons.push(`Sobreventa Extrema RSI 1H (${rsi1h.toFixed(1)})`);
-    reasons.push(`Posible rebote técnico por pánico`);
+    score = 72 + trendScore;
+    reasons.push('⚡ Setup A: Momentum Burst');
+    reasons.push(`RSI cruza 50 (${rsi15m.toFixed(1)}) + Volumen x${(currentVolume / volumeSMA).toFixed(1)}`);
+    reasons.push(`Precio sobre EMA21 15m`);
   }
 
-  // 4. RISK MANAGEMENT (THE SHIELD)
+  // --- SETUP B: EMA PULLBACK (Day Trading version) ---
+  // Precio retrocede a EMA21 en 15m con tendencia 1H alcista
+  if (!signal && marketBias === 'BULLISH' && adx1h > 20) {
+    const distToEma21 = Math.abs(price - ema21_15m) / price;
+    const isNearEma = distToEma21 < 0.005; // 0.5% de la EMA
+    const isPriceAboveEma = price >= ema21_15m * 0.998; // Tocando o ligeramente por encima
+
+    if (isNearEma && isPriceAboveEma && rsi15m > 40 && rsi15m < 60) {
+      signal = 'BUY';
+      score = 75 + trendScore;
+      reasons.push('🎯 Setup B: EMA21 Pullback');
+      reasons.push(`Rebote en EMA21 15m + Tendencia fuerte (ADX: ${adx1h.toFixed(1)})`);
+      reasons.push(`RSI neutral (${rsi15m.toFixed(1)})`);
+    }
+  }
+
+  // --- SETUP C: BREAKOUT (Improved) ---
+  // Ruptura de Bollinger con volumen
+  if (!signal && bb1h) {
+    const bbWidth = (bb1h.upper - bb1h.lower) / bb1h.middle;
+    const isSqueeze = bbWidth < 0.08;
+
+    if (isSqueeze && price > bb1h.upper && isVolSpike && macd15m && macd15m.histogram > 0) {
+      signal = 'BUY';
+      score = 80 + trendScore;
+      reasons.push('🚀 Setup C: Squeeze Breakout');
+      reasons.push(`BB Squeeze (${(bbWidth * 100).toFixed(1)}%) + Ruptura`);
+      reasons.push(`Volumen confirmado + MACD positivo`);
+    }
+  }
+
+  // --- SETUP D: OVERSOLD BOUNCE (Adjusted for crypto) ---
+  if (!signal && rsi15m < 32 && rsi1h < 40) {
+    // Check for bullish divergence hint: price making lows but RSI not as low
+    const recentLow15m = Math.min(...closes15m.slice(-5));
+    const isAtRecent = Math.abs(price - recentLow15m) / price < 0.01;
+
+    if (isAtRecent) {
+      signal = 'BUY';
+      score = 70;
+      reasons.push('📉 Setup D: Oversold Bounce');
+      reasons.push(`RSI 15m: ${rsi15m.toFixed(1)} + RSI 1H: ${rsi1h.toFixed(1)}`);
+      reasons.push(`Posible rebote técnico`);
+    }
+  }
+
+  // --- SETUP E: GOLDEN CROSS MINI (EMA9 cruza EMA21) ---
+  if (!signal && marketBias === 'BULLISH') {
+    const prevEma9 = calculateEMA(closes15m.slice(0, -1), 9);
+    const prevEma21 = calculateEMA(closes15m.slice(0, -1), 21);
+    const emaCrossUp = prevEma9 < prevEma21 && ema9_15m >= ema21_15m;
+
+    if (emaCrossUp && rsi15m > 50 && rsi15m < 70) {
+      signal = 'BUY';
+      score = 73 + trendScore;
+      reasons.push('✨ Setup E: Golden Cross Mini');
+      reasons.push(`EMA9 cruza EMA21 en 15m`);
+      reasons.push(`RSI confirmando (${rsi15m.toFixed(1)})`);
+    }
+  }
+
+  // 4. RISK MANAGEMENT (DAY TRADING STYLE)
   if (signal) {
-    // Score Gate
     if (score < SIGNAL_SCORE_THRESHOLD) {
       console.log(`[${symbol}] Signal rejected by score: ${score} < ${SIGNAL_SCORE_THRESHOLD}`);
       return null;
     }
 
-    // Filter: Avoid Extreme Choppiness if not a breakout/reversal
-    if (!reasons[0].includes('Breakout') && !reasons[0].includes('Reversal') && adx1h < 15) {
-      console.log(`[${symbol}] Rejected: Choppy ADX 1H (${adx1h.toFixed(1)})`);
-      return null;
-    }
-
-    // Calculate Position Sizing Logic
-    const atr = calculateATR(candles4h, 14);
-    const stopLoss = price - (atr * 2.0);
+    // Use 1H ATR for tighter stops (day trading)
+    const atr = atr1h;
+    const stopLoss = price - (atr * 1.5); // Tighter: 1.5 ATR
     const risk = price - stopLoss;
-    const takeProfit = price + (risk * 2.5);
+    const takeProfit = price + (risk * 2.0); // 2:1 R:R for day trading
 
     return {
       symbol,
@@ -391,8 +403,9 @@ function generateSniperSignal(symbol, candles1h, candles4h, candles1d) {
         takeProfit: Number(takeProfit.toFixed(4))
       },
       indicators: {
-        rsi: Number(rsi1h.toFixed(1)),
-        adx: Number(adx4h.toFixed(1)),
+        rsi15m: Number(rsi15m.toFixed(1)),
+        rsi1h: Number(rsi1h.toFixed(1)),
+        adx: Number(adx1h.toFixed(1)),
         trend: marketBias
       }
     };
@@ -403,22 +416,21 @@ function generateSniperSignal(symbol, candles1h, candles4h, candles1d) {
 
 async function processCoin(symbol) {
   try {
-    // SNIPER DATA: 1H, 4H, 1D
-    const [candles1h, candles4h, candles1d] = await Promise.all([
-      getCandles(symbol, '60m', 200),
-      getCandles(symbol, '4h', 200), // Increased from 100
-      getCandles(symbol, '1d', 100)  // Increased from 50
+    // DAY TRADING DATA: 15m, 1H, 4H
+    const [candles15m, candles1h, candles4h] = await Promise.all([
+      getCandles(symbol, '15m', 100),
+      getCandles(symbol, '60m', 100),
+      getCandles(symbol, '4h', 100)
     ]);
 
-    const signal = generateSniperSignal(symbol, candles1h, candles4h, candles1d);
+    const signal = generateDayTradingSignal(symbol, candles15m, candles1h, candles4h);
 
     if (signal) {
-      console.log(`🎯 SNIPER SIGNAL: ${symbol} [${signal.type}] Score: ${signal.score}`);
+      console.log(`🎯 DAY TRADING SIGNAL: ${symbol} [${signal.type}] Score: ${signal.score}`);
       return signal;
     }
   } catch (error) {
     console.error(`Error analyzing ${symbol}:`, error.message);
-    // Don't throw to keep batch processing alive
   }
   return null;
 }
@@ -435,7 +447,7 @@ export async function sendTelegramNotification(signals) {
     return { success: true, sent: 0 };
   }
 
-  let message = '🎯 *SNIPER SIGNAL ACTIVE* 🎯\n\n';
+  let message = '🎯 *DAY TRADING SIGNAL* 🎯\n\n';
 
   for (const sig of signals) {
     let icon = '🟢';
@@ -446,8 +458,8 @@ export async function sendTelegramNotification(signals) {
 
     // Levels
     const levels = sig.levels;
-    message += `🛑 SL: $${escapeMarkdownV2(levels.stopLoss)} \\(2.0 ATR\\)\n`;
-    message += `🎯 TP: $${escapeMarkdownV2(levels.takeProfit)} \\(2.5R\\)\n`;
+    message += `🛑 SL: $${escapeMarkdownV2(levels.stopLoss)} \\(1.5 ATR\\)\n`;
+    message += `🎯 TP: $${escapeMarkdownV2(levels.takeProfit)} \\(2:1 R\\)\n`;
 
     // Indicators
     const inds = sig.indicators;
@@ -549,8 +561,8 @@ async function runAnalysis() {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: 'Sniper Analysis complete', signals })
+    body: JSON.stringify({ message: 'Day Trading Analysis complete', signals })
   };
 }
 
-export const handler = schedule('*/30 * * * *', runAnalysis);
+export const handler = schedule('*/15 * * * *', runAnalysis);

@@ -11,11 +11,6 @@
   external_node_modules = ["axios"]
 
 [[redirects]]
-  from = "/api/check-analysis"
-  to = "/.netlify/functions/scheduled-analysis"
-  status = 200
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
