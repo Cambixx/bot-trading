@@ -386,7 +386,7 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
 
     // Use 1H ATR for tighter stops (day trading)
     const atr = atr1h;
-    const stopLoss = price - (atr * 1.5); // Tighter: 1.5 ATR
+    const stopLoss = price - (atr * 1.5); // Tighter: 1\.5 ATR
     const risk = price - stopLoss;
     const takeProfit = price + (risk * 2.0); // 2:1 R:R for day trading
 
@@ -454,16 +454,16 @@ export async function sendTelegramNotification(signals) {
     if (sig.type === 'SELL') icon = '🔴';
 
     message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| SCORE: ${sig.score}\n`;
-    message += `💰 Entry: $${escapeMarkdownV2(sig.price.toFixed(4))}\n`;
+    message += `💰 Entry: \$${escapeMarkdownV2(String(sig.price.toFixed(4))}\n`;
 
     // Levels
     const levels = sig.levels;
-    message += `🛑 SL: $${escapeMarkdownV2(levels.stopLoss)} \\(1.5 ATR\\)\n`;
-    message += `🎯 TP: $${escapeMarkdownV2(levels.takeProfit)} \\(2:1 R\\)\n`;
+    message += `🛑 SL: \$${escapeMarkdownV2(String(levels.stopLoss))} \\(1\.5 ATR\\)\n`;
+    message += `🎯 TP: \$${escapeMarkdownV2(String(levels.takeProfit))} \\(2:1 R\\)\n`;
 
     // Indicators
     const inds = sig.indicators;
-    message += `📊 Trend: ${inds.trend} \\| RSI: ${inds.rsi} \\| ADX: ${inds.adx}\n`;
+    message += `📊 Trend: ${escapeMarkdownV2(inds.trend)} \\| RSI: ${escapeMarkdownV2(String(inds.rsi15m || inds.rsi || 0))} \\| ADX: ${escapeMarkdownV2(String(inds.adx))}\n`;
 
     // Reasons
     message += `\n📝 _Logic:_\n`;
