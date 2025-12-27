@@ -10,39 +10,62 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [lastScan, setLastScan] = useState(null);
+    const [error, setError] = useState(null);
 
     const handleScan = async () => {
         if (!selectedSymbol) return;
 
         setLoading(true);
         setResult(null);
+        setError(null);
 
         try {
+            console.log('🔍 Pattern Hunter: Iniciando escaneo para', selectedSymbol);
+            
             // Fetch OHLCV candles (not just close prices)
             const klines = await binanceService.getKlines(selectedSymbol, '1h', 60);
+            
+            if (!klines || klines.length === 0) {
+                throw new Error('No se pudieron obtener datos de velas');
+            }
+
+            console.log('📊 Datos obtenidos:', klines.length, 'velas');
 
             // Build structured OHLCV data for better pattern detection
             const ohlcvData = klines.map(k => ({
-                open: k.open,
-                high: k.high,
-                low: k.low,
-                close: k.close,
-                volume: k.volume
+                open: parseFloat(k.open),
+                high: parseFloat(k.high),
+                low: parseFloat(k.low),
+                close: parseFloat(k.close),
+                volume: parseFloat(k.volume)
             }));
 
+            // Validate OHLCV data
+            const isValid = ohlcvData.every(candle => 
+                !isNaN(candle.open) && !isNaN(candle.high) && 
+                !isNaN(candle.low) && !isNaN(candle.close) && 
+                !isNaN(candle.volume)
+            );
+
+            if (!isValid) {
+                throw new Error('Datos OHLCV inválidos detectados');
+            }
+
             // Calculate volume context
-            const volumes = klines.map(k => k.volume);
+            const volumes = klines.map(k => parseFloat(k.volume));
             const avgVolume = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
             const recentVolume = volumes.slice(-5).reduce((a, b) => a + b, 0) / 5;
             const volumeTrend = recentVolume > avgVolume ? 'INCREASING' : 'DECREASING';
 
             // Current price context
-            const currentPrice = klines[klines.length - 1].close;
+            const currentPrice = parseFloat(klines[klines.length - 1].close);
             const priceRange = {
-                high24h: Math.max(...klines.slice(-24).map(k => k.high)),
-                low24h: Math.min(...klines.slice(-24).map(k => k.low)),
+                high24h: Math.max(...klines.slice(-24).map(k => parseFloat(k.high))),
+                low24h: Math.min(...klines.slice(-24).map(k => parseFloat(k.low))),
                 current: currentPrice
             };
+
+            console.log('📈 Contexto:', { volumeTrend, avgVolume: avgVolume.toFixed(2), currentPrice });
 
             // Call AI with enhanced data
             const response = await getPatternAnalysis(selectedSymbol, ohlcvData, {
@@ -51,13 +74,20 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
                 priceRange
             });
 
+            console.log('🤖 Respuesta IA:', response);
+
             if (response.success && response.analysis) {
                 setResult(response.analysis);
                 setLastScan(new Date());
+                setError(null);
+            } else {
+                throw new Error(response.error || 'No se recibió análisis de la IA');
             }
 
         } catch (error) {
-            console.error(error);
+            console.error('❌ Error en Pattern Hunter:', error);
+            setError(error.message || 'Error al escanear patrones');
+            setResult(null);
         } finally {
             setLoading(false);
         }
@@ -101,7 +131,17 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
             </div>
 
             <div className="hunter-body">
-                {!result && !loading && (
+                {error && (
+                    <div className="hunter-error">
+                        <div className="error-icon">⚠️</div>
+                        <p className="error-message">{error}</p>
+                        <button className="retry-btn" onClick={handleScan}>
+                            Reintentar
+                        </button>
+                    </div>
+                )}
+
+                {!result && !loading && !error && (
                     <div className="hunter-empty">
                         <Target size={40} className="target-icon" />
                         <p>Radar Ready. Initiate scan to detect chart patterns.</p>

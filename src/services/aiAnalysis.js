@@ -203,6 +203,17 @@ Responde SOLO con este JSON:
     }
 
     try {
+        // Validate API key
+        if (!OPENROUTER_API_KEY) {
+            console.error('❌ OpenRouter API Key no configurada');
+            console.warn('💡 Configura VITE_OPENROUTER_API_KEY en tu archivo .env');
+            return { 
+                success: false, 
+                error: 'API Key no configurada. Revisa la configuración.', 
+                analysis: getFallbackAnalysis(mode) 
+            };
+        }
+
         const response = await fetch(
             "https://openrouter.ai/api/v1/chat/completions",
             {
@@ -305,6 +316,23 @@ export async function getTradeDoctorAnalysis(symbol, price, technicals) {
 }
 
 export async function getPatternAnalysis(symbol, prices, context) {
+    // Validate inputs
+    if (!symbol) {
+        console.error('❌ Pattern Analysis: Symbol is required');
+        return { success: false, error: 'Symbol is required', analysis: null };
+    }
+    
+    if (!prices || !Array.isArray(prices) || prices.length === 0) {
+        console.error('❌ Pattern Analysis: Invalid or empty prices array');
+        return { success: false, error: 'Invalid price data', analysis: null };
+    }
+
+    console.log('🔍 Pattern Analysis Request:', { 
+        symbol, 
+        pricesCount: prices.length, 
+        hasContext: !!context 
+    });
+
     return await getAIAnalysis({ mode: 'PATTERN_HUNTER', symbol, prices: prices || [], context });
 }
 
