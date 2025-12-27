@@ -454,7 +454,7 @@ export async function sendTelegramNotification(signals) {
     if (sig.type === 'SELL') icon = '🔴';
 
     message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| SCORE: ${sig.score}\n`;
-    message += `💰 Entry: \$${escapeMarkdownV2(String(sig.price.toFixed(4))}\n`;
+    message += `💰 Entry: \$${escapeMarkdownV2(String(sig.price.toFixed(4)))}\n`;
 
     // Levels
     const levels = sig.levels;
