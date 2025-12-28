@@ -46,16 +46,17 @@ body: JSON.stringify({
 
 OpenRouter ofrece modelos con costo 0 (marcados con `:free`). Aquí tienes los más estables y potentes actualmente:
 
-| Modelo | ID para el código | Especialidad |
-| :--- | :--- | :--- |
-| **Google Gemini 2.0 Flash** | `google/gemini-2.0-flash-exp:free` | **Recomendado para Local**. Gratis y muy rápido. |
-| **DeepSeek Chat (V3)** | `deepseek/deepseek-chat` | **Recomendado para Producción**. Alta precisión. |
-| **DeepSeek R1 (Free)** | `deepseek/deepseek-r1-0528:free` | Versión gratuita de R1 para lógica compleja. |
+| Modelo | ID para el código | Especialidad | Costo Aprox. |
+| :--- | :--- | :--- | :--- |
+| **DeepSeek Chat (V3)** | `deepseek/deepseek-chat` | **Recomendado para Análisis**. Alta precisión y lógica. | $0.27 / 1M tokens |
+| **Gemini 1.5 Flash** | `google/gemini-flash-1.5` | **Recomendado para Oracle**. Velocidad extrema. | $0.07 / 1M tokens |
+| **Google Gemini 2.0 (Free)** | `google/gemini-2.0-flash-exp:free` | Plan de respaldo gratuito. | $0.00 |
 
 > [!NOTE]
-> Actualmente el bot está configurado en **Modo Híbrido**:
-> *   **Local**: Usa Gemini 2.0 Flash Free para no gastar saldo.
-> *   **Producción**: Usa DeepSeek Chat para máxima fiabilidad.
+> Actualmente el bot está configurado en **Modo Optimizado (Paid)**:
+> *   **DeepSeek V3**: Se encarga del razonamiento técnico complejo (Doctor, Hunter).
+> *   **Gemini 1.5 Flash**: Maneja los resúmenes de mercado globales para ahorrar costos.
+> *   **Fallback Automático**: Si el saldo se agota, el sistema está preparado para intentar usar modelos gratuitos.
 
 > [!TIP]
 > Puedes consultar la lista completa y actualizada de modelos en: [openrouter.ai/models](https://openrouter.ai/models?max_price=0)

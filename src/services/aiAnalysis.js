@@ -12,11 +12,22 @@ const isDevelopment = (import.meta.env && import.meta.env.DEV) || (typeof window
 // La API key debe estar en .env (nunca hardcodeada)
 const OPENROUTER_API_KEY = (import.meta.env && import.meta.env.VITE_OPENROUTER_API_KEY) || process.env.VITE_OPENROUTER_API_KEY;
 
+const AI_MODELS = {
+    DEFAULT: 'deepseek/deepseek-chat',
+    REASONING: 'deepseek/deepseek-chat',
+    FAST: 'deepseek/deepseek-chat', // Switched from Gemini to avoid 404s
+    FREE: 'google/gemini-2.0-flash-exp:free'
+};
+
 /**
  * Llamar directamente a OpenRouter API (solo en desarrollo)
  */
 async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
     const { mode, symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward, marketData: globalMarketData } = inputData;
+
+    // Seleccionar modelo según el modo
+    let selectedModel = AI_MODELS.DEFAULT;
+    if (mode === 'MARKET_ORACLE') selectedModel = AI_MODELS.FAST;
 
     let prompt = '';
 
@@ -225,7 +236,7 @@ Responde SOLO con este JSON:
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    "model": "google/gemini-2.0-flash-exp:free",
+                    "model": selectedModel,
                     "messages": [
                         { "role": "system", "content": "Eres un experto asistente de trading especializado en criptomonedas." },
                         { "role": "user", "content": prompt }
@@ -308,11 +319,13 @@ export async function getAIAnalysis(marketData, tradingMode = 'BALANCED') {
 }
 
 export async function getMarketOracleAnalysis(marketData) {
-    return await getAIAnalysis({ mode: 'MARKET_ORACLE', marketData });
+    // Cache market oracle for 1 hour as it's global and less volatile
+    return await getCachedAIAnalysis({ mode: 'MARKET_ORACLE', marketData }, 3600000);
 }
 
 export async function getTradeDoctorAnalysis(symbol, price, technicals) {
-    return await getAIAnalysis({
+    // Use cached analysis if available (5 min TTL)
+    return await getCachedAIAnalysis({
         mode: 'TRADE_DOCTOR',
         symbol,
         price,
@@ -323,23 +336,18 @@ export async function getTradeDoctorAnalysis(symbol, price, technicals) {
 
 export async function getPatternAnalysis(symbol, prices, context) {
     // Validate inputs
-    if (!symbol) {
-        console.error('❌ Pattern Analysis: Symbol is required');
-        return { success: false, error: 'Symbol is required', analysis: null };
-    }
+    if (!symbol) return { success: false, error: 'Symbol is required' };
+    if (!prices || !Array.isArray(prices) || prices.length === 0) return { success: false, error: 'Invalid price data' };
 
-    if (!prices || !Array.isArray(prices) || prices.length === 0) {
-        console.error('❌ Pattern Analysis: Invalid or empty prices array');
-        return { success: false, error: 'Invalid price data', analysis: null };
-    }
+    const currentPrice = prices[prices.length - 1]?.close || prices[prices.length - 1];
 
-    console.log('🔍 Pattern Analysis Request:', {
+    return await getCachedAIAnalysis({
+        mode: 'PATTERN_HUNTER',
         symbol,
-        pricesCount: prices.length,
-        hasContext: !!context
+        price: currentPrice,
+        prices: prices || [],
+        context
     });
-
-    return await getAIAnalysis({ mode: 'PATTERN_HUNTER', symbol, prices: prices || [], context });
 }
 
 export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode = 'BALANCED') {
@@ -354,7 +362,7 @@ export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode
         ...technicalData
     };
 
-    const aiResult = await getAIAnalysis(marketData, tradingMode);
+    const aiResult = await getCachedAIAnalysis(marketData);
 
     if (aiResult.success && aiResult.analysis) {
         return {
@@ -373,25 +381,31 @@ export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode
 }
 
 class AIAnalysisCache {
-    constructor(ttl = 300000) {
+    constructor() {
         this.cache = new Map();
-        this.ttl = ttl;
     }
 
-    getKey(symbol, price) {
-        const roundedPrice = Math.round(price / 10) * 10;
-        return `${symbol}-${roundedPrice}`;
+    getKey(marketData) {
+        const { mode, symbol, price } = marketData;
+        if (mode === 'MARKET_ORACLE') return 'GLOBAL_MARKET_ORACLE';
+
+        // Round price to reduce cache misses on tiny fluctuations
+        const roundedPrice = price ? (Math.round(price * 100) / 100) : 0;
+        return `${mode || 'SIGNAL'}-${symbol || 'GLOBAL'}-${roundedPrice}`;
     }
 
-    get(symbol, price) {
-        const key = this.getKey(symbol, price);
+    get(marketData, ttl = 300000) {
+        const key = this.getKey(marketData);
         const cached = this.cache.get(key);
-        if (cached && Date.now() - cached.timestamp < this.ttl) return cached.data;
+        if (cached && Date.now() - cached.timestamp < (marketData.ttl || ttl)) {
+            console.log(`🎯 AI Cache Hit: ${key}`);
+            return cached.data;
+        }
         return null;
     }
 
-    set(symbol, price, data) {
-        const key = this.getKey(symbol, price);
+    set(marketData, data) {
+        const key = this.getKey(marketData);
         this.cache.set(key, { data, timestamp: Date.now() });
     }
 
@@ -400,11 +414,11 @@ class AIAnalysisCache {
 
 export const aiCache = new AIAnalysisCache();
 
-export async function getCachedAIAnalysis(marketData) {
-    const cached = aiCache.get(marketData.symbol, marketData.price);
+export async function getCachedAIAnalysis(marketData, customTTL) {
+    const cached = aiCache.get(marketData, customTTL);
     if (cached) return cached;
 
     const analysis = await getAIAnalysis(marketData);
-    if (analysis.success) aiCache.set(marketData.symbol, marketData.price, analysis);
+    if (analysis.success) aiCache.set(marketData, analysis);
     return analysis;
 }

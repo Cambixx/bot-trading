@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScanEye, Radar, Target, Info, RefreshCw } from 'lucide-react';
 import { getPatternAnalysis } from '../services/aiAnalysis';
@@ -12,24 +12,40 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
     const [lastScan, setLastScan] = useState(null);
     const [error, setError] = useState(null);
 
+    // Load persisted scan results on mount
+    useEffect(() => {
+        const savedResult = localStorage.getItem(`hunter_result_${selectedSymbol}`);
+        const savedTime = localStorage.getItem(`hunter_time_${selectedSymbol}`);
+
+        if (savedResult) {
+            try {
+                setResult(JSON.parse(savedResult));
+                if (savedTime) setLastScan(new Date(savedTime));
+            } catch (e) {
+                console.error("Error parsing saved hunter result", e);
+            }
+        }
+    }, [selectedSymbol]);
+
+    const [cooldown, setCooldown] = useState(false);
+
     const handleScan = async () => {
-        if (!selectedSymbol) return;
+        if (!selectedSymbol || cooldown) return;
 
         setLoading(true);
         setResult(null);
         setError(null);
+        setCooldown(true);
 
         try {
             console.log('🔍 Pattern Hunter: Iniciando escaneo para', selectedSymbol);
-            
+
             // Fetch OHLCV candles (not just close prices)
             const klines = await binanceService.getKlines(selectedSymbol, '1h', 60);
-            
+
             if (!klines || klines.length === 0) {
                 throw new Error('No se pudieron obtener datos de velas');
             }
-
-            console.log('📊 Datos obtenidos:', klines.length, 'velas');
 
             // Build structured OHLCV data for better pattern detection
             const ohlcvData = klines.map(k => ({
@@ -41,9 +57,9 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
             }));
 
             // Validate OHLCV data
-            const isValid = ohlcvData.every(candle => 
-                !isNaN(candle.open) && !isNaN(candle.high) && 
-                !isNaN(candle.low) && !isNaN(candle.close) && 
+            const isValid = ohlcvData.every(candle =>
+                !isNaN(candle.open) && !isNaN(candle.high) &&
+                !isNaN(candle.low) && !isNaN(candle.close) &&
                 !isNaN(candle.volume)
             );
 
@@ -65,8 +81,6 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
                 current: currentPrice
             };
 
-            console.log('📈 Contexto:', { volumeTrend, avgVolume: avgVolume.toFixed(2), currentPrice });
-
             // Call AI with enhanced data
             const response = await getPatternAnalysis(selectedSymbol, ohlcvData, {
                 volumeTrend,
@@ -74,22 +88,23 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
                 priceRange
             });
 
-            console.log('🤖 Respuesta IA:', response);
-
             if (response.success && response.analysis) {
                 setResult(response.analysis);
-                setLastScan(new Date());
-                setError(null);
+                const now = new Date();
+                setLastScan(now);
+                localStorage.setItem(`hunter_result_${selectedSymbol}`, JSON.stringify(response.analysis));
+                localStorage.setItem(`hunter_time_${selectedSymbol}`, now.toISOString());
             } else {
-                throw new Error(response.error || 'No se recibió análisis de la IA');
+                setError(response.error || "Radar jammed by rate limits. Try again soon.");
             }
 
         } catch (error) {
             console.error('❌ Error en Pattern Hunter:', error);
-            setError(error.message || 'Error al escanear patrones');
-            setResult(null);
+            setError(error.message.includes("Rate Limit") ? "Too many requests. Radar cooling down..." : (error.message || 'Error al escanear patrones'));
         } finally {
             setLoading(false);
+            // 5s cooling period
+            setTimeout(() => setCooldown(false), 5000);
         }
     };
 

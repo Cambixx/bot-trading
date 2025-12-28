@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Stethoscope, HeartPulse, FileText, AlertCircle, Thermometer } from 'lucide-react';
 import { getTradeDoctorAnalysis } from '../services/aiAnalysis';
@@ -12,23 +12,40 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
     const [report, setReport] = useState(null);
     const [error, setError] = useState(null);
 
-    // Update local state if default changes (optional, but good for sync)
+    // Load persisted report on mount
+    useEffect(() => {
+        const savedReport = localStorage.getItem(`doctor_report_${selectedSymbol}`);
+        if (savedReport) {
+            try {
+                setReport(JSON.parse(savedReport));
+            } catch (e) {
+                console.error("Error parsing saved report", e);
+            }
+        }
+    }, [selectedSymbol]);
+
+    // Update local state if default changes (optional)
     // useEffect(() => { if(defaultSymbol) setSelectedSymbol(defaultSymbol); }, [defaultSymbol]);
 
+    const [cooldown, setCooldown] = useState(false);
+
     const handleDiagnose = async () => {
-        if (!selectedSymbol) return;
+        if (!selectedSymbol || cooldown) return;
 
         setLoading(true);
         setError(null);
         setReport(null);
+        setCooldown(true);
 
         try {
             // 1. Fetch Multi-Timeframe Data (15m, 1H, 4H)
             const [klines15m, klines1h, klines4h] = await Promise.all([
-                binanceService.getKlines(selectedSymbol, '15m', 100),
-                binanceService.getKlines(selectedSymbol, '1h', 100),
-                binanceService.getKlines(selectedSymbol, '4h', 50)
+                binanceService.getKlines(selectedSymbol, '15m', 100).catch(e => { throw new Error("Binance Service unavailable (15m)"); }),
+                binanceService.getKlines(selectedSymbol, '1h', 100).catch(e => { throw new Error("Binance Service unavailable (1h)"); }),
+                binanceService.getKlines(selectedSymbol, '4h', 50).catch(e => { throw new Error("Binance Service unavailable (4h)"); })
             ]);
+
+            if (!klines15m || !klines1h || !klines4h) throw new Error("Could not fetch market data.");
 
             const price = parseFloat(klines15m[klines15m.length - 1].close);
 
@@ -92,27 +109,17 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
             // 3. Build comprehensive technicals object
             const technicals = {
                 indicators: {
-                    // Multi-timeframe RSI
                     rsi15m: rsi15m[rsi15m.length - 1]?.toFixed(1) || 'N/A',
                     rsi1h: rsi1h[rsi1h.length - 1]?.toFixed(1) || 'N/A',
-                    // MACD
                     macd15m: macd15m.histogram[macd15m.histogram.length - 1]?.toFixed(4) || 'N/A',
                     macd1h: macd1h.histogram[macd1h.histogram.length - 1]?.toFixed(4) || 'N/A',
-                    // Bollinger
                     bbPosition: bbPos,
-                    // Trend
                     adx1h: adx1h?.toFixed(1) || 'N/A',
                     trend1h: trend1h,
-                    // Volatility
                     atr1h: atr1h?.toFixed(4) || 'N/A',
                     atrPercent: atr1h ? ((atr1h / price) * 100).toFixed(2) + '%' : 'N/A',
-                    // Volume
                     volumeRatio: volumeRatio + 'x avg',
                     volumeStatus: currentVolume > avgVolume * 1.5 ? 'HIGH' : currentVolume < avgVolume * 0.5 ? 'LOW' : 'NORMAL'
-                },
-                context: {
-                    timeframes: '15m/1H/4H',
-                    tradingStyle: 'Day Trading / Scalping'
                 }
             };
 
@@ -121,15 +128,21 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
 
             if (result.success && result.analysis) {
                 setReport(result.analysis);
+                localStorage.setItem(`doctor_report_${selectedSymbol}`, JSON.stringify(result.analysis));
+                if (result.isFallback) {
+                    setError("Notice: Using localized diagnostic tools. High congestion.");
+                }
             } else {
-                setError("The Doctor is currently unavailable.");
+                setError("The Doctor is currently on a break (Rate Limit). Try again in a minute.");
             }
 
         } catch (err) {
-            console.error(err);
-            setError("Failed to fetch patient data: " + err.message);
+            console.error("Doctor Error:", err);
+            setError("Diagnostic failed: " + (err.message.includes("Rate Limit") ? "Too many requests. Please wait." : err.message));
         } finally {
             setLoading(false);
+            // 5s cooling period for the button
+            setTimeout(() => setCooldown(false), 5000);
         }
     };
 

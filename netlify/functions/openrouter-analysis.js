@@ -71,7 +71,18 @@ export async function handler(event, context) {
             };
         }
 
+        const AI_MODELS = {
+            DEFAULT: 'deepseek/deepseek-chat',
+            REASONING: 'deepseek/deepseek-chat',
+            FAST: 'deepseek/deepseek-chat', // Switched from Gemini to avoid 404s
+            FREE: 'google/gemini-2.0-flash-exp:free'
+        };
+
         const { mode, symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward, marketData: globalMarketData, tradingMode } = inputData;
+
+        // Seleccionar modelo según el modo
+        let selectedModel = AI_MODELS.DEFAULT;
+        if (mode === 'MARKET_ORACLE') selectedModel = AI_MODELS.FAST;
 
         let prompt = '';
 
@@ -238,10 +249,11 @@ export async function handler(event, context) {
                 headers: {
                     "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                     "Content-Type": "application/json",
+                    "HTTP-Referer": "https://cambixx-bot.netlify.app",
                     "X-Title": "Cambixx Bot Production"
                 },
                 body: JSON.stringify({
-                    "model": "google/gemini-2.0-flash-exp:free",
+                    "model": selectedModel,
                     "messages": [
                         { "role": "system", "content": "Eres un asistente de trading experto. Responde siempre en formato JSON puro." },
                         { "role": "user", "content": prompt }
