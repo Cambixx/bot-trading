@@ -1,7 +1,17 @@
+
 /**
- * Netlify Serverless Function para análisis con IA usando OpenRouter
- * Sustituye a gemini-analysis.js con soporte multimodelo y mayor flexibilidad
+ * Fallback data if AI fails
  */
+function getFallbackAnalysis(mode) {
+    if (mode === 'MARKET_ORACLE') {
+        return { marketState: 'CHOPPY', headline: 'Market Analysis Paused', summary: 'AI service busy. Proceed with caution.', strategy: 'WAIT', sentimentScore: 50 };
+    } else if (mode === 'TRADE_DOCTOR') {
+        return { diagnosis: "System Overload", symptoms: ["API Rate Limit", "High Traffic"], prescription: "Wait 60s and retry.", prognosis: "Temporary congestion", healthScore: 50, tradability: "LOW" };
+    } else if (mode === 'PATTERN_HUNTER') {
+        return { detected: false, patterns: [], summary: "Radar jammed. Retrying..." };
+    }
+    return { sentiment: 'NEUTRAL', recommendation: 'HOLD', insights: ['System busy, try again later.'], riskAssessment: 'MEDIUM', confidenceScore: 50, reasoning: 'Fallback due to technical issues.' };
+}
 
 export async function handler(event, context) {
     // Solo permitir POST
@@ -217,26 +227,58 @@ export async function handler(event, context) {
                 }`;
         }
 
-        // Llamar a OpenRouter
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "model": "google/gemini-2.0-flash-exp:free",
-                "messages": [
-                    { "role": "system", "content": "Eres un asistente de trading experto. Responde siempre en formato JSON puro." },
-                    { "role": "user", "content": prompt }
-                ],
-                "temperature": 0.3
-            })
-        });
+        // Llamar a OpenRouter con lógica de reintento simple
+        let response;
+        let retryCount = 0;
+        const maxRetries = 1;
+
+        while (retryCount <= maxRetries) {
+            response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json",
+                    "X-Title": "Cambixx Bot Production"
+                },
+                body: JSON.stringify({
+                    "model": "google/gemini-2.0-flash-exp:free",
+                    "messages": [
+                        { "role": "system", "content": "Eres un asistente de trading experto. Responde siempre en formato JSON puro." },
+                        { "role": "user", "content": prompt }
+                    ],
+                    "temperature": 0.3
+                })
+            });
+
+            if (response.ok) break;
+
+            if (response.status === 429 && retryCount < maxRetries) {
+                console.warn(`⚠️ Rate limit hit, retrying in 2s... (Attempt ${retryCount + 1})`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                retryCount++;
+            } else {
+                break;
+            }
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
             console.error(`❌ OpenRouter Error (${response.status}):`, errorText);
+
+            // Si es 429 u otro error de limitación, devolvemos un éxito con el fallback
+            if (response.status === 429 || response.status === 503) {
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        success: true,
+                        analysis: getFallbackAnalysis(mode),
+                        isFallback: true,
+                        error: 'Rate limit hit'
+                    })
+                };
+            }
+
             return {
                 statusCode: response.status,
                 headers,

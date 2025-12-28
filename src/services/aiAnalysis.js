@@ -207,10 +207,10 @@ Responde SOLO con este JSON:
         if (!OPENROUTER_API_KEY) {
             console.error('❌ OpenRouter API Key no configurada');
             console.warn('💡 Configura VITE_OPENROUTER_API_KEY en tu archivo .env');
-            return { 
-                success: false, 
-                error: 'API Key no configurada. Revisa la configuración.', 
-                analysis: getFallbackAnalysis(mode) 
+            return {
+                success: false,
+                error: 'API Key no configurada. Revisa la configuración.',
+                analysis: getFallbackAnalysis(mode)
             };
         }
 
@@ -237,9 +237,15 @@ Responde SOLO con este JSON:
         );
 
         if (!response.ok) {
-            if (response.status === 429) {
-                console.warn('⚠️ OpenRouter Rate Limit Hit. Using Fallback.');
-                return { success: true, analysis: getFallbackAnalysis(mode), timestamp: new Date().toISOString() };
+            if (response.status === 429 || response.status === 503) {
+                console.warn('⚠️ OpenRouter Rate Limit Hit or Service Unavailable. Using Fallback.');
+                return {
+                    success: true,
+                    analysis: getFallbackAnalysis(mode),
+                    timestamp: new Date().toISOString(),
+                    isFallback: true,
+                    error: 'Rate limit hit'
+                };
             }
             throw new Error(`OpenRouter API failed: ${response.status} ${response.statusText}`);
         }
@@ -321,16 +327,16 @@ export async function getPatternAnalysis(symbol, prices, context) {
         console.error('❌ Pattern Analysis: Symbol is required');
         return { success: false, error: 'Symbol is required', analysis: null };
     }
-    
+
     if (!prices || !Array.isArray(prices) || prices.length === 0) {
         console.error('❌ Pattern Analysis: Invalid or empty prices array');
         return { success: false, error: 'Invalid price data', analysis: null };
     }
 
-    console.log('🔍 Pattern Analysis Request:', { 
-        symbol, 
-        pricesCount: prices.length, 
-        hasContext: !!context 
+    console.log('🔍 Pattern Analysis Request:', {
+        symbol,
+        pricesCount: prices.length,
+        hasContext: !!context
     });
 
     return await getAIAnalysis({ mode: 'PATTERN_HUNTER', symbol, prices: prices || [], context });

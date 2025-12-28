@@ -52,65 +52,46 @@ function Dashboard({
     // Fetch Market Oracle Data (Once on mount)
     useEffect(() => {
         const initOracle = async () => {
-            try {
-                // 1. Get Top 5 Coins by Volume for Market Breadth
-                const topSymbols = await binanceService.getTopCryptosByVolume(5);
+            const cachedOracle = localStorage.getItem('oracle_cache_v2');
+            const cachedTimestamp = localStorage.getItem('oracle_timestamp_v2');
+            const NOW = Date.now();
+            const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 Hours
 
-                // 2. Get 24h Stats for these coins
-                const statsPromises = topSymbols.map(sym => binanceService.getCurrentPrice(sym));
-                const topStats = await Promise.all(statsPromises);
+            // 1. Define refresh function (moved inside to have access to setOracleData)
+            window.refreshOracle = async () => {
+                setOracleLoading(true);
+                try {
+                    console.log('🔮 Fetching Fresh Market Data & AI Analysis...');
 
-                // 3. Prepare data for AI
-                const marketInput = topStats.map(s => ({
-                    symbol: s.symbol,
-                    change: s.priceChangePercent + '%',
-                    vol: (s.quoteVolume24h / 1000000).toFixed(1) + 'M'
-                }));
+                    // 1. Get Market Breadth (More comprehensive than just Top 5)
+                    const marketBreadth = await binanceService.getMarketBreadth();
 
-                // 4. Call AI (Check if we have cached data first? Service handles it if we implement cache there, 
-                // but for now let's rely on component state to not re-fetch on re-renders)
-                // Note: In a real app we'd cache this longer key in localStorage or Service.
+                    if (!marketBreadth) throw new Error('Failed to fetch market breadth');
 
-                // Check LocalStorage cache for Oracle to save tokens
-                const cachedOracle = localStorage.getItem('oracle_cache_v2');
-                const cachedTimestamp = localStorage.getItem('oracle_timestamp_v2');
-                const NOW = Date.now();
-                const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 Hours
+                    // 2. Call AI with breadth data
+                    const aiResult = await getMarketOracleAnalysis(marketBreadth);
 
-                // Define refresh function (moved inside to have access to setOracleData)
-                window.refreshOracle = async () => {
-                    setOracleLoading(true);
-                    try {
-                        console.log('🔮 Fetching Fresh Market Data & AI Analysis...');
-
-                        // 1. Get Market Breadth (More comprehensive than just Top 5)
-                        const marketBreadth = await binanceService.getMarketBreadth();
-
-                        if (!marketBreadth) throw new Error('Failed to fetch market breadth');
-
-                        // 2. Call AI with breadth data
-                        const aiResult = await getMarketOracleAnalysis(marketBreadth);
-
-                        if (aiResult.success && aiResult.analysis) {
-                            // Merge marketBreadth stats into analysis for UI display if needed
-                            const enrichedAnalysis = {
-                                ...aiResult.analysis,
-                                stats: {
-                                    btcDominance: marketBreadth.btcDominance,
-                                    totalVolume: marketBreadth.totalVolumeUSD,
-                                    marketAvgChange: marketBreadth.marketAvgChange
-                                }
-                            };
-                            setOracleData(enrichedAnalysis);
-                            localStorage.setItem('oracle_cache_v2', JSON.stringify(enrichedAnalysis));
-                            localStorage.setItem('oracle_timestamp_v2', String(Date.now()));
-                        }
-                    } catch (error) {
-                        console.error('Error refreshing Oracle:', error);
+                    if (aiResult.success && aiResult.analysis) {
+                        // Merge marketBreadth stats into analysis for UI display if needed
+                        const enrichedAnalysis = {
+                            ...aiResult.analysis,
+                            stats: {
+                                btcDominance: marketBreadth.btcDominance,
+                                totalVolume: marketBreadth.totalVolumeUSD,
+                                marketAvgChange: marketBreadth.marketAvgChange
+                            }
+                        };
+                        setOracleData(enrichedAnalysis);
+                        localStorage.setItem('oracle_cache_v2', JSON.stringify(enrichedAnalysis));
+                        localStorage.setItem('oracle_timestamp_v2', String(Date.now()));
                     }
-                    setOracleLoading(false);
-                };
+                } catch (error) {
+                    console.error('Error refreshing Oracle:', error);
+                }
+                setOracleLoading(false);
+            };
 
+            try {
                 if (cachedOracle && cachedTimestamp && (NOW - Number(cachedTimestamp) < CACHE_DURATION)) {
                     console.log('🔮 Using Cached Oracle Data');
                     setOracleData(JSON.parse(cachedOracle));
@@ -118,7 +99,6 @@ function Dashboard({
                 } else {
                     await window.refreshOracle();
                 }
-
             } catch (error) {
                 console.error('Error fetching Oracle initial data:', error);
                 setOracleData({
