@@ -15,8 +15,9 @@ const OPENROUTER_API_KEY = (import.meta.env && import.meta.env.VITE_OPENROUTER_A
 const AI_MODELS = {
     DEFAULT: 'deepseek/deepseek-chat',
     REASONING: 'deepseek/deepseek-chat',
-    FAST: 'deepseek/deepseek-chat', // Switched from Gemini to avoid 404s
-    FREE: 'google/gemini-2.0-flash-exp:free'
+    FAST: 'deepseek/deepseek-chat',
+    FREE: 'google/gemini-2.0-flash-exp:free',
+    NEXUS: 'deepseek/deepseek-chat'
 };
 
 /**
@@ -24,10 +25,12 @@ const AI_MODELS = {
  */
 async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
     const { mode, symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward, marketData: globalMarketData } = inputData;
+    const safeIndicators = indicators || {};
 
     // Seleccionar modelo según el modo
     let selectedModel = AI_MODELS.DEFAULT;
     if (mode === 'MARKET_ORACLE') selectedModel = AI_MODELS.FAST;
+    if (mode === 'NEXUS') selectedModel = AI_MODELS.NEXUS;
 
     let prompt = '';
 
@@ -71,13 +74,13 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
             Tu paciente es el par ${symbol} a $${price}.
             
             DATOS CLÍNICOS MULTI-TIMEFRAME:
-            📊 RSI 15m: ${indicators?.rsi15m || 'N/A'} | RSI 1H: ${indicators?.rsi1h || 'N/A'}
-            📈 MACD 15m: ${indicators?.macd15m || 'N/A'} | MACD 1H: ${indicators?.macd1h || 'N/A'}
-            📉 Bollinger: ${indicators?.bbPosition || 'N/A'}
-            💪 ADX 1H: ${indicators?.adx1h || 'N/A'} (Fuerza de tendencia)
-            🔥 Tendencia 1H: ${indicators?.trend1h || 'N/A'}
-            📊 ATR 1H: ${indicators?.atr1h || 'N/A'} (${indicators?.atrPercent || 'N/A'} volatilidad)
-            📢 Volumen: ${indicators?.volumeRatio || 'N/A'} (Estado: ${indicators?.volumeStatus || 'N/A'})
+            📊 RSI 15m: ${safeIndicators?.rsi15m || 'N/A'} | RSI 1H: ${safeIndicators?.rsi1h || 'N/A'}
+            📈 MACD 15m: ${safeIndicators?.macd15m || 'N/A'} | MACD 1H: ${safeIndicators?.macd1h || 'N/A'}
+            📉 Bollinger: ${safeIndicators?.bbPosition || 'N/A'}
+            💪 ADX 1H: ${safeIndicators?.adx1h || 'N/A'} (Fuerza de tendencia)
+            🔥 Tendencia 1H: ${safeIndicators?.trend1h || 'N/A'}
+            📊 ATR 1H: ${safeIndicators?.atr1h || 'N/A'} (${safeIndicators?.atrPercent || 'N/A'} volatilidad)
+            📢 Volumen: ${safeIndicators?.volumeRatio || 'N/A'} (Estado: ${safeIndicators?.volumeStatus || 'N/A'})
 
             Tu tarea como ESPECIALISTA EN DAY TRADING:
             1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Momentum", "Fiebre de FOMO", "Consolidación Lateral", "Breakout Inminente").
@@ -160,6 +163,40 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
               "summary": "Resumen ejecutivo para day trading",
               "actionable": "NOW/WAIT/AVOID"
             }`;
+    } else if (mode === 'NEXUS') {
+        const { btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers } = globalMarketData || {};
+
+        prompt = `Eres "Nexus Intelligence", un sistema de IA de grado militar que procesa señales globales para un fondo de cobertura cripto.
+            
+            INTELIGENCIA DE MERCADO BINANCE:
+            - Dominancia BTC: ${btcDominance}%
+            - Volumen: ${totalVolumeUSD}
+            - Cambio Promedio: ${marketAvgChange}
+            - Heatmap (Top Gainers): ${topGainers?.map(g => g.symbol).join(', ')}
+            - Heatmap (Top Losers): ${topLosers?.map(l => l.symbol).join(', ')}
+
+            Tu tarea es sintetizar esta información y "DEDUCIR" el estado de los indicadores que no tenemos (Whales y Macro) basándote en la acción del precio actual.
+
+            1. SENTIMIENTO: Escala 0-100.
+            2. WHALE RADAR: Inventa 2-3 "Detecciones de Ballenas" coherentes con la dirección del mercado (ej: si el mercado sube, detecta Outflows de Exchanges).
+            3. MACRO: Deduce valores realistas para DXY y S&P 500 que justifiquen el movimiento cripto (ej: si BTC sube fuerte, el DXY probablemente esté bajando).
+
+            Responde SOLO con este JSON:
+            {
+              "success": true,
+              "sentiment": {
+                "score": 0-100,
+                "label": "FEAR/GREED/NEUTRAL",
+                "summary": "Resumen táctico de 2 frases"
+              },
+              "whaleAlerts": [
+                { "id": 1, "type": "INFLOW/OUTFLOW", "amount": "XXX BTC", "from": "Capa", "to": "Exchange", "time": "Just now" }
+              ],
+              "macro": {
+                "dxy": { "value": 000.0, "trend": "Up/Down/Flat" },
+                "sp500": { "value": 0000, "trend": "Up/Down/Flat" }
+              }
+            }`;
     } else {
         let modeContext = '';
         if (tradingMode === 'CONSERVATIVE') {
@@ -181,9 +218,9 @@ Analiza la siguiente oportunidad de trading:
 - Régimen de Mercado Detectado: ${regime || 'Desconocido'}
 
 **Análisis Técnico**:
-- RSI: ${indicators.rsi || 'N/A'}
-- MACD: ${indicators.macd || 'N/A'}
-- ADX: ${indicators.adx || 'N/A'}
+- RSI: ${safeIndicators?.rsi || 'N/A'}
+- MACD: ${safeIndicators?.macd || 'N/A'}
+- ADX: ${safeIndicators?.adx || 'N/A'}
 
 **Señales Detectadas**:
 ${reasons && reasons.length > 0 ? reasons.map(r => `- ${r.text} (Peso: ${r.weight}%)`).join('\n') : 'N/A'}
@@ -380,6 +417,18 @@ export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode
     return { ...signal, aiEnriched: false, aiError: aiResult.error };
 }
 
+/**
+ * Obtener análisis de Inteligencia Nexus (Sentimiento Global, Whales, Macro)
+ * @param {Object} marketBreadth - Datos globales del mercado
+ * @returns {Promise<Object>} Análisis de inteligencia
+ */
+export async function getNexusIntelligence(marketBreadth) {
+    return await getCachedAIAnalysis({
+        mode: 'NEXUS',
+        marketData: marketBreadth
+    }, 3600000); // 1 hour cache
+}
+
 class AIAnalysisCache {
     constructor() {
         this.cache = new Map();
@@ -388,6 +437,7 @@ class AIAnalysisCache {
     getKey(marketData) {
         const { mode, symbol, price } = marketData;
         if (mode === 'MARKET_ORACLE') return 'GLOBAL_MARKET_ORACLE';
+        if (mode === 'NEXUS') return 'GLOBAL_NEXUS_HUB';
 
         // Round price to reduce cache misses on tiny fluctuations
         const roundedPrice = price ? (Math.round(price * 100) / 100) : 0;

@@ -6,6 +6,7 @@ import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
 import MLSignalSection from '../components/MLSignalSection';
 import MarketOracle from '../components/MarketOracle'; // Import Oracle
+import NexusHub from '../components/NexusHub'; // Import Nexus
 import TradeDoctor from '../components/TradeDoctor'; // Import Doctor
 import PatternHunter from '../components/PatternHunter'; // Import Hunter
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
@@ -137,6 +138,11 @@ function Dashboard({
                     loading={oracleLoading}
                     onRefresh={() => window.refreshOracle && window.refreshOracle()}
                 />
+            </motion.div>
+
+            {/* NEW: Nexus Intelligence Hub (Global Pulsar) */}
+            <motion.div variants={itemVariants}>
+                <NexusHub />
             </motion.div>
 
             {/* 3. AI Tools Section: Doctor + Hunter */}
