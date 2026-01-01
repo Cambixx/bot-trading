@@ -1,46 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, TrendingUp, TrendingDown, Activity, AlertTriangle, CloudRain, Sun, Zap, RefreshCw } from 'lucide-react';
 import './MarketOracle.css';
 
-const MarketOracle = ({ analysis, loading, onRefresh }) => {
-    // Definir configuración visual según el estado del mercado
-    const getStateConfig = (state) => {
-        switch (state) {
-            case 'RISK_ON':
-                return {
-                    icon: <RocketIcon />,
-                    color: '#00ff9d',
-                    bg: 'rgba(0, 255, 157, 0.1)',
-                    label: 'RISK ON'
+import { getMarketOracleAnalysis } from '../services/aiAnalysis';
+import binanceService from '../services/binanceService';
+
+const MarketOracle = () => {
+    const [analysis, setAnalysis] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [lastSync, setLastSync] = useState(null);
+
+    // Initial load from local storage
+    useEffect(() => {
+        const cached = localStorage.getItem('oracle_cache_v3');
+        if (cached) {
+            try {
+                setAnalysis(JSON.parse(cached));
+                const ts = localStorage.getItem('oracle_ts_v3');
+                if (ts) setLastSync(new Date(parseInt(ts)));
+            } catch (e) { console.error(e); }
+        }
+    }, []);
+
+    const handleRefresh = async () => {
+        setLoading(true);
+        try {
+            // 1. Get Market Breadth
+            const marketBreadth = await binanceService.getMarketBreadth();
+            if (!marketBreadth) throw new Error('Market data unavailable');
+
+            // 2. AI Analysis
+            const aiResult = await getMarketOracleAnalysis(marketBreadth);
+
+            if (aiResult.success && aiResult.analysis) {
+                const enriched = {
+                    ...aiResult.analysis,
+                    stats: {
+                        btcDominance: marketBreadth.btcDominance,
+                        totalVolume: marketBreadth.totalVolumeUSD
+                    }
                 };
-            case 'RISK_OFF':
-                return {
-                    icon: <ShieldIcon />,
-                    color: '#ff4d4d',
-                    bg: 'rgba(255, 77, 77, 0.1)',
-                    label: 'RISK OFF'
-                };
-            case 'ALT_SEASON':
-                return {
-                    icon: <Zap size={20} />,
-                    color: '#bd00ff',
-                    bg: 'rgba(189, 0, 255, 0.1)',
-                    label: 'ALT SEASON'
-                };
-            case 'CHOPPY':
-            default:
-                return {
-                    icon: <CloudRain size={20} />,
-                    color: '#fbbf24',
-                    bg: 'rgba(251, 191, 36, 0.1)',
-                    label: 'CHOPPY'
-                };
+                setAnalysis(enriched);
+                setLastSync(new Date());
+                localStorage.setItem('oracle_cache_v3', JSON.stringify(enriched));
+                localStorage.setItem('oracle_ts_v3', Date.now().toString());
+            }
+        } catch (error) {
+            console.error('Oracle Error:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Placeholder mientras carga
-    if (loading) {
+    const getStateConfig = (state) => {
+        switch (state) {
+            case 'RISK_ON': return { icon: <RocketIcon />, color: '#00ff9d', bg: 'rgba(0, 255, 157, 0.1)', label: 'RISK ON' };
+            case 'RISK_OFF': return { icon: <ShieldIcon />, color: '#ff4d4d', bg: 'rgba(255, 77, 77, 0.1)', label: 'RISK OFF' };
+            case 'BTC_LED': return { icon: <TrendingUp size={20} />, color: '#f7931a', bg: 'rgba(247, 147, 26, 0.1)', label: 'BTC LED' };
+            case 'ALT_SEASON': return { icon: <Zap size={20} />, color: '#bd00ff', bg: 'rgba(189, 0, 255, 0.1)', label: 'ALT SEASON' };
+            default: return { icon: <CloudRain size={20} />, color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.1)', label: 'CHOPPY' };
+        }
+    };
+
+    if (!analysis && !loading) {
+        return (
+            <div className="market-oracle glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', justifyContent: 'center' }}>
+                <div style={{ marginBottom: '1rem', color: 'var(--color-primary)' }}>
+                    <Brain size={32} />
+                </div>
+                <h3 style={{ margin: '0 0 1rem 0' }}>THE MARKET ORACLE</h3>
+                <p style={{ textAlign: 'center', opacity: 0.7, maxWidth: '300px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                    analyze global market regime, sentiment, and capital flow using statistical data.
+                </p>
+                <button
+                    onClick={handleRefresh}
+                    className="oracle-refresh-btn"
+                    style={{ width: 'auto', padding: '10px 24px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)' }}
+                >
+                    INITIALIZE ORACLE
+                </button>
+            </div>
+        );
+    }
+
+    if (loading && !analysis) {
         return (
             <div className="market-oracle glass-card loading-state">
                 <div className="oracle-header shimmer-line" style={{ width: '40%' }}></div>
@@ -51,15 +95,7 @@ const MarketOracle = ({ analysis, loading, onRefresh }) => {
         );
     }
 
-    const safeAnalysis = analysis || {
-        marketState: 'CHOPPY',
-        headline: 'Oracle Offline',
-        summary: 'Waiting for market data connection...',
-        strategy: 'WAIT',
-        sentimentScore: 50
-    };
-
-    const { marketState, headline, summary, strategy, sentimentScore } = safeAnalysis;
+    const { marketState, headline, summary, strategy, sentimentScore } = analysis;
     const config = getStateConfig(marketState || 'CHOPPY');
 
     return (
@@ -77,9 +113,9 @@ const MarketOracle = ({ analysis, loading, onRefresh }) => {
                     <span className="oracle-name">THE MARKET ORACLE</span>
                     <button
                         className={`oracle-refresh-btn ${loading ? 'loading' : ''}`}
-                        onClick={onRefresh}
+                        onClick={handleRefresh}
                         disabled={loading}
-                        title="Actualizar análisis (consume créditos)"
+                        title="Refresh Analysis"
                     >
                         <RefreshCw size={14} />
                     </button>
@@ -112,7 +148,7 @@ const MarketOracle = ({ analysis, loading, onRefresh }) => {
                     </div>
 
                     <div className="strategy-box">
-                        <span className="strategy-label">TODAY'S STRATEGY</span>
+                        <span className="strategy-label">STRATEGY</span>
                         <span className="strategy-value">{strategy}</span>
                     </div>
                 </div>
@@ -120,13 +156,21 @@ const MarketOracle = ({ analysis, loading, onRefresh }) => {
                 {/* Middle: Narrative */}
                 <div className="oracle-narrative-col">
                     <h2 className="oracle-headline">"{headline}"</h2>
+
+                    {analysis.keyDriver && (
+                        <div className="key-driver-box" style={{ marginBottom: '1rem', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', borderLeft: '3px solid var(--color-accent)' }}>
+                            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.7, display: 'block' }}>Key Driver</span>
+                            <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{analysis.keyDriver}</span>
+                        </div>
+                    )}
+
                     <p className="oracle-summary">{summary}</p>
 
-                    {safeAnalysis.coinsToWatch && safeAnalysis.coinsToWatch.length > 0 && (
+                    {analysis.coinsToWatch && analysis.coinsToWatch.length > 0 && (
                         <div className="watch-pills">
                             <span className="watch-label">WATCH:</span>
-                            {safeAnalysis.coinsToWatch.map(coin => (
-                                <span key={coin} className="watch-pill">{coin}</span>
+                            {analysis.coinsToWatch.map((coin, i) => (
+                                <span key={i} className="watch-pill">{coin}</span>
                             ))}
                         </div>
                     )}
@@ -134,23 +178,23 @@ const MarketOracle = ({ analysis, loading, onRefresh }) => {
 
                 {/* Right: Detailed Stats */}
                 <div className="oracle-stats-col">
-                    {safeAnalysis.stats && (
+                    {analysis.stats && (
                         <div className="stats-grid">
                             <div className="stat-item">
                                 <span className="stat-label">BTC DOM</span>
-                                <span className="stat-val">{safeAnalysis.stats.btcDominance}%</span>
+                                <span className="stat-val">{analysis.stats.btcDominance}%</span>
                             </div>
                             <div className="stat-item">
                                 <span className="stat-label">VOL 24H</span>
-                                <span className="stat-val">{safeAnalysis.stats.totalVolume}</span>
+                                <span className="stat-val">{analysis.stats.totalVolume}</span>
                             </div>
                             <div className="stat-item">
                                 <span className="stat-label">TF</span>
-                                <span className="stat-val">{safeAnalysis.suggestedTimeframe || '1H'}</span>
+                                <span className="stat-val">{analysis.suggestedTimeframe || '1H'}</span>
                             </div>
                             <div className="stat-item">
                                 <span className="stat-label">VOLATILITY</span>
-                                <span className={`stat-val ${safeAnalysis.volatility?.toLowerCase()}`}>{safeAnalysis.volatility || 'N/A'}</span>
+                                <span className={`stat-val ${analysis.volatility?.toLowerCase()}`}>{analysis.volatility || 'N/A'}</span>
                             </div>
                         </div>
                     )}

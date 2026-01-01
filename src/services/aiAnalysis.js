@@ -322,13 +322,33 @@ Responde SOLO con este JSON:
 
 function getFallbackAnalysis(mode) {
     if (mode === 'MARKET_ORACLE') {
-        return { marketState: 'CHOPPY', headline: 'Market Analysis Paused', summary: 'AI service busy. Proceed with caution.', strategy: 'WAIT', sentimentScore: 50 };
+        return {
+            marketState: 'CHOPPY',
+            headline: 'Data Feed Interrupted',
+            summary: 'Unable to calculate global market regime.',
+            strategy: 'WAIT',
+            sentimentScore: 50,
+            volatility: 'LOW',
+            coinsToWatch: []
+        };
     } else if (mode === 'TRADE_DOCTOR') {
-        return { diagnosis: "System Overload", symptoms: ["API Rate Limit", "High Traffic"], prescription: "Wait 60s and retry.", prognosis: "Temporary congestion", healthScore: 50 };
+        return {
+            diagnosis: "Connection Lost",
+            symptoms: ["Vital signs missing"],
+            prescription: "Retry diagnosis.",
+            prognosis: "Unknown",
+            healthScore: 50,
+            tradability: "LOW"
+        };
     } else if (mode === 'PATTERN_HUNTER') {
-        return { detected: false, patterns: [], summary: "Radar jammed. Retrying..." };
+        return {
+            detected: false,
+            patterns: [],
+            summary: "Pattern recognition offline.",
+            actionable: "NO_TRADE"
+        };
     }
-    return { sentiment: 'NEUTRAL', recommendation: 'HOLD', insights: ['System busy, try again later.'], riskAssessment: 'MEDIUM', confidenceScore: 50, reasoning: 'Fallback due to technical issues.' };
+    return { sentiment: 'NEUTRAL', recommendation: 'HOLD', insights: ['System busy.'], riskAssessment: 'MEDIUM', confidenceScore: 50, reasoning: 'Fallback.' };
 }
 
 /**
@@ -426,7 +446,7 @@ export async function getNexusIntelligence(marketBreadth) {
     return await getCachedAIAnalysis({
         mode: 'NEXUS',
         marketData: marketBreadth
-    }, 3600000); // 1 hour cache
+    }, 300000); // 5 minutes cache
 }
 
 class AIAnalysisCache {

@@ -87,7 +87,6 @@
 .nexus-refresh:hover:not(:disabled) {
     background: var(--color-info-glow);
     color: var(--color-info-light);
-    transform: rotate(30deg);
 }
 
 .nexus-refresh.loading {

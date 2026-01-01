@@ -1,18 +1,42 @@
-
 /**
  * Fallback data if AI fails
  */
 function getFallbackAnalysis(mode) {
     if (mode === 'MARKET_ORACLE') {
-        return { marketState: 'CHOPPY', headline: 'Market Analysis Paused', summary: 'AI service busy. Proceed with caution.', strategy: 'WAIT', sentimentScore: 50 };
+        return {
+            marketState: 'CHOPPY',
+            headline: 'Data Feed Interrupted',
+            summary: 'Unable to calculate global market regime. Maintain neutral positioning.',
+            strategy: 'WAIT',
+            sentimentScore: 50,
+            volatility: 'LOW',
+            coinsToWatch: ['BTCUSDC']
+        };
     } else if (mode === 'TRADE_DOCTOR') {
-        return { diagnosis: "System Overload", symptoms: ["API Rate Limit", "High Traffic"], prescription: "Wait 60s and retry.", prognosis: "Temporary congestion", healthScore: 50, tradability: "LOW" };
+        return {
+            diagnosis: "Connection Lost",
+            symptoms: ["Vital signs missing", "Telemetry offline"],
+            prescription: "Check internet connection and retry.",
+            prognosis: "Unknown",
+            healthScore: 50,
+            tradability: "LOW"
+        };
     } else if (mode === 'PATTERN_HUNTER') {
-        return { detected: false, patterns: [], summary: "Radar jammed. Retrying..." };
+        return {
+            detected: false,
+            patterns: [],
+            summary: "Pattern recognition module offline.",
+            actionable: "NO_TRADE"
+        };
     } else if (mode === 'NEXUS') {
-        return { success: true, sentiment: { score: 50, label: 'NEUTRAL', summary: 'AI intelligence currently recalibrating frequencies.' }, whaleAlerts: [], macro: { dxy: { value: 100, trend: 'Flat' }, sp500: { value: 5000, trend: 'Flat' } } };
+        return {
+            success: true,
+            sentiment: { score: 50, label: 'NEUTRAL', summary: 'System recalibrating. Using technical baseline.' },
+            hotlist: [],
+            marketStats: { volatility: 'MEDIUM', trend: 'RANGE', btcDominance: '0%' }
+        };
     }
-    return { sentiment: 'NEUTRAL', recommendation: 'HOLD', insights: ['System busy, try again later.'], riskAssessment: 'MEDIUM', confidenceScore: 50, reasoning: 'Fallback due to technical issues.' };
+    return { sentiment: 'NEUTRAL', recommendation: 'HOLD', insights: ['System busy.'], riskAssessment: 'MEDIUM', confidenceScore: 50, reasoning: 'Fallback.' };
 }
 
 export async function handler(event, context) {
@@ -44,6 +68,7 @@ export async function handler(event, context) {
     try {
         // Obtener API key de variables de entorno (Configurar en Netlify!)
         const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+        const NEWS_API_KEY = process.env.VITE_NEWS_API_KEY;
 
         if (!OPENROUTER_API_KEY) {
             console.error('OPENROUTER_API_KEY not found in environment variables');
@@ -95,71 +120,86 @@ export async function handler(event, context) {
         if (mode === 'MARKET_ORACLE') {
             const { topCoins, btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers } = globalMarketData || {};
 
-            prompt = `Eres un estratega jefe de mercado de criptomonedas (Chief Market Strategist).
-                Tu trabajo es analizar la "Salud del Mercado" global y dar una directriz clara para el día.
+            // 1. Fetch News
+            let newsContext = "No real-time news available.";
+            try {
+                if (NEWS_API_KEY) {
+                    const newsResponse = await fetch(`https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=5&apiKey=${NEWS_API_KEY}`);
+                    if (newsResponse.ok) {
+                        const newsData = await newsResponse.json();
+                        if (newsData.articles) {
+                            newsContext = newsData.articles.map(a => `- ${a.title} (${a.source.name})`).join('\n');
+                        }
+                    } else {
+                        console.warn("NewsAPI Error:", newsResponse.status);
+                    }
+                }
+            } catch (err) {
+                console.warn("News Fetch Error:", err);
+            }
 
-                DATOS DEL MERCADO GLOBAL:
-                - Dominancia BTC: ${btcDominance}% (Si sube, BTC absorbe liquidez; si baja, dinero fluye a Alts)
+            prompt = `Eres un Analista Cuantitatvo de Mercado (Quant Analyst) y un experto en Geopolítica Financiera.
+                Tu trabajo es sintetizar los DATOS TÉCNICOS con las NOTICIAS GLOBALES para ofrecer una visión de mercado profunda y profesional.
+
+                NOTICIAS DE ÚLTIMA HORA (NewsAPI):
+                ${newsContext}
+
+                DATOS DEL MERCADO GLOBAL (Binance USDC):
+                - Dominancia BTC: ${btcDominance}%
                 - Volumen Total 24h: $${totalVolumeUSD}
-                - Cambio Promedio Mercado: ${marketAvgChange}
+                - Cambio Promedio (Top 20): ${marketAvgChange}
                 
-                GANADORES (Heat): ${topGainers?.map(g => `${g.symbol} (${g.change}%)`).join(', ')}
-                PERDEDORES: ${topLosers?.map(l => `${l.symbol} (${l.change}%)`).join(', ')}
-                
-                DETALLE TOP ASSETS:
-                ${JSON.stringify(topCoins?.slice(0, 10), null, 2)}
+                MOMENTUM DEL MERCADO:
+                - Ganadores (Hot): ${topGainers?.map(g => `${g.symbol} (${g.change}%)`).join(', ')}
+                - Perdedores (Cold): ${topLosers?.map(l => `${l.symbol} (${l.change}%)`).join(', ')}
 
                 Tu tarea:
-                1. Analizar el SENTIMIENTO GENERAL: ¿Hay apetito por el riesgo (Risk-On) o miedo (Risk-Off)?
-                2. Definir el ESTADO DEL MERCADO: RISK_ON, RISK_OFF, CHOPPY, ALT_SEASON.
-                3. Redactar un TITULAR impactante basado en los datos.
-                4. Escribir un RESUMEN narrativo explicando el flujo de dinero (BTC vs Alts).
-                5. Sugerir 2-3 "MONEDAS A VIGILAR" hoy y el TIME-FRAME sugerido (ej: 15m para Scalping, 1H para Intraday).
+                1. DETERMINAR RÉGIMEN: Cruza los datos técnicos con las noticias. ¿El mercado sube por fundamentales o solo por flujo?
+                2. GENERAR NARRATIVA: Escribe un análisis detallado (2-3 oraciones) que explique POR QUÉ el mercado se mueve así, citando las noticias si son relevantes.
+                3. IDENTIFICAR DRIVER: ¿Cuál es el evento principal? (Fed, Guerra, Earnings, o "Technical Rebound").
 
                 Responde SOLO con este JSON:
                 {
-                  "marketState": "RISK_ON / RISK_OFF / CHOPPY / ALT_SEASON",
-                  "headline": "Titular corto y directo (max 6 palabras)",
-                  "summary": "Resumen narrativo del estado del mercado (max 2 frases).",
-                  "strategy": "BREAKOUTS / DIPS / SCALPING / WAIT",
-                  "sentimentScore": 0-100 (0=Pánico, 100=Euforia),
-                  "coinsToWatch": ["BTCUSDC", "SYMBOL"],
-                  "suggestedTimeframe": "15m / 1h / 4h",
+                  "marketState": "RISK_ON / RISK_OFF / BTC_LED / ALT_SEASON / CHOPPY",
+                  "headline": "Titular Profesional e Impactante (basado en noticias/datos)",
+                  "summary": "Análisis rico y contextual. Úsalo para explicar la correlación entre las noticias y el precio. Sé específico.",
+                  "keyDriver": "El factor principal moviendo el mercado hoy (ej: 'Datos de inflación de EE.UU.')",
+                  "strategy": "MOMENTUM / MEAN_REVERSION / SCALPING / WAIT",
+                  "sentimentScore": 0-100,
+                  "coinsToWatch": ["SYMBOL1", "SYMBOL2"],
+                  "suggestedTimeframe": "5m / 15m / 1h",
                   "volatility": "LOW / MEDIUM / HIGH"
                 }`;
         } else if (mode === 'TRADE_DOCTOR') {
-            prompt = `Eres "Dr. Market", un cirujano de day trading cínico, directo y extremadamente perspicaz.
+            prompt = `Eres "Dr. Market", un algoritmo de diagnóstico de trading. Eres cínico, técnico y directo.
                 Tu paciente es el par ${symbol} a $${price}.
                 
-                DATOS CLÍNICOS MULTI-TIMEFRAME:
-                📊 RSI 15m: ${safeIndicators?.rsi15m || 'N/A'} | RSI 1H: ${safeIndicators?.rsi1h || 'N/A'}
-                📈 MACD 15m: ${safeIndicators?.macd15m || 'N/A'} | MACD 1H: ${safeIndicators?.macd1h || 'N/A'}
-                📉 Bollinger: ${safeIndicators?.bbPosition || 'N/A'}
-                💪 ADX 1H: ${safeIndicators?.adx1h || 'N/A'} (Fuerza de tendencia)
-                🔥 Tendencia 1H: ${safeIndicators?.trend1h || 'N/A'}
-                📊 ATR 1H: ${safeIndicators?.atr1h || 'N/A'} (${safeIndicators?.atrPercent || 'N/A'} volatilidad)
-                📢 Volumen: ${safeIndicators?.volumeRatio || 'N/A'} (Estado: ${safeIndicators?.volumeStatus || 'N/A'})
+                SIGNOS VITALES (Datos Reales):
+                - RSI: 15m=${safeIndicators?.rsi15m} | 1H=${safeIndicators?.rsi1h}
+                - MACD: 15m=${safeIndicators?.macd15m} | 1H=${safeIndicators?.macd1h}
+                - Tendencia (EMA): ${safeIndicators?.trend1h}
+                - Volatilidad (ATR): ${safeIndicators?.atrPercent}
+                - Volumen: ${safeIndicators?.volumeRatio} (${safeIndicators?.volumeStatus})
+                - Bollinger: ${safeIndicators?.bbPosition}
 
-                Tu tarea como ESPECIALISTA EN DAY TRADING:
-                1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Momentum", "Fiebre de FOMO", "Consolidación Lateral", "Breakout Inminente").
-                2. SÍNTOMAS: Lista 3-4 evidencias técnicas que apoyan tu diagnóstico usando los datos multi-timeframe.
-                3. RECETA: ¿Qué debe hacer el trader AHORA? Sé específico (ej: "Long si rompe $X con stop en $Y", "Esperar pullback a EMA21", "No tocar, muy choppy").
-                4. NIVELES CRÍTICOS: Sugiere Entry, Stop Loss y Take Profit basados en el ATR.
-                5. PRONÓSTICO: ¿Qué esperar en las próximas 1-4 horas?
+                TU DIAGNÓSTICO PROFESIONAL:
+                1. Analiza la congruencia de los indicadores. ¿Confirman una dirección o divergen?
+                2. Identifica la condición: Sobrecompra, Sobreventa, Acumulación, Distribución, o Extensión de Tendencia.
+                3. RECETA: Da una instrucción precisa. Si no hay setup claro, receta "PACIENCIA".
 
                 Responde SOLO con este JSON:
                 {
-                  "diagnosis": "Diagnóstico médico creativo y técnico",
-                  "symptoms": ["Síntoma 1 con datos", "Síntoma 2 con datos", "Síntoma 3 con datos"],
-                  "prescription": "Consejo de acción directo y específico",
+                  "diagnosis": "Diagnóstico técnico corto (ej: 'Divergencia Bajista en 1H')",
+                  "symptoms": ["RSI en sobrecompra", "Volumen decreciente", "Rechazo en BB Superior"],
+                  "prescription": "Instrucción clara (ej: 'Buscar cortos en rebote a $XXXX')",
                   "levels": {
-                    "entry": "Precio de entrada sugerido o 'Esperar'",
-                    "stopLoss": "Nivel de SL basado en ATR",
-                    "takeProfit": "Nivel de TP con ratio R:R"
+                    "entry": "Precio ideal o 'NOW'",
+                    "stopLoss": "Precio exacto",
+                    "takeProfit": "Precio exacto"
                   },
-                  "prognosis": "Predicción a corto plazo (1-4h)",
-                  "tradability": "HIGH/MEDIUM/LOW (qué tan operable es ahora)",
-                  "healthScore": 0-100 (0=Crash inminente, 100=Pump fuerte)
+                  "prognosis": "Proyección técnica probable",
+                  "tradability": "HIGH (Setup claro) / MEDIUM / LOW (Riesgo alto/Confuso)",
+                  "healthScore": 0-100 (Salud de la tendencia/movimiento)
                 }`;
         } else if (mode === 'PATTERN_HUNTER') {
             const { prices, context } = inputData;
@@ -179,82 +219,85 @@ export async function handler(event, context) {
                 priceData = 'No price data available';
             }
 
-            prompt = `Eres "The Pattern Hunter", un algoritmo de IA especializado en análisis técnico y reconocimiento de patrones gráficos para DAY TRADING.
-                
-                DATOS OHLCV (Últimas 20 velas, 1H):
+            prompt = `Eres "The Pattern Hunter". Tu ÚNICO trabajo es encontrar patrones geométricos validos en los datos OHLCV proporcionados. Eres escéptico: si no hay patrón, di que no hay.
+
+                DATOS OHLCV (1H, Últimas 20 velas):
                 ${priceData}
                 
-                CONTEXTO DE VOLUMEN:
-                ${context ? `Tendencia: ${context.volumeTrend}, Volumen promedio: ${context.avgVolume?.toFixed(0)}` : 'No disponible'}
-                ${context?.priceRange ? `Rango 24h: $${context.priceRange.low24h?.toFixed(2)} - $${context.priceRange.high24h?.toFixed(2)} | Actual: $${context.priceRange.current?.toFixed(2)}` : ''}
-                
-                Tu tarea es analizar la ESTRUCTURA DE PRECIOS y buscar:
-                1. PATRONES CLÁSICOS: H&S, Doble Techo/Suelo, Cuñas, Banderas, Triángulos
-                2. SOPORTES Y RESISTENCIAS: Niveles clave basados en los highs/lows
-                3. BREAKOUT ZONES: Dónde se activaría el patrón
-                4. TARGETS: Objetivo estimado basado en el patrón
-                
-                IMPORTANTE: 
-                - El volumen DEBE confirmar los patrones (volumen creciente en breakouts)
-                - Sé HONESTO: si no hay patrón claro, dilo
-                - Da NIVELES ESPECÍFICOS para operar
+                CONTEXTO:
+                Precio Actual: ${context?.priceRange?.current?.toFixed(2)}
+                Tendencia Volumen: ${context?.volumeTrend}
+
+                TAREA DE RECONOCIMIENTO:
+                Busca patrones de libro de texto:
+                - Triángulos (Ascendente/Descendente/Simétrico)
+                - Banderas / Banderines
+                - Doble Suelo / Doble Techo
+                - Hombro-Cabeza-Hombro (Normal/Invertido)
+
+                REGLAS:
+                1. El patrón debe ser visible en las últimas 20 velas.
+                2. El volumen debe apoyar la formación.
+                3. Calcula Targets y Stop Loss basados en la altura del patrón.
 
                 Responde SOLO con este JSON:
                 {
                   "detected": true/false,
                   "patterns": [
                     { 
-                      "name": "Nombre del Patrón", 
+                      "name": "Nombre Exacto (ej: Bull Flag)", 
                       "confidence": "High/Medium/Low", 
                       "signal": "BULLISH/BEARISH",
-                      "description": "Dónde se ve el patrón",
-                      "breakoutLevel": "Precio de activación",
-                      "target": "Objetivo del patrón",
-                      "stopLoss": "Stop sugerido",
+                      "description": "Breve descripción técnica",
+                      "breakoutLevel": "Nivel de ruptura exacto",
+                      "target": "Nivel objetivo",
+                      "stopLoss": "Validación de fallo",
                       "volumeConfirmed": true/false
                     }
                   ],
                   "keyLevels": {
-                    "resistance": "Nivel de resistencia principal",
-                    "support": "Nivel de soporte principal"
+                    "resistance": "Resistencia más cercana",
+                    "support": "Soporte más cercano"
                   },
-                  "summary": "Resumen ejecutivo para day trading",
-                  "actionable": "NOW/WAIT/AVOID"
+                  "summary": "Resumen técnico de la estructura de mercado.",
+                  "actionable": "ENTER_NOW / WAIT_BREAKOUT / WAIT_PULLBACK / NO_TRADE"
                 }`;
         } else if (mode === 'NEXUS') {
             const { btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers } = globalMarketData || {};
 
-            prompt = `Eres "Nexus Intelligence", un sistema de IA de grado militar que procesa señales globales para un fondo de cobertura cripton.
-                
-                INTELIGENCIA DE MERCADO BINANCE:
-                - Dominancia BTC: ${btcDominance}%
-                - Volumen: ${totalVolumeUSD}
-                - Cambio Promedio: ${marketAvgChange}
-                - Heatmap (Top Gainers): ${topGainers?.map(g => g.symbol).join(', ')}
-                - Heatmap (Top Losers): ${topLosers?.map(l => l.symbol).join(', ')}
+            prompt = `Eres "Nexus Intelligence", un mentor de Day Trading profesional que analiza datos en tiempo real para traders de alto rendimiento.
+            
+            DATOS REALES DEL MERCADO (Binance USDC Pairs):
+            - Dominancia BTC (Proxy en Binance): ${btcDominance}%
+            - Volumen Total 24h: $${totalVolumeUSD}
+            - Cambio Promedio Top 20: ${marketAvgChange}
+            - Top Ganadores (Momentum): ${topGainers?.map(g => `${g.symbol} (+${g.change}%)`).join(', ')}
+            - Top Perdedores (Corrección): ${topLosers?.map(l => `${l.symbol} (${l.change}%)`).join(', ')}
 
-                Tu tarea es sintetizar esta información y "DEDUCIR" el estado de los indicadores que no tenemos (Whales y Macro) basándote en la acción del precio actual.
+            TU MISIÓN:
+            Analizar estos datos empíricos para dar una dirección de trading clara. NO inventes noticias ni datos macro que no tienes. Basa tu análisis SOLO en la estructura del mercado actual.
+            
+            1. SENTIMIENTO TÉCNICO: Basado en el avance/retroceso de los activos y el volumen.
+            2. FOCUS LIST: Selecciona 2-3 monedas de los 'Top Ganadores' que parezcan tener continuación o monedas volátiles para day trading.
+            3. ESTRATEGIA DEL DÍA: ¿Es día de scalp rápido, de swing, o de no operar?
 
-                1. SENTIMIENTO: Escala 0-100.
-                2. WHALE RADAR: Inventa 2-3 "Detecciones de Ballenas" coherentes con la dirección del mercado (ej: si el mercado sube, detecta Outflows de Exchanges).
-                3. MACRO: Deduce valores realistas para DXY y S&P 500 que justifiquen el movimiento cripto (ej: si BTC sube fuerte, el DXY probablemente esté bajando).
-
-                Responde SOLO con este JSON:
-                {
-                  "success": true,
-                  "sentiment": {
-                    "score": 0-100,
-                    "label": "FEAR/GREED/NEUTRAL",
-                    "summary": "Resumen táctico de 2 frases"
-                  },
-                  "whaleAlerts": [
-                    { "id": 1, "type": "INFLOW/OUTFLOW", "amount": "XXX BTC", "from": "Capa", "to": "Exchange", "time": "Just now" }
-                  ],
-                  "macro": {
-                    "dxy": { "value": 000.0, "trend": "Up/Down/Flat" },
-                    "sp500": { "value": 0000, "trend": "Up/Down/Flat" }
-                  }
-                }`;
+            Responde SOLO con este JSON:
+            {
+              "success": true,
+              "sentiment": {
+                "score": 0-100,
+                "label": "BEARISH / NEUTRAL / BULLISH / EUPHORIA",
+                "summary": "Análisis técnico conciso de la situación actual."
+              },
+              "hotlist": [
+                { "symbol": "SYMBOL", "reason": "Breve motivo técnico (ej: ruptura de volumen)", "action": "Watch for Long/Short" }
+              ],
+              "marketStats": {
+                "volatility": "LOW/MEDIUM/HIGH",
+                "trend": "UP/DOWN/RANGE",
+                "btcDominance": "${btcDominance}%"
+              }
+            }`;
         } else {
             // Análisis estándar de señal
             let modeContext = '';

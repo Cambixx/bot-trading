@@ -13,7 +13,6 @@ import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader
 
 // Services
 import binanceService from '../services/binanceService';
-import { getMarketOracleAnalysis } from '../services/aiAnalysis';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -47,75 +46,6 @@ function Dashboard({
     loading,
     handleSimulateBuy
 }) {
-    const [oracleData, setOracleData] = useState(null);
-    const [oracleLoading, setOracleLoading] = useState(true);
-
-    // Fetch Market Oracle Data (Once on mount)
-    useEffect(() => {
-        const initOracle = async () => {
-            const cachedOracle = localStorage.getItem('oracle_cache_v2');
-            const cachedTimestamp = localStorage.getItem('oracle_timestamp_v2');
-            const NOW = Date.now();
-            const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 Hours
-
-            // 1. Define refresh function (moved inside to have access to setOracleData)
-            window.refreshOracle = async () => {
-                setOracleLoading(true);
-                try {
-                    console.log('🔮 Fetching Fresh Market Data & AI Analysis...');
-
-                    // 1. Get Market Breadth (More comprehensive than just Top 5)
-                    const marketBreadth = await binanceService.getMarketBreadth();
-
-                    if (!marketBreadth) throw new Error('Failed to fetch market breadth');
-
-                    // 2. Call AI with breadth data
-                    const aiResult = await getMarketOracleAnalysis(marketBreadth);
-
-                    if (aiResult.success && aiResult.analysis) {
-                        // Merge marketBreadth stats into analysis for UI display if needed
-                        const enrichedAnalysis = {
-                            ...aiResult.analysis,
-                            stats: {
-                                btcDominance: marketBreadth.btcDominance,
-                                totalVolume: marketBreadth.totalVolumeUSD,
-                                marketAvgChange: marketBreadth.marketAvgChange
-                            }
-                        };
-                        setOracleData(enrichedAnalysis);
-                        localStorage.setItem('oracle_cache_v2', JSON.stringify(enrichedAnalysis));
-                        localStorage.setItem('oracle_timestamp_v2', String(Date.now()));
-                    }
-                } catch (error) {
-                    console.error('Error refreshing Oracle:', error);
-                }
-                setOracleLoading(false);
-            };
-
-            try {
-                if (cachedOracle && cachedTimestamp && (NOW - Number(cachedTimestamp) < CACHE_DURATION)) {
-                    console.log('🔮 Using Cached Oracle Data');
-                    setOracleData(JSON.parse(cachedOracle));
-                    setOracleLoading(false);
-                } else {
-                    await window.refreshOracle();
-                }
-            } catch (error) {
-                console.error('Error fetching Oracle initial data:', error);
-                setOracleData({
-                    marketState: 'CHOPPY',
-                    headline: 'Oracle Connection Failed',
-                    summary: 'Unable to reach AI services. Displaying offline data.',
-                    strategy: 'WAIT',
-                    sentimentScore: 50
-                });
-                setOracleLoading(false);
-            }
-        };
-
-        initOracle();
-    }, []); // Empty dependency array -> Run once on mount
-
     return (
         <motion.div
             initial="hidden"
@@ -133,11 +63,7 @@ function Dashboard({
 
             {/* 2. Market Oracle (Macro Analysis) */}
             <motion.div variants={itemVariants}>
-                <MarketOracle
-                    analysis={oracleData}
-                    loading={oracleLoading}
-                    onRefresh={() => window.refreshOracle && window.refreshOracle()}
-                />
+                <MarketOracle />
             </motion.div>
 
             {/* NEW: Nexus Intelligence Hub (Global Pulsar) */}
@@ -221,7 +147,7 @@ function Dashboard({
                     </div>
                 )}
             </motion.section>
-        </motion.div>
+        </motion.div >
     );
 }
 
