@@ -2,7 +2,7 @@
  * Netlify Scheduled Function - Day Trading Signal Analysis
  * Uses MEXC API for OHLCV data with 15m/1H/4H timeframes.
  * Implements momentum, pullback, and breakout setups for intraday trading.
- * Runs every 15 minutes to detect quick opportunities and send Telegram alerts.
+ * Runs every hour to detect intraday opportunities and send Telegram alerts.
  */
 
 import { schedule } from "@netlify/functions";
@@ -542,4 +542,4 @@ async function runAnalysis() {
   };
 }
 
-export const handler = schedule('*/15 * * * *', runAnalysis);
+export const handler = schedule('0 * * * *', runAnalysis);
