@@ -23,7 +23,7 @@ const COINS_TO_MONITOR = [
   'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX', // Majors
   'PEPE', 'WIF', 'BONK', 'FLOKI', 'SHIB',                 // Memes (High Vol)
   'SUI', 'SEI', 'INJ', 'TIA', 'APT', 'NEAR',              // L1 Rotators
-  'FET', 'RNDR', 'WLD', 'ARKM',                           // AI Narrative
+  'FET', 'RENDER', 'WLD', 'ARKM',                           // AI Narrative
   'ORDI', 'SATS',                                         // BRC20
   'ENA', 'JUP', 'PYTH', 'ONDO'                            // New DeFi
 ];
