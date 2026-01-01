@@ -10,6 +10,21 @@ const NexusHub = () => {
     const [loading, setLoading] = useState(false);
     const [lastSync, setLastSync] = useState(null);
 
+    // Load persisted data on mount
+    useEffect(() => {
+        const savedData = localStorage.getItem('nexus_intelligence_data');
+        const savedTime = localStorage.getItem('nexus_intelligence_time');
+
+        if (savedData) {
+            try {
+                setData(JSON.parse(savedData));
+                if (savedTime) setLastSync(new Date(savedTime));
+            } catch (e) {
+                console.error("Error parsing saved nexus data", e);
+            }
+        }
+    }, []);
+
     const loadIntelligence = async () => {
         setLoading(true);
         try {
@@ -21,7 +36,12 @@ const NexusHub = () => {
 
             if (result && result.success !== false) {
                 setData(result);
-                setLastSync(new Date());
+                const now = new Date();
+                setLastSync(now);
+
+                // Persist to local storage
+                localStorage.setItem('nexus_intelligence_data', JSON.stringify(result));
+                localStorage.setItem('nexus_intelligence_time', now.toISOString());
             }
         } catch (error) {
             console.error("Nexus load error", error);

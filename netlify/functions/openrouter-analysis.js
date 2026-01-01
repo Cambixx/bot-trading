@@ -124,7 +124,7 @@ export async function handler(event, context) {
             let newsContext = "No real-time news available.";
             try {
                 if (NEWS_API_KEY) {
-                    const newsResponse = await fetch(`https://newsapi.org/v2/top-headlines?category=business&language=en&pageSize=5&apiKey=${NEWS_API_KEY}`);
+                    const newsResponse = await fetch(`https://newsapi.org/v2/everything?q=crypto OR bitcoin OR ethereum&language=en&sortBy=publishedAt&pageSize=5&apiKey=${NEWS_API_KEY}`);
                     if (newsResponse.ok) {
                         const newsData = await newsResponse.json();
                         if (newsData.articles) {
