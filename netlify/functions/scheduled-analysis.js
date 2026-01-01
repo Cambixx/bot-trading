@@ -18,12 +18,14 @@ const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
 const MEXC_API = 'https://api.mexc.com/api/v3';
 
 // Top 20 Liquidity Coins (Sniper Focus)
+// Top 30 High Volatility & Liquidity Coins (Day Trading Focus)
 const COINS_TO_MONITOR = [
-  'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX',
-  'TRX', 'LINK', 'DOT', 'POL', 'LTC', 'BCH', 'UNI',
-  'APT', 'NEAR', 'FIL', 'ATOM', 'ARB', 'OP', 'HBAR',
-  'PEPE', 'ORDI', 'WIF', 'FET', 'RENDER', 'SUI', 'SEI', 'INJ',
-  'TIA', 'BONK', 'PYTH', 'JUP', 'DYM', 'STRK', 'ENA', 'W', 'TNSR'
+  'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX', // Majors
+  'PEPE', 'WIF', 'BONK', 'FLOKI', 'SHIB',                 // Memes (High Vol)
+  'SUI', 'SEI', 'INJ', 'TIA', 'APT', 'NEAR',              // L1 Rotators
+  'FET', 'RNDR', 'WLD', 'ARKM',                           // AI Narrative
+  'ORDI', 'SATS',                                         // BRC20
+  'ENA', 'JUP', 'PYTH', 'ONDO'                            // New DeFi
 ];
 
 // ==================== HELPERS ====================
@@ -276,126 +278,95 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
   const ema21_1h = calculateEMA(closes1h, 21);
   const ema50_1h = calculateEMA(closes1h, 50);
   const trend1h = price > ema21_1h ? 'BULLISH' : 'BEARISH';
+  const adx1h = calculateADX(candles1h, 14);
 
   // 15m Indicators (Trigger)
   const closes15m = candles15m.map(c => c.close);
   const rsi15m = calculateRSI(closes15m, 14);
   const rsi1h = calculateRSI(closes1h, 14);
   const macd15m = calculateMACD(closes15m);
-  const ema9_15m = calculateEMA(closes15m, 9);
   const ema21_15m = calculateEMA(closes15m, 21);
+  const ema200_15m = calculateEMA(closes15m, 200); // Trend filter
   const atr1h = calculateATR(candles1h, 14);
-  const adx1h = calculateADX(candles1h, 14);
+
+  // VOLUME ANALYSIS (CRITICAL for Day Trading)
   const volumeSMA = calculateVolumeSMA(candles15m, 20);
   const currentVolume = candles15m[candles15m.length - 1].volume;
-  const bb1h = calculateBollingerBands(closes1h, 20, 2);
+  const rvol = currentVolume / volumeSMA;
 
-  // Trend Alignment Score
-  let trendScore = 0;
-  if (structureTrend === 'BULLISH' && trend1h === 'BULLISH') trendScore = 15;
-  else if (structureTrend === trend1h) trendScore = 10;
-  else trendScore = -5;
+  // 3. SURGICAL FILTERS
+  // Rule 1: Volume is King. If RVOL < 1.2, ignore everything. (Unless huge breakout)
+  if (rvol < 1.2) return null;
+
+  // Rule 2: No Chopping. If ADX < 20, market is dead.
+  if (adx1h < 20) return null;
 
   const marketBias = trend1h; // Focus on 1H for day trading
-
   let signal = null;
+  let setupType = 'UNKNOWN'; // SCALP or SWING
   let reasons = [];
   let score = 0;
 
-  // --- SETUP A: MOMENTUM BURST (New - Day Trading) ---
-  // RSI cruza 50 desde abajo con volumen
-  const prevRsi15m = calculateRSI(closes15m.slice(0, -1), 14);
-  const rsiCrossUp = prevRsi15m < 50 && rsi15m >= 50;
-  const isVolSpike = currentVolume > (volumeSMA * 1.5);
-
-  if (marketBias === 'BULLISH' && rsiCrossUp && isVolSpike && price > ema21_15m) {
+  // --- SETUP A: MOMENTUM BURST (SCALP) ---
+  // RSI pumps > 55 with HUGE Volume
+  if (marketBias === 'BULLISH' && rsi15m > 55 && rsi15m < 75 && rvol > 2.0) {
     signal = 'BUY';
-    score = 72 + trendScore;
-    reasons.push('⚡ Setup A: Momentum Burst');
-    reasons.push(`RSI cruza 50 (${rsi15m.toFixed(1)}) + Volumen x${(currentVolume / volumeSMA).toFixed(1)}`);
-    reasons.push(`Precio sobre EMA21 15m`);
+    setupType = 'SCALP';
+    score = 80;
+    reasons.push('⚡ SCALP: Momentum Burst');
+    reasons.push(`🔥 RVOL: ${rvol.toFixed(1)}x (Extreme Volume)`);
+    reasons.push(`RSI Accelerating (${rsi15m.toFixed(1)})`);
   }
 
-  // --- SETUP B: EMA PULLBACK (Day Trading version) ---
-  // Precio retrocede a EMA21 en 15m con tendencia 1H alcista
-  if (!signal && marketBias === 'BULLISH' && adx1h > 20) {
+  // --- SETUP B: TREND PULLBACK (SWING) ---
+  // Price holds EMA21 15m in uptrend
+  if (!signal && marketBias === 'BULLISH' && price > ema200_15m) {
     const distToEma21 = Math.abs(price - ema21_15m) / price;
-    const isNearEma = distToEma21 < 0.005; // 0.5% de la EMA
-    const isPriceAboveEma = price >= ema21_15m * 0.998; // Tocando o ligeramente por encima
-
-    if (isNearEma && isPriceAboveEma && rsi15m > 40 && rsi15m < 60) {
+    if (distToEma21 < 0.005 && price > ema21_15m && rsi15m > 45) {
       signal = 'BUY';
-      score = 75 + trendScore;
-      reasons.push('🎯 Setup B: EMA21 Pullback');
-      reasons.push(`Rebote en EMA21 15m + Tendencia fuerte (ADX: ${adx1h.toFixed(1)})`);
-      reasons.push(`RSI neutral (${rsi15m.toFixed(1)})`);
+      setupType = 'SWING';
+      score = 75;
+      if (structureTrend === 'BULLISH') score += 10; // 4H Alignment
+      reasons.push('🌊 SWING: Trend Continuation');
+      reasons.push(`Holding EMA21 15m Support`);
+      reasons.push(`4H Trend: ${structureTrend}`);
     }
   }
 
-  // --- SETUP C: BREAKOUT (Improved) ---
-  // Ruptura de Bollinger con volumen
+  // --- SETUP C: BREAKOUT SQUEEZE (EXPLOSIVE) ---
+  const bb1h = calculateBollingerBands(closes1h, 20, 2);
   if (!signal && bb1h) {
     const bbWidth = (bb1h.upper - bb1h.lower) / bb1h.middle;
-    const isSqueeze = bbWidth < 0.08;
-
-    if (isSqueeze && price > bb1h.upper && isVolSpike && macd15m && macd15m.histogram > 0) {
+    if (bbWidth < 0.10 && price > bb1h.upper && rvol > 1.5) {
       signal = 'BUY';
-      score = 80 + trendScore;
-      reasons.push('🚀 Setup C: Squeeze Breakout');
-      reasons.push(`BB Squeeze (${(bbWidth * 100).toFixed(1)}%) + Ruptura`);
-      reasons.push(`Volumen confirmado + MACD positivo`);
+      setupType = 'BREAKOUT';
+      score = 85;
+      reasons.push('🚀 BREAKOUT: Volatility Expansion');
+      reasons.push(`BB Squeeze breaking up`);
+      reasons.push(`Volume Confirmation (${rvol.toFixed(1)}x)`);
     }
   }
 
-  // --- SETUP D: OVERSOLD BOUNCE (Adjusted for crypto) ---
-  if (!signal && rsi15m < 32 && rsi1h < 40) {
-    // Check for bullish divergence hint: price making lows but RSI not as low
-    const recentLow15m = Math.min(...closes15m.slice(-5));
-    const isAtRecent = Math.abs(price - recentLow15m) / price < 0.01;
-
-    if (isAtRecent) {
-      signal = 'BUY';
-      score = 70;
-      reasons.push('📉 Setup D: Oversold Bounce');
-      reasons.push(`RSI 15m: ${rsi15m.toFixed(1)} + RSI 1H: ${rsi1h.toFixed(1)}`);
-      reasons.push(`Posible rebote técnico`);
-    }
-  }
-
-  // --- SETUP E: GOLDEN CROSS MINI (EMA9 cruza EMA21) ---
-  if (!signal && marketBias === 'BULLISH') {
-    const prevEma9 = calculateEMA(closes15m.slice(0, -1), 9);
-    const prevEma21 = calculateEMA(closes15m.slice(0, -1), 21);
-    const emaCrossUp = prevEma9 < prevEma21 && ema9_15m >= ema21_15m;
-
-    if (emaCrossUp && rsi15m > 50 && rsi15m < 70) {
-      signal = 'BUY';
-      score = 73 + trendScore;
-      reasons.push('✨ Setup E: Golden Cross Mini');
-      reasons.push(`EMA9 cruza EMA21 en 15m`);
-      reasons.push(`RSI confirmando (${rsi15m.toFixed(1)})`);
-    }
-  }
-
-  // 4. RISK MANAGEMENT (DAY TRADING STYLE)
+  // 4. RISK MANAGEMENT
   if (signal) {
-    if (score < SIGNAL_SCORE_THRESHOLD) {
-      console.log(`[${symbol}] Signal rejected by score: ${score} < ${SIGNAL_SCORE_THRESHOLD}`);
-      return null;
-    }
+    if (score < SIGNAL_SCORE_THRESHOLD) return null;
 
-    // Use 1H ATR for tighter stops (day trading)
-    const atr = atr1h;
-    const stopLoss = price - (atr * 1.5); // Tighter: 1\.5 ATR
+    // Dynamic SL based on Strategy
+    let slPips = atr1h * 1.5;
+    if (setupType === 'SCALP') slPips = atr1h * 1.0; // Tighter for scalps
+
+    const stopLoss = price - slPips;
     const risk = price - stopLoss;
-    const takeProfit = price + (risk * 2.0); // 2:1 R:R for day trading
+    const riskReward = setupType === 'SCALP' ? 1.5 : 2.0;
+    const takeProfit = price + (risk * riskReward);
 
     return {
       symbol,
       type: signal,
+      setupType,
       price,
       score,
-      confidence: score > 85 ? 'HIGH' : 'MEDIUM',
+      rvol: Number(rvol.toFixed(2)),
       reasons,
       levels: {
         entry: price,
@@ -403,8 +374,7 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
         takeProfit: Number(takeProfit.toFixed(4))
       },
       indicators: {
-        rsi15m: Number(rsi15m.toFixed(1)),
-        rsi1h: Number(rsi1h.toFixed(1)),
+        rsi: Number(rsi15m.toFixed(1)),
         adx: Number(adx1h.toFixed(1)),
         trend: marketBias
       }
@@ -447,33 +417,38 @@ export async function sendTelegramNotification(signals) {
     return { success: true, sent: 0 };
   }
 
-  // Using HTML parse mode (much easier than MarkdownV2)
-  let message = '🎯 <b>DAY TRADING SIGNAL</b> 🎯\n\n';
+  // Using HTML parse mode
+  const setupEmoji = {
+    'SCALP': '⚡',
+    'SWING': '🌊',
+    'BREAKOUT': '🚀'
+  };
+
+  let message = '🎯 <b>CRYPTO SNIPER SIGNAL</b> 🎯\n\n';
 
   for (const sig of signals) {
-    let icon = '🟢';
-    if (sig.type === 'SELL') icon = '🔴';
+    const icon = sig.type === 'SELL' ? '🔴' : '🟢';
+    const typeEmoji = setupEmoji[sig.setupType] || '✨';
 
-    message += `${icon} <b>${sig.symbol}</b> | SCORE: ${sig.score}\n`;
-    message += `💰 Entry: $${sig.price.toFixed(4)}\n`;
+    // Header
+    message += `${icon} <b>${sig.symbol}</b> | ${sig.setupType} ${typeEmoji}\n`;
+    message += `📊 Score: <b>${sig.score}</b> | RVOL: <b>${sig.rvol}x</b>\n\n`;
 
-    // Levels
-    const levels = sig.levels;
-    message += `🛑 SL: $${levels.stopLoss} (1.5 ATR)\n`;
-    message += `🎯 TP: $${levels.takeProfit} (2:1 R)\n`;
+    // Entry & Targets
+    message += `💰 <b>ENTRY: $${sig.price.toFixed(4)}</b>\n`;
+    message += `🎯 TP: $${sig.levels.takeProfit}\n`;
+    message += `🛑 SL: $${sig.levels.stopLoss}\n\n`;
 
-    // Indicators
-    const inds = sig.indicators;
-    const rsiVal = inds.rsi15m || inds.rsi || 0;
-    message += `📊 Trend: ${inds.trend} | RSI: ${rsiVal} | ADX: ${inds.adx}\n`;
+    // Indicators Context
+    message += `📉 <i>Techs:</i> RSI ${sig.indicators.rsi} • ADX ${sig.indicators.adx}\n`;
 
-    // Reasons
-    message += `\n📝 <i>Logic:</i>\n`;
+    // Logic
+    message += `📝 <i>Why?</i>\n`;
     sig.reasons.forEach(r => {
       message += `• ${r}\n`;
     });
 
-    message += `───────────────────\n`;
+    message += `\n───────────────────\n`;
   }
 
   const timeStr = new Date().toLocaleTimeString('es-ES', {
@@ -481,7 +456,7 @@ export async function sendTelegramNotification(signals) {
     minute: '2-digit',
     timeZone: 'Europe/Madrid'
   });
-  message += `🤖 <i>Day Trading Bot</i> • ${timeStr}`;
+  message += `🤖 <i>Algo v3.0 (DayTrading)</i> • ${timeStr}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -567,4 +542,4 @@ async function runAnalysis() {
   };
 }
 
-export const handler = schedule('*/30 * * * *', runAnalysis);
+export const handler = schedule('*/15 * * * *', runAnalysis);
