@@ -9,6 +9,7 @@ import MarketOracle from '../components/MarketOracle'; // Import Oracle
 import NexusHub from '../components/NexusHub'; // Import Nexus
 import TradeDoctor from '../components/TradeDoctor'; // Import Doctor
 import PatternHunter from '../components/PatternHunter'; // Import Hunter
+import ExecutiveDashboard from '../components/ExecutiveDashboard'; // Import Executive Dashboard
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
 
 // Services
@@ -46,6 +47,41 @@ function Dashboard({
     loading,
     handleSimulateBuy
 }) {
+    // Lifted State for Executive Dashboard
+    const [nexusData, setNexusData] = useState(null);
+    const [oracleData, setOracleData] = useState(null);
+
+    // Calculate Top Opportunity dynamically
+    const topOpportunity = (() => {
+        // Priority 1: Active Signals (High confidence)
+        if (signals && signals.length > 0) {
+            const bestSignal = [...signals].sort((a, b) => b.score - a.score)[0];
+            return {
+                symbol: bestSignal.symbol,
+                type: bestSignal.type || 'BUY',
+                score: bestSignal.score,
+                reason: 'Signal Algorithm'
+            };
+        }
+
+        // Priority 2: Crypto Data with highest opportunity score
+        if (cryptoData) {
+            const allCoins = Object.values(cryptoData);
+            if (allCoins.length > 0) {
+                const bestCoin = allCoins.sort((a, b) => (b.opportunity || 0) - (a.opportunity || 0))[0];
+                if (bestCoin && bestCoin.opportunity > 60) {
+                    return {
+                        symbol: bestCoin.symbol,
+                        type: bestCoin.opportunityType || 'LONG',
+                        score: bestCoin.opportunity,
+                        reason: 'Technical Analysis'
+                    };
+                }
+            }
+        }
+        return null; // No good opportunity found
+    })();
+
     return (
         <motion.div
             initial="hidden"
@@ -53,6 +89,11 @@ function Dashboard({
             variants={containerVariants}
             className="dashboard-page"
         >
+            {/* 0. Executive Command Center */}
+            <motion.div variants={itemVariants}>
+                <ExecutiveDashboard nexusData={nexusData} oracleData={oracleData} topOpportunity={topOpportunity} />
+            </motion.div>
+
             {/* 1. Crypto Selector & Market (Top Priority) */}
             <motion.div variants={itemVariants}>
                 <CryptoSelector
@@ -63,12 +104,12 @@ function Dashboard({
 
             {/* 2. Market Oracle (Macro Analysis) */}
             <motion.div variants={itemVariants}>
-                <MarketOracle />
+                <MarketOracle onDataUpdate={setOracleData} />
             </motion.div>
 
             {/* NEW: Nexus Intelligence Hub (Global Pulsar) */}
             <motion.div variants={itemVariants}>
-                <NexusHub />
+                <NexusHub onDataUpdate={setNexusData} />
             </motion.div>
 
             {/* 3. AI Tools Section: Doctor + Hunter */}

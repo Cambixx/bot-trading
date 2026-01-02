@@ -5,7 +5,7 @@ import { fetchNexusIntelligence } from '../services/nexusService';
 import binanceService from '../services/binanceService';
 import './NexusHub.css';
 
-const NexusHub = () => {
+const NexusHub = ({ onDataUpdate }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [lastSync, setLastSync] = useState(null);
@@ -17,8 +17,10 @@ const NexusHub = () => {
 
         if (savedData) {
             try {
-                setData(JSON.parse(savedData));
+                const parsed = JSON.parse(savedData);
+                setData(parsed);
                 if (savedTime) setLastSync(new Date(savedTime));
+                if (onDataUpdate) onDataUpdate(parsed);
             } catch (e) {
                 console.error("Error parsing saved nexus data", e);
             }
@@ -42,6 +44,8 @@ const NexusHub = () => {
                 // Persist to local storage
                 localStorage.setItem('nexus_intelligence_data', JSON.stringify(result));
                 localStorage.setItem('nexus_intelligence_time', now.toISOString());
+
+                if (onDataUpdate) onDataUpdate(result);
             }
         } catch (error) {
             console.error("Nexus load error", error);

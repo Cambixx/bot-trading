@@ -6,7 +6,7 @@ import './MarketOracle.css';
 import { getMarketOracleAnalysis } from '../services/aiAnalysis';
 import binanceService from '../services/binanceService';
 
-const MarketOracle = () => {
+const MarketOracle = ({ onDataUpdate }) => {
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
     const [lastSync, setLastSync] = useState(null);
@@ -16,12 +16,14 @@ const MarketOracle = () => {
         const cached = localStorage.getItem('oracle_cache_v3');
         if (cached) {
             try {
-                setAnalysis(JSON.parse(cached));
+                const parsed = JSON.parse(cached);
+                setAnalysis(parsed);
                 const ts = localStorage.getItem('oracle_ts_v3');
                 if (ts) setLastSync(new Date(parseInt(ts)));
+                if (onDataUpdate) onDataUpdate(parsed);
             } catch (e) { console.error(e); }
         }
-    }, []);
+    }, [onDataUpdate]);
 
     const handleRefresh = async () => {
         setLoading(true);
@@ -45,6 +47,8 @@ const MarketOracle = () => {
                 setLastSync(new Date());
                 localStorage.setItem('oracle_cache_v3', JSON.stringify(enriched));
                 localStorage.setItem('oracle_ts_v3', Date.now().toString());
+
+                if (onDataUpdate) onDataUpdate(enriched);
             }
         } catch (error) {
             console.error('Oracle Error:', error);
