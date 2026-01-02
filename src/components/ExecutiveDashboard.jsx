@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Activity, Thermometer, Zap, AlertTriangle, ShieldCheck } from 'lucide-react';
 import './ExecutiveDashboard.css';
 
-const ExecutiveDashboard = ({ nexusData, oracleData }) => {
+const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity }) => {
     // Determine overall risk status
     const getRiskStatus = () => {
         if (!oracleData && !nexusData) return 'NEUTRAL';
@@ -31,7 +31,7 @@ const ExecutiveDashboard = ({ nexusData, oracleData }) => {
     // Strategy Tip
     const strategy = oracleData?.strategy || 'WAIT';
 
-    const hasData = nexusData || oracleData;
+    const hasData = nexusData || oracleData || topOpportunity;
 
     if (!hasData) {
         return (
@@ -75,7 +75,31 @@ const ExecutiveDashboard = ({ nexusData, oracleData }) => {
                     <div className="card-sub">{risk.label} Environment</div>
                 </div>
 
-                {/* 2. Key Driver */}
+                {/* 2. Top Opportunity (NEW) */}
+                <div className="exec-card" style={{ borderLeft: '3px solid #ffd700', background: 'rgba(255, 215, 0, 0.05)' }}>
+                    <div className="card-label" style={{ color: '#ffd700' }}>
+                        ★ Top Opportunity
+                    </div>
+                    {topOpportunity ? (
+                        <>
+                            <div className="card-value" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {topOpportunity.symbol}
+                                <span style={{ fontSize: '0.8rem', padding: '2px 6px', borderRadius: '4px', background: topOpportunity.type === 'LONG' ? 'rgba(0,255,157,0.2)' : 'rgba(255,77,77,0.2)', color: topOpportunity.type === 'LONG' ? '#00ff9d' : '#ff4d4d' }}>
+                                    {topOpportunity.type}
+                                </span>
+                            </div>
+                            <div className="card-sub">
+                                Score: <b style={{ color: 'white' }}>{topOpportunity.score}</b> • {topOpportunity.reason}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="card-value" style={{ fontSize: '1rem', fontStyle: 'italic', opacity: 0.5 }}>
+                            Scanning...
+                        </div>
+                    )}
+                </div>
+
+                {/* 3. Key Driver */}
                 <div className="exec-card">
                     <div className="card-label">
                         Primary Catalyst
@@ -86,7 +110,7 @@ const ExecutiveDashboard = ({ nexusData, oracleData }) => {
                     </div>
                 </div>
 
-                {/* 3. Sentiment Thermometer */}
+                {/* 4. Sentiment Thermometer */}
                 <div className="exec-card">
                     <div className="card-label">
                         Sentiment Score
@@ -99,7 +123,7 @@ const ExecutiveDashboard = ({ nexusData, oracleData }) => {
                     <div className="card-sub">{sentimentLabel}</div>
                 </div>
 
-                {/* 4. Action Strategy */}
+                {/* 5. Action Strategy */}
                 <div className="exec-card" style={{ borderLeft: '3px solid var(--color-primary)' }}>
                     <div className="card-label">
                         Recommended Strategy
