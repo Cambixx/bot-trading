@@ -542,4 +542,4 @@ async function runAnalysis() {
   };
 }
 
-export const handler = schedule('0 * * * *', runAnalysis);
+export const handler = schedule('*/15 * * * *', runAnalysis);
