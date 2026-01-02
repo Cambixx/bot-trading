@@ -126,6 +126,26 @@
     border-left: 3px solid var(--color-danger);
 }
 
+.risk-critical {
+    border-left: 3px solid #ff0000;
+    background: rgba(255, 0, 0, 0.1);
+    animation: critical-pulse 1s infinite;
+}
+
+@keyframes critical-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(255, 0, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
 .sentiment-val.positive {
     color: var(--color-accent);
 }

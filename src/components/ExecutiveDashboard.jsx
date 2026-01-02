@@ -3,9 +3,18 @@ import { motion } from 'framer-motion';
 import { Activity, Thermometer, Zap, AlertTriangle, ShieldCheck } from 'lucide-react';
 import './ExecutiveDashboard.css';
 
-const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity }) => {
+const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol }) => {
     // Determine overall risk status
     const getRiskStatus = () => {
+        // PRIORITY: Real-time Volatility Override
+        if (btcVol?.isFlashCrash) {
+            return { label: 'FLASH CRASH', class: 'risk-critical', icon: <AlertTriangle size={16} /> };
+        }
+
+        if (btcVol?.volatility > 8) { // High volatility heuristic
+            return { label: 'VOLATILE', class: 'risk-on', icon: <Zap size={16} /> };
+        }
+
         if (!oracleData && !nexusData) return 'NEUTRAL';
 
         let score = 0;
@@ -29,9 +38,10 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity }) => {
     const driver = oracleData?.keyDriver || 'Scanning news...';
 
     // Strategy Tip
-    const strategy = oracleData?.strategy || 'WAIT';
+    let strategy = oracleData?.strategy || 'WAIT';
+    if (btcVol?.isFlashCrash) strategy = "CASH IS KING";
 
-    const hasData = nexusData || oracleData || topOpportunity;
+    const hasData = nexusData || oracleData || topOpportunity || (btcVol?.price > 0);
 
     if (!hasData) {
         return (
@@ -60,7 +70,7 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity }) => {
                 </div>
                 <div className="live-indicator">
                     <div className="pulsar"></div>
-                    LIVE
+                    LIVE  {btcVol?.price > 0 && <span style={{ marginLeft: '10px', fontSize: '0.8rem', opacity: 0.7 }}>BTC: ${btcVol.price.toLocaleString()} ({btcVol.percentChange > 0 ? '+' : ''}{btcVol.percentChange.toFixed(2)}%)</span>}
                 </div>
             </div>
 
@@ -71,7 +81,7 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity }) => {
                         Market Regime
                         {risk.icon}
                     </div>
-                    <div className="card-value">{regime}</div>
+                    <div className="card-value">{btcVol?.isFlashCrash ? 'CRITICAL' : regime}</div>
                     <div className="card-sub">{risk.label} Environment</div>
                 </div>
 
@@ -106,7 +116,7 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity }) => {
                         <AlertTriangle size={14} />
                     </div>
                     <div className="card-value" style={{ fontSize: '1rem', lineHeight: '1.4' }}>
-                        {driver}
+                        {btcVol?.isFlashCrash ? 'HIGH VOLATILITY DETECTED' : driver}
                     </div>
                 </div>
 

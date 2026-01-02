@@ -39,10 +39,11 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
 
         try {
             // 1. Fetch Multi-Timeframe Data (15m, 1H, 4H)
-            const [klines15m, klines1h, klines4h] = await Promise.all([
+            const [klines15m, klines1h, klines4h, depth] = await Promise.all([
                 binanceService.getKlines(selectedSymbol, '15m', 100).catch(e => { throw new Error("Binance Service unavailable (15m)"); }),
                 binanceService.getKlines(selectedSymbol, '1h', 100).catch(e => { throw new Error("Binance Service unavailable (1h)"); }),
-                binanceService.getKlines(selectedSymbol, '4h', 50).catch(e => { throw new Error("Binance Service unavailable (4h)"); })
+                binanceService.getKlines(selectedSymbol, '4h', 50).catch(e => { throw new Error("Binance Service unavailable (4h)"); }),
+                binanceService.getOrderBookDepth(selectedSymbol, 20).catch(e => null)
             ]);
 
             if (!klines15m || !klines1h || !klines4h) throw new Error("Could not fetch market data.");
@@ -106,6 +107,20 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
             const ema50_1h = closes1h.slice(-50).reduce((a, b) => a + b, 0) / 50;
             const trend1h = price > ema21_1h ? (price > ema50_1h ? 'BULLISH' : 'WEAK BULLISH') : (price < ema50_1h ? 'BEARISH' : 'WEAK BEARISH');
 
+            // Order Book Imbalance Calculation
+            let obImbalance = "Neutral";
+            let bidVol = 0;
+            let askVol = 0;
+            if (depth) {
+                bidVol = depth.bids.reduce((acc, item) => acc + item[1], 0);
+                askVol = depth.asks.reduce((acc, item) => acc + item[1], 0);
+                const ratio = bidVol / (askVol || 1);
+
+                if (ratio > 1.5) obImbalance = `Bulish Order Flow (${ratio.toFixed(1)}x Bids)`;
+                else if (ratio < 0.6) obImbalance = `Bearish Order Flow (${(1 / ratio).toFixed(1)}x Asks)`;
+                else obImbalance = "Balanced Order Book";
+            }
+
             // 3. Build comprehensive technicals object
             const technicals = {
                 indicators: {
@@ -119,16 +134,20 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
                     atr1h: atr1h?.toFixed(4) || 'N/A',
                     atrPercent: atr1h ? ((atr1h / price) * 100).toFixed(2) + '%' : 'N/A',
                     volumeRatio: volumeRatio + 'x avg',
-                    volumeStatus: currentVolume > avgVolume * 1.5 ? 'HIGH' : currentVolume < avgVolume * 0.5 ? 'LOW' : 'NORMAL'
-                }
+                    volumeStatus: currentVolume > avgVolume * 1.5 ? 'HIGH' : currentVolume < avgVolume * 0.5 ? 'LOW' : 'NORMAL',
+                    orderBook: obImbalance
+                },
+                orderFlow: { bidVol, askVol } // Save for UI rendering
             };
 
             // 4. Call The Doctor with enhanced data
             const result = await getTradeDoctorAnalysis(selectedSymbol, price, technicals);
 
             if (result.success && result.analysis) {
-                setReport(result.analysis);
-                localStorage.setItem(`doctor_report_${selectedSymbol}`, JSON.stringify(result.analysis));
+                // Merge Order Flow data into the report for rendering
+                const finalReport = { ...result.analysis, orderFlow: technicals.orderFlow };
+                setReport(finalReport);
+                localStorage.setItem(`doctor_report_${selectedSymbol}`, JSON.stringify(finalReport));
                 if (result.isFallback) {
                     setError("Notice: Using localized diagnostic tools. High congestion.");
                 }
@@ -258,6 +277,39 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
                                             <span className="level-label">Take Profit</span>
                                             <span className="level-value">{report.levels.takeProfit}</span>
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Order Book Vital (Professional Edge) */}
+                            {report.orderFlow && (
+                                <div className="levels-box" style={{ borderColor: 'rgba(0, 180, 255, 0.3)' }}>
+                                    <div className="box-title" style={{ color: 'var(--color-info)' }}>⚡ ORDER BOOK DEPTH</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px', fontSize: '0.8rem', gap: '10px' }}>
+                                        <div style={{ flex: 1, textAlign: 'right', color: '#00ff9d' }}>
+                                            BIDS: {report.orderFlow.bidVol?.toFixed(0)}
+                                        </div>
+
+                                        {/* Bar Visual */}
+                                        <div style={{ width: '80px', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden', display: 'flex' }}>
+                                            <div style={{
+                                                flex: report.orderFlow.bidVol / (report.orderFlow.bidVol + report.orderFlow.askVol),
+                                                background: '#00ff9d'
+                                            }} />
+                                            <div style={{
+                                                flex: report.orderFlow.askVol / (report.orderFlow.bidVol + report.orderFlow.askVol),
+                                                background: '#ff4d4d'
+                                            }} />
+                                        </div>
+
+                                        <div style={{ flex: 1, textAlign: 'left', color: '#ff4d4d' }}>
+                                            ASKS: {report.orderFlow.askVol?.toFixed(0)}
+                                        </div>
+                                    </div>
+                                    <div style={{ textAlign: 'center', fontSize: '0.7rem', marginTop: '5px', opacity: 0.75 }}>
+                                        {report.orderFlow.bidVol > report.orderFlow.askVol
+                                            ? `Buying Pressure Dominates (${(report.orderFlow.bidVol / report.orderFlow.askVol).toFixed(1)}x)`
+                                            : `Selling Pressure Dominates (${(report.orderFlow.askVol / report.orderFlow.bidVol).toFixed(1)}x)`}
                                     </div>
                                 </div>
                             )}

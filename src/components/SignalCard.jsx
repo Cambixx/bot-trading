@@ -1,7 +1,47 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap, Calculator } from 'lucide-react';
 import { format } from 'date-fns';
 import './SignalCard.css';
+
+const RiskCalculator = ({ entry, stopLoss, isSell }) => {
+    const [riskAmount, setRiskAmount] = useState(50); // Default risk $50
+
+    const riskPerShare = Math.abs(entry - stopLoss);
+    const shares = riskAmount / riskPerShare;
+    const positionValue = shares * entry;
+    // Leverage needed assuming 100% margin usage for simplicity, or just display raw size
+    // Let's just show Size and Value.
+
+    // Leverage hint: If Position Value > Risk * 10, suggests leverage might be needed for small accounts
+
+    return (
+        <div className="risk-calc-box">
+            <div className="calc-header">
+                <div className="calc-label"><Calculator size={12} /> RISK SIZING</div>
+                <div className="risk-input-group">
+                    <span>Risk $</span>
+                    <input
+                        type="number"
+                        value={riskAmount}
+                        onChange={(e) => setRiskAmount(Number(e.target.value))}
+                        className="risk-input"
+                    />
+                </div>
+            </div>
+            <div className="calc-results">
+                <div className="calc-item">
+                    <span className="lbl">SIZE</span>
+                    <span className="val">{shares < 1 ? shares.toFixed(4) : shares.toFixed(2)}</span>
+                </div>
+                <div className="calc-item">
+                    <span className="lbl">VALUE</span>
+                    <span className="val">${positionValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 function SignalCard({ signal, onSimulateBuy }) {
     const isSell = signal.type === 'SELL';
@@ -98,6 +138,13 @@ function SignalCard({ signal, onSimulateBuy }) {
                     <div className="ind-pill">ADX: {signal.indicators.adx || '-'}</div>
                     <div className="ind-pill">RR: {signal.riskReward}</div>
                 </div>
+
+                {/* Risk Calculator (Professional Edge) */}
+                <RiskCalculator
+                    entry={signal.price}
+                    stopLoss={signal.levels.stopLoss}
+                    isSell={isSell}
+                />
 
                 {/* AI Insights if available */}
                 {signal.aiAnalysis && (

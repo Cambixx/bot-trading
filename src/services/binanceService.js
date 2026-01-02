@@ -146,6 +146,27 @@ class BinanceService {
   }
 
   /**
+   * Obtener profundidad del libro de órdenes (Order Book)
+   * @param {string} symbol - Par de trading
+   * @param {number} limit - Profundidad (5, 10, 20, 50, 100, 500, 1000)
+   * @returns {Promise<Object>} Objeto con bids y asks
+   */
+  async getOrderBookDepth(symbol, limit = 20) {
+    try {
+      const response = await axios.get(`${BINANCE_API_BASE}/depth`, {
+        params: { symbol: symbol.toUpperCase(), limit }
+      });
+      return {
+        bids: response.data.bids.map(b => [parseFloat(b[0]), parseFloat(b[1])]), // [Price, Qty]
+        asks: response.data.asks.map(a => [parseFloat(a[0]), parseFloat(a[1])])
+      };
+    } catch (error) {
+      console.error(`Error fetching depth for ${symbol}:`, error.message);
+      return null;
+    }
+  }
+
+  /**
    * Obtener las top N criptomonedas por volumen en USDC
    * @param {number} limit - Número de criptos a obtener (default: 10)
    * @returns {Promise<Array<string>>} Array de símbolos ordenados por volumen
@@ -363,6 +384,32 @@ class BinanceService {
     this.ws.onclose = () => {
       console.log('WebSocket Desconectado');
     };
+  }
+
+  /**
+   * Obtener Funding Rates (Tasas de Financiación) del mercado de Futuros
+   * @returns {Promise<Array>} Array de objetos con symbol y fundingRate
+   */
+  async getFundingRates() {
+    try {
+      // Nota: fapi.binance.com puede tener restricciones CORS en navegador.
+      // Si falla, retornaremos un set vacío o simulado para evitar romper la app.
+      const response = await axios.get('https://fapi.binance.com/fapi/v1/premiumIndex');
+
+      // Filtrar top pares y devolver
+      return response.data
+        .filter(t => t.symbol.endsWith('USDT')) // Futures usa USDT mayormente
+        .sort((a, b) => parseFloat(b.markPrice) - parseFloat(a.markPrice)) // Sort irrelevante, solo queremos datos
+        .slice(0, 20)
+        .map(t => ({
+          symbol: t.symbol,
+          fundingRate: parseFloat(t.lastFundingRate),
+          markPrice: parseFloat(t.markPrice)
+        }));
+    } catch (error) {
+      console.warn('Error fetching Funding Rates (CORS likely):', error.message);
+      return []; // Fail gracefully
+    }
   }
 
   /**

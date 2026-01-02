@@ -10,6 +10,7 @@ const MarketOracle = ({ onDataUpdate }) => {
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
     const [lastSync, setLastSync] = useState(null);
+    const [fundingRates, setFundingRates] = useState([]); // New State
 
     // Initial load from local storage
     useEffect(() => {
