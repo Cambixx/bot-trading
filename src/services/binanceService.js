@@ -413,6 +413,25 @@ class BinanceService {
   }
 
   /**
+   * Obtener Fear & Greed Index (Sentimiento Global)
+   * @returns {Promise<Object>} Datos del índice
+   */
+  async getFearAndGreedIndex() {
+    try {
+      const response = await axios.get('https://api.alternative.me/fng/');
+      const data = response.data.data[0];
+      return {
+        value: parseInt(data.value),
+        classification: data.value_classification,
+        timestamp: data.timestamp
+      };
+    } catch (error) {
+      console.warn('Error fetching Fear & Greed Index:', error.message);
+      return null;
+    }
+  }
+
+  /**
    * Cerrar conexión WebSocket
    */
   disconnect() {

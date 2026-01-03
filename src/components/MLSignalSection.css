@@ -472,3 +472,109 @@
     padding-top: var(--spacing-sm);
     border-top: 1px solid var(--color-border);
 }
+
+/* ========================================
+   NEW: Styles for Enhanced Signal Modes
+   ======================================== */
+
+/* Approaching (Early Warning) Mode */
+.ml-card-premium.approaching {
+    border-top: 2px solid #fbbf24 !important;
+    animation: approaching-pulse 2s infinite;
+}
+
+@keyframes approaching-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+    }
+
+    50% {
+        box-shadow: 0 0 20px 0 rgba(251, 191, 36, 0.3);
+    }
+}
+
+/* Signal Label Variants */
+.signal-label.approaching {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a1a1a;
+}
+
+.signal-label.mean_reversion {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.signal-label.extremity.sell {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.signal-label.extremity.buy {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+/* Mode Badge (inside card body) */
+.mode-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-sm);
+}
+
+.mode-badge.extremity {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.mode-badge.approaching {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    animation: warning-blink 1.5s infinite;
+}
+
+@keyframes warning-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.mode-badge.mean_reversion {
+    background: rgba(139, 92, 246, 0.1);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* Warning badge in header */
+.active-badge.warning {
+    background: rgba(251, 191, 36, 0.1) !important;
+    border-color: rgba(251, 191, 36, 0.3) !important;
+    color: #fbbf24 !important;
+}
+
+/* Band Position indicator styling */
+.data-row .value.high-band {
+    color: var(--color-danger);
+}
+
+.data-row .value.low-band {
+    color: var(--color-success);
+}
+
+.data-row .value.mid-band {
+    color: var(--color-text-muted);
+}

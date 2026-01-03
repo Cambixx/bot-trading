@@ -280,6 +280,60 @@
     border-radius: 8px;
 }
 
+/* Funding Rates */
+.funding-section {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.section-label {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.funding-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.funding-pill {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    font-size: 0.7rem;
+}
+
+.fund-sym {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.fund-val {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+}
+
+.fund-val.high-pos {
+    color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.1);
+    padding: 0 4px;
+    border-radius: 2px;
+}
+
+.fund-val.high-neg {
+    color: #00ff9d;
+    background: rgba(0, 255, 157, 0.1);
+    padding: 0 4px;
+    border-radius: 2px;
+}
+
 @media (max-width: 1024px) {
     .oracle-content {
         grid-template-columns: 180px 1fr;

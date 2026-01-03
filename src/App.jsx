@@ -240,13 +240,14 @@ function AppContent() {
         if (candleData15m[symbol]?.data) multiTimeframeAnalysis[symbol]['15m'] = performTechnicalAnalysis(candleData15m[symbol].data);
       }
 
-      // 4.1 Generar señales ML (LuxAlgo)
+      // 4.1 Generar señales ML (LuxAlgo) - Improved detection
       const calculatedMlSignals = [];
       for (const symbol of symbols) {
         if (candleData[symbol]?.data && candleData[symbol].data.length >= 30) {
           const closes = candleData[symbol].data.map(c => c.close);
           const mlResult = calculateMLMovingAverage(closes, { window: 30, forecast: 2 });
-          if (mlResult && mlResult.score >= 40) { // Filter out weak signals (<40)
+          // Lower threshold to 30 to include "Early Warning" signals
+          if (mlResult && mlResult.signal && mlResult.score >= 30) {
             calculatedMlSignals.push({
               symbol,
               ...mlResult,
@@ -257,20 +258,31 @@ function AppContent() {
       }
       setMlSignals(calculatedMlSignals);
 
-      // 4.2 Notificar nuevas señales ML por Telegram
+      // 4.2 Notificar nuevas señales ML por Telegram (only EXTREMITY signals with high score)
       if (calculatedMlSignals.length > 0 && mlSignals.length > 0) {
         const newMlSignals = calculatedMlSignals.filter(newSig =>
+          newSig.signalMode === 'EXTREMITY' && // Only strong extremity signals
+          newSig.score >= 60 && // High quality only
           !mlSignals.some(oldSig => oldSig.symbol === newSig.symbol && oldSig.signal === newSig.signal)
         );
 
         if (newMlSignals.length > 0) {
-          const telegramPayload = newMlSignals.map(s => ({
-            symbol: s.symbol,
-            price: s.price,
-            score: 99, // High score to show Green icon
-            reasons: [`🤖 ML Alert: ${s.signal === 'UPPER_EXTREMITY' ? 'SHORT 🔴' : s.signal === 'LOWER_EXTREMITY' ? 'LONG 🟢' : 'NEUTRAL ⚪'} (${(s.signal || '').replace(/_/g, ' ') || 'SIN SEÑAL'})`],
-            levels: { entry: s.price }
-          }));
+          const telegramPayload = newMlSignals.map(s => {
+            // Determine signal type for message
+            let signalType = 'NEUTRAL ⚪';
+            if (s.signal === 'UPPER_EXTREMITY' || s.signal === 'APPROACHING_UPPER') signalType = 'SHORT 🔴';
+            else if (s.signal === 'LOWER_EXTREMITY' || s.signal === 'APPROACHING_LOWER') signalType = 'LONG 🟢';
+            else if (s.signal === 'MEAN_REVERSION_UP') signalType = 'LONG (Reversion) 🟢';
+            else if (s.signal === 'MEAN_REVERSION_DOWN') signalType = 'SHORT (Reversion) 🔴';
+
+            return {
+              symbol: s.symbol,
+              price: s.price,
+              score: s.score,
+              reasons: [`🤖 ML ${s.signalMode}: ${signalType} | RSI: ${s.rsi} | Quality: ${s.signalQuality}`],
+              levels: { entry: s.price }
+            };
+          });
           sendToTelegram(telegramPayload);
         }
       }
@@ -387,7 +399,8 @@ function AppContent() {
             low24h: data.low24h,
             analysis: analysis,
             opportunity: opportunityScore,
-            opportunityType: opportunityType // 'LONG' | 'SHORT'
+            opportunityType: opportunityType, // 'LONG' | 'SHORT'
+            priceHistory: candleData[symbol]?.data ? candleData[symbol].data.slice(-24).map(c => c.close) : []
           };
         }
       });

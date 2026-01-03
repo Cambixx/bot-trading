@@ -27,7 +27,7 @@
 }
 
 .signal-info {
-    /* Default subtle style */
+    border-color: var(--color-border);
 }
 
 .crypto-card-glow {
@@ -137,6 +137,19 @@
     color: var(--color-text-primary);
 }
 
+.crypto-sparkline {
+    width: 60px;
+    height: 20px;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.crypto-sparkline svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
 .score-viz {
     position: relative;
     width: 60px;
@@ -222,6 +235,7 @@
 .opportunity-status.success {
     color: var(--color-success);
 }
+
 .opportunity-status.success .status-dot-mini {
     background: var(--color-success);
     box-shadow: 0 0 8px var(--color-success-glow);
@@ -230,6 +244,7 @@
 .opportunity-status.warning {
     color: var(--color-warning);
 }
+
 .opportunity-status.warning .status-dot-mini {
     background: var(--color-warning);
     box-shadow: 0 0 8px var(--color-warning-glow);
@@ -238,6 +253,7 @@
 .opportunity-status.info {
     color: var(--color-info);
 }
+
 .opportunity-status.info .status-dot-mini {
     background: var(--color-info);
     box-shadow: 0 0 8px var(--color-info-glow);
@@ -246,6 +262,7 @@
 .opportunity-status.danger {
     color: var(--color-danger);
 }
+
 .opportunity-status.danger .status-dot-mini {
     background: var(--color-danger);
     box-shadow: 0 0 8px var(--color-danger-glow);

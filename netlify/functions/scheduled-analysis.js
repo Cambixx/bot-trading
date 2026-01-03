@@ -243,6 +243,33 @@ function calculateADX(candles, period = 14) {
   return adx;
 }
 
+// Calculate Choppiness Index (0-100)
+// 100 = high chop (range), 0 = strong trend
+function calculateChoppinessIndex(candles, period = 14) {
+  if (candles.length < period + 1) return 50; // Fallback
+
+  const trValues = [];
+  for (let i = 1; i < candles.length; i++) {
+    const high = candles[i].high;
+    const low = candles[i].low;
+    const prevClose = candles[i - 1].close;
+    trValues.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
+  }
+
+  // Calculate CI for last candle only
+  const i = candles.length - 1;
+  const sumTR = trValues.slice(-period).reduce((a, b) => a + b, 0);
+
+  const periodSlice = candles.slice(-period);
+  const maxHigh = Math.max(...periodSlice.map(c => c.high));
+  const minLow = Math.min(...periodSlice.map(c => c.low));
+
+  const range = maxHigh - minLow;
+  if (range === 0) return 50;
+
+  return 100 * (Math.log10(sumTR / range) / Math.log10(period));
+}
+
 // ==================== SIGNAL GENERATION (SNIPER MODE) ====================
 
 // Trend Analysis Helper
@@ -288,52 +315,77 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
   const ema21_15m = calculateEMA(closes15m, 21);
   const ema200_15m = calculateEMA(closes15m, 200); // Trend filter
   const atr1h = calculateATR(candles1h, 14);
+  const bb15m = calculateBollingerBands(closes15m, 20, 2);
+  const chop1h = calculateChoppinessIndex(candles1h, 14);
 
   // VOLUME ANALYSIS (CRITICAL for Day Trading)
   const volumeSMA = calculateVolumeSMA(candles15m, 20);
   const currentVolume = candles15m[candles15m.length - 1].volume;
   const rvol = currentVolume / volumeSMA;
 
-  // 3. SURGICAL FILTERS
-  // Rule 1: Volume is King. If RVOL < 1.2, ignore everything. (Unless huge breakout)
-  if (rvol < 1.2) return null;
+  // 3. SURGICAL FILTERS & REGIME DETECTION
 
-  // Rule 2: No Chopping. If ADX < 20, market is dead.
-  if (adx1h < 20) return null;
-
+  const isChoppy = chop1h > 61.8;
+  const isTrending = chop1h < 38.2;
   const marketBias = trend1h; // Focus on 1H for day trading
+
+  // Gate: Low Volume is mostly un-tradable unless Mean Reversion
+  if (rvol < 0.5 && !isChoppy) return null;
+
   let signal = null;
-  let setupType = 'UNKNOWN'; // SCALP or SWING
+  let setupType = 'UNKNOWN'; // SCALP, SWING, BREAKOUT, REVERSION
   let reasons = [];
   let score = 0;
 
   // --- SETUP A: MOMENTUM BURST (SCALP) ---
-  // RSI pumps > 55 with HUGE Volume
-  if (marketBias === 'BULLISH' && rsi15m > 55 && rsi15m < 75 && rvol > 2.0) {
+  // Trend + High Volume + RSI Pump
+  if (!isChoppy && marketBias === 'BULLISH' && rsi15m > 55 && rsi15m < 80 && rvol > 1.8) {
     signal = 'BUY';
     setupType = 'SCALP';
     score = 80;
+    if (rvol > 3.0) score += 10;
     reasons.push('⚡ SCALP: Momentum Burst');
-    reasons.push(`🔥 RVOL: ${rvol.toFixed(1)}x (Extreme Volume)`);
-    reasons.push(`RSI Accelerating (${rsi15m.toFixed(1)})`);
+    reasons.push(`🔥 RVOL: ${rvol.toFixed(1)}x (High Vol)`);
+    reasons.push(`Trend Aligned (1H)`);
   }
 
   // --- SETUP B: TREND PULLBACK (SWING) ---
-  // Price holds EMA21 15m in uptrend
-  if (!signal && marketBias === 'BULLISH' && price > ema200_15m) {
+  // Price holds EMA21 in uptrend, lower volume pullback acceptable
+  if (!signal && !isChoppy && marketBias === 'BULLISH' && price > ema200_15m) {
     const distToEma21 = Math.abs(price - ema21_15m) / price;
-    if (distToEma21 < 0.005 && price > ema21_15m && rsi15m > 45) {
+    if (distToEma21 < 0.006 && price > ema21_15m && rsi15m > 40 && rsi15m < 60) {
       signal = 'BUY';
       setupType = 'SWING';
       score = 75;
       if (structureTrend === 'BULLISH') score += 10; // 4H Alignment
       reasons.push('🌊 SWING: Trend Continuation');
-      reasons.push(`Holding EMA21 15m Support`);
-      reasons.push(`4H Trend: ${structureTrend}`);
+      reasons.push(`Holding EMA21 Support`);
     }
   }
 
-  // --- SETUP C: BREAKOUT SQUEEZE (EXPLOSIVE) ---
+  // --- SETUP C: MEAN REVERSION (CHOPPY MARKETS) ---
+  // Only valid if Chop Index is High (>60)
+  if (!signal && isChoppy && bb15m) {
+    // Buy at Lower Band
+    if (price < bb15m.lower && rsi15m < 30) {
+      signal = 'BUY';
+      setupType = 'REVERSION';
+      score = 70;
+      reasons.push('↩️ REVERSION: Oversold in Range');
+      reasons.push('Below Lower BB + RSI < 30');
+      reasons.push('Market is Choppy (Range Bound)');
+    }
+    // Sell at Upper Band
+    else if (price > bb15m.upper && rsi15m > 70) {
+      signal = 'SELL';
+      setupType = 'REVERSION';
+      score = 70;
+      reasons.push('↩️ REVERSION: Overbought in Range');
+      reasons.push('Above Upper BB + RSI > 70');
+    }
+  }
+
+  // --- SETUP D: BREAKOUT SQUEEZE (EXPLOSIVE) ---
   const bb1h = calculateBollingerBands(closes1h, 20, 2);
   if (!signal && bb1h) {
     const bbWidth = (bb1h.upper - bb1h.lower) / bb1h.middle;
@@ -353,12 +405,28 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
 
     // Dynamic SL based on Strategy
     let slPips = atr1h * 1.5;
-    if (setupType === 'SCALP') slPips = atr1h * 1.0; // Tighter for scalps
+    let rrRatio = 2.0;
 
-    const stopLoss = price - slPips;
-    const risk = price - stopLoss;
-    const riskReward = setupType === 'SCALP' ? 1.5 : 2.0;
-    const takeProfit = price + (risk * riskReward);
+    if (setupType === 'SCALP') {
+      slPips = atr1h * 0.8; // Tight stop
+      rrRatio = 1.5;
+    } else if (setupType === 'REVERSION') {
+      slPips = atr1h * 1.0; // Wide enough for wick
+      rrRatio = 1.5; // Reversion usually has closer targets
+    } else if (setupType === 'BREAKOUT') {
+      slPips = atr1h * 1.2; // Allow for retest
+      rrRatio = 3.0; // Breakouts run hard
+    }
+
+    // Calculate levels
+    let stopLoss, takeProfit;
+    if (signal === 'BUY') {
+      stopLoss = price - slPips;
+      takeProfit = price + (slPips * rrRatio);
+    } else { // SELL
+      stopLoss = price + slPips;
+      takeProfit = price - (slPips * rrRatio);
+    }
 
     return {
       symbol,
@@ -376,7 +444,8 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
       indicators: {
         rsi: Number(rsi15m.toFixed(1)),
         adx: Number(adx1h.toFixed(1)),
-        trend: marketBias
+        trend: marketBias,
+        chop: Number(chop1h.toFixed(1))
       }
     };
   }
@@ -421,7 +490,8 @@ export async function sendTelegramNotification(signals) {
   const setupEmoji = {
     'SCALP': '⚡',
     'SWING': '🌊',
-    'BREAKOUT': '🚀'
+    'BREAKOUT': '🚀',
+    'REVERSION': '↩️'
   };
 
   let message = '🎯 <b>CRYPTO SNIPER SIGNAL</b> 🎯\n\n';
@@ -440,7 +510,7 @@ export async function sendTelegramNotification(signals) {
     message += `🛑 SL: $${sig.levels.stopLoss}\n\n`;
 
     // Indicators Context
-    message += `📉 <i>Techs:</i> RSI ${sig.indicators.rsi} • ADX ${sig.indicators.adx}\n`;
+    message += `📉 <i>Techs:</i> RSI ${sig.indicators.rsi} • Chop ${sig.indicators.chop}\n`;
 
     // Logic
     message += `📝 <i>Why?</i>\n`;

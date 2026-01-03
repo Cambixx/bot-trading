@@ -29,9 +29,29 @@ const MarketOracle = ({ onDataUpdate }) => {
     const handleRefresh = async () => {
         setLoading(true);
         try {
-            // 1. Get Market Breadth
-            const marketBreadth = await binanceService.getMarketBreadth();
+            // 1. Get Market Breadth, BTC Volatility, Sentiment & Funding
+            const [marketBreadth, btcKlines, fngData, fundingData] = await Promise.all([
+                binanceService.getMarketBreadth(),
+                binanceService.getKlines('BTCUSDT', '15m', 50),
+                binanceService.getFearAndGreedIndex(),
+                binanceService.getFundingRates()
+            ]);
+
             if (!marketBreadth) throw new Error('Market data unavailable');
+
+            // Detect Flash Crash / Volatility Spike
+            let flashAlert = null;
+            if (btcKlines && btcKlines.length > 20) {
+                const recent = btcKlines.slice(-5);
+                const avgRange = btcKlines.slice(0, -5).reduce((sum, k) => sum + (k.high - k.low), 0) / (btcKlines.length - 5);
+                const currentRange = recent[recent.length - 1].high - recent[recent.length - 1].low;
+
+                if (currentRange > avgRange * 2.5) {
+                    flashAlert = { level: 'HIGH', message: 'FLASH RISK DETECTED: BTC Volatility Spike' };
+                } else if (currentRange > avgRange * 1.8) {
+                    flashAlert = { level: 'MEDIUM', message: 'Caution: Rising BTC Volatility' };
+                }
+            }
 
             // 2. AI Analysis
             const aiResult = await getMarketOracleAnalysis(marketBreadth);
@@ -42,7 +62,10 @@ const MarketOracle = ({ onDataUpdate }) => {
                     stats: {
                         btcDominance: marketBreadth.btcDominance,
                         totalVolume: marketBreadth.totalVolumeUSD
-                    }
+                    },
+                    flashAlert, // Save alert
+                    fngData, // Save Fear & Greed
+                    fundingRates: (fundingData || []).slice(0, 5) // Save Top 5 Funding
                 };
                 setAnalysis(enriched);
                 setLastSync(new Date());
@@ -142,6 +165,29 @@ const MarketOracle = ({ onDataUpdate }) => {
                 </div>
             </div>
 
+            {/* Flash Risk Alert */}
+            {analysis.flashAlert && (
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className={`flash-alert-banner ${analysis.flashAlert.level.toLowerCase()}`}
+                    style={{
+                        background: analysis.flashAlert.level === 'HIGH' ? 'rgba(255, 59, 48, 0.2)' : 'rgba(255, 149, 0, 0.2)',
+                        border: `1px solid ${analysis.flashAlert.level === 'HIGH' ? '#ff3b30' : '#ff9500'}`,
+                        margin: '0 1.5rem 1rem 1.5rem',
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        color: analysis.flashAlert.level === 'HIGH' ? '#ff4d4d' : '#ffac1c'
+                    }}
+                >
+                    <AlertTriangle size={18} />
+                    <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{analysis.flashAlert.message}</span>
+                </motion.div>
+            )}
+
             {/* Main Content Grid */}
             <div className="oracle-content">
 
@@ -193,13 +239,34 @@ const MarketOracle = ({ onDataUpdate }) => {
                                 <span className="stat-label">VOL 24H</span>
                                 <span className="stat-val">{analysis.stats.totalVolume}</span>
                             </div>
+                            {analysis.fngData && (
+                                <div className="stat-item fng-stat" title={`Sentiment: ${analysis.fngData.classification}`}>
+                                    <span className="stat-label">FEAR & GREED</span>
+                                    <span className="stat-val" style={{ color: analysis.fngData.value > 60 ? '#00ff9d' : analysis.fngData.value < 40 ? '#ff4d4d' : '#fbbf24' }}>
+                                        {analysis.fngData.value}
+                                    </span>
+                                </div>
+                            )}
                             <div className="stat-item">
-                                <span className="stat-label">TF</span>
+                                <span className="stat-label">TF SUG</span>
                                 <span className="stat-val">{analysis.suggestedTimeframe || '1H'}</span>
                             </div>
-                            <div className="stat-item">
-                                <span className="stat-label">VOLATILITY</span>
-                                <span className={`stat-val ${analysis.volatility?.toLowerCase()}`}>{analysis.volatility || 'N/A'}</span>
+                        </div>
+                    )}
+
+                    {/* Funding Rates Heatmap (Mini) */}
+                    {analysis.fundingRates && analysis.fundingRates.length > 0 && (
+                        <div className="funding-section">
+                            <span className="section-label">TOP FUNDING</span>
+                            <div className="funding-grid">
+                                {analysis.fundingRates.map(f => (
+                                    <div key={f.symbol} className="funding-pill">
+                                        <span className="fund-sym">{f.symbol.replace('USDT', '')}</span>
+                                        <span className={`fund-val ${f.fundingRate > 0.01 ? 'high-pos' : f.fundingRate < -0.01 ? 'high-neg' : ''}`}>
+                                            {(f.fundingRate * 100).toFixed(3)}%
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}

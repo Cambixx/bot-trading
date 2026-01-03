@@ -405,6 +405,22 @@ export function hasVolumeSpike(candles, threshold = 1.5) {
 }
 
 /**
+ * Calcular RVOL (Relative Volume)
+ * Relación entre el volumen actual y el volumen promedio
+ * @param {Array<Object>} candles - Datos de velas
+ * @param {number} period - Período
+ * @returns {number} RVOL value (e.g., 2.5 means 2.5x average volume)
+ */
+export function calculateRVOL(candles, period = 20) {
+    if (candles.length < period) return 1;
+
+    const currentVolume = candles[candles.length - 1].volume;
+    const avgVolume = calculateAverageVolume(candles.slice(0, -1), period);
+
+    return avgVolume === 0 ? 0 : Number((currentVolume / avgVolume).toFixed(2));
+}
+
+/**
  * Calcular ATR (Average True Range) - Medida de volatilidad
  * @param {Array<Object>} candles - Datos de velas con high, low, close
  * @param {number} period - Período del ATR (típicamente 14)
@@ -1022,7 +1038,8 @@ export function performTechnicalAnalysis(candles) {
         patterns,
         volume: {
             spike: volumeSpike,
-            buyerPressure
+            buyerPressure,
+            rvol: calculateRVOL(candles, 20)
         },
         divergence: {
             rsi: rsiDivergence,
@@ -1193,4 +1210,232 @@ export function calculateChoppinessIndex(candles, period = 14) {
     }
 
     return ciValues;
+}
+
+/**
+ * Encontrar picos y valles (Local Pivot Points)
+ * @param {Array<Object>} candles 
+ * @param {number} leftBars - Velas a la izquierda para confirmar pivot
+ * @param {number} rightBars - Velas a la derecha para confirmar pivot
+ */
+function findPivots(candles, leftBars = 5, rightBars = 2) {
+    const pivots = [];
+
+    // Necesitamos al menos left + right + 1 velas
+    if (candles.length < leftBars + rightBars + 1) return pivots;
+
+    for (let i = leftBars; i < candles.length - rightBars; i++) {
+        const currentHigh = candles[i].high;
+        const currentLow = candles[i].low;
+
+        // Check High Pivot
+        let isHighPivot = true;
+
+        // Loop simple tradicional para evitar complejidad de slice/every
+        for (let j = 1; j <= leftBars; j++) {
+            if (candles[i - j].high > currentHigh) { isHighPivot = false; break; }
+        }
+        if (isHighPivot) {
+            for (let j = 1; j <= rightBars; j++) {
+                if (candles[i + j].high > currentHigh) { isHighPivot = false; break; }
+            }
+        }
+
+        // Check Low Pivot
+        let isLowPivot = true;
+        for (let j = 1; j <= leftBars; j++) {
+            if (candles[i - j].low < currentLow) { isLowPivot = false; break; }
+        }
+        if (isLowPivot) {
+            for (let j = 1; j <= rightBars; j++) {
+                if (candles[i + j].low < currentLow) { isLowPivot = false; break; }
+            }
+        }
+
+        if (isHighPivot) {
+            pivots.push({ type: 'HIGH', price: currentHigh, index: i, time: candles[i].openTime });
+        }
+        if (isLowPivot) {
+            pivots.push({ type: 'LOW', price: currentLow, index: i, time: candles[i].openTime });
+        }
+    }
+    return pivots;
+}
+
+/**
+ * Detectar patrones gráficos algorítmicos
+ * Base sólida para Pattern Hunter antes de IA
+ */
+export function findChartPatterns(candles) {
+    const patterns = [];
+
+    // 1. Detect Pivots
+    const pivots = findPivots(candles, 4, 3); // Ajustar sensibilidad
+    if (pivots.length < 4) return { detected: false, patterns: [] };
+
+    const highs = pivots.filter(p => p.type === 'HIGH');
+    const lows = pivots.filter(p => p.type === 'LOW');
+
+    if (highs.length < 2 || lows.length < 2) return { detected: false, patterns: [] };
+
+    const lastHigh = highs[highs.length - 1];
+    const prevHigh = highs[highs.length - 2];
+    const lastLow = lows[lows.length - 1];
+    const prevLow = lows[lows.length - 2];
+
+    const currentPrice = candles[candles.length - 1].close;
+
+    // --- DOUBLE TOP DETECTOR ---
+    // Dos picos a nivel similar (< 1% diff), validados si el precio cae bajo el valle intermedio
+    if (Math.abs(lastHigh.price - prevHigh.price) / lastHigh.price < 0.01) {
+        // Encontrar el valle entre los dos picos
+        const valley = lows.find(l => l.index > prevHigh.index && l.index < lastHigh.index);
+        if (valley) {
+            if (currentPrice < valley.price) { // Confirmado break
+                patterns.push({
+                    name: "Double Top",
+                    signal: "BEARISH",
+                    confidence: "High",
+                    breakoutLevel: valley.price,
+                    description: "Reversión bajista confirmada al romper soporte central",
+                    target: valley.price - (lastHigh.price - valley.price)
+                });
+            } else { // Potencial
+                patterns.push({
+                    name: "Potential Double Top",
+                    signal: "BEARISH",
+                    confidence: "Medium",
+                    breakoutLevel: valley.price,
+                    description: "Resistencia doble detectada, esperar ruptura de soporte",
+                    target: valley.price - (lastHigh.price - valley.price)
+                });
+            }
+        }
+    }
+
+    // --- DOUBLE BOTTOM DETECTOR ---
+    if (Math.abs(lastLow.price - prevLow.price) / lastLow.price < 0.01) {
+        // Encontrar el pico entre los dos valles
+        const peak = highs.find(h => h.index > prevLow.index && h.index < lastLow.index);
+        if (peak) {
+            if (currentPrice > peak.price) {
+                patterns.push({
+                    name: "Double Bottom",
+                    signal: "BULLISH",
+                    confidence: "High",
+                    breakoutLevel: peak.price,
+                    description: "Reversión alcista confirmada al romper resistencia central",
+                    target: peak.price + (peak.price - lastLow.price)
+                });
+            } else {
+                patterns.push({
+                    name: "Potential Double Bottom",
+                    signal: "BULLISH",
+                    confidence: "Medium",
+                    breakoutLevel: peak.price,
+                    description: "Soporte doble detectado, esperar ruptura de resistencia",
+                    target: peak.price + (peak.price - lastLow.price)
+                });
+            }
+        }
+    }
+
+    // --- TRIANGLE / WEDGE DETECTOR ---
+    // Analizar pendientes de líneas de tendencia
+    const highSlope = (lastHigh.price - prevHigh.price) / (lastHigh.index - prevHigh.index);
+    const lowSlope = (lastLow.price - prevLow.price) / (lastLow.index - prevLow.index);
+
+    // ASCENDING TRIANGLE: Highs flat, Lows rising
+    // DESCENDING TRIANGLE: Highs falling, Lows flat
+    // SYMMETRICAL TRIANGLE: Highs falling, Lows rising
+
+    // Lows rising?
+    const lowsRising = lowSlope > 0; // Pendiente positiva
+    // Highs falling?
+    const highsFalling = highSlope < 0; // Pendiente negativa
+    // Flat?
+    const highsFlat = Math.abs(highSlope) < (lastHigh.price * 0.0005); // Muy poca pendiente
+    const lowsFlat = Math.abs(lowSlope) < (lastLow.price * 0.0005);
+
+    if (highsFlat && lowsRising) {
+        patterns.push({
+            name: "Ascending Triangle",
+            signal: "BULLISH",
+            confidence: "Medium",
+            breakoutLevel: lastHigh.price,
+            description: "Mínimos ascendentes contra resistencia plana. Presión de compra.",
+            target: lastHigh.price + (lastHigh.price - lastLow.price)
+        });
+    } else if (lowsFlat && highsFalling) {
+        patterns.push({
+            name: "Descending Triangle",
+            signal: "BEARISH",
+            confidence: "Medium",
+            breakoutLevel: lastLow.price,
+            description: "Máximos descendentes contra soporte plano. Presión de venta.",
+            target: lastLow.price - (lastHigh.price - lastLow.price)
+        });
+    } else if (highsFalling && lowsRising) {
+        patterns.push({
+            name: "Symmetrical Triangle",
+            signal: "NEUTRAL_BIAS", // Esperar break
+            confidence: "Medium",
+            breakoutLevel: `${lastHigh.price.toFixed(4)} / ${lastLow.price.toFixed(4)}`,
+            description: "Consolidación con compresión de volatilidad. Breakout inminente.",
+            target: null
+        });
+    }
+
+    // --- CHANNEL DETECTOR ---
+    // Pendientes similares
+    const slopesSimilar = Math.abs(highSlope - lowSlope) < Math.abs(highSlope * 0.2); // 20% diff tolerance
+
+    if (slopesSimilar) {
+        if (highSlope > 0) {
+            patterns.push({
+                name: "Ascending Channel",
+                signal: "BEARISH_BIAS", // Canales alcistas suelen romper abajo, pero es trend following
+                confidence: "Low",
+                breakoutLevel: lastLow.price,
+                description: "Canal de tendencia alcista ordenado.",
+                target: null
+            });
+        } else if (highSlope < 0) {
+            patterns.push({
+                name: "Descending Channel",
+                signal: "BULLISH_BIAS", // Canales bajistas (flags) suelen romper arriba
+                confidence: "Medium",
+                breakoutLevel: lastHigh.price,
+                description: "Canal bajista ordenado (Posible Bull Flag).",
+                target: null
+            });
+        }
+    }
+
+    // --- HEAD AND SHOULDERS (Simplified) ---
+    // Requiere 3 picos: Lower, Higher, Lower
+    if (highs.length >= 3) {
+        const h3 = highs[highs.length - 1]; // Right Shoulder
+        const h2 = highs[highs.length - 2]; // Head
+        const h1 = highs[highs.length - 3]; // Left Shoulder
+
+        const isHead = h2.price > h1.price && h2.price > h3.price;
+        const shouldersLevel = Math.abs(h1.price - h3.price) / h1.price < 0.02; // Shoulders similar level
+
+        if (isHead && shouldersLevel) {
+            // Find neckline (minimos entre hombros)
+            const neckLow = Math.min(...lows.filter(l => l.index > h1.index && l.index < h3.index).map(l => l.price));
+
+            patterns.push({
+                name: "Head and Shoulders",
+                signal: "BEARISH",
+                confidence: "High",
+                breakoutLevel: neckLow,
+                description: "Patrón de reversión mayor detectado.",
+                target: neckLow - (h2.price - neckLow)
+            });
+        }
+    }
+
+    return { detected: patterns.length > 0, patterns };
 }

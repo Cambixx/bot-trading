@@ -332,48 +332,126 @@ export function calculateMLMovingAverage(prices, config = {}) {
     const aboveSMA20 = currClose > sma20;
     const trendDirection = aboveSMA20 ? 'BULLISH' : 'BEARISH';
 
-    // === Determine Signal with Enhanced Logic ===
+    // === IMPROVED: Signal Detection with Multiple Modes ===
+    // Mode 1: EXTREMITY - Price has crossed the band (strongest signal)
+    // Mode 2: APPROACHING - Price is near band (early warning, 98%)
+    // Mode 3: MEAN_REVERSION - Price returning to center after extremity
+
     let signal = null;
     let signalQuality = 'WEAK';
     let rsiConfirmed = false;
     let trendAligned = false;
+    let signalMode = null; // 'EXTREMITY' | 'APPROACHING' | 'MEAN_REVERSION'
 
-    // UPPER_EXTREMITY: Price above upper band + curve rising
-    if (currClose > currUpper && isRising) {
+    // Calculate position relative to bands (normalized 0-100)
+    // 0 = at lower band, 50 = at middle, 100 = at upper band
+    const bandPosition = ((currClose - currLower) / bandWidth) * 100;
+
+    // Threshold for "approaching" (within 2% of band)
+    const approachThreshold = 0.98;
+    const upperApproachLevel = currLower + (bandWidth * approachThreshold);
+    const lowerApproachLevel = currLower + (bandWidth * (1 - approachThreshold));
+
+    // ============ UPPER EXTREMITY DETECTION ============
+    // PRIORITY 1: Clear break above upper band
+    if (currClose > currUpper) {
         signal = 'UPPER_EXTREMITY';
+        signalMode = 'EXTREMITY';
 
-        // RSI confirmation (>70 = confirmed overbought)
-        rsiConfirmed = rsi > 70;
+        // RSI confirmation (>65 = overbought zone, >70 = confirmed)
+        rsiConfirmed = rsi > 65;
 
-        // Trend alignment (bearish trend = better for sells)
-        trendAligned = !aboveSMA20; // Better to sell when below SMA
+        // For SHORT signals: better when price is extended AND RSI is high
+        // We DON'T require curve direction - that was the bug!
 
-        // Signal quality
-        if (rsiConfirmed && signalStrength > 50) signalQuality = 'STRONG';
-        else if (rsiConfirmed || signalStrength > 30) signalQuality = 'MODERATE';
+        // Quality assessment
+        if (rsi > 75 && deviation > 0.5) signalQuality = 'STRONG';
+        else if (rsi > 65 || deviation > 0.3) signalQuality = 'MODERATE';
+
+        // Trend alignment: better to short when already in downtrend
+        trendAligned = !aboveSMA20 || isFalling;
     }
-    // LOWER_EXTREMITY: Price below lower band + curve falling
-    else if (currClose < currLower && isFalling) {
+    // PRIORITY 2: Approaching upper band (Early Warning)
+    else if (currClose > upperApproachLevel && bandPosition > 90) {
+        signal = 'APPROACHING_UPPER';
+        signalMode = 'APPROACHING';
+        rsiConfirmed = rsi > 60;
+        signalQuality = rsi > 70 ? 'MODERATE' : 'WEAK';
+        trendAligned = isRising; // Still in momentum
+    }
+
+    // ============ LOWER EXTREMITY DETECTION ============
+    // PRIORITY 1: Clear break below lower band
+    if (!signal && currClose < currLower) {
         signal = 'LOWER_EXTREMITY';
+        signalMode = 'EXTREMITY';
 
-        // RSI confirmation (<30 = confirmed oversold)
-        rsiConfirmed = rsi < 30;
+        // RSI confirmation (<35 = oversold zone, <30 = confirmed)
+        rsiConfirmed = rsi < 35;
 
-        // Trend alignment (bullish trend = better for buys)
-        trendAligned = aboveSMA20; // Better to buy when above SMA
+        // For LONG signals: better when price is depressed AND RSI is low
 
-        // Signal quality
-        if (rsiConfirmed && signalStrength > 50) signalQuality = 'STRONG';
-        else if (rsiConfirmed || signalStrength > 30) signalQuality = 'MODERATE';
+        // Quality assessment
+        if (rsi < 25 && deviation > 0.5) signalQuality = 'STRONG';
+        else if (rsi < 35 || deviation > 0.3) signalQuality = 'MODERATE';
+
+        // Trend alignment: better to buy when already in uptrend
+        trendAligned = aboveSMA20 || isRising;
+    }
+    // PRIORITY 2: Approaching lower band (Early Warning)
+    else if (!signal && currClose < lowerApproachLevel && bandPosition < 10) {
+        signal = 'APPROACHING_LOWER';
+        signalMode = 'APPROACHING';
+        rsiConfirmed = rsi < 40;
+        signalQuality = rsi < 30 ? 'MODERATE' : 'WEAK';
+        trendAligned = isFalling; // Still in momentum down
     }
 
-    // Calculate final score (0-100)
+    // ============ MEAN REVERSION DETECTION ============
+    // Price was at extremity and now returning to middle
+    if (!signal) {
+        const prevBandPosition = prevOut ? ((prevResult.close - currLower) / bandWidth) * 100 : 50;
+
+        // Was at upper extremity, now returning
+        if (prevBandPosition > 95 && bandPosition < 85 && bandPosition > 50) {
+            signal = 'MEAN_REVERSION_DOWN';
+            signalMode = 'MEAN_REVERSION';
+            signalQuality = 'MODERATE';
+            rsiConfirmed = rsi < 60;
+            trendAligned = isFalling;
+        }
+        // Was at lower extremity, now returning
+        else if (prevBandPosition < 5 && bandPosition > 15 && bandPosition < 50) {
+            signal = 'MEAN_REVERSION_UP';
+            signalMode = 'MEAN_REVERSION';
+            signalQuality = 'MODERATE';
+            rsiConfirmed = rsi > 40;
+            trendAligned = isRising;
+        }
+    }
+
+    // ============ SCORING SYSTEM ============
     let score = 0;
     if (signal) {
-        score += signalStrength; // Base score from deviation
-        if (rsiConfirmed) score += 25; // RSI confirmation bonus
-        if (trendAligned) score += 15; // Trend alignment bonus
-        if (Math.abs(velocity) > 0.5) score += 10; // Strong velocity bonus
+        // Base score depends on signal mode
+        if (signalMode === 'EXTREMITY') {
+            score = 50; // Strong base for confirmed extremity
+            score += Math.min(20, signalStrength); // Up to +20 for deviation
+        } else if (signalMode === 'APPROACHING') {
+            score = 30; // Lower base for early warning
+            score += Math.min(15, signalStrength);
+        } else if (signalMode === 'MEAN_REVERSION') {
+            score = 40; // Medium base for reversion
+            score += Math.min(15, Math.abs(velocity) * 10);
+        }
+
+        // Confirmation bonuses
+        if (rsiConfirmed) score += 20;
+        if (trendAligned) score += 10;
+        if (Math.abs(velocity) > 0.5) score += 5;
+        if (signalQuality === 'STRONG') score += 10;
+        else if (signalQuality === 'MODERATE') score += 5;
+
         score = Math.min(100, Math.round(score));
     }
 
@@ -397,6 +475,9 @@ export function calculateMLMovingAverage(prices, config = {}) {
         trendDirection,
         trendAligned,
         bandWidthPercent: bandWidthPercent.toFixed(2),
-        deviation: deviation.toFixed(2)
+        deviation: deviation.toFixed(2),
+        // NEW: Mode and position info
+        signalMode,
+        bandPosition: bandPosition.toFixed(1)
     };
 }

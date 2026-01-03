@@ -77,28 +77,39 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
                 console.log('ADX not available');
             }
 
-            // ATR for volatility context
+            // ATR & Chop Index for Volatility/Regime
             let atr1h = null;
+            let chop1h = null;
+            let rvol = "1.0";
+
             try {
-                const { calculateATR } = await import('../services/technicalAnalysis');
+                const { calculateATR, calculateChoppinessIndex, calculateRVOL } = await import('../services/technicalAnalysis');
+
+                // ATR
                 const atrResult = calculateATR(klines1h, 14);
                 atr1h = atrResult[atrResult.length - 1];
+
+                // Choppiness
+                const chopResult = calculateChoppinessIndex(klines1h, 14);
+                chop1h = chopResult[chopResult.length - 1];
+
+                // RVOL
+                rvol = calculateRVOL(klines1h, 20);
             } catch (e) {
-                console.log('ATR not available');
+                console.log('Error calculating advanced indicators', e);
             }
 
-            // Volume Analysis
+            // Volume Analysis Legacy (Keep for display just in case, but rely on RVOL)
             const volumes1h = klines1h.map(k => k.volume);
             const avgVolume = volumes1h.slice(-20).reduce((a, b) => a + b, 0) / 20;
             const currentVolume = volumes1h[volumes1h.length - 1];
-            const volumeRatio = (currentVolume / avgVolume).toFixed(2);
 
             // BB Position
             const upper1h = bb1h.upper[bb1h.upper.length - 1];
             const lower1h = bb1h.lower[bb1h.lower.length - 1];
             let bbPos = "Middle";
-            if (price > upper1h) bbPos = "Above Upper Band (Overbought Zone)";
-            else if (price < lower1h) bbPos = "Below Lower Band (Oversold Zone)";
+            if (price > upper1h) bbPos = "Above Upper Band (Overbought)";
+            else if (price < lower1h) bbPos = "Below Lower Band (Oversold)";
             else if (price > (upper1h + lower1h) / 2) bbPos = "Upper Half";
             else bbPos = "Lower Half";
 
@@ -116,7 +127,7 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
                 askVol = depth.asks.reduce((acc, item) => acc + item[1], 0);
                 const ratio = bidVol / (askVol || 1);
 
-                if (ratio > 1.5) obImbalance = `Bulish Order Flow (${ratio.toFixed(1)}x Bids)`;
+                if (ratio > 1.5) obImbalance = `Bullish Order Flow (${ratio.toFixed(1)}x Bids)`;
                 else if (ratio < 0.6) obImbalance = `Bearish Order Flow (${(1 / ratio).toFixed(1)}x Asks)`;
                 else obImbalance = "Balanced Order Book";
             }
@@ -130,11 +141,12 @@ const TradeDoctor = ({ defaultSymbol, availableSymbols }) => {
                     macd1h: macd1h.histogram[macd1h.histogram.length - 1]?.toFixed(4) || 'N/A',
                     bbPosition: bbPos,
                     adx1h: adx1h?.toFixed(1) || 'N/A',
+                    chop1h: chop1h?.toFixed(1) || 'N/A', // NEW
                     trend1h: trend1h,
                     atr1h: atr1h?.toFixed(4) || 'N/A',
                     atrPercent: atr1h ? ((atr1h / price) * 100).toFixed(2) + '%' : 'N/A',
-                    volumeRatio: volumeRatio + 'x avg',
-                    volumeStatus: currentVolume > avgVolume * 1.5 ? 'HIGH' : currentVolume < avgVolume * 0.5 ? 'LOW' : 'NORMAL',
+                    volumeRatio: rvol + 'x avg', // Use calculated RVOL
+                    volumeStatus: rvol > 2.0 ? 'ULTRA HIGH' : rvol > 1.2 ? 'HIGH' : rvol < 0.8 ? 'LOW' : 'NORMAL',
                     orderBook: obImbalance
                 },
                 orderFlow: { bidVol, askVol } // Save for UI rendering

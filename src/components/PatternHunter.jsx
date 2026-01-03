@@ -41,7 +41,7 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
             console.log('🔍 Pattern Hunter: Iniciando escaneo para', selectedSymbol);
 
             // Fetch OHLCV candles (not just close prices)
-            const klines = await binanceService.getKlines(selectedSymbol, '1h', 60);
+            const klines = await binanceService.getKlines(selectedSymbol, '1h', 120);
 
             if (!klines || klines.length === 0) {
                 throw new Error('No se pudieron obtener datos de velas');
@@ -81,11 +81,25 @@ const PatternHunter = ({ defaultSymbol, availableSymbols }) => {
                 current: currentPrice
             };
 
-            // Call AI with enhanced data
+            // 2. Algorithmic Pattern Detection (New)
+            let algoPatterns = [];
+            try {
+                const { findChartPatterns } = await import('../services/technicalAnalysis');
+                const algoResult = findChartPatterns(ohlcvData);
+                if (algoResult.detected) {
+                    algoPatterns = algoResult.patterns;
+                    console.log(`🎯 Algoritmo detectó ${algoPatterns.length} patrones:`, algoPatterns.map(p => p.name));
+                }
+            } catch (err) {
+                console.error("Algo Pattern Error:", err);
+            }
+
+            // Call AI with enhanced data + algorithmic results
             const response = await getPatternAnalysis(selectedSymbol, ohlcvData, {
                 volumeTrend,
                 avgVolume,
-                priceRange
+                priceRange,
+                algoPatterns // Pass detected patterns to AI
             });
 
             if (response.success && response.analysis) {

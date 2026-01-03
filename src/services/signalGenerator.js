@@ -87,7 +87,7 @@ function percent(v) {
 export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}, mode = 'BALANCED') {
     const config = getSignalConfig(mode);
     const { indicators = {}, levels = {}, patterns = {}, volume = {}, price, buyerPressure, regime, choppiness } = analysis;
-    
+
     // Initialize dynamic weights
     let dynamicWeights = { ...config.weights };
 
@@ -106,10 +106,10 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
 
     if (isChoppy) {
         if (mode === 'CONSERVATIVE') return null; // Abort in conservative
-        
+
         // RANGING MARKET: Strategy Switch -> Mean Reversion
         warnings.push({ text: 'Mercado Lateral - Reversión activada', type: 'warning' });
-        
+
         // Adjust weights: Kill Trend, Boost Momentum/Levels
         dynamicWeights.trend = 0;
         dynamicWeights.trendStrength = 0;
@@ -137,16 +137,16 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
         // === REVERSION STRATEGY ===
         // Ignore trend bias, look for band extremes
         if (indicators.bollingerBands) {
-             const bb = indicators.bollingerBands;
-             // Allow 1% tolerance
-             if (price <= bb.lower * 1.01) signalType = 'BUY';
-             else if (price >= bb.upper * 0.99) signalType = 'SELL';
-             else {
-                 // Secondary check: RSI Extremes
-                 if (indicators.rsi < 30) signalType = 'BUY';
-                 else if (indicators.rsi > 70) signalType = 'SELL';
-                 else return null; // No reversion signal found in chop
-             }
+            const bb = indicators.bollingerBands;
+            // Allow 1% tolerance
+            if (price <= bb.lower * 1.01) signalType = 'BUY';
+            else if (price >= bb.upper * 0.99) signalType = 'SELL';
+            else {
+                // Secondary check: RSI Extremes
+                if (indicators.rsi < 30) signalType = 'BUY';
+                else if (indicators.rsi > 70) signalType = 'SELL';
+                else return null; // No reversion signal found in chop
+            }
         } else {
             return null; // Cannot trade chop without bands
         }
@@ -439,13 +439,25 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
 
     // --- 3.3 Volume ---
     let vScore = 0;
-    if (volume.spike) vScore += 0.6;
+    const rvol = volume.rvol || 1;
+
+    // RVOL Scoring
+    if (rvol > 3.0) vScore += 1.0;          // Ultra High Volume
+    else if (rvol > 2.0) vScore += 0.8;     // High Volume
+    else if (rvol > 1.5) vScore += 0.5;     // Good Volume
+    else if (rvol < 0.5) vScore -= 0.2;     // Low Volume (Warning)
+
+    if (volume.spike) vScore = Math.max(vScore, 0.6); // Floor at 0.6 if spike detected
+
     if (buyerPressure) {
-        if (signalType === 'BUY' && buyerPressure.current > 55) vScore += 0.4;
-        if (signalType === 'SELL' && buyerPressure.current < 45) vScore += 0.4;
+        if (signalType === 'BUY' && buyerPressure.current > 60) vScore += 0.3;
+        if (signalType === 'SELL' && buyerPressure.current < 40) vScore += 0.3;
     }
-    subscores.volume = clamp(vScore, 0, 1);
-    if (volume.spike) reasons.push({ text: 'Pico de Volumen', weight: 20 });
+
+    subscores.volume = clamp(vScore / 1.5, 0, 1); // Normalize
+
+    if (rvol > 2.0) reasons.push({ text: `Volumen fuerte (RVOL ${rvol})`, weight: percent(subscores.volume) });
+    else if (volume.spike) reasons.push({ text: 'Pico de Volumen', weight: 20 });
 
     // --- 3.4 Levels (S/R) ---
     let lScore = 0;
@@ -592,12 +604,21 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
     // === Stop Loss & Take Profit Strategy ===
     const atr = indicators.atr || (price * 0.02);
     let stopLoss, takeProfit1, takeProfit2;
-    let volMult;
+
+    // Dynamic Volatility Multiplier based on Regime
+    let volMult = 1.5; // Default Balanced
+
     if (mode === 'SCALPING') {
-        volMult = choppiness > 50 ? 1.2 : 0.8;
-    } else {
-        volMult = choppiness > 50 ? 2.5 : 1.5;
+        volMult = 1.0; // Tight stops for scalping
+        if (choppiness > 50) volMult = 0.8; // Even tighter in chop
+    } else if (mode === 'CONSERVATIVE') {
+        volMult = 2.0; // Wide breath for conservative
+    } else if (mode === 'RISKY') {
+        volMult = 1.2;
     }
+
+    // Adjust for current volatility spike
+    if (rvol > 3) volMult *= 1.2; // Increase room if volume is exploding
 
     if (signalType === 'BUY') {
         stopLoss = price - (atr * volMult);
@@ -638,7 +659,7 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
  */
 export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode = 'BALANCED') {
     const raw = calculateDetailedScore(analysis, symbol, multiTimeframeData, mode);
-    
+
     // Si calculateDetailedScore retorna null (por Gate 1/2), no hay señal
     if (!raw) return null;
 
@@ -673,7 +694,10 @@ export function generateSignal(analysis, symbol, multiTimeframeData = {}, mode =
             macd: analysis.indicators.macd?.histogram != null ? Number(analysis.indicators.macd.histogram.toFixed(6)) : null,
             atr: Number((analysis.indicators.atr || 0).toFixed(8)),
             adx: analysis.indicators.adx != null ? Number(analysis.indicators.adx.toFixed(1)) : null,
-            choppiness: analysis.choppiness != null ? Number(analysis.choppiness.toFixed(1)) : null
+            atr: Number((analysis.indicators.atr || 0).toFixed(8)),
+            adx: analysis.indicators.adx != null ? Number(analysis.indicators.adx.toFixed(1)) : null,
+            choppiness: analysis.choppiness != null ? Number(analysis.choppiness.toFixed(1)) : null,
+            rvol: Number((analysis.volume?.rvol || 0).toFixed(2))
         },
         regime: currentRegime
     };

@@ -78,12 +78,14 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
             📈 MACD 15m: ${safeIndicators?.macd15m || 'N/A'} | MACD 1H: ${safeIndicators?.macd1h || 'N/A'}
             📉 Bollinger: ${safeIndicators?.bbPosition || 'N/A'}
             💪 ADX 1H: ${safeIndicators?.adx1h || 'N/A'} (Fuerza de tendencia)
+            🌀 Chop Index 1H: ${safeIndicators?.chop1h || 'N/A'} (Regime: <38 Trend, >61 Range)
             🔥 Tendencia 1H: ${safeIndicators?.trend1h || 'N/A'}
             📊 ATR 1H: ${safeIndicators?.atr1h || 'N/A'} (${safeIndicators?.atrPercent || 'N/A'} volatilidad)
-            📢 Volumen: ${safeIndicators?.volumeRatio || 'N/A'} (Estado: ${safeIndicators?.volumeStatus || 'N/A'})
+            📢 Volumen: ${safeIndicators?.volumeRatio || 'N/A'} (RVOL - Fuerza relativa)
+            📖 Order Book: ${safeIndicators?.orderBook || 'N/A'}
 
             Tu tarea como ESPECIALISTA EN DAY TRADING:
-            1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Momentum", "Fiebre de FOMO", "Consolidación Lateral", "Breakout Inminente").
+            1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Momentum", "Fiebre de FOMO", "Consolidación Lateral", "Breakout Inminente"). Usa el Chop Index para determinar si es Rango o Tendencia.
             2. SÍNTOMAS: Lista 3-4 evidencias técnicas que apoyan tu diagnóstico usando los datos multi-timeframe.
             3. RECETA: ¿Qué debe hacer el trader AHORA? Sé específico (ej: "Long si rompe $X con stop en $Y", "Esperar pullback a EMA21", "No tocar, muy choppy").
             4. NIVELES CRÍTICOS: Sugiere Entry, Stop Loss y Take Profit basados en el ATR.
@@ -130,13 +132,20 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
             ${context ? `Tendencia: ${context.volumeTrend}, Volumen promedio: ${context.avgVolume?.toFixed(0)}` : 'No disponible'}
             ${context?.priceRange ? `Rango 24h: $${context.priceRange.low24h?.toFixed(2)} - $${context.priceRange.high24h?.toFixed(2)} | Actual: $${context.priceRange.current?.toFixed(2)}` : ''}
             
+            ${context?.algoPatterns && context.algoPatterns.length > 0 ? `
+            VALIDACIÓN ALGORÍTMICA (Patrones detectados matemáticamente):
+            ${context.algoPatterns.map(p => `- ${p.name} (${p.signal}): ${p.description} (Nivel: ${p.breakoutLevel})`).join('\n')}
+            ` : 'No se detectaron patrones geométricos matemáticos evidentes.'}
+            
             Tu tarea es analizar la ESTRUCTURA DE PRECIOS y buscar:
-            1. PATRONES CLÁSICOS: H&S, Doble Techo/Suelo, Cuñas, Banderas, Triángulos
-            2. SOPORTES Y RESISTENCIAS: Niveles clave basados en los highs/lows
-            3. BREAKOUT ZONES: Dónde se activaría el patrón
-            4. TARGETS: Objetivo estimado basado en el patrón
+            1. VALIDACIÓN DE ALGORITMOS: Confirma si los patrones detectados matemáticamente (arriba) son válidos visualmente y tienen sentido en el contexto actual.
+            2. PATRONES ADICIONALES: Busca patrones que el algoritmo básico pudo omitir (H&S amplios, Banderas complejas).
+            3. SOPORTES Y RESISTENCIAS: Niveles clave basados en los highs/lows
+            4. BREAKOUT ZONES: Dónde se activaría el patrón
+            5. TARGETS: Objetivo estimado basado en el patrón
             
             IMPORTANTE: 
+            - SI EL ALGORITMO DETECTÓ ALGO, PRIORIZA VALIDARLO.
             - El volumen DEBE confirmar los patrones (volumen creciente en breakouts)
             - Sé HONESTO: si no hay patrón claro, dilo
             - Da NIVELES ESPECÍFICOS para operar
@@ -215,12 +224,13 @@ Analiza la siguiente oportunidad de trading:
 **Contexto de Mercado**:
 - Símbolo: ${symbol}
 - Precio Actual: $${price}
-- Régimen de Mercado Detectado: ${regime || 'Desconocido'}
+- Régimen de Mercado (Choppiness): ${safeIndicators?.choppiness || 'Desconocido'} (<38 Trend, >61 Chop)
 
 **Análisis Técnico**:
 - RSI: ${safeIndicators?.rsi || 'N/A'}
 - MACD: ${safeIndicators?.macd || 'N/A'}
 - ADX: ${safeIndicators?.adx || 'N/A'}
+- RVOL: ${safeIndicators?.rvol || 'N/A'} (Fuerza Volumétrica)
 
 **Señales Detectadas**:
 ${reasons && reasons.length > 0 ? reasons.map(r => `- ${r.text} (Peso: ${r.weight}%)`).join('\n') : 'N/A'}
@@ -235,9 +245,9 @@ ${levels ? `- Entrada: $${levels.entry}
 ${warnings && warnings.length > 0 ? `**Advertencias**:\n${warnings.map(w => `- ${w}`).join('\n')}` : ''}
 
 Tu tarea:
-1. Validar la calidad de la señal considerando el Régimen de Mercado.
+1. Validar la calidad de la señal considerando el Régimen de Mercado y el RVOL.
 2. Criticar los niveles de Stop Loss y Take Profit.
-3. Dar un veredicto final.
+3. Dar un veredicto final rápido y conciso.
 
 Responde SOLO con este JSON:
 {

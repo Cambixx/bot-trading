@@ -66,6 +66,35 @@ function SignalCard({ signal, onSimulateBuy }) {
         return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
+    const ConfluenceTracker = ({ subscores }) => {
+        if (!subscores) return null;
+
+        const factors = [
+            { id: 'trend', label: 'TREND', score: subscores.trend || 0 },
+            { id: 'momentum', label: 'MOM', score: subscores.momentum || 0 },
+            { id: 'volume', label: 'VOL', score: subscores.volume || 0 },
+            { id: 'levels', label: 'STRUC', score: (subscores.levels || 0) + (subscores.patterns || 0) }
+        ];
+
+        return (
+            <div className="confluence-tracker">
+                {factors.map(f => (
+                    <div key={f.id} className="confluence-item" title={`${f.label}: ${f.score}%`}>
+                        <div className="conf-bar-bg">
+                            <motion.div
+                                className="conf-bar-fill"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(100, f.score)}%` }}
+                                transition={{ duration: 1, delay: 0.8 }}
+                            />
+                        </div>
+                        <span className="conf-label">{f.label}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <motion.div
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
@@ -104,6 +133,8 @@ function SignalCard({ signal, onSimulateBuy }) {
                 </div>
             </div>
 
+            <ConfluenceTracker subscores={signal.subscores} />
+
             <div className="levels-grid-premium">
                 <div className="level-box tp">
                     <div className="level-header">
@@ -137,6 +168,11 @@ function SignalCard({ signal, onSimulateBuy }) {
                     <div className="ind-pill">RSI: {signal.indicators.rsi}</div>
                     <div className="ind-pill">ADX: {signal.indicators.adx || '-'}</div>
                     <div className="ind-pill">RR: {signal.riskReward}</div>
+                    {(signal.indicators.rvol > 1.5 || (signal.subscores && signal.subscores.volume > 70)) && (
+                        <div className={`ind-pill ${signal.indicators.rvol > 3 ? 'high-vol-alert' : ''}`} style={{ borderColor: 'var(--color-warning)', color: 'var(--color-warning)' }}>
+                            RVOL: {signal.indicators.rvol || 'High'}
+                        </div>
+                    )}
                 </div>
 
                 {/* Risk Calculator (Professional Edge) */}
