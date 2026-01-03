@@ -14,7 +14,7 @@ const OPENROUTER_API_KEY = (import.meta.env && import.meta.env.VITE_OPENROUTER_A
 
 const AI_MODELS = {
     DEFAULT: 'deepseek/deepseek-chat',
-    REASONING: 'deepseek/deepseek-chat',
+    REASONING: 'deepseek/deepseek-r1',
     FAST: 'deepseek/deepseek-chat',
     FREE: 'google/gemini-2.0-flash-exp:free',
     NEXUS: 'deepseek/deepseek-chat'
@@ -29,8 +29,10 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
 
     // Seleccionar modelo según el modo
     let selectedModel = AI_MODELS.DEFAULT;
+    if (mode === 'TRADE_DOCTOR') selectedModel = AI_MODELS.REASONING;
     if (mode === 'MARKET_ORACLE') selectedModel = AI_MODELS.FAST;
     if (mode === 'NEXUS') selectedModel = AI_MODELS.NEXUS;
+    if (mode === 'PATTERN_HUNTER') selectedModel = AI_MODELS.FAST;
 
     let prompt = '';
 

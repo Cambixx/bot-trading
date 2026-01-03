@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap, Calculator } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap, Calculator, Copy, Layers, Activity, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import './SignalCard.css';
 
@@ -10,17 +10,30 @@ const RiskCalculator = ({ entry, stopLoss, isSell }) => {
     const riskPerShare = Math.abs(entry - stopLoss);
     const shares = riskAmount / riskPerShare;
     const positionValue = shares * entry;
-    // Leverage needed assuming 100% margin usage for simplicity, or just display raw size
-    // Let's just show Size and Value.
-
-    // Leverage hint: If Position Value > Risk * 10, suggests leverage might be needed for small accounts
 
     return (
         <div className="risk-calc-box">
             <div className="calc-header">
-                <div className="calc-label"><Calculator size={12} /> RISK SIZING</div>
+                <div className="calc-label">
+                    <Calculator size={14} />
+                    <span>RISK SIZING</span>
+                </div>
+                <div className="quick-risk-btns">
+                    {[10, 50, 100, 500].map(amt => (
+                        <button
+                            key={amt}
+                            onClick={() => setRiskAmount(amt)}
+                            className={`q-btn ${riskAmount === amt ? 'active' : ''}`}
+                        >
+                            ${amt}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="calc-input-row">
                 <div className="risk-input-group">
-                    <span>Risk $</span>
+                    <span className="cur">$</span>
                     <input
                         type="number"
                         value={riskAmount}
@@ -28,15 +41,15 @@ const RiskCalculator = ({ entry, stopLoss, isSell }) => {
                         className="risk-input"
                     />
                 </div>
-            </div>
-            <div className="calc-results">
-                <div className="calc-item">
-                    <span className="lbl">SIZE</span>
-                    <span className="val">{shares < 1 ? shares.toFixed(4) : shares.toFixed(2)}</span>
-                </div>
-                <div className="calc-item">
-                    <span className="lbl">VALUE</span>
-                    <span className="val">${positionValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                <div className="calc-results-mini">
+                    <div className="res-item">
+                        <span className="lbl">SIZE</span>
+                        <span className="val">{shares < 1 ? shares.toFixed(4) : shares.toFixed(2)}</span>
+                    </div>
+                    <div className="res-item">
+                        <span className="lbl">VALUE</span>
+                        <span className="val">${positionValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,29 +83,38 @@ function SignalCard({ signal, onSimulateBuy }) {
         if (!subscores) return null;
 
         const factors = [
-            { id: 'trend', label: 'TREND', score: subscores.trend || 0 },
-            { id: 'momentum', label: 'MOM', score: subscores.momentum || 0 },
-            { id: 'volume', label: 'VOL', score: subscores.volume || 0 },
-            { id: 'levels', label: 'STRUC', score: (subscores.levels || 0) + (subscores.patterns || 0) }
+            { id: 'trend', label: 'TREND', score: subscores.trend || 0, icon: <TrendingUp size={10} /> },
+            { id: 'momentum', label: 'MOM', score: subscores.momentum || 0, icon: <Zap size={10} /> },
+            { id: 'volume', label: 'VOL', score: subscores.volume || 0, icon: <Activity size={10} /> },
+            { id: 'levels', label: 'STRUC', score: (subscores.levels || 0) + (subscores.patterns || 0), icon: <Layers size={10} /> }
         ];
 
         return (
-            <div className="confluence-tracker">
+            <div className="confluence-tracker-modern">
                 {factors.map(f => (
-                    <div key={f.id} className="confluence-item" title={`${f.label}: ${f.score}%`}>
-                        <div className="conf-bar-bg">
-                            <motion.div
-                                className="conf-bar-fill"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(100, f.score)}%` }}
-                                transition={{ duration: 1, delay: 0.8 }}
-                            />
+                    <div key={f.id} className="confluence-item-modern" title={`${f.label}: ${f.score}%`}>
+                        <div className="conf-icon-box">{f.icon}</div>
+                        <div className="conf-data">
+                            <div className="conf-bar-modern">
+                                <motion.div
+                                    className="conf-bar-fill-modern"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(100, f.score)}%` }}
+                                    transition={{ duration: 1, delay: 0.8 }}
+                                />
+                            </div>
+                            <span className="conf-label-modern">{f.label}</span>
                         </div>
-                        <span className="conf-label">{f.label}</span>
                     </div>
                 ))}
             </div>
         );
+    };
+
+    const copyToClipboard = (text, type) => {
+        navigator.clipboard.writeText(text);
+        // We could add a local state for toast/feedback here if needed
+        console.log(`Copied ${type}: ${text}`);
     };
 
     return (
@@ -121,9 +143,12 @@ function SignalCard({ signal, onSimulateBuy }) {
             </div>
 
             <div className="signal-main-premium">
-                <div className="price-stack">
+                <div className="price-stack" onClick={() => copyToClipboard(signal.price, 'Price')} title="Click to copy price">
                     <span className="stack-label">{isSell ? 'SELL AT' : 'BUY AT'}</span>
-                    <span className="stack-value">${formatPrice(signal.price)}</span>
+                    <div className="stack-value-wrapper">
+                        <span className="stack-value">${formatPrice(signal.price)}</span>
+                        <Copy size={12} className="copy-hint" />
+                    </div>
                 </div>
 
                 <div className="score-viz-small">
@@ -142,23 +167,32 @@ function SignalCard({ signal, onSimulateBuy }) {
                         <span>TAKE PROFIT</span>
                     </div>
                     <div className="level-values">
-                        <div className="tp-val">
+                        <div className="tp-val" onClick={() => copyToClipboard(signal.levels.takeProfit1, 'TP1')}>
                             <span className="val-label">TP1</span>
-                            <span className="val-num">${formatPrice(signal.levels.takeProfit1)}</span>
+                            <div className="val-num-wrapper">
+                                <span className="val-num">${formatPrice(signal.levels.takeProfit1)}</span>
+                                <Copy size={10} className="copy-hint-mini" />
+                            </div>
                         </div>
-                        <div className="tp-val">
+                        <div className="tp-val" onClick={() => copyToClipboard(signal.levels.takeProfit2, 'TP2')}>
                             <span className="val-label">TP2</span>
-                            <span className="val-num">${formatPrice(signal.levels.takeProfit2)}</span>
+                            <div className="val-num-wrapper">
+                                <span className="val-num">${formatPrice(signal.levels.takeProfit2)}</span>
+                                <Copy size={10} className="copy-hint-mini" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="level-box sl">
+                <div className="level-box sl" onClick={() => copyToClipboard(signal.levels.stopLoss, 'SL')}>
                     <div className="level-header">
                         <Shield size={14} />
                         <span>STOP LOSS</span>
                     </div>
-                    <span className="sl-val">${formatPrice(signal.levels.stopLoss)}</span>
+                    <div className="sl-val-wrapper">
+                        <span className="sl-val">${formatPrice(signal.levels.stopLoss)}</span>
+                        <Copy size={10} className="copy-hint-mini" />
+                    </div>
                 </div>
             </div>
 

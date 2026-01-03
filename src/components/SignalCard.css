@@ -160,43 +160,82 @@
     font-weight: 800;
 }
 
-.confluence-tracker {
+.confluence-tracker-modern {
     display: flex;
     justify-content: space-between;
-    gap: var(--spacing-sm);
-    padding: 8px 12px;
+    gap: 8px;
+    padding: 10px;
     background: rgba(255, 255, 255, 0.03);
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid var(--color-border-light);
 }
 
-.confluence-item {
+.confluence-item-modern {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     flex: 1;
 }
 
-.conf-bar-bg {
-    width: 100%;
-    height: 4px;
+.conf-icon-box {
+    width: 20px;
+    height: 20px;
     background: var(--color-bg-tertiary);
-    border-radius: 2px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+}
+
+.conf-data {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.conf-bar-modern {
+    width: 100%;
+    height: 3px;
+    background: var(--color-bg-tertiary);
+    border-radius: 1.5px;
     overflow: hidden;
 }
 
-.conf-bar-fill {
+.conf-bar-fill-modern {
     height: 100%;
     background: var(--color-primary);
-    box-shadow: 0 0 8px var(--color-primary-glow);
+    box-shadow: 0 0 6px var(--color-primary-glow);
 }
 
-.conf-label {
-    font-size: 0.5rem;
+.conf-label-modern {
+    font-size: 0.45rem;
     font-weight: 800;
     color: var(--color-text-muted);
     letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stack-value-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.copy-hint {
+    opacity: 0;
+    color: var(--color-primary-light);
+    transition: opacity 0.2s ease;
+}
+
+.price-stack:hover .copy-hint {
+    opacity: 0.6;
 }
 
 .levels-grid-premium {
@@ -237,6 +276,25 @@
 .val-label {
     font-size: 0.5rem;
     color: var(--color-text-muted);
+}
+
+.val-num-wrapper,
+.sl-val-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.copy-hint-mini {
+    opacity: 0;
+    color: var(--color-primary-light);
+    transition: opacity 0.2s ease;
+}
+
+.tp-val:hover .copy-hint-mini,
+.sl-val-wrapper:hover .copy-hint-mini {
+    opacity: 0.8;
 }
 
 .val-num {
@@ -347,6 +405,113 @@
 
 .btn-execute-premium.sell {
     background: var(--color-danger-dark);
+}
+
+/* Risk Calculator Modern */
+.risk-calc-box {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border-light);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calc-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--color-text-muted);
+}
+
+.quick-risk-btns {
+    display: flex;
+    gap: 4px;
+}
+
+.q-btn {
+    padding: 2px 6px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.q-btn:hover {
+    background: var(--color-bg-glass);
+    border-color: var(--color-primary-light);
+}
+
+.q-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.calc-input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.risk-input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 2px 6px;
+    width: 80px;
+}
+
+.risk-input {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    width: 100%;
+}
+
+.calc-results-mini {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.res-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.res-item .lbl {
+    font-size: 0.5rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
+.res-item .val {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: white;
+    font-family: 'Space Mono', monospace;
 }
 
 @media (max-width: 640px) {
