@@ -62,6 +62,9 @@ export function useSignalHistory() {
             } catch (error) {
                 console.error(`Error verifying signal ${signal.id}:`, error);
             }
+
+            // Add delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
     };
 

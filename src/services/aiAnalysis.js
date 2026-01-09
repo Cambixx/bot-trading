@@ -396,10 +396,11 @@ function getFallbackAnalysis(mode) {
  * Enviar datos de mercado para análisis con IA
  */
 export async function getAIAnalysis(marketData, tradingMode = 'BALANCED') {
-    if (isDevelopment) {
-        console.log('💡 Usando OpenRouter API directamente (desarrollo)');
-        return await callOpenRouterDirectly(marketData, tradingMode);
-    }
+    // FORCE USE OF NETLIFY FUNCTION even in dev to use the improved axios proxy
+    // if (isDevelopment) {
+    //     console.log('💡 Usando OpenRouter API directamente (desarrollo)');
+    //     return await callOpenRouterDirectly(marketData, tradingMode);
+    // }
 
     try {
         const response = await fetch(NETLIFY_FUNCTION_URL, {

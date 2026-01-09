@@ -57,63 +57,26 @@ class MacroService {
             return cached;
         }
 
-        if (!ALPHA_VANTAGE_KEY) {
-            console.warn('Alpha Vantage API Key missing');
-            return null;
-        }
-
         try {
-            // Fetch SPY (S&P 500 ETF) and UUP (Dollar Index ETF) in parallel
-            const [spyRes, uupRes] = await Promise.all([
-                this._fetchAlphaVantageQuote('SPY'),
-                this._fetchAlphaVantageQuote('UUP')
-            ]);
+            // Call internal proxy
+            const res = await axios.get('/.netlify/functions/market-data?type=macro');
 
-            const data = {
-                sp500: {
-                    price: spyRes?.price || 0,
-                    changePercent: spyRes?.changePercent || 0,
-                    trend: spyRes?.changePercent >= 0 ? 'BULLISH' : 'BEARISH'
-                },
-                dxy: {
-                    price: uupRes?.price || 0,
-                    changePercent: uupRes?.changePercent || 0,
-                    trend: uupRes?.changePercent >= 0 ? 'BULLISH' : 'BEARISH'
-                },
-                lastUpdated: new Date().toISOString()
-            };
+            // Validate response 
+            const data = res.data;
+            if (!data.sp500 && !data.dxy) return null; // Both failed
+
+            // Add lastUpdated if missing
+            if (!data.lastUpdated) data.lastUpdated = new Date().toISOString();
 
             this._saveCache(CACHE_KEYS.MACRO, data);
             return data;
         } catch (error) {
-            console.error('Macro Data Fetch Error:', error);
+            console.error('Macro Data Service Error:', error);
             return null;
         }
     }
 
-    async _fetchAlphaVantageQuote(symbol) {
-        try {
-            const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_KEY}`;
-            const res = await axios.get(url);
-
-            // Alpha Vantage Rate Limit Check
-            if (res.data.Note || res.data.Information) {
-                console.warn(`Alpha Vantage Limit Hit for ${symbol}:`, res.data);
-                return null;
-            }
-
-            const quote = res.data['Global Quote'];
-            if (!quote) return null;
-
-            return {
-                price: parseFloat(quote['05. price']),
-                changePercent: parseFloat(quote['10. change percent'].replace('%', ''))
-            };
-        } catch (err) {
-            console.error(`Error fetching ${symbol}:`, err);
-            return null;
-        }
-    }
+    // _fetchAlphaVantageQuote is no longer needed
 
     /**
      * Get Crypto News Analysis
@@ -122,27 +85,17 @@ class MacroService {
         const cached = this._getFromCache(CACHE_KEYS.NEWS, CACHE_TTL.NEWS);
         if (cached) return cached;
 
-        if (!NEWS_API_KEY) return [];
-
         try {
-            // Query for generic crypto market news
-            const url = `https://newsapi.org/v2/everything?q=bitcoin+crypto+market&language=en&sortBy=publishedAt&pageSize=5&apiKey=${NEWS_API_KEY}`;
-            const res = await axios.get(url);
+            // Call internal proxy
+            const res = await axios.get('/.netlify/functions/market-data?type=news');
 
-            if (res.data.status === 'ok') {
-                const articles = res.data.articles.map(a => ({
-                    title: a.title,
-                    source: a.source.name,
-                    url: a.url,
-                    publishedAt: a.publishedAt,
-                    summary: a.description
-                }));
+            const articles = Array.isArray(res.data) ? res.data : [];
+            if (articles.length > 0) {
                 this._saveCache(CACHE_KEYS.NEWS, articles);
-                return articles;
             }
-            return [];
+            return articles;
         } catch (error) {
-            console.error('News API Fetch Error:', error);
+            console.error('News Service Error:', error);
             return [];
         }
     }

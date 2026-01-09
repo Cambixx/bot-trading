@@ -6,6 +6,12 @@ const BINANCE_API_BASE = 'https://api.binance.com/api/v3';
  * Servicio para obtener datos de criptomonedas desde Binance API
  */
 class BinanceService {
+  constructor() {
+    this.ws = null;
+    this.reconnectTimer = null;
+    this.reconnectDelay = 1000;
+  }
+
   /**
    * Obtener datos de velas (candlesticks) para un símbolo
    * @param {string} symbol - Par de trading (ej: BTCUSDC)
@@ -79,15 +85,25 @@ class BinanceService {
    */
   async getMultipleSymbolsData(symbols, interval = '1h', limit = 100) {
     try {
-      const promises = symbols.map(symbol =>
-        this.getKlines(symbol, interval, limit)
-          .then(data => ({ symbol, data, error: null }))
-          .catch(error => ({ symbol, data: null, error: error.message }))
-      );
+      const batchSize = 5;
+      const results = [];
 
-      const results = await Promise.all(promises);
+      for (let i = 0; i < symbols.length; i += batchSize) {
+        const batch = symbols.slice(i, i + batchSize);
+        const batchPromises = batch.map(symbol =>
+          this.getKlines(symbol, interval, limit)
+            .then(data => ({ symbol, data, error: null }))
+            .catch(error => ({ symbol, data: null, error: error.message }))
+        );
 
-      // Convertir array a objeto para fácil acceso
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+
+        if (i + batchSize < symbols.length) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+
       return results.reduce((acc, { symbol, data, error }) => {
         acc[symbol] = { data, error };
         return acc;
@@ -333,8 +349,10 @@ class BinanceService {
    * @param {Function} onMessage - Callback para manejar los mensajes
    */
   subscribeToTickers(symbols, onMessage) {
-    if (this.ws) {
-      this.ws.close();
+    // Cancel any pending reconnection
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
 
     // Usar Combined Streams para múltiples símbolos
@@ -352,38 +370,57 @@ class BinanceService {
       this.ws.close();
     }
 
-    console.log('Conectando a WebSocket:', url);
-    this.ws = new WebSocket(url);
+    // Debounce connection to avoid rapid reconnections
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+    }
 
-    this.ws.onopen = () => {
-      console.log('WebSocket Conectado');
-    };
+    this.reconnectTimer = setTimeout(() => {
+      console.log('Conectando a WebSocket:', url);
+      this.ws = new WebSocket(url);
 
-    this.ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      // message.data contiene el payload del ticker
-      if (message.data) {
-        const ticker = {
-          symbol: message.data.s,
-          price: parseFloat(message.data.c),
-          priceChange: parseFloat(message.data.p),
-          priceChangePercent: parseFloat(message.data.P),
-          high24h: parseFloat(message.data.h),
-          low24h: parseFloat(message.data.l),
-          volume24h: parseFloat(message.data.v),
-          quoteVolume24h: parseFloat(message.data.q)
-        };
-        onMessage(ticker);
-      }
-    };
+      this.ws.onopen = () => {
+        console.log('WebSocket Conectado');
+        this.reconnectDelay = 1000;
+      };
 
-    this.ws.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
+      this.ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          if (message.data) {
+            const ticker = {
+              symbol: message.data.s,
+              price: parseFloat(message.data.c),
+              priceChange: parseFloat(message.data.p),
+              priceChangePercent: parseFloat(message.data.P),
+              high24h: parseFloat(message.data.h),
+              low24h: parseFloat(message.data.l),
+              volume24h: parseFloat(message.data.v),
+              quoteVolume24h: parseFloat(message.data.q)
+            };
+            onMessage(ticker);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
 
-    this.ws.onclose = () => {
-      console.log('WebSocket Desconectado');
-    };
+      this.ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+      };
+
+      this.ws.onclose = (event) => {
+        console.log('WebSocket Desconectado');
+        // Only reconnect if it wasn't a clean close
+        if (event.code !== 1000) {
+          console.log('Reintentando conectar en', this.reconnectDelay, 'ms...');
+          this.reconnectTimer = setTimeout(() => {
+            this.subscribeToTickers(symbols, onMessage);
+          }, this.reconnectDelay);
+          this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
+        }
+      };
+    }, 200);
   }
 
   /**
