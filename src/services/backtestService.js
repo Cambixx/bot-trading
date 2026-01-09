@@ -92,7 +92,8 @@ export async function runBacktest(symbol, interval = '1h', config = { initialCap
                     pnlPercent: (pnl / position.collateral) * 100,
                     entryTime: position.entryTime,
                     exitTime: timestamp,
-                    reason: exitReason
+                    reason: exitReason,
+                    isSMC: position.isSMC
                 });
 
                 position = null;
@@ -115,7 +116,23 @@ export async function runBacktest(symbol, interval = '1h', config = { initialCap
                 [interval]: { indicators: analysis.indicators, regime: analysis.regime }
             };
 
+            // NEW: Add SMC Detection to analysis mock (since performTechnicalAnalysis already includes it)
+            // But we need to make sure 'generateSignal' receives everything needed.
+            // Current 'performTechnicalAnalysis' returns: { indicators, candles, levels: { support, resistance, pivot, fibPivot, orderBlocks, fvg, liquiditySweeps } }
+            // generateSignal(technicalAnalysis, symbol, multiTimeframeData, currentMode)
+
+            // We need to construct a robust mock multiTF data
+            // For MVP backtest, we assume lower/higher timeframes are similar or we fetch them (expensive) -> 
+            // We'll proceed with single timeframe approximation for speed, but ensuring SMC data is passed.
+
+            // Note: `performTechnicalAnalysis` expects High/Low/Close arrays or similar structure.
+            // Let's verify `performTechnicalAnalysis` returns what `generateSignal` expects.
+            // Yes, it returns `levels` object which now has `orderBlocks`, `fvg`, etc.
+
             const signal = generateSignal(analysis, symbol, mockMultiTF, config.mode);
+
+            // Check if this signal had SMC confluence
+            const hasSMC = signal && signal.subscores && signal.subscores.smc > 0;
 
             if (signal && signal.score >= 60) { // Threshold
                 // Enter Position
@@ -126,11 +143,12 @@ export async function runBacktest(symbol, interval = '1h', config = { initialCap
                     type: signal.type,
                     entryPrice: currentPrice,
                     quantity,
-                    collateral: riskAmount,
+                    collateral: riskAmount, // Fixed: Added collateral back
                     stopLoss: signal.levels.stopLoss,
                     takeProfit1: signal.levels.takeProfit1,
                     takeProfit2: signal.levels.takeProfit2,
-                    entryTime: timestamp
+                    entryTime: timestamp,
+                    isSMC: hasSMC // Track if this was an SMC trade
                 };
 
                 balance -= riskAmount;
@@ -159,6 +177,11 @@ export async function runBacktest(symbol, interval = '1h', config = { initialCap
     const totalPnL = equityCurve[equityCurve.length - 1].value - config.initialCapital;
     const totalPnLPercent = (totalPnL / config.initialCapital) * 100;
 
+    // SMC Specific Stats
+    const smcTrades = trades.filter(t => t.isSMC);
+    const smcWins = smcTrades.filter(t => t.pnl > 0);
+    const smcWinRate = smcTrades.length > 0 ? (smcWins.length / smcTrades.length) * 100 : 0;
+
     // Calculate Max Drawdown
     let maxDrawdown = 0;
     let peak = -Infinity;
@@ -179,7 +202,9 @@ export async function runBacktest(symbol, interval = '1h', config = { initialCap
             maxDrawdown: parseFloat(maxDrawdown.toFixed(2)),
             profitFactor: losingTrades.length > 0
                 ? parseFloat((winningTrades.reduce((sum, t) => sum + t.pnl, 0) / Math.abs(losingTrades.reduce((sum, t) => sum + t.pnl, 0))).toFixed(2))
-                : '∞'
+                : '∞',
+            smcWinRate: parseFloat(smcWinRate.toFixed(2)),
+            smcTradesCount: smcTrades.length
         },
         trades: trades.reverse(), // Newest first
         equityCurve

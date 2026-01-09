@@ -268,17 +268,21 @@ function AppContent() {
 
         if (newMlSignals.length > 0) {
           const telegramPayload = newMlSignals.map(s => {
-            // Determine signal type for message
+            let type = 'NEUTRAL';
+            if (s.signal === 'UPPER_EXTREMITY' || s.signal === 'APPROACHING_UPPER' || s.signal === 'MEAN_REVERSION_DOWN') type = 'SELL';
+            else type = 'BUY';
+
+            // Determine signal type for message text
             let signalType = 'NEUTRAL ⚪';
-            if (s.signal === 'UPPER_EXTREMITY' || s.signal === 'APPROACHING_UPPER') signalType = 'SHORT 🔴';
-            else if (s.signal === 'LOWER_EXTREMITY' || s.signal === 'APPROACHING_LOWER') signalType = 'LONG 🟢';
-            else if (s.signal === 'MEAN_REVERSION_UP') signalType = 'LONG (Reversion) 🟢';
-            else if (s.signal === 'MEAN_REVERSION_DOWN') signalType = 'SHORT (Reversion) 🔴';
+            if (type === 'SELL') signalType = 'SHORT 🔴';
+            else signalType = 'LONG 🟢';
 
             return {
               symbol: s.symbol,
               price: s.price,
               score: s.score,
+              type: type, // Critical for icon selection
+              signal: s.signal, // Critical for logic
               reasons: [`🤖 ML ${s.signalMode}: ${signalType} | RSI: ${s.rsi} | Quality: ${s.signalQuality}`],
               levels: { entry: s.price }
             };

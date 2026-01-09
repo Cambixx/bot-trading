@@ -10,6 +10,7 @@ import NexusHub from '../components/NexusHub'; // Import Nexus
 import TradeDoctor from '../components/TradeDoctor'; // Import Doctor
 import PatternHunter from '../components/PatternHunter'; // Import Hunter
 import ExecutiveDashboard from '../components/ExecutiveDashboard'; // Import Executive Dashboard
+import BacktestDashboard from '../components/BacktestDashboard'; // Import Backtest Dashboard
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
 
 // Services
@@ -91,7 +92,12 @@ function Dashboard({
         >
             {/* 0. Executive Command Center */}
             <motion.div variants={itemVariants}>
-                <ExecutiveDashboard nexusData={nexusData} oracleData={oracleData} topOpportunity={topOpportunity} />
+                <ExecutiveDashboard
+                    nexusData={nexusData}
+                    oracleData={oracleData}
+                    topOpportunity={topOpportunity}
+                    btcVol={cryptoData['BTCUSDC'] || cryptoData['BTCUSDT']}
+                />
             </motion.div>
 
             {/* 1. Crypto Selector & Market (Top Priority) */}
@@ -123,7 +129,12 @@ function Dashboard({
                 </motion.div>
             </div>
 
-            {/* 4. Crypto Prices Dashboard */}
+            {/* 4. Validation: Backtest Engine */}
+            <motion.div variants={itemVariants}>
+                <BacktestDashboard symbols={symbols} />
+            </motion.div>
+
+            {/* 5. Crypto Prices Dashboard */}
             <motion.section variants={itemVariants} className="dashboard-section">
                 <div className="section-header">
                     <TrendingUp size={20} className="text-primary" />

@@ -86,7 +86,7 @@ function SignalCard({ signal, onSimulateBuy }) {
             { id: 'trend', label: 'TREND', score: subscores.trend || 0, icon: <TrendingUp size={10} /> },
             { id: 'momentum', label: 'MOM', score: subscores.momentum || 0, icon: <Zap size={10} /> },
             { id: 'volume', label: 'VOL', score: subscores.volume || 0, icon: <Activity size={10} /> },
-            { id: 'levels', label: 'STRUC', score: (subscores.levels || 0) + (subscores.patterns || 0), icon: <Layers size={10} /> }
+            { id: 'smc', label: 'SMC', score: (subscores.smc || 0) * 100, icon: <Target size={10} /> }
         ];
 
         return (

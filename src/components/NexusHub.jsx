@@ -133,57 +133,56 @@ const NexusHub = ({ onDataUpdate }) => {
 
                 {/* Grid for Stats and Hotlist */}
                 <div className="nexus-grid">
-                    {/* Market Stats */}
+                    {/* Market Stats (Real Macro Data) */}
                     <div className="nexus-panel macro-panel">
-                        <div className="nexus-label">MARKET STATS</div>
+                        <div className="nexus-label">MACRO DATA (LIVE)</div>
                         <div className="macro-items">
                             <div className="macro-item">
-                                <span className="m-name">VOLATILITY</span>
-                                <div className={`m-val ${data?.marketStats?.volatility === 'HIGH' ? 'bullish' : 'bearish'}`}>
-                                    {data?.marketStats?.volatility || 'MEDIUM'}
-                                    <Waves size={12} />
+                                <span className="m-name">S&P 500</span>
+                                <div className={`m-val ${data?.macro?.sp500?.trend === 'BULLISH' ? 'bullish' : 'bearish'}`}>
+                                    ${data?.macro?.sp500?.value || '--'}
+                                    {data?.macro?.sp500?.trend === 'BULLISH' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                 </div>
                             </div>
                             <div className="macro-item">
-                                <span className="m-name">TREND</span>
-                                <div className={`m-val ${data?.marketStats?.trend === 'UP' ? 'bullish' : 'bearish'}`}>
-                                    {data?.marketStats?.trend || 'RANGE'}
-                                    {data?.marketStats?.trend === 'UP' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                                <span className="m-name">DXY (DOLLAR)</span>
+                                <div className={`m-val ${data?.macro?.dxy?.trend === 'UP' || data?.macro?.dxy?.trend === 'BULLISH' ? 'bullish' : 'bearish'}`}>
+                                    ${data?.macro?.dxy?.value || '--'}
+                                    {data?.macro?.dxy?.trend === 'BULLISH' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                                 </div>
                             </div>
                             <div className="macro-item">
                                 <span className="m-name">BTC DOMINANCE</span>
                                 <div className="m-val">
-                                    {data?.marketStats?.btcDominance || '0%'}
+                                    {data?.marketStats?.btcDominance || data?.marketBreadth?.btcDominance || '0%'}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Focus List (Hotlist) */}
+                    {/* Whale Radar (Flow Analysis) */}
                     <div className="nexus-panel whale-panel">
                         <div className="nexus-label">
-                            <AlertTriangle size={14} /> FOCUS LIST
+                            <AlertTriangle size={14} /> CAPITAL FLOW
                         </div>
                         <div className="whale-feed">
                             <AnimatePresence mode="popLayout">
-                                {data?.hotlist?.map((item, index) => (
+                                {data?.whaleAlerts?.map((item, index) => (
                                     <motion.div
                                         key={index}
-                                        className={`whale-alert inflow`} // Reuse inflow style for positive vibe
+                                        className="whale-alert inflow"
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
                                     >
-                                        <div className="alert-vol" style={{ fontSize: '0.9rem' }}>{item.symbol}</div>
-                                        <div className="alert-meta" style={{ alignItems: 'flex-start' }}>
-                                            <span style={{ fontSize: '0.65rem', opacity: 0.8 }}>{item.action}</span>
-                                            <span className="alert-time">{item.reason}</span>
+                                        <div className="alert-vol" style={{ fontSize: '0.85rem' }}>{item.type.replace('_', ' ')}</div>
+                                        <div className="alert-meta">
+                                            <span className="alert-time">{item.summary}</span>
                                         </div>
                                     </motion.div>
                                 ))}
-                                {(!data?.hotlist || data.hotlist.length === 0) && (
-                                    <div className="whale-empty">Scanning for volatility setups...</div>
+                                {(!data?.whaleAlerts || data.whaleAlerts.length === 0) && (
+                                    <div className="whale-empty">Scanning for capital flow...</div>
                                 )}
                             </AnimatePresence>
                         </div>

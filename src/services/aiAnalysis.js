@@ -5,6 +5,7 @@
  */
 
 const NETLIFY_FUNCTION_URL = '/.netlify/functions/openrouter-analysis';
+import macroService from './macroService';
 
 // Detectar si estamos en desarrollo local
 const isDevelopment = (import.meta.env && import.meta.env.DEV) || (typeof window !== 'undefined' && window.location.hostname === 'localhost');
@@ -37,7 +38,8 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
     let prompt = '';
 
     if (mode === 'MARKET_ORACLE') {
-        const { topCoins, btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers } = globalMarketData || {};
+        const { topCoins, btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers, combinedSectors } = globalMarketData || {};
+        const sectorText = combinedSectors ? combinedSectors.slice(0, 3).map(s => `${s.name}: ${s.change}%`).join(', ') : 'No data';
 
         prompt = `Eres un estratega jefe de mercado de criptomonedas (Chief Market Strategist).
             Tu trabajo es analizar la "Salud del Mercado" global y dar una directriz clara para el día.
@@ -46,6 +48,7 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
             - Dominancia BTC: ${btcDominance}% (Si sube, BTC absorbe liquidez; si baja, dinero fluye a Alts)
             - Volumen Total 24h: $${totalVolumeUSD}
             - Cambio Promedio Mercado: ${marketAvgChange}
+            - TOP SECTORES HOY: ${sectorText}
             
             GANADORES (Heat): ${topGainers?.map(g => `${g.symbol} (${g.change}%)`).join(', ')}
             PERDEDORES: ${topLosers?.map(l => `${l.symbol} (${l.change}%)`).join(', ')}
@@ -85,6 +88,9 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
             📊 ATR 1H: ${safeIndicators?.atr1h || 'N/A'} (${safeIndicators?.atrPercent || 'N/A'} volatilidad)
             📢 Volumen: ${safeIndicators?.volumeRatio || 'N/A'} (RVOL - Fuerza relativa)
             📖 Order Book: ${safeIndicators?.orderBook || 'N/A'}
+            🏦 Order Blocks (Institucional): ${levels?.orderBlocks ? JSON.stringify(levels.orderBlocks).slice(0, 100) : 'None'}
+            🕳️ Fair Value Gaps (FVG): ${levels?.fvg ? JSON.stringify(levels.fvg).slice(0, 100) : 'None'}
+            🧹 Liquidity Sweeps: ${levels?.liquiditySweeps ? JSON.stringify(levels.liquiditySweeps) : 'None'}
 
             Tu tarea como ESPECIALISTA EN DAY TRADING:
             1. DIAGNÓSTICO: ¿Qué "enfermedad" tiene el precio? (ej: "Agotamiento de Momentum", "Fiebre de FOMO", "Consolidación Lateral", "Breakout Inminente"). Usa el Chop Index para determinar si es Rango o Tendencia.
@@ -175,22 +181,45 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
               "actionable": "NOW/WAIT/AVOID"
             }`;
     } else if (mode === 'NEXUS') {
-        const { btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers } = globalMarketData || {};
+        const { btcDominance, totalVolumeUSD, marketAvgChange, topGainers, topLosers } = globalMarketData?.marketBreadth || globalMarketData || {};
+        const { macro, news, sectors } = inputData;
+
+        const sectorText = sectors ? sectors.slice(0, 3).map(s => `${s.name} (${s.change}%)`).join(', ') : 'Analyzing sectors...';
+
+        // Formatear noticias para el prompt
+        const newsText = news ? news.map(n => `- ${n.title} (${n.source})`).join('\n') : 'No news available';
+
+        // Formatear Macro
+        const macroText = macro ?
+            `S&P 500: $${macro.sp500.price} (${macro.sp500.changePercent}%) | DXY (Proxy): $${macro.dxy.price} (${macro.dxy.changePercent}%)` :
+            'Macro data unavailable';
 
         prompt = `Eres "Nexus Intelligence", un sistema de IA de grado militar que procesa señales globales para un fondo de cobertura cripto.
             
-            INTELIGENCIA DE MERCADO BINANCE:
+            INTELIGENCIA DE MERCADO REAL (NO INVENTAR):
             - Dominancia BTC: ${btcDominance}%
-            - Volumen: ${totalVolumeUSD}
+            - Volumen Global: ${totalVolumeUSD}
             - Cambio Promedio: ${marketAvgChange}
-            - Heatmap (Top Gainers): ${topGainers?.map(g => g.symbol).join(', ')}
-            - Heatmap (Top Losers): ${topLosers?.map(l => l.symbol).join(', ')}
+            - Top Gainers: ${topGainers?.map(g => g.symbol).join(', ')}
+            - Top Losers: ${topLosers?.map(l => l.symbol).join(', ')}
+            
+            CONTEXTO MACROECONÓMICO (Real-Time):
+            ${macroText}
 
-            Tu tarea es sintetizar esta información y "DEDUCIR" el estado de los indicadores que no tenemos (Whales y Macro) basándote en la acción del precio actual.
+            CONTEXTO MACROECONÓMICO (Real-Time):
+            ${macroText}
+            
+            ROTACIÓN DE CAPITAL (SECTORES):
+            ${sectorText}
 
-            1. SENTIMIENTO: Escala 0-100.
-            2. WHALE RADAR: Inventa 2-3 "Detecciones de Ballenas" coherentes con la dirección del mercado (ej: si el mercado sube, detecta Outflows de Exchanges).
-            3. MACRO: Deduce valores realistas para DXY y S&P 500 que justifiquen el movimiento cripto (ej: si BTC sube fuerte, el DXY probablemente esté bajando).
+            NOTICIAS RECIENTES:
+            ${newsText}
+
+            Tu tarea es CORRELACIONAR estos datos reales y generar un informe de inteligencia:
+
+            1. SENTIMIENTO: Calcula un score 0-100 basado en la convergencia de Crypto + Macro + Noticias.
+            2. ANÁLISIS MACRO: Explica brevemente cómo el S&P500 y DXY están afectando a Crypto ahora mismo.
+            3. WHALE RADAR: Basado en los 'Top Gainers' y el Volumen Global, identifica dónde está fluyendo el capital (ej: "Capital rotando a Memecoins" o "Refugio en BTC"). NO INVENTES transacciones específicas si no las tienes.
 
             Responde SOLO con este JSON:
             {
@@ -198,14 +227,14 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
               "sentiment": {
                 "score": 0-100,
                 "label": "FEAR/GREED/NEUTRAL",
-                "summary": "Resumen táctico de 2 frases"
+                "summary": "Resumen táctico basado en datos reales (max 20 palabras)"
               },
               "whaleAlerts": [
-                { "id": 1, "type": "INFLOW/OUTFLOW", "amount": "XXX BTC", "from": "Capa", "to": "Exchange", "time": "Just now" }
+                { "id": 1, "type": "FLOW_ANALYSIS", "symbol": "BTC/ALT", "summary": "Análisis del flujo de capital observado (ej: Alta volatilidad en Top Gainers)" }
               ],
               "macro": {
-                "dxy": { "value": 000.0, "trend": "Up/Down/Flat" },
-                "sp500": { "value": 0000, "trend": "Up/Down/Flat" }
+                "dxy": { "value": ${macro?.dxy?.price || 0}, "trend": "${macro?.dxy?.trend || 'NEUTRAL'}" },
+                "sp500": { "value": ${macro?.sp500?.price || 0}, "trend": "${macro?.sp500?.trend || 'NEUTRAL'}" }
               }
             }`;
     } else {
@@ -388,8 +417,20 @@ export async function getAIAnalysis(marketData, tradingMode = 'BALANCED') {
 }
 
 export async function getMarketOracleAnalysis(marketData) {
+    // Inject Sector Data
+    let combinedSectors = [];
+    try {
+        const binanceService = (await import('./binanceService')).default; // Dynamic import to avoid cycles
+        combinedSectors = await binanceService.getSectorPerformance();
+    } catch (e) { console.log('Error fetching sectors for Oracle', e); }
+
+    const improvedData = {
+        ...marketData,
+        combinedSectors
+    };
+
     // Cache market oracle for 1 hour as it's global and less volatile
-    return await getCachedAIAnalysis({ mode: 'MARKET_ORACLE', marketData }, 3600000);
+    return await getCachedAIAnalysis({ mode: 'MARKET_ORACLE', marketData: improvedData }, 3600000);
 }
 
 export async function getTradeDoctorAnalysis(symbol, price, technicals) {
@@ -455,9 +496,27 @@ export async function enrichSignalWithAI(signal, technicalData = {}, tradingMode
  * @returns {Promise<Object>} Análisis de inteligencia
  */
 export async function getNexusIntelligence(marketBreadth) {
+    // 1. Fetch Real Macro & News Data
+    let macro = null;
+    let news = null;
+    let sectors = null;
+    try {
+        const binanceService = (await import('./binanceService')).default;
+        [macro, news, sectors] = await Promise.all([
+            macroService.getMacroIndicators(),
+            macroService.getMarketNews(),
+            binanceService.getSectorPerformance()
+        ]);
+    } catch (e) {
+        console.warn('Failed to fetch macro/news data for Nexus:', e);
+    }
+
     return await getCachedAIAnalysis({
         mode: 'NEXUS',
-        marketData: marketBreadth
+        marketBreadth, // Pass explicitly
+        macro,
+        news,
+        sectors
     }, 300000); // 5 minutes cache
 }
 

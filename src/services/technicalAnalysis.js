@@ -904,6 +904,94 @@ export function detectOrderBlocks(candles, lookback = 50) {
 }
 
 /**
+ * Detectar Fair Value Gaps (FVG)
+ * Ineficiencias de precio donde hay poco volumen negociado
+ * @param {Array<Object>} candles - Datos de velas
+ * @returns {Object} { bullish: [], bearish: [] }
+ */
+export function findFairValueGaps(candles, lookback = 50) {
+    if (candles.length < lookback) return { bullish: [], bearish: [] };
+
+    const bullishFVGs = [];
+    const bearishFVGs = [];
+    const recent = candles.slice(-lookback);
+
+    for (let i = 0; i < recent.length - 2; i++) {
+        const c1 = recent[i];
+        // c2 es la vela del movimiento
+        const c3 = recent[i + 2];
+
+        // Bullish FVG: (High C1) < (Low C3)
+        // El espacio entre C1.High y C3.Low no ha sido cubierto
+        if (c1.high < c3.low) {
+            bullishFVGs.push({
+                top: c3.low,
+                bottom: c1.high,
+                index: i + 1, // Index de la vela que creó el gap
+                mitigated: false // Simplificado
+            });
+        }
+
+        // Bearish FVG: (Low C1) > (High C3)
+        if (c1.low > c3.high) {
+            bearishFVGs.push({
+                top: c1.low,
+                bottom: c3.high,
+                index: i + 1,
+                mitigated: false
+            });
+        }
+    }
+
+    // Filtrar FVGs que ya han sido llenados por velas posteriores
+    // (Lógica simplificada: devolvemos los 3 más recientes)
+    return {
+        bullish: bullishFVGs.slice(-3),
+        bearish: bearishFVGs.slice(-3)
+    };
+}
+
+/**
+ * Detectar Liquidity Sweeps (Tomas de liquidez)
+ * Mechas largas que rompen niveles clave y cierran dentro del rango
+ * @param {Array<Object>} candles
+ */
+export function findLiquiditySweeps(candles, lookback = 20) {
+    const sweeps = [];
+    const recent = candles.slice(-lookback);
+
+    // Necesitamos pivots locales para definir "Liquidez"
+    // Usamos logic simplificada: rompe el High/Low de las ultimas 5 velas y cierra dentro
+
+    for (let i = 5; i < recent.length; i++) {
+        const current = recent[i];
+        const prev5 = recent.slice(i - 5, i);
+        const prevHigh = Math.max(...prev5.map(c => c.high));
+        const prevLow = Math.min(...prev5.map(c => c.low));
+
+        // Bearish Sweep (Sweep de Highs)
+        if (current.high > prevHigh && current.close < prevHigh) {
+            sweeps.push({
+                type: 'BEARISH_SWEEP',
+                price: current.high,
+                index: i
+            });
+        }
+
+        // Bullish Sweep (Sweep de Lows)
+        if (current.low < prevLow && current.close > prevLow) {
+            sweeps.push({
+                type: 'BULLISH_SWEEP',
+                price: current.low,
+                index: i
+            });
+        }
+    }
+
+    return sweeps.slice(-2); // Últimos 2
+}
+
+/**
  * Detectar Régimen de Mercado
  * @param {Array<Object>} candles - Velas (idealmente diarias o 4h)
  * @returns {string} 'TRENDING_BULL' | 'TRENDING_BEAR' | 'RANGING' | 'VOLATILE'
@@ -973,6 +1061,8 @@ export function performTechnicalAnalysis(candles) {
     const pivotPoints = calculatePivotPoints(candles);
     const fibPivotPoints = calculateFibonacciPivots(candles);
     const orderBlocks = detectOrderBlocks(candles);
+    const fvgs = findFairValueGaps(candles);
+    const liquiditySweeps = findLiquiditySweeps(candles);
 
     // Patrones
     const lastCandle = candles[candles.length - 1];
@@ -1033,7 +1123,9 @@ export function performTechnicalAnalysis(candles) {
             resistance: supportResistance.resistance,
             pivot: pivotPoints,
             fibPivot: fibPivotPoints,
-            orderBlocks: orderBlocks
+            orderBlocks: orderBlocks,
+            fvg: fvgs,
+            liquiditySweeps: liquiditySweeps
         },
         patterns,
         volume: {

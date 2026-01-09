@@ -432,6 +432,60 @@ class BinanceService {
   }
 
   /**
+   * Obtener rendimiento por Sectores (Definición manual simplificada)
+   * @returns {Promise<Array>} Array de sectores con su performance promedio
+   */
+  async getSectorPerformance() {
+    try {
+      const response = await axios.get(`${BINANCE_API_BASE}/ticker/24hr`);
+      const tickers = response.data;
+
+      // Definiciones básicas de sectores (Top coins)
+      const sectors = {
+        'L1/Infrastructure': ['BTC', 'ETH', 'SOL', 'ADA', 'AVAX', 'DOT', 'MATIC', 'ATOM'],
+        'DeFi': ['UNI', 'AAVE', 'MKR', 'CRV', 'LDO', 'RUNE', 'SNX'],
+        'AI & Big Data': ['FET', 'RNDR', 'GRT', 'OCEAN', 'AGIX', 'NEAR'],
+        'Meme': ['DOGE', 'SHIB', 'PEPE', 'FLOKI', 'BONK'],
+        'Gaming/Metaverse': ['SAND', 'MANA', 'AXS', 'GALA', 'IMX']
+      };
+
+      const sectorStats = [];
+
+      for (const [sectorName, coins] of Object.entries(sectors)) {
+        let totalChange = 0;
+        let count = 0;
+        let vol = 0;
+
+        coins.forEach(coin => {
+          const symbol = `${coin}USDT`; // Usar USDT para mayor liquidez/data
+          const ticker = tickers.find(t => t.symbol === symbol || t.symbol === `${coin}USDC`);
+
+          if (ticker) {
+            totalChange += parseFloat(ticker.priceChangePercent);
+            vol += parseFloat(ticker.quoteVolume);
+            count++;
+          }
+        });
+
+        if (count > 0) {
+          sectorStats.push({
+            name: sectorName,
+            change: (totalChange / count).toFixed(2),
+            volume: (vol / 1000000).toFixed(0) + 'M',
+            trend: (totalChange / count) > 0 ? 'UP' : 'DOWN'
+          });
+        }
+      }
+
+      return sectorStats.sort((a, b) => parseFloat(b.change) - parseFloat(a.change));
+
+    } catch (error) {
+      console.error("Error calculating sector performance", error);
+      return [];
+    }
+  }
+
+  /**
    * Cerrar conexión WebSocket
    */
   disconnect() {

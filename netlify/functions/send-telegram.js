@@ -70,23 +70,47 @@ export async function handler(event, context) {
             const price = sig.price ? esc(sig.price) : 'N/A';
             const score = sig.score || 'N/A';
 
-            message += `${icon} *${symbol}*\n`;
-            message += `💰 Precio: $${price}\n`;
-            message += `🎯 Score: ${score}\n`;
+            message += `${icon} *${symbol}* \\| Score: ${score}\n`;
+            message += `💰 Price: $${price}\n`;
 
-            if (sig.reasons && sig.reasons.length > 0) {
-                // handle string or object reasons
+            // SMC / Institutional Footprint
+            if (sig.subscores && sig.subscores.smc > 0) {
+                message += `🏦 *INSTITUTIONAL FOOTPRINT DETECTED*\n`;
+                const smcDetails = [];
+                // We need to pass detailed SMC reasons or inspect levels
+                if (sig.levels && sig.levels.orderBlocks && (sig.levels.orderBlocks.bullish || sig.levels.orderBlocks.bearish)) smcDetails.push("Order Block");
+                if (sig.levels && sig.levels.fvg && sig.levels.fvg.length > 0) smcDetails.push("Fair Value Gap");
+                if (sig.levels && sig.levels.liquiditySweeps && sig.levels.liquiditySweeps.length > 0) smcDetails.push("Liquidity Sweep");
+
+                if (smcDetails.length > 0) message += `   ├ ${esc(smcDetails.join(" + "))}\n`;
+            }
+
+            // Levels
+            if (sig.levels) {
+                if (sig.levels.entry) message += `   ├ Entry: ${esc(sig.levels.entry)}\n`;
+                if (sig.levels.stopLoss) message += `   ├ SL: ${esc(sig.levels.stopLoss)}\n`;
+                if (sig.levels.takeProfit1) message += `   ├ TP1: ${esc(sig.levels.takeProfit1)}\n`;
+            }
+
+            // AI Insight
+            if (sig.aiAnalysis) {
+                const sentiment = sig.aiAnalysis.sentiment || 'NEUTRAL';
+                const sentimentIcon = sentiment === 'BULLISH' ? '🚀' : sentiment === 'BEARISH' ? '🐻' : '⚖️';
+                message += `\n🤖 *AI INTELLIGENCE* ${sentimentIcon}\n`;
+
+                if (sig.aiAnalysis.insights && sig.aiAnalysis.insights.length > 0) {
+                    message += `_${esc(sig.aiAnalysis.insights[0])}_\n`;
+                } else if (sig.aiAnalysis.recommendation) {
+                    message += `Rec: ${esc(sig.aiAnalysis.recommendation)}\n`;
+                }
+            } else if (sig.reasons && sig.reasons.length > 0) {
+                // Fallback to algorithmic reasons if no AI
                 const r = sig.reasons[0];
                 const reasonText = typeof r === 'string' ? r : (r.text || '');
                 message += `💡 _${esc(reasonText)}_\n`;
             }
 
-            if (sig.aiAnalysis) {
-                const rec = esc(sig.aiAnalysis.recommendation || '');
-                message += `🤖 AI: ${rec}\n`;
-            }
-
-            message += `───────────────────\n`;
+            message += `\n───────────────────\n`;
         }
 
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;

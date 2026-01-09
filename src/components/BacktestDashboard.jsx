@@ -149,6 +149,13 @@ function BacktestDashboard({ symbols }) {
                                 <span className="stat-label">Total Trades</span>
                                 <span className="stat-value">{results.stats.totalTrades}</span>
                             </div>
+                            <div className="stat-card glass-card" style={{ borderLeft: '3px solid #ffd700' }}>
+                                <span className="stat-label">SMC Win Rate</span>
+                                <span className="stat-value text-info">
+                                    {results.stats.smcWinRate}%
+                                    <small>({results.stats.smcTradesCount} trades)</small>
+                                </span>
+                            </div>
                             <div className="stat-card glass-card">
                                 <span className="stat-label">Max Drawdown</span>
                                 <span className="stat-value text-danger">-{results.stats.maxDrawdown}%</span>

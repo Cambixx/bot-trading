@@ -501,13 +501,69 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
     subscores.patterns = patterns[signalType === 'BUY' ? 'bullishEngulfing' : 'bearishEngulfing'] ? 1 : 0;
     subscores.divergence = divergenceScore;
 
+    // --- 3.8 Smart Money Concepts (SMC) ---
+    // Institutional Footprint: Order Blocks, FVG, Liquidity Sweeps
+    let smcScore = 0;
+    const { orderBlocks, fvg, liquiditySweeps } = levels; // Destructure new SMC data
+
+    if (signalType === 'BUY') {
+        // 1. Order Block Mitigation (Price tapping into Bullish OB)
+        if (orderBlocks?.bullish?.some(ob => price >= ob.bottom && price <= ob.top * 1.005)) {
+            smcScore += 0.8;
+            reasons.push({ text: '🏦 Tapping Bullish Order Block', weight: 80 });
+        }
+
+        // 2. FVG (Price filling a Bullish FVG or bouncing off one?) 
+        // Usually, we buy inside a discount FVG.
+        if (fvg?.bullish?.some(gap => price >= gap.bottom && price <= gap.top)) {
+            smcScore += 0.5;
+            reasons.push({ text: 'Inside Bullish FVG (Gap Fill)', weight: 50 });
+        }
+
+        // 3. Liquidity Sweep (Bullish Sweep of lows)
+        // Check last candle or recent sweep
+        const recentSweep = liquiditySweeps?.find(s => s.type === 'BULLISH_SWEEP');
+        if (recentSweep) {
+            smcScore += 0.9;
+            reasons.push({ text: '🧹 Liquidity Sweep (Stop Hunt)', weight: 90 });
+        }
+    } else { // SELL
+        // 1. Bearish OB
+        if (orderBlocks?.bearish?.some(ob => price <= ob.top && price >= ob.bottom * 0.995)) {
+            smcScore += 0.8;
+            reasons.push({ text: '🏦 Tapping Bearish Order Block', weight: 80 });
+        }
+        // 2. Bearish FVG
+        if (fvg?.bearish?.some(gap => price <= gap.top && price >= gap.bottom)) {
+            smcScore += 0.5;
+            reasons.push({ text: 'Inside Bearish FVG', weight: 50 });
+        }
+        // 3. Bearish Sweep
+        const recentSweep = liquiditySweeps?.find(s => s.type === 'BEARISH_SWEEP');
+        if (recentSweep) {
+            smcScore += 0.9;
+            reasons.push({ text: '🧹 Liquidity Sweep (Hgihs Taken)', weight: 90 });
+        }
+    }
+    subscores.smc = clamp(smcScore, 0, 1);
+
+    // Boost final score with SMC
+    if (subscores.smc > 0) {
+        // SMC is high quality, so we allow it to boost significantly
+        // We'll treat it as a "Multiplier" or additive bonus
+    }
+
     // --- FINAL SCORE CALCULATION ---
     let finalNormalized = 0;
     for (const k of Object.keys(w)) {
         finalNormalized += (subscores[k] || 0) * (w[k] || 0);
     }
 
-    // Boosts
+    // SMC Alpha Boost (Institutional Confluence)
+    // If SMC signals are present, we boost confidence significantly
+    if (subscores.smc > 0) {
+        finalNormalized += (subscores.smc * 0.20); // +20% raw score boost for SMC
+    }
     if (choppiness < 30) {
         finalNormalized += 0.1;
         reasons.push({ text: 'Tendencia muy limpia (Low Chop)', weight: 10 });
