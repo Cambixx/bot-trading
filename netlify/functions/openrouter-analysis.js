@@ -99,14 +99,14 @@ export async function handler(event, context) {
             };
         }
 
-        // Cost optimization: Use FREE models for most operations
+        // Standardizing on DeepSeek for stability and reliability
         const AI_MODELS = {
-            DEFAULT: 'google/gemini-2.0-flash-exp:free',     // FREE - General analysis
-            REASONING: 'deepseek/deepseek-chat',              // Paid - Only for Trade Doctor
-            FAST: 'google/gemini-2.0-flash-exp:free',         // FREE - Quick validation
-            FREE: 'google/gemini-2.0-flash-exp:free',         // FREE - Explicit free
-            NEXUS: 'google/gemini-2.0-flash-exp:free',        // FREE - Market intelligence
-            ORACLE: 'google/gemini-2.0-flash-exp:free'        // FREE - Market Oracle
+            DEFAULT: 'deepseek/deepseek-chat',
+            REASONING: 'deepseek/deepseek-chat',
+            FAST: 'deepseek/deepseek-chat',
+            FREE: 'deepseek/deepseek-chat',
+            NEXUS: 'deepseek/deepseek-chat',
+            ORACLE: 'deepseek/deepseek-chat'
         };
 
         const { mode, symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward, marketData: globalMarketData, tradingMode } = inputData;

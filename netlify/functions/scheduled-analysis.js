@@ -1,8 +1,14 @@
 /**
- * Netlify Scheduled Function - Day Trading Signal Analysis
- * Uses MEXC API for OHLCV data with 15m/1H/4H timeframes.
- * Implements momentum, pullback, and breakout setups for intraday trading.
- * Runs every hour to detect intraday opportunities and send Telegram alerts.
+ * Netlify Scheduled Function - SNIPER MODE Day Trading Analysis
+ * 
+ * SNIPER Philosophy:
+ * - Only 1-4 high-precision trades per day
+ * - Strict hard gates: ADX > 25, Choppiness < 50, RVOL > 1.2
+ * - Capital: €3,400 with 1.5% risk per trade
+ * - Multi-timeframe confluence required
+ * 
+ * Uses MEXC API for OHLCV data (15m/1H/4H)
+ * Runs every 30 minutes to detect high-quality setups
  */
 
 import { schedule } from "@netlify/functions";
@@ -11,21 +17,34 @@ import { schedule } from "@netlify/functions";
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70; // Raised to 70 for fewer, stronger alerts
-const CRYPTOCOMPARE_API_KEY = process.env.CRYPTOCOMPARE_API_KEY || '';
+
+// SNIPER MODE CONFIGURATION
+const SNIPER_CONFIG = {
+  scoreThreshold: 75,        // Minimum score to emit signal
+  minADX: 25,                // Minimum trend strength
+  maxChoppiness: 50,         // Maximum choppiness (above = no trade)
+  minRVOL: 1.2,              // Minimum relative volume
+  maxSignalsPerRun: 4,       // Max signals to send per execution
+  capital: 3400,             // €3,400 capital
+  riskPercent: 0.015,        // 1.5% risk per trade
+  eurToUsd: 1.08             // EUR/USD conversion
+};
+
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD
+  ? Number(process.env.SIGNAL_SCORE_THRESHOLD)
+  : SNIPER_CONFIG.scoreThreshold;
 
 // MEXC API V3 (Highly permissive for public market data)
 const MEXC_API = 'https://api.mexc.com/api/v3';
 
-// Top 20 Liquidity Coins (Sniper Focus)
-// Top 30 High Volatility & Liquidity Coins (Day Trading Focus)
+// Top 25 High Liquidity Coins (SNIPER Focus - reduced list for precision)
 const COINS_TO_MONITOR = [
-  'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX', // Majors
-  'PEPE', 'WIF', 'BONK', 'FLOKI', 'SHIB',                 // Memes (High Vol)
-  'SUI', 'SEI', 'INJ', 'TIA', 'APT', 'NEAR',              // L1 Rotators
-  'FET', 'RENDER', 'WLD', 'ARKM',                           // AI Narrative
-  'ORDI', 'SATS',                                         // BRC20
-  'ENA', 'JUP', 'PYTH', 'ONDO'                            // New DeFi
+  'BTC', 'ETH', 'SOL', 'BNB', 'XRP',                     // Top 5 Majors
+  'DOGE', 'ADA', 'AVAX', 'LINK', 'DOT',                  // Large Caps
+  'PEPE', 'WIF', 'BONK', 'SHIB',                         // Memes (High Vol)
+  'SUI', 'SEI', 'INJ', 'APT', 'NEAR',                   // L1 Rotators
+  'FET', 'RENDER', 'WLD',                                 // AI Narrative
+  'ENA', 'JUP', 'ONDO'                                   // New DeFi
 ];
 
 // ==================== HELPERS ====================
@@ -311,111 +330,78 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
   const closes15m = candles15m.map(c => c.close);
   const rsi15m = calculateRSI(closes15m, 14);
   const rsi1h = calculateRSI(closes1h, 14);
-  const macd15m = calculateMACD(closes15m);
   const ema21_15m = calculateEMA(closes15m, 21);
-  const ema200_15m = calculateEMA(closes15m, 200); // Trend filter
+  const ema200_15m = calculateEMA(closes15m, 200);
   const atr1h = calculateATR(candles1h, 14);
   const bb15m = calculateBollingerBands(closes15m, 20, 2);
   const chop1h = calculateChoppinessIndex(candles1h, 14);
 
-  // VOLUME ANALYSIS (CRITICAL for Day Trading)
+  // VOLUME ANALYSIS (CRITICAL for Sniper)
   const volumeSMA = calculateVolumeSMA(candles15m, 20);
   const currentVolume = candles15m[candles15m.length - 1].volume;
   const rvol = currentVolume / volumeSMA;
 
-  // 3. SURGICAL FILTERS & REGIME DETECTION
+  // ============================================
+  // SNIPER GATES - MANDATORY
+  // ============================================
 
-  const isChoppy = chop1h > 61.8;
-  const isTrending = chop1h < 38.2;
-  const marketBias = trend1h; // Focus on 1H for day trading
+  // 1. ADX must be strong (Trend strength)
+  if (adx1h !== null && adx1h < SNIPER_CONFIG.minADX) return null;
 
-  // Gate: Low Volume is mostly un-tradable unless Mean Reversion
-  if (rvol < 0.5 && !isChoppy) return null;
+  // 2. Choppiness must be low (Not lateral)
+  if (chop1h !== null && chop1h > SNIPER_CONFIG.maxChoppiness) return null;
+
+  // 3. Volume must be elevated
+  if (rvol < SNIPER_CONFIG.minRVOL) return null;
+
+  const marketBias = trend1h;
 
   let signal = null;
-  let setupType = 'UNKNOWN'; // SCALP, SWING, BREAKOUT, REVERSION
+  let setupType = 'UNKNOWN';
   let reasons = [];
   let score = 0;
 
-  // --- SETUP A: MOMENTUM BURST (SCALP) ---
-  // Trend + High Volume + RSI Pump
-  if (!isChoppy && marketBias === 'BULLISH' && rsi15m > 55 && rsi15m < 80 && rvol > 1.8) {
-    signal = 'BUY';
-    setupType = 'SCALP';
-    score = 80;
-    if (rvol > 3.0) score += 10;
-    reasons.push('⚡ SCALP: Momentum Burst');
-    reasons.push(`🔥 RVOL: ${rvol.toFixed(1)}x (High Vol)`);
-    reasons.push(`Trend Aligned (1H)`);
-  }
-
-  // --- SETUP B: TREND PULLBACK (SWING) ---
-  // Price holds EMA21 in uptrend, lower volume pullback acceptable
-  if (!signal && !isChoppy && marketBias === 'BULLISH' && price > ema200_15m) {
-    const distToEma21 = Math.abs(price - ema21_15m) / price;
-    if (distToEma21 < 0.006 && price > ema21_15m && rsi15m > 40 && rsi15m < 60) {
-      signal = 'BUY';
-      setupType = 'SWING';
-      score = 75;
-      if (structureTrend === 'BULLISH') score += 10; // 4H Alignment
-      reasons.push('🌊 SWING: Trend Continuation');
-      reasons.push(`Holding EMA21 Support`);
-    }
-  }
-
-  // --- SETUP C: MEAN REVERSION (CHOPPY MARKETS) ---
-  // Only valid if Chop Index is High (>60)
-  if (!signal && isChoppy && bb15m) {
-    // Buy at Lower Band
-    if (price < bb15m.lower && rsi15m < 30) {
-      signal = 'BUY';
-      setupType = 'REVERSION';
-      score = 70;
-      reasons.push('↩️ REVERSION: Oversold in Range');
-      reasons.push('Below Lower BB + RSI < 30');
-      reasons.push('Market is Choppy (Range Bound)');
-    }
-    // Sell at Upper Band
-    else if (price > bb15m.upper && rsi15m > 70) {
-      signal = 'SELL';
-      setupType = 'REVERSION';
-      score = 70;
-      reasons.push('↩️ REVERSION: Overbought in Range');
-      reasons.push('Above Upper BB + RSI > 70');
-    }
-  }
-
-  // --- SETUP D: BREAKOUT SQUEEZE (EXPLOSIVE) ---
+  // --- SETUP A: BREAKOUT SQUEEZE (SNIPER PRIMARY) ---
   const bb1h = calculateBollingerBands(closes1h, 20, 2);
-  if (!signal && bb1h) {
+  if (bb1h) {
     const bbWidth = (bb1h.upper - bb1h.lower) / bb1h.middle;
-    if (bbWidth < 0.10 && price > bb1h.upper && rvol > 1.5) {
-      signal = 'BUY';
-      setupType = 'BREAKOUT';
-      score = 85;
-      reasons.push('🚀 BREAKOUT: Volatility Expansion');
-      reasons.push(`BB Squeeze breaking up`);
-      reasons.push(`Volume Confirmation (${rvol.toFixed(1)}x)`);
+    // Squeeze breakout
+    if (bbWidth < 0.08) { // Narrow squeeze
+      if (price > bb1h.upper && marketBias === 'BULLISH') {
+        signal = 'BUY';
+        setupType = 'BREAKOUT';
+        score = 85;
+        reasons.push('🚀 BREAKOUT: Sniper Squeeze breaking up');
+      } else if (price < bb1h.lower && marketBias === 'BEARISH') {
+        signal = 'SELL';
+        setupType = 'BREAKOUT';
+        score = 85;
+        reasons.push('📉 BREAKOUT: Sniper Squeeze breaking down');
+      }
     }
   }
 
-  // 4. RISK MANAGEMENT
+  // --- SETUP B: TREND CONTINUATION (PULLBACK) ---
+  if (!signal && price > ema200_15m && marketBias === 'BULLISH') {
+    const distToEma21 = Math.abs(price - ema21_15m) / price;
+    if (distToEma21 < 0.005 && rsi15m > 45 && rsi15m < 65) {
+      signal = 'BUY';
+      setupType = 'PULLBACK';
+      score = 78;
+      reasons.push('🎯 SNIPER: Precision Pullback to EMA21');
+    }
+  }
+
   if (signal) {
     if (score < SIGNAL_SCORE_THRESHOLD) return null;
 
-    // Dynamic SL based on Strategy
+    // RISK MANAGEMENT - Sniper Sizing
     let slPips = atr1h * 1.5;
     let rrRatio = 2.0;
 
-    if (setupType === 'SCALP') {
-      slPips = atr1h * 0.8; // Tight stop
-      rrRatio = 1.5;
-    } else if (setupType === 'REVERSION') {
-      slPips = atr1h * 1.0; // Wide enough for wick
-      rrRatio = 1.5; // Reversion usually has closer targets
-    } else if (setupType === 'BREAKOUT') {
-      slPips = atr1h * 1.2; // Allow for retest
-      rrRatio = 3.0; // Breakouts run hard
+    if (setupType === 'BREAKOUT') {
+      slPips = atr1h * 1.2;
+      rrRatio = 3.0; // Higher reward for breakouts
     }
 
     // Calculate levels
@@ -428,6 +414,17 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
       takeProfit = price - (slPips * rrRatio);
     }
 
+    // Position Sizing: S = (C * r) / |Entry - SL|
+    const riskAmountEUR = SNIPER_CONFIG.capital * SNIPER_CONFIG.riskPercent;
+    const slPercent = Math.abs(price - stopLoss) / price;
+
+    // Convert SL to % distance
+    const riskPerTradeUSD = riskAmountEUR * SNIPER_CONFIG.eurToUsd;
+    const positionValueUSD = riskPerTradeUSD / slPercent;
+    // Cap at capital to avoid excessive leverage in spot logic
+    const finalPositionValueUSD = Math.min(positionValueUSD, SNIPER_CONFIG.capital * SNIPER_CONFIG.eurToUsd);
+    const units = finalPositionValueUSD / price;
+
     return {
       symbol,
       type: signal,
@@ -436,6 +433,11 @@ function generateDayTradingSignal(symbol, candles15m, candles1h, candles4h) {
       score,
       rvol: Number(rvol.toFixed(2)),
       reasons,
+      sizing: {
+        units: Number(units.toFixed(6)),
+        valueEUR: Math.round(finalPositionValueUSD / SNIPER_CONFIG.eurToUsd),
+        riskEUR: Math.round(riskAmountEUR)
+      },
       levels: {
         entry: price,
         stopLoss: Number(stopLoss.toFixed(4)),
@@ -487,14 +489,15 @@ export async function sendTelegramNotification(signals) {
   }
 
   // Using HTML parse mode
+  // Using HTML parse mode
   const setupEmoji = {
-    'SCALP': '⚡',
-    'SWING': '🌊',
+    'PULLBACK': '🌊',
     'BREAKOUT': '🚀',
+    'SCALP': '⚡',
     'REVERSION': '↩️'
   };
 
-  let message = '🎯 <b>CRYPTO SNIPER SIGNAL</b> 🎯\n\n';
+  let message = '🎯 <b>SNIPER SIGNAL DETECTED</b> 🎯\n\n';
 
   for (const sig of signals) {
     const icon = sig.type === 'SELL' ? '🔴' : '🟢';
@@ -504,16 +507,22 @@ export async function sendTelegramNotification(signals) {
     message += `${icon} <b>${sig.symbol}</b> | ${sig.setupType} ${typeEmoji}\n`;
     message += `📊 Score: <b>${sig.score}</b> | RVOL: <b>${sig.rvol}x</b>\n\n`;
 
+    // Sizing & Capital
+    message += `💼 <b>POSITION SIZING:</b>\n`;
+    message += `• Size: <b>${sig.sizing.units} units</b>\n`;
+    message += `• Value: <b>€${sig.sizing.valueEUR}</b>\n`;
+    message += `• Risk: €${sig.sizing.riskEUR} (1.5%)\n\n`;
+
     // Entry & Targets
     message += `💰 <b>ENTRY: $${sig.price.toFixed(4)}</b>\n`;
     message += `🎯 TP: $${sig.levels.takeProfit}\n`;
     message += `🛑 SL: $${sig.levels.stopLoss}\n\n`;
 
     // Indicators Context
-    message += `📉 <i>Techs:</i> RSI ${sig.indicators.rsi} • Chop ${sig.indicators.chop}\n`;
+    message += `📉 <i>Techs:</i> RSI ${sig.indicators.rsi} • ADX ${sig.indicators.adx} • Chop ${sig.indicators.chop}\n`;
 
     // Logic
-    message += `📝 <i>Why?</i>\n`;
+    message += `📝 <i>Logic:</i>\n`;
     sig.reasons.forEach(r => {
       message += `• ${r}\n`;
     });
@@ -526,7 +535,7 @@ export async function sendTelegramNotification(signals) {
     minute: '2-digit',
     timeZone: 'Europe/Madrid'
   });
-  message += `🤖 <i>Algo v3.0 (DayTrading)</i> • ${timeStr}`;
+  message += `🤖 <b>Sniper Bot v4.0</b> • ${timeStr}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -593,23 +602,29 @@ async function runAnalysis() {
     }
   }
 
+  // Limit signals per run to avoid spamming (Sniper quality)
+  const finalSignals = signals
+    .sort((a, b) => b.score - a.score)
+    .slice(0, SNIPER_CONFIG.maxSignalsPerRun);
+
   console.log('--------------------------------------------------');
-  console.log(`📊 RESUMEN FINAL:`);
-  console.log(`✅ Monedas Analizadas: ${analyzed}`);
-  console.log(`🎯 Señales Encontradas: ${signals.length}`);
-  console.log(`❌ Errores: ${errors}`);
+  console.log(`📊 FINAL SUMMARY (SNIPER):`);
+  console.log(`✅ Coins Analyzed: ${analyzed}`);
+  console.log(`🎯 Signals Found: ${signals.length}`);
+  console.log(`🚀 Final Sent: ${finalSignals.length}`);
+  console.log(`❌ Errors: ${errors}`);
   console.log('--------------------------------------------------');
 
-  if (signals.length > 0) {
-    await sendTelegramNotification(signals);
+  if (finalSignals.length > 0) {
+    await sendTelegramNotification(finalSignals);
   } else {
-    console.log('ℹ️ No se encontraron señales en esta ejecución.');
+    console.log('ℹ️ No high-quality sniper signals found in this execution.');
   }
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: 'Day Trading Analysis complete', signals })
+    body: JSON.stringify({ message: 'Sniper Analysis complete', signals: finalSignals })
   };
 }
 
-export const handler = schedule('*/15 * * * *', runAnalysis);
+export const handler = schedule('*/30 * * * *', runAnalysis);

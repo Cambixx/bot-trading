@@ -14,13 +14,13 @@ const isDevelopment = (import.meta.env && import.meta.env.DEV) || (typeof window
 const OPENROUTER_API_KEY = (import.meta.env && import.meta.env.VITE_OPENROUTER_API_KEY) || process.env.VITE_OPENROUTER_API_KEY;
 
 const AI_MODELS = {
-    // Cost optimization: Use FREE models for most operations
-    DEFAULT: 'google/gemini-2.0-flash-exp:free',     // FREE - General analysis
-    REASONING: 'deepseek/deepseek-chat',              // Paid - Only for Trade Doctor
-    FAST: 'google/gemini-2.0-flash-exp:free',         // FREE - Quick validation
-    FREE: 'google/gemini-2.0-flash-exp:free',         // FREE - Explicit free
-    NEXUS: 'google/gemini-2.0-flash-exp:free',        // FREE - Market intelligence
-    ORACLE: 'google/gemini-2.0-flash-exp:free'        // FREE - Market Oracle
+    // Standardizing on DeepSeek for stability and performance
+    DEFAULT: 'deepseek/deepseek-chat',
+    REASONING: 'deepseek/deepseek-chat',
+    FAST: 'deepseek/deepseek-chat',
+    FREE: 'deepseek/deepseek-chat',
+    NEXUS: 'deepseek/deepseek-chat',
+    ORACLE: 'deepseek/deepseek-chat'
 };
 
 /**
@@ -191,9 +191,9 @@ async function callOpenRouterDirectly(inputData, tradingMode = 'BALANCED') {
         // Formatear noticias para el prompt
         const newsText = news ? news.map(n => `- ${n.title} (${n.source})`).join('\n') : 'No news available';
 
-        // Formatear Macro
+        // Formatear Macro with safety checks
         const macroText = macro ?
-            `S&P 500: $${macro.sp500.price} (${macro.sp500.changePercent}%) | DXY (Proxy): $${macro.dxy.price} (${macro.dxy.changePercent}%)` :
+            `S&P 500: $${macro.sp500?.price || 'N/A'} (${macro.sp500?.changePercent || 'N/A'}%) | DXY (Proxy): $${macro.dxy?.price || 'N/A'} (${macro.dxy?.changePercent || 'N/A'}%)` :
             'Macro data unavailable';
 
         prompt = `Eres "Nexus Intelligence", un sistema de IA de grado militar que procesa señales globales para un fondo de cobertura cripto.
@@ -398,11 +398,11 @@ function getFallbackAnalysis(mode) {
  * Enviar datos de mercado para análisis con IA
  */
 export async function getAIAnalysis(marketData, tradingMode = 'BALANCED') {
-    // FORCE USE OF NETLIFY FUNCTION even in dev to use the improved axios proxy
-    // if (isDevelopment) {
-    //     console.log('💡 Usando OpenRouter API directamente (desarrollo)');
-    //     return await callOpenRouterDirectly(marketData, tradingMode);
-    // }
+    // En desarrollo, llamamos directamente para evitar latencia de funciones y problemas de proxy
+    if (isDevelopment) {
+        console.log('💡 Usando OpenRouter API directamente (desarrollo)');
+        return await callOpenRouterDirectly(marketData, tradingMode);
+    }
 
     try {
         const response = await fetch(NETLIFY_FUNCTION_URL, {
