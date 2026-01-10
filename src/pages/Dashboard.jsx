@@ -97,6 +97,7 @@ function Dashboard({
                     oracleData={oracleData}
                     topOpportunity={topOpportunity}
                     btcVol={cryptoData['BTCUSDC'] || cryptoData['BTCUSDT']}
+                    signalCount={signals?.length || 0}
                 />
             </motion.div>
 

@@ -14,11 +14,13 @@ const isDevelopment = (import.meta.env && import.meta.env.DEV) || (typeof window
 const OPENROUTER_API_KEY = (import.meta.env && import.meta.env.VITE_OPENROUTER_API_KEY) || process.env.VITE_OPENROUTER_API_KEY;
 
 const AI_MODELS = {
-    DEFAULT: 'deepseek/deepseek-chat',
-    REASONING: 'deepseek/deepseek-r1',
-    FAST: 'deepseek/deepseek-chat',
-    FREE: 'google/gemini-2.0-flash-exp:free',
-    NEXUS: 'deepseek/deepseek-chat'
+    // Cost optimization: Use FREE models for most operations
+    DEFAULT: 'google/gemini-2.0-flash-exp:free',     // FREE - General analysis
+    REASONING: 'deepseek/deepseek-chat',              // Paid - Only for Trade Doctor
+    FAST: 'google/gemini-2.0-flash-exp:free',         // FREE - Quick validation
+    FREE: 'google/gemini-2.0-flash-exp:free',         // FREE - Explicit free
+    NEXUS: 'google/gemini-2.0-flash-exp:free',        // FREE - Market intelligence
+    ORACLE: 'google/gemini-2.0-flash-exp:free'        // FREE - Market Oracle
 };
 
 /**
@@ -430,8 +432,9 @@ export async function getMarketOracleAnalysis(marketData) {
         combinedSectors
     };
 
-    // Cache market oracle for 1 hour as it's global and less volatile
-    return await getCachedAIAnalysis({ mode: 'MARKET_ORACLE', marketData: improvedData }, 3600000);
+    // Cache market oracle for 12 hours (was 1h) - macro conditions change slowly
+    // Cost optimization: Only refresh Oracle 2x per day max
+    return await getCachedAIAnalysis({ mode: 'MARKET_ORACLE', marketData: improvedData }, 43200000);
 }
 
 export async function getTradeDoctorAnalysis(symbol, price, technicals) {

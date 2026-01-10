@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, Thermometer, Zap, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Activity, Thermometer, Zap, AlertTriangle, ShieldCheck, Wallet, TrendingUp, Target } from 'lucide-react';
 import './ExecutiveDashboard.css';
 
-const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol }) => {
+const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol, capital = 3400, signalCount = 0 }) => {
     // Determine overall risk status
     const getRiskStatus = () => {
         // PRIORITY: Real-time Volatility Override
@@ -110,6 +110,25 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol }) =
                     <div className="live-indicator">
                         <div className="pulsar"></div>
                         DATA STREAM: ACTIVE
+                    </div>
+                </div>
+
+                {/* CAPITAL BAR - Portfolio Health at a Glance */}
+                <div className="capital-bar">
+                    <div className="capital-item primary">
+                        <Wallet size={14} />
+                        <span className="cap-label">CAPITAL</span>
+                        <span className="cap-value">€{capital.toLocaleString()}</span>
+                    </div>
+                    <div className="capital-item">
+                        <Target size={14} />
+                        <span className="cap-label">RISK/TRADE</span>
+                        <span className="cap-value">€{Math.round(capital * 0.015)} <small>(1.5%)</small></span>
+                    </div>
+                    <div className="capital-item">
+                        <TrendingUp size={14} />
+                        <span className="cap-label">SIGNALS TODAY</span>
+                        <span className="cap-value signal-count">{signalCount}</span>
                     </div>
                 </div>
 

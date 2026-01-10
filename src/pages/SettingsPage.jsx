@@ -1,5 +1,5 @@
 import { useSettings } from '../context/SettingsContext';
-import { Bell, BellOff, Shield, Zap, DollarSign } from 'lucide-react';
+import { Bell, BellOff, Shield, Zap, DollarSign, Crosshair } from 'lucide-react';
 
 function SettingsPage() {
     const {
@@ -26,7 +26,7 @@ function SettingsPage() {
                     <p className="text-muted mb-md">Define la agresividad de las señales generadas.</p>
 
                     <div className="mode-options" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                        {['CONSERVATIVE', 'BALANCED', 'RISKY', 'SCALPING'].map(mode => (
+                        {['CONSERVATIVE', 'BALANCED', 'SNIPER', 'RISKY', 'SCALPING'].map(mode => (
                             <button
                                 key={mode}
                                 onClick={() => setTradingMode(mode)}
@@ -35,6 +35,7 @@ function SettingsPage() {
                             >
                                 {mode === 'CONSERVATIVE' && '🛡️ Conservador'}
                                 {mode === 'BALANCED' && '⚖️ Equilibrado'}
+                                {mode === 'SNIPER' && '🎯 Sniper'}
                                 {mode === 'RISKY' && '🚀 Arriesgado'}
                                 {mode === 'SCALPING' && '⚡ Scalping'}
                             </button>
@@ -44,6 +45,7 @@ function SettingsPage() {
                         <small className="text-muted">
                             {tradingMode === 'CONSERVATIVE' && 'Solo opera a favor de la tendencia mayor. Menos señales, mayor tasa de acierto.'}
                             {tradingMode === 'BALANCED' && 'Equilibrio entre tendencia y momentum. Estrategia estándar.'}
+                            {tradingMode === 'SNIPER' && '🎯 Precisión extrema: 1-4 trades/día. Requiere ADX>25, Choppiness<50, RVOL>1.2 y confluencia en S/R o SMC. Score mínimo 70.'}
                             {tradingMode === 'RISKY' && 'Busca reversiones y scalps rápidos. Más señales, mayor riesgo.'}
                             {tradingMode === 'SCALPING' && 'Modo day trading: stops ajustados, alta frecuencia (~4-5 operaciones/día por par).'}
                         </small>

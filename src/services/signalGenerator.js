@@ -21,7 +21,7 @@ const MODES = {
     BALANCED: {
         categoryThresholdForConvergence: 0.20,
         requiredCategories: 1,
-        scoreToEmit: 0.35,  // Temporarily lowered for debugging
+        scoreToEmit: 0.55,  // Production threshold for quality signals
         weights: {
             momentum: 0.25,
             trend: 0.25,
@@ -64,6 +64,30 @@ const MODES = {
             divergence: 0.025,
             accumulation: 0.025
         }
+    },
+    // SNIPER: Modo de alta precisión para 1-4 operaciones diarias
+    // Exige confluencia técnica fuerte y filtros estrictos de régimen de mercado
+    SNIPER: {
+        categoryThresholdForConvergence: 0.30,  // Alto - exige confluencia real
+        requiredCategories: 3,                   // Mínimo 3 categorías positivas
+        scoreToEmit: 0.70,                       // Umbral alto = menos señales, más calidad
+        weights: {
+            momentum: 0.20,      // Reducido - evitar falsas señales
+            trend: 0.30,         // Tendencia domina para precision
+            trendStrength: 0.15, // ADX obligatorio > 25
+            levels: 0.10,        // S/R para entradas precisas
+            volume: 0.10,        // Solo confirmación
+            patterns: 0.05,      // Patrones de vela
+            divergence: 0.05,    // Divergencias importantes
+            accumulation: 0.05   // Acumulación institucional
+        },
+        // Hard gates - condiciones obligatorias para emitir señal
+        hardGates: {
+            minADX: 25,          // Tendencia mínima requerida
+            maxChoppiness: 50,   // No operar en mercados laterales
+            minRVOL: 1.2,        // Volumen mínimo relativo
+            requireSMCorLevel: true  // Debe tocar OB o S/R
+        }
     }
 };
 
@@ -97,6 +121,46 @@ export function calculateDetailedScore(analysis, symbol, multiTimeframeData = {}
     let trendStrengthScore = 0;
     let divergenceScore = 0;
     let accumulationScore = 0;
+
+    // ============================================
+    // GATE 0: SNIPER MODE HARD GATES (Strictest filters)
+    // ============================================
+    if (mode === 'SNIPER' && config.hardGates) {
+        const gates = config.hardGates;
+        const rvol = volume.rvol || 1;
+
+        // ADX must be strong enough
+        if (indicators.adx != null && indicators.adx < gates.minADX) {
+            console.log(`SNIPER GATE FAIL: ${symbol} ADX ${indicators.adx?.toFixed(1)} < ${gates.minADX}`);
+            return null;
+        }
+
+        // Market must not be choppy
+        if (choppiness != null && choppiness > gates.maxChoppiness) {
+            console.log(`SNIPER GATE FAIL: ${symbol} Choppiness ${choppiness?.toFixed(1)} > ${gates.maxChoppiness}`);
+            return null;
+        }
+
+        // Volume must be elevated
+        if (rvol < gates.minRVOL) {
+            console.log(`SNIPER GATE FAIL: ${symbol} RVOL ${rvol} < ${gates.minRVOL}`);
+            return null;
+        }
+
+        // Must be near key level or SMC zone
+        if (gates.requireSMCorLevel) {
+            const nearSupport = levels.support && Math.abs(price - levels.support) / price < 0.02;
+            const nearResistance = levels.resistance && Math.abs(levels.resistance - price) / price < 0.02;
+            const hasSMC = levels.orderBlocks?.bullish?.length > 0 || levels.orderBlocks?.bearish?.length > 0;
+
+            if (!nearSupport && !nearResistance && !hasSMC) {
+                console.log(`SNIPER GATE FAIL: ${symbol} Not near S/R or SMC zone`);
+                return null;
+            }
+        }
+
+        console.log(`✅ SNIPER GATES PASSED: ${symbol} (ADX: ${indicators.adx?.toFixed(1)}, Chop: ${choppiness?.toFixed(1)}, RVOL: ${rvol})`);
+    }
 
     // ============================================
     // GATE 1: REGIME & FILTER (Noisy Market check)

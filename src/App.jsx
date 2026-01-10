@@ -91,6 +91,7 @@ const StatusBar = React.memo(({ loading, error, lastUpdate, tradingMode, isRefre
           {tradingMode === 'BALANCED' && 'Equilibrado'}
           {tradingMode === 'RISKY' && 'Arriesgado'}
           {tradingMode === 'SCALPING' && 'Scalping'}
+          {tradingMode === 'SNIPER' && '🎯 Sniper'}
         </span>
       </div>
     </div>

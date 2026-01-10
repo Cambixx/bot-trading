@@ -67,8 +67,9 @@ export async function handler(event, context) {
 
     try {
         // Obtener API key de variables de entorno (Configurar en Netlify!)
-        const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-        const NEWS_API_KEY = process.env.VITE_NEWS_API_KEY;
+        // Check both with and without VITE_ prefix for local dev compatibility
+        const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY;
+        const NEWS_API_KEY = process.env.NEWS_API_KEY || process.env.VITE_NEWS_API_KEY;
 
         if (!OPENROUTER_API_KEY) {
             console.error('OPENROUTER_API_KEY not found in environment variables');
@@ -98,12 +99,14 @@ export async function handler(event, context) {
             };
         }
 
+        // Cost optimization: Use FREE models for most operations
         const AI_MODELS = {
-            DEFAULT: 'deepseek/deepseek-chat',
-            REASONING: 'deepseek/deepseek-r1',
-            FAST: 'deepseek/deepseek-chat',
-            FREE: 'google/gemini-2.0-flash-exp:free',
-            NEXUS: 'deepseek/deepseek-chat'
+            DEFAULT: 'google/gemini-2.0-flash-exp:free',     // FREE - General analysis
+            REASONING: 'deepseek/deepseek-chat',              // Paid - Only for Trade Doctor
+            FAST: 'google/gemini-2.0-flash-exp:free',         // FREE - Quick validation
+            FREE: 'google/gemini-2.0-flash-exp:free',         // FREE - Explicit free
+            NEXUS: 'google/gemini-2.0-flash-exp:free',        // FREE - Market intelligence
+            ORACLE: 'google/gemini-2.0-flash-exp:free'        // FREE - Market Oracle
         };
 
         const { mode, symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward, marketData: globalMarketData, tradingMode } = inputData;

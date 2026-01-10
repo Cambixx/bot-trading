@@ -1,31 +1,45 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap, Calculator, Copy, Layers, Activity, Check } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap, Calculator, Copy, Layers, Activity, Check, Euro } from 'lucide-react';
 import { format } from 'date-fns';
+import { calculatePosition } from '../services/riskCalculator';
 import './SignalCard.css';
 
 const RiskCalculator = ({ entry, stopLoss, isSell }) => {
-    const [riskAmount, setRiskAmount] = useState(50); // Default risk $50
+    const [capital, setCapital] = useState(3400); // Default €3,400
+    const [riskPct, setRiskPct] = useState(1.5);  // Default 1.5%
 
-    const riskPerShare = Math.abs(entry - stopLoss);
-    const shares = riskAmount / riskPerShare;
-    const positionValue = shares * entry;
+    const calculation = useMemo(() =>
+        calculatePosition({
+            capital,
+            riskPercent: riskPct / 100,
+            entryPrice: entry,
+            stopLossPrice: stopLoss,
+            maxLeverage: 1, // Spot only
+            eurToUsd: 1.08
+        }), [capital, riskPct, entry, stopLoss]
+    );
+
+    const riskAmountEUR = capital * (riskPct / 100);
 
     return (
-        <div className="risk-calc-box">
+        <div className="risk-calc-box sniper-mode">
             <div className="calc-header">
                 <div className="calc-label">
                     <Calculator size={14} />
-                    <span>RISK SIZING</span>
+                    <span>POSITION SIZING</span>
+                    {calculation.isCapped && (
+                        <span className="capped-badge" title="Position capped at capital limit">CAPPED</span>
+                    )}
                 </div>
                 <div className="quick-risk-btns">
-                    {[10, 50, 100, 500].map(amt => (
+                    {[1, 1.5, 2].map(pct => (
                         <button
-                            key={amt}
-                            onClick={() => setRiskAmount(amt)}
-                            className={`q-btn ${riskAmount === amt ? 'active' : ''}`}
+                            key={pct}
+                            onClick={() => setRiskPct(pct)}
+                            className={`q-btn ${riskPct === pct ? 'active' : ''}`}
                         >
-                            ${amt}
+                            {pct}%
                         </button>
                     ))}
                 </div>
@@ -33,24 +47,36 @@ const RiskCalculator = ({ entry, stopLoss, isSell }) => {
 
             <div className="calc-input-row">
                 <div className="risk-input-group">
-                    <span className="cur">$</span>
+                    <Euro size={14} className="cur-icon" />
                     <input
                         type="number"
-                        value={riskAmount}
-                        onChange={(e) => setRiskAmount(Number(e.target.value))}
-                        className="risk-input"
+                        value={capital}
+                        onChange={(e) => setCapital(Number(e.target.value))}
+                        className="risk-input capital-input"
+                        step="100"
                     />
                 </div>
-                <div className="calc-results-mini">
-                    <div className="res-item">
+                <div className="calc-results-sniper">
+                    <div className="res-item primary">
                         <span className="lbl">SIZE</span>
-                        <span className="val">{shares < 1 ? shares.toFixed(4) : shares.toFixed(2)}</span>
+                        <span className="val">{calculation.positionSize < 0.01 ? calculation.positionSize.toFixed(6) : calculation.positionSize.toFixed(4)}</span>
                     </div>
                     <div className="res-item">
                         <span className="lbl">VALUE</span>
-                        <span className="val">${positionValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                        <span className="val">€{calculation.positionValueEUR.toLocaleString()}</span>
+                    </div>
+                    <div className="res-item risk-highlight">
+                        <span className="lbl">RISK</span>
+                        <span className="val">€{riskAmountEUR.toFixed(0)}</span>
                     </div>
                 </div>
+            </div>
+
+            <div className="sl-info-bar">
+                <span>SL Distance: {calculation.slPercent}%</span>
+                <span className={`direction-tag ${calculation.direction.toLowerCase()}`}>
+                    {calculation.direction}
+                </span>
             </div>
         </div>
     );
