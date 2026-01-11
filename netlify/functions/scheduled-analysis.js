@@ -7,7 +7,7 @@
 
 import { schedule } from "@netlify/functions";
 
-console.log('--- Binance Advanced Analysis Module Loaded ---');
+console.log('--- MEXC Advanced Analysis Module Loaded ---');
 
 // Environment Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -22,7 +22,8 @@ const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 25;
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 20000000;
 
-const BINANCE_API = 'https://api.binance.com/api/v3';
+// Migrado a MEXC para evitar bloques territoriales (HTTP 451) de Binance en Netlify
+const MEXC_API = 'https://api.mexc.com/api/v3';
 
 const FALLBACK_SYMBOLS = [
   `BTC${QUOTE_ASSET}`,
@@ -60,7 +61,7 @@ async function fetchWithTimeout(url, timeout = 15000) {
 // ==================== BINANCE DATA ====================
 
 async function getKlines(symbol, interval = '1h', limit = 300) {
-  const url = `${BINANCE_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+  const url = `${MEXC_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
   const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
@@ -80,14 +81,15 @@ async function getKlines(symbol, interval = '1h', limit = 300) {
     close: Number(candle[4]),
     volume: Number(candle[5]),
     quoteVolume: Number(candle[7]),
-    trades: Number(candle[8]),
-    takerBuyBaseVolume: Number(candle[9]),
-    takerBuyQuoteVolume: Number(candle[10])
+    // MEXC no siempre provee estos campos, usamos fallbacks
+    trades: candle[8] ? Number(candle[8]) : 0,
+    takerBuyBaseVolume: candle[9] ? Number(candle[9]) : Number(candle[5]) * 0.5,
+    takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : Number(candle[7]) * 0.5
   }));
 }
 
 async function getOrderBookDepth(symbol, limit = 20) {
-  const url = `${BINANCE_API}/depth?symbol=${symbol}&limit=${limit}`;
+  const url = `${MEXC_API}/depth?symbol=${symbol}&limit=${limit}`;
   const response = await fetchWithTimeout(url);
   if (!response.ok) return null;
 
@@ -101,7 +103,7 @@ async function getOrderBookDepth(symbol, limit = 20) {
 }
 
 async function getAllTickers24h() {
-  const url = `${BINANCE_API}/ticker/24hr`;
+  const url = `${MEXC_API}/ticker/24hr`;
   const response = await fetchWithTimeout(url);
   if (!response.ok) throw new Error(`Binance HTTP error: ${response.status}`);
   const json = await response.json();
@@ -683,7 +685,7 @@ async function sendTelegramNotification(signals) {
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
 async function runAnalysis() {
-  console.log('--- Binance Advanced Analysis Started ---');
+  console.log('--- MEXC Advanced Analysis Started ---');
   console.log('Time:', new Date().toISOString());
 
   const signals = [];
