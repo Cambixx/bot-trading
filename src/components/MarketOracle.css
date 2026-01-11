@@ -46,7 +46,7 @@
 .oracle-refresh-btn {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-muted);
+    color: var(--color-text-muted);
     width: 28px;
     height: 28px;
     border-radius: 6px;
@@ -97,7 +97,7 @@
 
 .sentiment-label {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
 }
 
 .meter-track {
@@ -117,7 +117,7 @@
 .sentiment-value {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     min-width: 30px;
     text-align: right;
 }
@@ -158,7 +158,7 @@
 
 .strategy-label {
     font-size: 0.65rem;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -166,8 +166,8 @@
 .strategy-value {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-primary);
-    background: linear-gradient(90deg, #fff, #ccc);
+    color: var(--color-text-primary);
+    background: linear-gradient(90deg, #fff, var(--color-text-secondary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -192,7 +192,7 @@
 
 .oracle-summary {
     font-size: 1rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     line-height: 1.5;
     margin: 0;
     max-width: 600px;
@@ -209,7 +209,7 @@
 
 .watch-label {
     font-size: 0.65rem;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
     font-weight: 800;
     letter-spacing: 1px;
 }
@@ -247,7 +247,7 @@
 
 .stat-label {
     font-size: 0.55rem;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -290,7 +290,7 @@
 
 .section-label {
     font-size: 0.55rem;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
     font-weight: 800;
     letter-spacing: 1px;
 }
@@ -311,7 +311,7 @@
 }
 
 .fund-sym {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-weight: 600;
 }
 

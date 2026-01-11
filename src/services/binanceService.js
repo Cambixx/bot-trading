@@ -9,7 +9,12 @@ class BinanceService {
   constructor() {
     this.ws = null;
     this.reconnectTimer = null;
+    this.connectDebounceTimer = null;
     this.reconnectDelay = 1000;
+    this.shouldReconnect = true;
+    this.intentionalCloseSockets = new WeakSet();
+    this.targetUrl = null;
+    this.lastSubscribe = null;
   }
 
   /**
@@ -182,6 +187,37 @@ class BinanceService {
     }
   }
 
+  async getMultipleOrderBooks(symbols, limit = 20) {
+    try {
+      const batchSize = 5;
+      const results = [];
+
+      for (let i = 0; i < symbols.length; i += batchSize) {
+        const batch = symbols.slice(i, i + batchSize);
+        const batchPromises = batch.map(symbol =>
+          this.getOrderBookDepth(symbol, limit)
+            .then(data => ({ symbol, data, error: null }))
+            .catch(error => ({ symbol, data: null, error: error.message }))
+        );
+
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+
+        if (i + batchSize < symbols.length) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+
+      return results.reduce((acc, { symbol, data, error }) => {
+        acc[symbol] = { data, error };
+        return acc;
+      }, {});
+    } catch (error) {
+      console.error('Error fetching multiple order books:', error.message);
+      throw error;
+    }
+  }
+
   /**
    * Obtener las top N criptomonedas por volumen en USDC
    * @param {number} limit - Número de criptos a obtener (default: 10)
@@ -349,78 +385,112 @@ class BinanceService {
    * @param {Function} onMessage - Callback para manejar los mensajes
    */
   subscribeToTickers(symbols, onMessage) {
-    // Cancel any pending reconnection
+    const normalizedSymbols = [...new Set((symbols || []).map(s => String(s).toUpperCase()))].sort();
+    const streams = normalizedSymbols.map(s => `${s.toLowerCase()}@ticker`).join('/');
+    const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
+
+    this.shouldReconnect = true;
+    this.targetUrl = url;
+    this.lastSubscribe = { symbols: normalizedSymbols, onMessage };
+
+    if (this.ws && this.ws.url === url && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+
+    if (this.connectDebounceTimer) {
+      clearTimeout(this.connectDebounceTimer);
+      this.connectDebounceTimer = null;
+    }
+
+    this.connectDebounceTimer = setTimeout(() => {
+      this.connectWebSocket();
+    }, 250);
+  }
+
+  connectWebSocket() {
+    if (!this.targetUrl || !this.lastSubscribe?.onMessage) return;
+
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
 
-    // Usar Combined Streams para múltiples símbolos
-    // Formato: <symbol>@ticker
-    const streams = symbols.map(s => `${s.toLowerCase()}@ticker`).join('/');
-    const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
-
-    // Evitar reconexión si la URL es la misma y el socket está abierto o conectando
-    if (this.ws && this.ws.url === url && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
-      console.log('WebSocket ya conectado a estos streams. ' + streams.split('/').length + ' pares.');
-      return;
+    if (this.connectDebounceTimer) {
+      clearTimeout(this.connectDebounceTimer);
+      this.connectDebounceTimer = null;
     }
 
     if (this.ws) {
-      this.ws.close();
+      const prevWs = this.ws;
+      try {
+        this.intentionalCloseSockets.add(prevWs);
+        prevWs.onopen = null;
+        prevWs.onmessage = null;
+        prevWs.onerror = null;
+        prevWs.onclose = null;
+        prevWs.close();
+      } catch (_err) {
+        this.ws = null;
+      }
     }
 
-    // Debounce connection to avoid rapid reconnections
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-    }
+    const { onMessage } = this.lastSubscribe;
+    const url = this.targetUrl;
 
-    this.reconnectTimer = setTimeout(() => {
-      console.log('Conectando a WebSocket:', url);
-      this.ws = new WebSocket(url);
+    console.log('Conectando a WebSocket:', url);
+    this.ws = new WebSocket(url);
+    const ws = this.ws;
 
-      this.ws.onopen = () => {
-        console.log('WebSocket Conectado');
-        this.reconnectDelay = 1000;
-      };
+    ws.onopen = () => {
+      if (this.ws !== ws) return;
+      console.log('WebSocket Conectado');
+      this.reconnectDelay = 1000;
+    };
 
-      this.ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          if (message.data) {
-            const ticker = {
-              symbol: message.data.s,
-              price: parseFloat(message.data.c),
-              priceChange: parseFloat(message.data.p),
-              priceChangePercent: parseFloat(message.data.P),
-              high24h: parseFloat(message.data.h),
-              low24h: parseFloat(message.data.l),
-              volume24h: parseFloat(message.data.v),
-              quoteVolume24h: parseFloat(message.data.q)
-            };
-            onMessage(ticker);
-          }
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+    ws.onmessage = (event) => {
+      if (this.ws !== ws) return;
+      try {
+        const message = JSON.parse(event.data);
+        if (message.data) {
+          const ticker = {
+            symbol: message.data.s,
+            price: parseFloat(message.data.c),
+            priceChange: parseFloat(message.data.p),
+            priceChangePercent: parseFloat(message.data.P),
+            high24h: parseFloat(message.data.h),
+            low24h: parseFloat(message.data.l),
+            volume24h: parseFloat(message.data.v),
+            quoteVolume24h: parseFloat(message.data.q)
+          };
+          onMessage(ticker);
         }
-      };
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
 
-      this.ws.onerror = (error) => {
-        console.error('WebSocket Error:', error);
-      };
+    ws.onerror = (error) => {
+      if (this.ws !== ws) return;
+      console.error('WebSocket Error:', error);
+    };
 
-      this.ws.onclose = (event) => {
-        console.log('WebSocket Desconectado');
-        // Only reconnect if it wasn't a clean close
-        if (event.code !== 1000) {
-          console.log('Reintentando conectar en', this.reconnectDelay, 'ms...');
-          this.reconnectTimer = setTimeout(() => {
-            this.subscribeToTickers(symbols, onMessage);
-          }, this.reconnectDelay);
-          this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
-        }
-      };
-    }, 200);
+    ws.onclose = (event) => {
+      if (this.ws !== ws) return;
+      console.log('WebSocket Desconectado');
+      const wasIntentional = this.intentionalCloseSockets.has(ws);
+      if (wasIntentional) this.intentionalCloseSockets.delete(ws);
+      this.ws = null;
+
+      if (wasIntentional || !this.shouldReconnect) return;
+
+      if (event.code !== 1000) {
+        console.log('Reintentando conectar en', this.reconnectDelay, 'ms...');
+        this.reconnectTimer = setTimeout(() => {
+          this.connectWebSocket();
+        }, this.reconnectDelay);
+        this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
+      }
+    };
   }
 
   /**
@@ -526,10 +596,36 @@ class BinanceService {
    * Cerrar conexión WebSocket
    */
   disconnect() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    this.shouldReconnect = false;
+
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
+
+    if (this.connectDebounceTimer) {
+      clearTimeout(this.connectDebounceTimer);
+      this.connectDebounceTimer = null;
+    }
+
+    if (this.ws) {
+      const prevWs = this.ws;
+      try {
+        this.intentionalCloseSockets.add(prevWs);
+        prevWs.onopen = null;
+        prevWs.onmessage = null;
+        prevWs.onerror = null;
+        prevWs.onclose = null;
+        prevWs.close();
+      } catch (_err) {
+        this.ws = null;
+      }
+    }
+
+    this.ws = null;
+    this.targetUrl = null;
+    this.lastSubscribe = null;
+    this.reconnectDelay = 1000;
   }
 }
 

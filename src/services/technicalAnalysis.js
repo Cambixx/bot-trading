@@ -466,6 +466,78 @@ export function calculateATR(candles, period = 14) {
     return atrValues;
 }
 
+export function calculateVWAP(candles, period = 20) {
+    if (!candles || candles.length === 0) return [];
+
+    const vwap = [];
+    const queue = [];
+    let pvSum = 0;
+    let vSum = 0;
+
+    for (let i = 0; i < candles.length; i++) {
+        const c = candles[i];
+        const typical = (c.high + c.low + c.close) / 3;
+        const v = c.volume || 0;
+        const pv = typical * v;
+
+        queue.push({ pv, v });
+        pvSum += pv;
+        vSum += v;
+
+        if (queue.length > period) {
+            const removed = queue.shift();
+            pvSum -= removed.pv;
+            vSum -= removed.v;
+        }
+
+        if (queue.length < period || vSum === 0) {
+            vwap.push(null);
+        } else {
+            vwap.push(pvSum / vSum);
+        }
+    }
+
+    return vwap;
+}
+
+export function calculateOrderBookMetrics(orderBook, levels = 10) {
+    if (!orderBook || !Array.isArray(orderBook.bids) || !Array.isArray(orderBook.asks)) return null;
+    if (orderBook.bids.length === 0 || orderBook.asks.length === 0) return null;
+
+    const [bestBidPrice] = orderBook.bids[0];
+    const [bestAskPrice] = orderBook.asks[0];
+    if (!Number.isFinite(bestBidPrice) || !Number.isFinite(bestAskPrice) || bestBidPrice <= 0 || bestAskPrice <= 0) return null;
+
+    const mid = (bestBidPrice + bestAskPrice) / 2;
+    const spreadBps = ((bestAskPrice - bestBidPrice) / mid) * 10000;
+
+    const topBids = orderBook.bids.slice(0, levels);
+    const topAsks = orderBook.asks.slice(0, levels);
+
+    const bidNotional = topBids.reduce((sum, [p, q]) => sum + (p * q), 0);
+    const askNotional = topAsks.reduce((sum, [p, q]) => sum + (p * q), 0);
+    const totalNotional = bidNotional + askNotional;
+    const obi = totalNotional > 0 ? (bidNotional - askNotional) / totalNotional : 0;
+
+    return {
+        mid,
+        spreadBps,
+        depthNotionalTopN: totalNotional,
+        obi
+    };
+}
+
+export function calculateCVD(candles, period = 20) {
+    if (!candles || candles.length === 0) return 0;
+    const slice = candles.slice(-period);
+    return slice.reduce((sum, c) => {
+        const buy = c.takerBuyBaseVolume || 0;
+        const total = c.volume || 0;
+        const sell = Math.max(0, total - buy);
+        return sum + (buy - sell);
+    }, 0);
+}
+
 /**
  * Calcular presión de compradores (Buy/Sell Pressure)
  * Usa takerBuyBaseVolume para determinar qué % del volumen fue de compradores
@@ -1035,7 +1107,6 @@ export function performTechnicalAnalysis(candles) {
     if (!candles || candles.length === 0) return null;
 
     const closes = candles.map(c => c.close);
-    const volumes = candles.map(c => c.volume);
 
     // Indicadores básicos
     const rsi = calculateRSI(closes);
@@ -1048,7 +1119,8 @@ export function performTechnicalAnalysis(candles) {
     const atr = calculateATR(candles);
     const adx = calculateADX(candles);
     const stochastic = calculateStochastic(candles);
-    const vwap = calculateSMA(closes, 20); // Aproximación simple
+    const vwap = calculateVWAP(candles, 20);
+    const cvd20 = calculateCVD(candles, 20);
 
     // RSI Velocity (cambio en RSI últimas 3 velas - para detectar aceleración)
     const lastIndex = closes.length - 1;
@@ -1116,7 +1188,8 @@ export function performTechnicalAnalysis(candles) {
                 k: stochastic.stochK[lastIndex],
                 d: stochastic.stochD[lastIndex]
             },
-            vwap: vwap[lastIndex]
+            vwap: vwap[lastIndex],
+            cvd20
         },
         levels: {
             support: supportResistance.support,

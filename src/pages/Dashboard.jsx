@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'; // Ensure React hooks are imported
-import { motion } from 'framer-motion';
-import { LayoutDashboard, TrendingUp, Zap } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, Zap } from 'lucide-react';
 import CryptoSelector from '../components/CryptoSelector';
 import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
@@ -12,9 +12,6 @@ import PatternHunter from '../components/PatternHunter'; // Import Hunter
 import ExecutiveDashboard from '../components/ExecutiveDashboard'; // Import Executive Dashboard
 import BacktestDashboard from '../components/BacktestDashboard'; // Import Backtest Dashboard
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
-
-// Services
-import binanceService from '../services/binanceService';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -48,15 +45,26 @@ function Dashboard({
     loading,
     handleSimulateBuy
 }) {
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [showAllSignals, setShowAllSignals] = useState(false);
+
     // Lifted State for Executive Dashboard
     const [nexusData, setNexusData] = useState(null);
     const [oracleData, setOracleData] = useState(null);
 
+    const sortedSignals = useMemo(() => {
+        if (!signals || signals.length === 0) return [];
+        return [...signals].sort((a, b) => b.score - a.score);
+    }, [signals]);
+
+    const topSignal = sortedSignals.length > 0 ? sortedSignals[0] : null;
+    const visibleSignals = showAllSignals ? sortedSignals : sortedSignals.slice(0, 3);
+
     // Calculate Top Opportunity dynamically
     const topOpportunity = (() => {
         // Priority 1: Active Signals (High confidence)
-        if (signals && signals.length > 0) {
-            const bestSignal = [...signals].sort((a, b) => b.score - a.score)[0];
+        if (sortedSignals && sortedSignals.length > 0) {
+            const bestSignal = sortedSignals[0];
             return {
                 symbol: bestSignal.symbol,
                 type: bestSignal.type || 'BUY',
@@ -96,6 +104,7 @@ function Dashboard({
                     nexusData={nexusData}
                     oracleData={oracleData}
                     topOpportunity={topOpportunity}
+                    topSignal={topSignal}
                     btcVol={cryptoData['BTCUSDC'] || cryptoData['BTCUSDT']}
                     signalCount={signals?.length || 0}
                 />
@@ -107,55 +116,6 @@ function Dashboard({
                     selectedSymbols={symbols}
                     onSymbolsChange={handleSymbolsChange}
                 />
-            </motion.div>
-
-            {/* 2. Market Oracle (Macro Analysis) */}
-            <motion.div variants={itemVariants}>
-                <MarketOracle onDataUpdate={setOracleData} />
-            </motion.div>
-
-            {/* NEW: Nexus Intelligence Hub (Global Pulsar) */}
-            <motion.div variants={itemVariants}>
-                <NexusHub onDataUpdate={setNexusData} />
-            </motion.div>
-
-            {/* 3. AI Tools Section: Doctor + Hunter */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                <motion.div variants={itemVariants}>
-                    <TradeDoctor defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <PatternHunter defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                </motion.div>
-            </div>
-
-            {/* 4. Validation: Backtest Engine */}
-            <motion.div variants={itemVariants}>
-                <BacktestDashboard symbols={symbols} />
-            </motion.div>
-
-            {/* 5. Crypto Prices Dashboard */}
-            <motion.section variants={itemVariants} className="dashboard-section">
-                <div className="section-header">
-                    <TrendingUp size={20} className="text-primary" />
-                    <h2>Mercado</h2>
-                </div>
-                <div className="dashboard-grid">
-                    {loading ? (
-                        <SkeletonLoader type="crypto" count={symbols.length || 4} />
-                    ) : (
-                        Object.values(cryptoData)
-                            .sort((a, b) => (b.opportunity || 0) - (a.opportunity || 0))
-                            .map(crypto => (
-                                <CryptoCard key={crypto.symbol} crypto={crypto} />
-                            ))
-                    )}
-                </div>
-            </motion.section>
-
-            <motion.div variants={itemVariants}>
-                <MLSignalSection signals={mlSignals} loading={loading} />
             </motion.div>
 
             {/* Trading Signals */}
@@ -170,6 +130,15 @@ function Dashboard({
                             )}
                         </h2>
                     </div>
+                    {!loading && sortedSignals.length > 3 && (
+                        <button
+                            className="btn-secondary"
+                            onClick={() => setShowAllSignals(v => !v)}
+                            style={{ padding: '0.55rem 0.8rem' }}
+                        >
+                            {showAllSignals ? 'Ver menos' : 'Ver todas'}
+                        </button>
+                    )}
                 </div>
 
                 {loading ? (
@@ -190,7 +159,7 @@ function Dashboard({
                     </div>
                 ) : (
                     <div className="signals-grid">
-                        {signals.map((signal, idx) => (
+                        {visibleSignals.map((signal, idx) => (
                             <SignalCard
                                 key={`${signal.symbol}-${idx}`}
                                 signal={signal}
@@ -199,6 +168,86 @@ function Dashboard({
                         ))}
                     </div>
                 )}
+            </motion.section>
+
+            <motion.div variants={itemVariants}>
+                <div className="glass-card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '1rem' }}>Herramientas avanzadas</h3>
+                        <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                            Macro, Nexus, Doctor, Hunter, Backtest y ML
+                        </div>
+                    </div>
+                    <button
+                        className="btn-primary"
+                        onClick={() => setShowAdvanced(v => !v)}
+                        style={{ padding: '0.6rem 0.9rem' }}
+                    >
+                        {showAdvanced ? 'Ocultar' : 'Mostrar'}
+                    </button>
+                </div>
+            </motion.div>
+
+            <AnimatePresence>
+                {showAdvanced && (
+                    <motion.div
+                        key="advanced-section"
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        variants={containerVariants}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                    >
+                        <motion.div variants={itemVariants}>
+                            <MarketOracle onDataUpdate={setOracleData} />
+                        </motion.div>
+
+                        <motion.div variants={itemVariants}>
+                            <NexusHub onDataUpdate={setNexusData} />
+                        </motion.div>
+
+                        <motion.div variants={itemVariants}>
+                            <MLSignalSection signals={mlSignals} loading={loading} />
+                        </motion.div>
+
+                        <motion.div
+                            variants={itemVariants}
+                            style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}
+                        >
+                            <TradeDoctor defaultSymbol={symbols[0]} availableSymbols={symbols} />
+                        </motion.div>
+
+                        <motion.div
+                            variants={itemVariants}
+                            style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}
+                        >
+                            <PatternHunter defaultSymbol={symbols[0]} availableSymbols={symbols} />
+                        </motion.div>
+
+                        <motion.div variants={itemVariants}>
+                            <BacktestDashboard symbols={symbols} />
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Crypto Prices Dashboard */}
+            <motion.section variants={itemVariants} className="dashboard-section">
+                <div className="section-header">
+                    <TrendingUp size={20} className="text-primary" />
+                    <h2>Mercado</h2>
+                </div>
+                <div className="dashboard-grid">
+                    {loading ? (
+                        <SkeletonLoader type="crypto" count={symbols.length || 4} />
+                    ) : (
+                        Object.values(cryptoData)
+                            .sort((a, b) => (b.opportunity || 0) - (a.opportunity || 0))
+                            .map(crypto => (
+                                <CryptoCard key={crypto.symbol} crypto={crypto} />
+                            ))
+                    )}
+                </div>
             </motion.section>
         </motion.div >
     );

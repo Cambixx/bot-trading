@@ -37,7 +37,7 @@
 .form-group label {
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -111,7 +111,7 @@
 .stat-label {
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
 }
 
@@ -141,7 +141,7 @@
     text-align: left;
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
     text-transform: uppercase;
     background: rgba(0, 0, 0, 0.2);
 }

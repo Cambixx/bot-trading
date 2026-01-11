@@ -24,6 +24,10 @@ describe('signalGenerator', () => {
     describe('generateSignal', () => {
         const mockAnalysis = {
             price: 50000,
+            orderBook: {
+                bids: Array.from({ length: 10 }, (_, i) => [49990 - i, 2]),
+                asks: Array.from({ length: 10 }, (_, i) => [50010 + i, 2]),
+            },
             indicators: {
                 rsi: 35,
                 macd: { histogram: 0.5 },

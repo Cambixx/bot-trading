@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Activity, Sparkles, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Sparkles } from 'lucide-react';
 import './CryptoCard.css';
 
 function CryptoCard({ crypto }) {
-    const { symbol, price, priceChangePercent, opportunity, opportunityType } = crypto;
+    const { symbol, price, priceChangePercent, opportunity } = crypto;
     const isPositive = priceChangePercent >= 0;
 
     // Formatear precio dinámicamente según el valor
@@ -16,74 +16,19 @@ function CryptoCard({ crypto }) {
     };
 
     const score = opportunity || 0;
-    const isShort = opportunityType === 'SHORT';
 
     const getOpportunityLevel = () => {
-        const directionLabel = isShort ? 'SHORT' : 'LONG';
-        const DirectionIcon = isShort ? ArrowDownCircle : ArrowUpCircle;
-
-        if (score >= 70) {
-            return {
-                level: 'HIGH',
-                label: `Alta Oportunidad (${directionLabel})`,
-                color: isShort ? 'danger' : 'success',
-                icon: <DirectionIcon size={14} />
-            };
-        }
-        if (score >= 50) {
-            return {
-                level: 'MEDIUM',
-                label: `Oportunidad Media (${directionLabel})`,
-                color: isShort ? 'danger' : 'success',
-                icon: <DirectionIcon size={14} />
-            };
-        }
-        return {
-            level: 'LOW',
-            label: 'Baja Oportunidad',
-            color: 'info',
-            icon: null
-        };
+        if (score >= 70) return { level: 'HIGH', label: 'Alta Oportunidad', color: 'success', icon: <Sparkles size={14} /> };
+        if (score >= 50) return { level: 'MEDIUM', label: 'Oportunidad Media', color: 'warning', icon: null };
+        return { level: 'LOW', label: 'Baja Oportunidad', color: 'info', icon: null };
     };
 
     const opportunityInfo = getOpportunityLevel();
 
-    // Componente mini sparkline
-    const Sparkline = ({ data, color }) => {
-        if (!data || data.length < 2) return null;
-
-        const min = Math.min(...data);
-        const max = Math.max(...data);
-        const range = max - min || 1;
-        const width = 100;
-        const height = 30;
-
-        const points = data.map((price, i) => {
-            const x = (i / (data.length - 1)) * width;
-            const y = height - ((price - min) / range) * height;
-            return `${x},${y}`;
-        }).join(' ');
-
-        return (
-            <div className="crypto-sparkline">
-                <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-                    <polyline
-                        fill="none"
-                        stroke={color === 'success' ? '#22c55e' : (color === 'danger' ? '#ef4444' : '#3b82f6')}
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        points={points}
-                    />
-                </svg>
-            </div>
-        );
-    };
-
     return (
         <motion.div
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            className={`crypto-card glass-card signal-${opportunityInfo.color}`}
+            className={`crypto-card glass-card ${opportunityInfo.level.toLowerCase()}-signal`}
         >
             <div className="crypto-card-glow" />
 
@@ -93,7 +38,7 @@ function CryptoCard({ crypto }) {
                         <Activity className="crypto-icon" size={16} />
                     </div>
                     <div>
-                        <span className="crypto-name">{(symbol || '').replace('USDC', '').replace('USDT', '')}</span>
+                        <span className="crypto-name">{symbol.replace('USDC', '').replace('USDT', '')}</span>
                         <div className={`crypto-change ${isPositive ? 'positive' : 'negative'}`}>
                             {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                             <span>{isPositive ? '+' : ''}{priceChangePercent?.toFixed(2)}%</span>
@@ -111,7 +56,6 @@ function CryptoCard({ crypto }) {
                 <div className="price-display">
                     <span className="price-label">PRECIO ACTUAL</span>
                     <span className="price-value">${formatPrice(price)}</span>
-                    <Sparkline data={crypto.priceHistory} color={isPositive ? 'success' : 'danger'} />
                 </div>
 
                 <div className="score-viz">

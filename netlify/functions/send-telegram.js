@@ -61,7 +61,7 @@ export async function handler(event, context) {
 
         for (const sig of signals) {
             // Safe helpers
-            const esc = (t) => String(t).replace(/([_\*\[\]\(\)~`>#\+\-=\|\{\}\.\!])/g, '\\$1');
+            const esc = (t) => String(t).replace(/([[\]_*()~`>#+\-=|{}.!])/g, '\\$1');
 
             let icon = '🟢';
             if (sig.type === 'SELL' || sig.signal === 'UPPER_EXTREMITY') icon = '🔴';

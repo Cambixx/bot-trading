@@ -259,6 +259,61 @@
     font-family: 'JetBrains Mono', monospace;
 }
 
+.exec-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.exec-metric {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.exec-orderbook {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 0.6rem;
+}
+
+.ob-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.35rem;
+}
+
+.ob-rows {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.ob-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-text-secondary);
+}
+
+.ob-row.bid span:first-child {
+    color: var(--color-accent);
+}
+
+.ob-row.ask span:first-child {
+    color: var(--color-danger);
+}
+
 .cap-value small {
     font-size: 0.65rem;
     opacity: 0.6;

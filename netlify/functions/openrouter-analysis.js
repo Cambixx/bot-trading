@@ -99,14 +99,14 @@ export async function handler(event, context) {
             };
         }
 
-        // Standardizing on DeepSeek for stability and reliability
+        // Fast, low-cost defaults (override via env vars in Netlify)
         const AI_MODELS = {
-            DEFAULT: 'deepseek/deepseek-chat',
-            REASONING: 'deepseek/deepseek-chat',
-            FAST: 'deepseek/deepseek-chat',
-            FREE: 'deepseek/deepseek-chat',
-            NEXUS: 'deepseek/deepseek-chat',
-            ORACLE: 'deepseek/deepseek-chat'
+            DEFAULT: process.env.OPENROUTER_DEFAULT_MODEL || 'google/gemini-flash-1.5',
+            REASONING: process.env.OPENROUTER_REASONING_MODEL || process.env.OPENROUTER_DEFAULT_MODEL || 'google/gemini-flash-1.5',
+            FAST: process.env.OPENROUTER_FAST_MODEL || process.env.OPENROUTER_DEFAULT_MODEL || 'google/gemini-flash-1.5',
+            FREE: process.env.OPENROUTER_FREE_MODEL || 'google/gemini-2.0-flash-exp:free',
+            NEXUS: process.env.OPENROUTER_NEXUS_MODEL || process.env.OPENROUTER_DEFAULT_MODEL || 'google/gemini-flash-1.5',
+            ORACLE: process.env.OPENROUTER_ORACLE_MODEL || process.env.OPENROUTER_FAST_MODEL || process.env.OPENROUTER_DEFAULT_MODEL || 'google/gemini-flash-1.5'
         };
 
         const { mode, symbol, price, indicators, patterns, reasons, warnings, regime, levels, riskReward, marketData: globalMarketData, tradingMode } = inputData;
@@ -343,10 +343,11 @@ export async function handler(event, context) {
                 body: JSON.stringify({
                     "model": selectedModel,
                     "messages": [
-                        { "role": "system", "content": "Eres un asistente de trading experto. Responde siempre en formato JSON puro." },
+                        { "role": "system", "content": "Responde SOLO JSON válido. No inventes datos. Si falta un dato, usa null." },
                         { "role": "user", "content": prompt }
                     ],
-                    "temperature": 0.3
+                    "temperature": 0.2,
+                    "max_tokens": 900
                 })
             });
 

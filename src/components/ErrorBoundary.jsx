@@ -12,9 +12,11 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, info) {
     this.setState({ error, info });
-    try { window._lastError = error; } catch (e) {}
-    if (window && typeof window._diagnosticAppend === 'function') {
-      try { window._diagnosticAppend('[ErrorBoundary] ' + (error && error.message)); } catch (e) {}
+    if (typeof window !== 'undefined') {
+      window._lastError = error;
+      if (typeof window._diagnosticAppend === 'function') {
+        window._diagnosticAppend('[ErrorBoundary] ' + (error && error.message));
+      }
     }
   }
 

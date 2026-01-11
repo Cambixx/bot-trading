@@ -149,7 +149,7 @@
         justify-content: center;
         background: transparent;
         border: none;
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
         padding: 0.5rem;
         margin-left: auto;
         /* Push to right */

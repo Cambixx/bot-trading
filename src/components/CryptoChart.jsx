@@ -10,9 +10,7 @@ import {
     calculateBollingerBands,
     findSupportResistance,
     isHammer,
-    isBullishEngulfing,
-    detectOrderBlocks,
-    findFairValueGaps
+    isBullishEngulfing
 } from '../services/technicalAnalysis';
 import './CryptoChart.css';
 
@@ -41,7 +39,7 @@ function CryptoChart({ symbol, signal }) {
 
     // Overlay toggles
     const [showOverlays, setShowOverlays] = useState({
-        ema: true, bb: false, sr: true, signal: true, smc: true // New SMC toggle
+        ema: true, bb: false, sr: true, signal: true,
     });
 
     // Panel visibility (CSS-based, not chart recreation)
@@ -260,56 +258,6 @@ function CryptoChart({ symbol, signal }) {
                     setPrediction(null);
                 }
 
-                // SMC Analysis (Order Blocks & FVG)
-                if (showOverlays.smc) {
-                    const obs = detectOrderBlocks(klines);
-                    // const fvgs = findFairValueGaps(klines); // Future implementation
-
-                    // Draw Bullish OBs
-                    if (obs.bullish) {
-                        obs.bullish.forEach(ob => {
-                            const l1 = s.candles.createPriceLine({
-                                price: ob.top,
-                                color: 'rgba(34, 197, 94, 0.6)',
-                                lineWidth: 1,
-                                lineStyle: 0,
-                                axisLabelVisible: false,
-                                title: 'Bull OB'
-                            });
-                            const l2 = s.candles.createPriceLine({
-                                price: ob.bottom,
-                                color: 'rgba(34, 197, 94, 0.3)',
-                                lineWidth: 1,
-                                lineStyle: 2,
-                                axisLabelVisible: false
-                            });
-                            smcLinesRef.current.push(l1, l2);
-                        });
-                    }
-
-                    // Draw Bearish OBs
-                    if (obs.bearish) {
-                        obs.bearish.forEach(ob => {
-                            const l1 = s.candles.createPriceLine({
-                                price: ob.bottom,
-                                color: 'rgba(239, 68, 68, 0.6)',
-                                lineWidth: 1,
-                                lineStyle: 0,
-                                axisLabelVisible: false,
-                                title: 'Bear OB'
-                            });
-                            const l2 = s.candles.createPriceLine({
-                                price: ob.top,
-                                color: 'rgba(239, 68, 68, 0.3)',
-                                lineWidth: 1,
-                                lineStyle: 2,
-                                axisLabelVisible: false
-                            });
-                            smcLinesRef.current.push(l1, l2);
-                        });
-                    }
-                }
-
                 charts.main.timeScale().fitContent();
                 setLoading(false);
             } catch (err) {
@@ -324,23 +272,7 @@ function CryptoChart({ symbol, signal }) {
         fetchData();
 
         return () => { cancelled = true; };
-    }, [symbol, timeframe, signal, showOverlays]); // Added showOverlays to trigger redraw
-
-    // Ref for SMC lines to support cleanup
-    const smcLinesRef = useRef([]);
-
-    // Cleanup effect (runs before next effect or unmount)
-    useEffect(() => {
-        return () => {
-            const s = seriesRef.current;
-            if (s && s.candles && smcLinesRef.current.length > 0) {
-                smcLinesRef.current.forEach(line => {
-                    try { s.candles.removePriceLine(line); } catch (e) { }
-                });
-            }
-        };
-    }, []);
-
+    }, [symbol, timeframe, signal]);
 
     const toggleOverlay = (key) => setShowOverlays(prev => ({ ...prev, [key]: !prev[key] }));
 
@@ -349,7 +281,7 @@ function CryptoChart({ symbol, signal }) {
             {/* Header */}
             <div className="chart-header">
                 <div className="chart-title-section">
-                    <span className="chart-title">{(symbol || '').replace('USDC', '')}</span>
+                    <span className="chart-title">{symbol.replace('USDC', '')}</span>
                     {currentPrice && <span className="chart-price">${formatPrice(currentPrice)}</span>}
                 </div>
                 <div className="chart-controls">
@@ -365,7 +297,6 @@ function CryptoChart({ symbol, signal }) {
                 <button className={`toggle-btn ${showOverlays.ema ? 'active' : ''}`} onClick={() => toggleOverlay('ema')}>EMA</button>
                 <button className={`toggle-btn ${showOverlays.bb ? 'active' : ''}`} onClick={() => toggleOverlay('bb')}>BB</button>
                 <button className={`toggle-btn ${showOverlays.sr ? 'active' : ''}`} onClick={() => toggleOverlay('sr')}>S/R</button>
-                <button className={`toggle-btn ${showOverlays.smc ? 'active' : ''}`} onClick={() => toggleOverlay('smc')}>SMC</button>
                 {signal && <button className={`toggle-btn ${showOverlays.signal ? 'active' : ''}`} onClick={() => toggleOverlay('signal')}>Signal</button>}
                 <span className="toggle-separator">|</span>
                 <button className={`toggle-btn ${showRSI ? 'active' : ''}`} onClick={() => setShowRSI(!showRSI)}>RSI</button>

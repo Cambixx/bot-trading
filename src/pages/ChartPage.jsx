@@ -39,7 +39,7 @@ function ChartPage({ symbols, selectedChartSymbol, setSelectedChartSymbol, signa
                     >
                         {symbols.map(s => (
                             <option key={s} value={s} style={{ background: '#1a1a2e' }}>
-                                {(s || '').replace('USDC', '')}
+                                {s.replace('USDC', '')}
                             </option>
                         ))}
                     </select>

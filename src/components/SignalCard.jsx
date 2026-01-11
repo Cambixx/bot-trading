@@ -1,89 +1,12 @@
-import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Clock, Target, Shield, AlertTriangle, Sparkles, ArrowRight, Zap, Calculator, Copy, Layers, Activity, Check, Euro } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Target, Shield, Sparkles, ArrowRight, Zap } from 'lucide-react';
 import { format } from 'date-fns';
-import { calculatePosition } from '../services/riskCalculator';
 import './SignalCard.css';
-
-const RiskCalculator = ({ entry, stopLoss, isSell }) => {
-    const [capital, setCapital] = useState(3400); // Default €3,400
-    const [riskPct, setRiskPct] = useState(1.5);  // Default 1.5%
-
-    const calculation = useMemo(() =>
-        calculatePosition({
-            capital,
-            riskPercent: riskPct / 100,
-            entryPrice: entry,
-            stopLossPrice: stopLoss,
-            maxLeverage: 1, // Spot only
-            eurToUsd: 1.08
-        }), [capital, riskPct, entry, stopLoss]
-    );
-
-    const riskAmountEUR = capital * (riskPct / 100);
-
-    return (
-        <div className="risk-calc-box sniper-mode">
-            <div className="calc-header">
-                <div className="calc-label">
-                    <Calculator size={14} />
-                    <span>POSITION SIZING</span>
-                    {calculation.isCapped && (
-                        <span className="capped-badge" title="Position capped at capital limit">CAPPED</span>
-                    )}
-                </div>
-                <div className="quick-risk-btns">
-                    {[1, 1.5, 2].map(pct => (
-                        <button
-                            key={pct}
-                            onClick={() => setRiskPct(pct)}
-                            className={`q-btn ${riskPct === pct ? 'active' : ''}`}
-                        >
-                            {pct}%
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <div className="calc-input-row">
-                <div className="risk-input-group">
-                    <Euro size={14} className="cur-icon" />
-                    <input
-                        type="number"
-                        value={capital}
-                        onChange={(e) => setCapital(Number(e.target.value))}
-                        className="risk-input capital-input"
-                        step="100"
-                    />
-                </div>
-                <div className="calc-results-sniper">
-                    <div className="res-item primary">
-                        <span className="lbl">SIZE</span>
-                        <span className="val">{calculation.positionSize < 0.01 ? calculation.positionSize.toFixed(6) : calculation.positionSize.toFixed(4)}</span>
-                    </div>
-                    <div className="res-item">
-                        <span className="lbl">VALUE</span>
-                        <span className="val">€{calculation.positionValueEUR.toLocaleString()}</span>
-                    </div>
-                    <div className="res-item risk-highlight">
-                        <span className="lbl">RISK</span>
-                        <span className="val">€{riskAmountEUR.toFixed(0)}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="sl-info-bar">
-                <span>SL Distance: {calculation.slPercent}%</span>
-                <span className={`direction-tag ${calculation.direction.toLowerCase()}`}>
-                    {calculation.direction}
-                </span>
-            </div>
-        </div>
-    );
-};
+import { useSettings } from '../context/SettingsContext';
 
 function SignalCard({ signal, onSimulateBuy }) {
     const isSell = signal.type === 'SELL';
+    const { riskPerTrade } = useSettings();
 
     const confidenceColor = {
         HIGH: 'success',
@@ -105,43 +28,18 @@ function SignalCard({ signal, onSimulateBuy }) {
         return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
-    const ConfluenceTracker = ({ subscores }) => {
-        if (!subscores) return null;
-
-        const factors = [
-            { id: 'trend', label: 'TREND', score: subscores.trend || 0, icon: <TrendingUp size={10} /> },
-            { id: 'momentum', label: 'MOM', score: subscores.momentum || 0, icon: <Zap size={10} /> },
-            { id: 'volume', label: 'VOL', score: subscores.volume || 0, icon: <Activity size={10} /> },
-            { id: 'smc', label: 'SMC', score: (subscores.smc || 0) * 100, icon: <Target size={10} /> }
-        ];
-
-        return (
-            <div className="confluence-tracker-modern">
-                {factors.map(f => (
-                    <div key={f.id} className="confluence-item-modern" title={`${f.label}: ${f.score}%`}>
-                        <div className="conf-icon-box">{f.icon}</div>
-                        <div className="conf-data">
-                            <div className="conf-bar-modern">
-                                <motion.div
-                                    className="conf-bar-fill-modern"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${Math.min(100, f.score)}%` }}
-                                    transition={{ duration: 1, delay: 0.8 }}
-                                />
-                            </div>
-                            <span className="conf-label-modern">{f.label}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
+    const formatCompact = (value) => {
+        if (value == null || !Number.isFinite(value)) return '-';
+        return Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value);
     };
 
-    const copyToClipboard = (text, type) => {
-        navigator.clipboard.writeText(text);
-        // We could add a local state for toast/feedback here if needed
-        console.log(`Copied ${type}: ${text}`);
-    };
+    const entry = signal?.levels?.entry ?? signal.price;
+    const stopLoss = signal?.levels?.stopLoss;
+    const positionValue = Number.isFinite(riskPerTrade) ? riskPerTrade : null;
+    const quantity = Number.isFinite(positionValue) && Number.isFinite(entry) && entry > 0 ? (positionValue / entry) : null;
+    const riskAtSL = Number.isFinite(quantity) && Number.isFinite(entry) && Number.isFinite(stopLoss)
+        ? Math.abs(entry - stopLoss) * quantity
+        : null;
 
     return (
         <motion.div
@@ -154,7 +52,7 @@ function SignalCard({ signal, onSimulateBuy }) {
                 <div className="symbol-meta">
                     <div className="symbol-badge-box">
                         <Zap size={14} className="zap-icon" />
-                        <span className="symbol-name">{(signal.symbol || '').replace('USDC', '').replace('USDT', '')}</span>
+                        <span className="symbol-name">{signal.symbol.replace('USDC', '').replace('USDT', '')}</span>
                     </div>
                     <div className={`trade-type-badge ${isSell ? 'sell' : 'buy'}`}>
                         {isSell ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
@@ -169,12 +67,9 @@ function SignalCard({ signal, onSimulateBuy }) {
             </div>
 
             <div className="signal-main-premium">
-                <div className="price-stack" onClick={() => copyToClipboard(signal.price, 'Price')} title="Click to copy price">
+                <div className="price-stack">
                     <span className="stack-label">{isSell ? 'SELL AT' : 'BUY AT'}</span>
-                    <div className="stack-value-wrapper">
-                        <span className="stack-value">${formatPrice(signal.price)}</span>
-                        <Copy size={12} className="copy-hint" />
-                    </div>
+                    <span className="stack-value">${formatPrice(signal.price)}</span>
                 </div>
 
                 <div className="score-viz-small">
@@ -184,8 +79,6 @@ function SignalCard({ signal, onSimulateBuy }) {
                 </div>
             </div>
 
-            <ConfluenceTracker subscores={signal.subscores} />
-
             <div className="levels-grid-premium">
                 <div className="level-box tp">
                     <div className="level-header">
@@ -193,32 +86,25 @@ function SignalCard({ signal, onSimulateBuy }) {
                         <span>TAKE PROFIT</span>
                     </div>
                     <div className="level-values">
-                        <div className="tp-val" onClick={() => copyToClipboard(signal.levels.takeProfit1, 'TP1')}>
+                        <div className="tp-val">
                             <span className="val-label">TP1</span>
-                            <div className="val-num-wrapper">
-                                <span className="val-num">${formatPrice(signal.levels.takeProfit1)}</span>
-                                <Copy size={10} className="copy-hint-mini" />
-                            </div>
+                            <span className="val-num">${formatPrice(signal.levels.takeProfit1)}</span>
                         </div>
-                        <div className="tp-val" onClick={() => copyToClipboard(signal.levels.takeProfit2, 'TP2')}>
-                            <span className="val-label">TP2</span>
-                            <div className="val-num-wrapper">
+                        {signal.levels.takeProfit2 != null && (
+                            <div className="tp-val">
+                                <span className="val-label">TP2</span>
                                 <span className="val-num">${formatPrice(signal.levels.takeProfit2)}</span>
-                                <Copy size={10} className="copy-hint-mini" />
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="level-box sl" onClick={() => copyToClipboard(signal.levels.stopLoss, 'SL')}>
+                <div className="level-box sl">
                     <div className="level-header">
                         <Shield size={14} />
                         <span>STOP LOSS</span>
                     </div>
-                    <div className="sl-val-wrapper">
-                        <span className="sl-val">${formatPrice(signal.levels.stopLoss)}</span>
-                        <Copy size={10} className="copy-hint-mini" />
-                    </div>
+                    <span className="sl-val">${formatPrice(signal.levels.stopLoss)}</span>
                 </div>
             </div>
 
@@ -228,19 +114,13 @@ function SignalCard({ signal, onSimulateBuy }) {
                     <div className="ind-pill">RSI: {signal.indicators.rsi}</div>
                     <div className="ind-pill">ADX: {signal.indicators.adx || '-'}</div>
                     <div className="ind-pill">RR: {signal.riskReward}</div>
-                    {(signal.indicators.rvol > 1.5 || (signal.subscores && signal.subscores.volume > 70)) && (
-                        <div className={`ind-pill ${signal.indicators.rvol > 3 ? 'high-vol-alert' : ''}`} style={{ borderColor: 'var(--color-warning)', color: 'var(--color-warning)' }}>
-                            RVOL: {signal.indicators.rvol || 'High'}
-                        </div>
-                    )}
+                    <div className="ind-pill">OBI: {signal.execution?.obi != null ? signal.execution.obi : '-'}</div>
+                    <div className="ind-pill">Spread: {signal.execution?.spreadBps != null ? `${signal.execution.spreadBps}bps` : '-'}</div>
+                    <div className="ind-pill">Depth: {signal.execution?.depthNotionalTopN != null ? `$${formatCompact(signal.execution.depthNotionalTopN)}` : '-'}</div>
+                    <div className="ind-pill">CVD20: {signal.indicators.cvd20 != null ? formatCompact(signal.indicators.cvd20) : '-'}</div>
+                    <div className="ind-pill">Pos: {quantity != null ? formatCompact(quantity) : '-'} </div>
+                    <div className="ind-pill">Risk@SL: {riskAtSL != null ? `$${formatCompact(riskAtSL)}` : '-'}</div>
                 </div>
-
-                {/* Risk Calculator (Professional Edge) */}
-                <RiskCalculator
-                    entry={signal.price}
-                    stopLoss={signal.levels.stopLoss}
-                    isSell={isSell}
-                />
 
                 {/* AI Insights if available */}
                 {signal.aiAnalysis && (

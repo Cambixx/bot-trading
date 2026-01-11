@@ -2,8 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Thermometer, Zap, AlertTriangle, ShieldCheck, Wallet, TrendingUp, Target } from 'lucide-react';
 import './ExecutiveDashboard.css';
+import { useSettings } from '../context/SettingsContext';
 
-const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol, capital = 3400, signalCount = 0 }) => {
+const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, topSignal, btcVol, capital = 3400, signalCount = 0 }) => {
+    const { riskPerTrade } = useSettings();
+
     // Determine overall risk status
     const getRiskStatus = () => {
         // PRIORITY: Real-time Volatility Override
@@ -37,6 +40,36 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol, cap
     const dxy = nexusData?.macro?.dxy;
     const btcPrice = btcVol?.price || 0;
     const btcChange = btcVol?.priceChangePercent || 0;
+
+    const formatCompact = (value) => {
+        if (value == null || !Number.isFinite(value)) return '--';
+        return Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+    };
+
+    const formatPrice = (price) => {
+        if (price == null || !Number.isFinite(price)) return '--';
+        if (price < 0.0001) return price.toFixed(8);
+        if (price < 0.01) return price.toFixed(6);
+        if (price < 1) return price.toFixed(4);
+        return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const topSignalEntry = topSignal?.levels?.entry ?? topSignal?.price ?? null;
+    const topSignalSL = topSignal?.levels?.stopLoss ?? null;
+    const positionValue = Number.isFinite(riskPerTrade) ? riskPerTrade : null;
+    const topSignalQty = Number.isFinite(positionValue) && Number.isFinite(topSignalEntry) && topSignalEntry > 0
+        ? (positionValue / topSignalEntry)
+        : null;
+    const topSignalRiskAtSL = Number.isFinite(topSignalQty) && Number.isFinite(topSignalEntry) && Number.isFinite(topSignalSL)
+        ? Math.abs(topSignalEntry - topSignalSL) * topSignalQty
+        : null;
+    const topSignalSlPct = Number.isFinite(topSignalEntry) && Number.isFinite(topSignalSL)
+        ? (Math.abs(topSignalEntry - topSignalSL) / topSignalEntry) * 100
+        : null;
+
+    const topBook = topSignal?.execution?.bookTop ?? null;
+    const topBids = topBook?.bids ?? [];
+    const topAsks = topBook?.asks ?? [];
 
     const hasData = nexusData || oracleData || topOpportunity || (btcPrice > 0);
 
@@ -123,7 +156,7 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol, cap
                     <div className="capital-item">
                         <Target size={14} />
                         <span className="cap-label">RISK/TRADE</span>
-                        <span className="cap-value">€{Math.round(capital * 0.015)} <small>(1.5%)</small></span>
+                        <span className="cap-value">{Number.isFinite(riskPerTrade) ? `$${formatCompact(riskPerTrade)}` : '--'}</span>
                     </div>
                     <div className="capital-item">
                         <TrendingUp size={14} />
@@ -178,6 +211,71 @@ const ExecutiveDashboard = ({ nexusData, oracleData, topOpportunity, btcVol, cap
                             </div>
                         )}
                     </div>
+
+                    {topSignal && (
+                        <div className="exec-card" style={{ borderLeft: '3px solid rgba(0, 180, 255, 0.6)' }}>
+                            <div className="card-label">
+                                Execution Quality
+                                <Thermometer size={14} />
+                            </div>
+                            <div className="card-value">{topSignal.symbol}</div>
+                            <div className="exec-metrics">
+                                <div className="exec-metric"><span>OBI</span><span>{topSignal.execution?.obi != null ? topSignal.execution.obi : '--'}</span></div>
+                                <div className="exec-metric"><span>CVD20</span><span>{topSignal.indicators?.cvd20 != null ? formatCompact(topSignal.indicators.cvd20) : '--'}</span></div>
+                                <div className="exec-metric"><span>Spread</span><span>{topSignal.execution?.spreadBps != null ? `${topSignal.execution.spreadBps}bps` : '--'}</span></div>
+                                <div className="exec-metric"><span>Depth</span><span>{topSignal.execution?.depthNotionalTopN != null ? `$${formatCompact(topSignal.execution.depthNotionalTopN)}` : '--'}</span></div>
+                            </div>
+                            {(topBids.length > 0 || topAsks.length > 0) && (
+                                <div className="exec-orderbook">
+                                    <div className="ob-side">
+                                        <div className="ob-title">Bids</div>
+                                        <div className="ob-rows">
+                                            {topBids.map(([p, q], idx) => (
+                                                <div className="ob-row bid" key={`b-${idx}`}>
+                                                    <span>{formatPrice(p)}</span>
+                                                    <span>{formatCompact(q)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="ob-side">
+                                        <div className="ob-title">Asks</div>
+                                        <div className="ob-rows">
+                                            {topAsks.map(([p, q], idx) => (
+                                                <div className="ob-row ask" key={`a-${idx}`}>
+                                                    <span>{formatPrice(p)}</span>
+                                                    <span>{formatCompact(q)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {topSignal && (
+                        <div className="exec-card" style={{ borderLeft: '3px solid rgba(0, 255, 157, 0.6)' }}>
+                            <div className="card-label">
+                                Position Plan
+                                <Target size={14} />
+                            </div>
+                            <div className="card-value">
+                                {topSignal.type === 'SELL' ? 'SHORT' : 'LONG'} {topSignal.symbol}
+                            </div>
+                            <div className="exec-metrics">
+                                <div className="exec-metric"><span>Entry</span><span>${formatPrice(topSignalEntry)}</span></div>
+                                <div className="exec-metric"><span>SL</span><span>${formatPrice(topSignalSL)}</span></div>
+                                <div className="exec-metric"><span>SL%</span><span>{topSignalSlPct != null ? `${topSignalSlPct.toFixed(2)}%` : '--'}</span></div>
+                                <div className="exec-metric"><span>RR</span><span>{topSignal.riskReward != null ? topSignal.riskReward : '--'}</span></div>
+                                <div className="exec-metric"><span>Qty</span><span>{topSignalQty != null ? formatCompact(topSignalQty) : '--'}</span></div>
+                                <div className="exec-metric"><span>Risk@SL</span><span>{topSignalRiskAtSL != null ? `$${formatCompact(topSignalRiskAtSL)}` : '--'}</span></div>
+                            </div>
+                            <div className="card-sub" style={{ marginTop: '0.35rem' }}>
+                                Score {topSignal.score} • {topSignal.confidence}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </motion.div>

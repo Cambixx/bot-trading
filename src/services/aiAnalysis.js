@@ -11,7 +11,7 @@ import macroService from './macroService';
 const isDevelopment = (import.meta.env && import.meta.env.DEV) || (typeof window !== 'undefined' && window.location.hostname === 'localhost');
 
 // La API key debe estar en .env (nunca hardcodeada)
-const OPENROUTER_API_KEY = (import.meta.env && import.meta.env.VITE_OPENROUTER_API_KEY) || process.env.VITE_OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = (import.meta.env && import.meta.env.VITE_OPENROUTER_API_KEY) || '';
 
 const AI_MODELS = {
     // Standardizing on DeepSeek for stability and performance

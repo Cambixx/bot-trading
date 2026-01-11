@@ -27,17 +27,14 @@ import { enrichSignalWithAI } from './services/aiAnalysis';
 import { usePaperTrading } from './hooks/usePaperTrading';
 import { useSignalHistory } from './hooks/useSignalHistory';
 
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
+const REFRESH_INTERVAL = 20 * 60 * 1000; // 20 minutos
 const STORAGE_KEY = 'trading_bot_symbols';
-
-// AI Cache to prevent redundant calls
-const aiAnalysisCache = new Map();
-const AI_CACHE_TTL = 30 * 60 * 1000; // 30 minutos de caché para análisis de IA
 
 // Función para enviar señales a Telegram via Netlify Function
 async function sendToTelegram(signals) {
   try {
-    // URL de la Netlify Function (Nueva función dedicada para envío directo)
+    // URL de la Netlify Function (endpoint dedicado para notificaciones desde cliente)
+    // URL relativa para que el proxy de Vite (en dev) o Netlify (en prod) maneje la ruta
     const functionUrl = '/.netlify/functions/send-telegram';
 
     const response = await fetch(functionUrl, {
@@ -49,15 +46,21 @@ async function sendToTelegram(signals) {
       body: JSON.stringify({ signals })
     });
 
+    const contentType = response.headers.get('content-type') || '';
     if (response.ok) {
-      const result = await response.json();
-      console.log('📱 Telegram notificación enviada:', result);
-      return { success: true, result };
-    } else {
+      if (contentType.includes('application/json')) {
+        const result = await response.json();
+        console.log('📱 Telegram notificación enviada:', result);
+        return { success: true, result };
+      }
       const text = await response.text();
-      console.warn('Telegram notification failed:', text);
+      console.warn('Telegram notification non-JSON response:', text);
       return { success: false, error: text };
     }
+
+    const text = await response.text();
+    console.warn('Telegram notification failed:', text);
+    return { success: false, error: text };
   } catch (error) {
     console.error('Error enviando a Telegram:', error);
     return { success: false, error: error.message };
@@ -91,7 +94,6 @@ const StatusBar = React.memo(({ loading, error, lastUpdate, tradingMode, isRefre
           {tradingMode === 'BALANCED' && 'Equilibrado'}
           {tradingMode === 'RISKY' && 'Arriesgado'}
           {tradingMode === 'SCALPING' && 'Scalping'}
-          {tradingMode === 'SNIPER' && '🎯 Sniper'}
         </span>
       </div>
     </div>
@@ -241,14 +243,15 @@ function AppContent() {
         if (candleData15m[symbol]?.data) multiTimeframeAnalysis[symbol]['15m'] = performTechnicalAnalysis(candleData15m[symbol].data);
       }
 
-      // 4.1 Generar señales ML (LuxAlgo) - Improved detection
+      const orderBooks = await binanceService.getMultipleOrderBooks(symbols, 20);
+
+      // 4.1 Generar señales ML (LuxAlgo)
       const calculatedMlSignals = [];
       for (const symbol of symbols) {
         if (candleData[symbol]?.data && candleData[symbol].data.length >= 30) {
           const closes = candleData[symbol].data.map(c => c.close);
           const mlResult = calculateMLMovingAverage(closes, { window: 30, forecast: 2 });
-          // Lower threshold to 30 to include "Early Warning" signals
-          if (mlResult && mlResult.signal && mlResult.score >= 30) {
+          if (mlResult) {
             calculatedMlSignals.push({
               symbol,
               ...mlResult,
@@ -259,32 +262,27 @@ function AppContent() {
       }
       setMlSignals(calculatedMlSignals);
 
-      // 4.2 Notificar nuevas señales ML por Telegram (only EXTREMITY signals with high score)
+      // 4.2 Notificar nuevas señales ML por Telegram
       if (calculatedMlSignals.length > 0 && mlSignals.length > 0) {
         const newMlSignals = calculatedMlSignals.filter(newSig =>
-          newSig.signalMode === 'EXTREMITY' && // Only strong extremity signals
-          newSig.score >= 60 && // High quality only
           !mlSignals.some(oldSig => oldSig.symbol === newSig.symbol && oldSig.signal === newSig.signal)
         );
 
         if (newMlSignals.length > 0) {
           const telegramPayload = newMlSignals.map(s => {
-            let type = 'NEUTRAL';
-            if (s.signal === 'UPPER_EXTREMITY' || s.signal === 'APPROACHING_UPPER' || s.signal === 'MEAN_REVERSION_DOWN') type = 'SELL';
-            else type = 'BUY';
-
-            // Determine signal type for message text
-            let signalType = 'NEUTRAL ⚪';
-            if (type === 'SELL') signalType = 'SHORT 🔴';
-            else signalType = 'LONG 🟢';
+            const signalCode = typeof s.signal === 'string' ? s.signal : 'UNKNOWN';
+            const directionLabel = signalCode === 'UPPER_EXTREMITY'
+              ? 'SHORT 🔴'
+              : signalCode === 'LOWER_EXTREMITY'
+                ? 'LONG 🟢'
+                : 'WATCH';
+            const signalLabel = signalCode.replace(/_/g, ' ');
 
             return {
               symbol: s.symbol,
               price: s.price,
-              score: s.score,
-              type: type, // Critical for icon selection
-              signal: s.signal, // Critical for logic
-              reasons: [`🤖 ML ${s.signalMode}: ${signalType} | RSI: ${s.rsi} | Quality: ${s.signalQuality}`],
+              score: 99, // High score to show Green icon
+              reasons: [`🤖 ML Alert: ${directionLabel} (${signalLabel})`],
               levels: { entry: s.price }
             };
           });
@@ -293,9 +291,9 @@ function AppContent() {
       }
 
       // 5. Generar señales
-      let generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis, tradingMode);
+      let generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis, tradingMode, orderBooks);
 
-      // 5.1 Enriquecer señales con IA (Optimizado con Caché)
+      // 5.1 Enriquecer señales con IA
       const highQualitySignals = generatedSignals
         .filter(s => s.score >= 60)
         .sort((a, b) => b.score - a.score)
@@ -305,44 +303,14 @@ function AppContent() {
         console.log(`Enriqueciendo ${highQualitySignals.length} señales con IA...`);
         for (const signal of highQualitySignals) {
           try {
-            // Verificar caché
-            const cacheKey = `${signal.symbol}-${signal.type}`;
-            const cachedAnalysis = aiAnalysisCache.get(cacheKey);
-            const now = Date.now();
-
-            if (cachedAnalysis && (now - cachedAnalysis.timestamp < AI_CACHE_TTL)) {
-              console.log(`💡 Usando análisis IA en caché para ${signal.symbol}`);
-              const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
-              if (index !== -1) {
-                generatedSignals[index] = {
-                  ...signal,
-                  aiAnalysis: cachedAnalysis.data,
-                  aiEnriched: true
-                };
-              }
-              continue; // Saltar llamada a API
-            }
-
-            // Si no hay caché, llamar a API
             const enrichedSignal = await enrichSignalWithAI(signal, {
               rsi: signal.indicators.rsi,
               macd: signal.indicators.macd
             }, tradingMode);
-
-            // Guardar en caché si fue exitoso
-            if (enrichedSignal.aiEnriched && enrichedSignal.aiAnalysis) {
-              aiAnalysisCache.set(cacheKey, {
-                timestamp: now,
-                data: enrichedSignal.aiAnalysis
-              });
-            }
-
             const index = generatedSignals.findIndex(s => s.symbol === signal.symbol);
             if (index !== -1) generatedSignals[index] = enrichedSignal;
-
-            // Rate limiting manual
             if (highQualitySignals.indexOf(signal) < highQualitySignals.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 2000)); // Aumentado a 2s por seguridad
+              await new Promise(resolve => setTimeout(resolve, 1000));
             }
           } catch (err) {
             console.error(`Error enriching signal for ${signal.symbol}: `, err);
@@ -365,7 +333,7 @@ function AppContent() {
             // 1. RSI (Oscilador)
             if (ind.rsi < 30) longScore += 30;      // Sobreventa -> Long
             else if (ind.rsi < 45) longScore += 15;
-
+            
             if (ind.rsi > 70) shortScore += 30;     // Sobrecompra -> Short
             else if (ind.rsi > 55) shortScore += 15;
 
@@ -404,8 +372,7 @@ function AppContent() {
             low24h: data.low24h,
             analysis: analysis,
             opportunity: opportunityScore,
-            opportunityType: opportunityType, // 'LONG' | 'SHORT'
-            priceHistory: candleData[symbol]?.data ? candleData[symbol].data.slice(-24).map(c => c.close) : []
+            opportunityType: opportunityType // 'LONG' | 'SHORT'
           };
         }
       });
