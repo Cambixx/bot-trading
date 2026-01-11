@@ -60,12 +60,13 @@ async function fetchWithTimeout(url, timeout = 15000) {
 
 // ==================== BINANCE DATA ====================
 
-async function getKlines(symbol, interval = '1h', limit = 300) {
+async function getKlines(symbol, interval = '60m', limit = 300) {
   const url = `${MEXC_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
   const response = await fetchWithTimeout(url);
 
   if (!response.ok) {
-    throw new Error(`Binance HTTP error: ${response.status}`);
+    const errorBody = await response.text().catch(() => 'No body');
+    throw new Error(`MEXC HTTP error: ${response.status} - ${errorBody}`);
   }
 
   const json = await response.json();
@@ -105,7 +106,10 @@ async function getOrderBookDepth(symbol, limit = 20) {
 async function getAllTickers24h() {
   const url = `${MEXC_API}/ticker/24hr`;
   const response = await fetchWithTimeout(url);
-  if (!response.ok) throw new Error(`Binance HTTP error: ${response.status}`);
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => 'No body');
+    throw new Error(`MEXC HTTP error: ${response.status} - ${errorBody}`);
+  }
   const json = await response.json();
   if (!Array.isArray(json)) throw new Error('Binance: Invalid ticker/24hr response');
   return json;
@@ -707,7 +711,7 @@ async function runAnalysis() {
 
   for (const symbol of topSymbols) {
     try {
-      const candles = await getKlines(symbol, '1h', 300);
+      const candles = await getKlines(symbol, '60m', 300);
       const orderBook = await getOrderBookDepth(symbol, 20);
       const ticker24h = tickersBySymbol.get(symbol) || null;
       analyzed++;
