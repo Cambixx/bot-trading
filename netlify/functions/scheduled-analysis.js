@@ -19,8 +19,8 @@ const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEP
 const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.25;
 const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 8;
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
-const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 25;
-const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 20000000;
+const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 15;
+const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 5000000;
 
 // Migrado a MEXC para evitar bloques territoriales (HTTP 451) de Binance en Netlify
 const MEXC_API = 'https://api.mexc.com/api/v3';
@@ -115,22 +115,43 @@ async function getAllTickers24h() {
   return json;
 }
 
-function getTopSymbolsByQuoteVolume(tickers, quoteAsset, limit, minQuoteVolume) {
-  const stableBases = new Set(['USDT', 'USDC', 'BUSD', 'TUSD', 'FDUSD', 'USDP', 'DAI']);
+/**
+ * Selecciona los mejores símbolos para trading basándose en una combinación
+ * de Volumen (liquidez) y Volatilidad (oportunidad de movimiento).
+ */
+function getTopSymbolsByOpportunity(tickers, quoteAsset, limit, minQuoteVolume) {
+  const stableBases = new Set(['USDT', 'USDC', 'BUSD', 'FDUSD', 'DAI', 'EUR', 'GBP']);
 
   const candidates = tickers
     .filter(t => typeof t.symbol === 'string' && t.symbol.endsWith(quoteAsset))
     .filter(t => {
       const base = t.symbol.slice(0, -quoteAsset.length);
-      if (!base) return false;
-      if (stableBases.has(base)) return false;
+      if (!base || stableBases.has(base)) return false;
+      // Filtrar tokens apalancados o basura
       if (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BULL') || base.endsWith('BEAR')) return false;
+
       const quoteVol = Number(t.quoteVolume);
       return Number.isFinite(quoteVol) && quoteVol >= minQuoteVolume;
     })
-    .sort((a, b) => Number(b.quoteVolume) - Number(a.quoteVolume))
+    .map(t => {
+      const high = Number(t.highPrice || 0);
+      const low = Number(t.lowPrice || 0);
+      const last = Number(t.lastPrice || 1);
+      const volume = Number(t.quoteVolume || 0);
+
+      // Volatilidad 24h en %
+      const volatility = low > 0 ? ((high - low) / low) * 100 : 0;
+
+      // Score de Oportunidad: combina volumen (logarítmico para no sesgar solo a BTC)
+      // con la volatilidad. Buscamos monedas líquidas que se estén moviendo.
+      const opportunityScore = (Math.log10(volume) * 0.4) + (volatility * 0.6);
+
+      return { symbol: t.symbol, opportunityScore };
+    })
+    .sort((a, b) => b.opportunityScore - a.opportunityScore)
     .slice(0, limit);
 
+  console.log(`Smart Selection: Top ${candidates.length} coins selected based on Opportunity Score.`);
   return candidates.map(t => t.symbol);
 }
 
@@ -704,7 +725,7 @@ async function runAnalysis() {
   }
 
   const topSymbols = tickers24h.length > 0
-    ? getTopSymbolsByQuoteVolume(tickers24h, QUOTE_ASSET, MAX_SYMBOLS, MIN_QUOTE_VOL_24H)
+    ? getTopSymbolsByOpportunity(tickers24h, QUOTE_ASSET, MAX_SYMBOLS, MIN_QUOTE_VOL_24H)
     : FALLBACK_SYMBOLS;
 
   const tickersBySymbol = new Map(tickers24h.map(t => [t.symbol, t]));

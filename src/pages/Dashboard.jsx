@@ -4,13 +4,8 @@ import { TrendingUp, Zap } from 'lucide-react';
 import CryptoSelector from '../components/CryptoSelector';
 import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
-import MLSignalSection from '../components/MLSignalSection';
-import MarketOracle from '../components/MarketOracle'; // Import Oracle
-import NexusHub from '../components/NexusHub'; // Import Nexus
-import TradeDoctor from '../components/TradeDoctor'; // Import Doctor
-import PatternHunter from '../components/PatternHunter'; // Import Hunter
-import ExecutiveDashboard from '../components/ExecutiveDashboard'; // Import Executive Dashboard
-import BacktestDashboard from '../components/BacktestDashboard'; // Import Backtest Dashboard
+import ExecutiveDashboard from '../components/ExecutiveDashboard';
+import ToolsHub from '../components/ToolsHub';
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
 
 const containerVariants = {
@@ -198,35 +193,13 @@ function Dashboard({
                         variants={containerVariants}
                         style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
                     >
-                        <motion.div variants={itemVariants}>
-                            <MarketOracle onDataUpdate={setOracleData} />
-                        </motion.div>
-
-                        <motion.div variants={itemVariants}>
-                            <NexusHub onDataUpdate={setNexusData} />
-                        </motion.div>
-
-                        <motion.div variants={itemVariants}>
-                            <MLSignalSection signals={mlSignals} loading={loading} />
-                        </motion.div>
-
-                        <motion.div
-                            variants={itemVariants}
-                            style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}
-                        >
-                            <TradeDoctor defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                        </motion.div>
-
-                        <motion.div
-                            variants={itemVariants}
-                            style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}
-                        >
-                            <PatternHunter defaultSymbol={symbols[0]} availableSymbols={symbols} />
-                        </motion.div>
-
-                        <motion.div variants={itemVariants}>
-                            <BacktestDashboard symbols={symbols} />
-                        </motion.div>
+                        <ToolsHub
+                            symbols={symbols}
+                            mlSignals={mlSignals}
+                            loading={loading}
+                            setOracleData={setOracleData}
+                            setNexusData={setNexusData}
+                        />
                     </motion.div>
                 )}
             </AnimatePresence>
