@@ -13,7 +13,7 @@ console.log('--- MEXC Advanced Analysis Module Loaded ---');
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 80;
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70;
 const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 10;
 const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 50000;
 const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.25;
@@ -21,6 +21,10 @@ const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 15;
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 5000000;
+const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
+const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 60;
+
+const lastNotifiedAtByKey = new Map();
 
 // Migrado a MEXC para evitar bloques territoriales (HTTP 451) de Binance en Netlify
 const MEXC_API = 'https://api.mexc.com/api/v3';
@@ -58,7 +62,7 @@ async function fetchWithTimeout(url, timeout = 15000) {
   }
 }
 
-// ==================== BINANCE DATA ====================
+// ==================== MARKET DATA ====================
 
 async function getKlines(symbol, interval = '60m', limit = 300) {
   const url = `${MEXC_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
@@ -71,7 +75,7 @@ async function getKlines(symbol, interval = '60m', limit = 300) {
 
   const json = await response.json();
   if (!Array.isArray(json)) {
-    throw new Error(`Binance: Invalid klines response for ${symbol}`);
+    throw new Error(`MEXC: Invalid klines response for ${symbol}`);
   }
 
   return json.map(candle => ({
@@ -82,10 +86,9 @@ async function getKlines(symbol, interval = '60m', limit = 300) {
     close: Number(candle[4]),
     volume: Number(candle[5]),
     quoteVolume: Number(candle[7]),
-    // MEXC no siempre provee estos campos, usamos fallbacks
     trades: candle[8] ? Number(candle[8]) : 0,
-    takerBuyBaseVolume: candle[9] ? Number(candle[9]) : Number(candle[5]) * 0.5,
-    takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : Number(candle[7]) * 0.5
+    takerBuyBaseVolume: candle[9] ? Number(candle[9]) : null,
+    takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : null
   }));
 }
 
@@ -111,7 +114,7 @@ async function getAllTickers24h() {
     throw new Error(`MEXC HTTP error: ${response.status} - ${errorBody}`);
   }
   const json = await response.json();
-  if (!Array.isArray(json)) throw new Error('Binance: Invalid ticker/24hr response');
+  if (!Array.isArray(json)) throw new Error('MEXC: Invalid ticker/24hr response');
   return json;
 }
 
@@ -136,7 +139,6 @@ function getTopSymbolsByOpportunity(tickers, quoteAsset, limit, minQuoteVolume) 
     .map(t => {
       const high = Number(t.highPrice || 0);
       const low = Number(t.lowPrice || 0);
-      const last = Number(t.lastPrice || 1);
       const volume = Number(t.quoteVolume || 0);
 
       // Volatilidad 24h en %
@@ -195,18 +197,52 @@ function calculateEMA(data, period) {
   return ema;
 }
 
+function calculateEMASeries(data, period) {
+  if (!Array.isArray(data) || data.length === 0) return null;
+  if (data.length < period) return null;
+
+  const multiplier = 2 / (period + 1);
+  const result = new Array(data.length).fill(null);
+
+  let ema = data.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  result[period - 1] = ema;
+
+  for (let i = period; i < data.length; i++) {
+    ema = (data[i] - ema) * multiplier + ema;
+    result[i] = ema;
+  }
+
+  return result;
+}
+
 function calculateMACD(closes) {
-  const ema12 = calculateEMA(closes, 12);
-  const ema26 = calculateEMA(closes, 26);
+  const ema12Series = calculateEMASeries(closes, 12);
+  const ema26Series = calculateEMASeries(closes, 26);
+  if (!ema12Series || !ema26Series) return null;
 
-  if (ema12 === null || ema26 === null) return null;
+  const macdSeries = closes.map((_, idx) => {
+    const e12 = ema12Series[idx];
+    const e26 = ema26Series[idx];
+    if (e12 === null || e26 === null) return null;
+    return e12 - e26;
+  });
 
-  const macdLine = ema12 - ema26;
+  const macdValues = macdSeries.filter(v => v !== null);
+  if (macdValues.length < 9) return null;
+
+  const signalSeriesCompact = calculateEMASeries(macdValues, 9);
+  if (!signalSeriesCompact) return null;
+  const signal = signalSeriesCompact[signalSeriesCompact.length - 1];
+  const macd = macdValues[macdValues.length - 1];
+  if (!Number.isFinite(macd) || !Number.isFinite(signal)) return null;
+
+  const histogram = macd - signal;
 
   return {
-    value: macdLine,
-    bullish: macdLine > 0,
-    histogram: macdLine
+    macd,
+    signal,
+    histogram,
+    bullish: histogram > 0
   };
 }
 
@@ -422,9 +458,12 @@ function detectDivergences(candles, closes) {
 }
 
 function generateSignal(symbol, candles, orderBook, ticker24h) {
-  if (!candles || candles.length < 200) return null; // Need 200 for EMA200
+  if (!candles || candles.length < 201) return null;
 
-  const closes = candles.map(c => c.close);
+  const closedCandles = candles.slice(0, -1);
+  if (closedCandles.length < 200) return null;
+
+  const closes = closedCandles.map(c => c.close);
   const currentPrice = closes[closes.length - 1];
   const prevPrice = closes[closes.length - 2];
 
@@ -441,20 +480,20 @@ function generateSignal(symbol, candles, orderBook, ticker24h) {
   const ema200 = calculateEMA(closes, 200); // Trend Filter
 
   // Advanced indicators
-  const volumeSMA = calculateVolumeSMA(candles, 20);
-  const currentVolume = candles[candles.length - 1].volume;
-  const divergences = detectDivergences(candles, closes);
-  const atr = calculateATR(candles, 14);
+  const volumeSMA = calculateVolumeSMA(closedCandles, 20);
+  const currentVolume = closedCandles[closedCandles.length - 1].volume;
+  const divergences = detectDivergences(closedCandles, closes);
+  const atr = calculateATR(closedCandles, 14);
   const atrPercent = atr ? (atr / currentPrice) * 100 : null;
   if (!atrPercent || atrPercent < MIN_ATR_PCT || atrPercent > MAX_ATR_PCT) return null;
 
-  const vwap = calculateVWAP(candles, 50);
+  const vwap = calculateVWAP(closedCandles, 50);
   const vwapDistancePct = vwap ? ((currentPrice - vwap) / vwap) * 100 : null;
 
-  const lastCandle = candles[candles.length - 1];
-  const takerBuyBase = Number(lastCandle.takerBuyBaseVolume);
+  const lastCandle = closedCandles[closedCandles.length - 1];
+  const takerBuyBase = Number.isFinite(lastCandle.takerBuyBaseVolume) ? lastCandle.takerBuyBaseVolume : null;
   const totalBaseVol = Number(lastCandle.volume);
-  const buyRatio = totalBaseVol > 0 ? takerBuyBase / totalBaseVol : null;
+  const buyRatio = takerBuyBase !== null && totalBaseVol > 0 ? takerBuyBase / totalBaseVol : null;
   const deltaRatio = buyRatio === null ? null : (2 * buyRatio - 1);
 
   if (!rsi || !macd || !bb || !ema200) return null;
@@ -577,7 +616,7 @@ function generateSignal(symbol, candles, orderBook, ticker24h) {
   }
 
   // Apply Volume Multiplier
-  score = Math.round(score * volumeMultiplier);
+  score = Math.max(0, Math.min(100, Math.round(score * volumeMultiplier)));
   if (volumeRatio > 1.5) reasons.push(`📊 Alto Volumen x${volumeRatio.toFixed(1)}`);
 
   // Final Decision Threshold
@@ -627,10 +666,11 @@ async function sendTelegramNotification(signals) {
   let message = '🔔 *ANÁLISIS TÉCNICO AUTOMÁTICO* 🔔\n';
   message += `_${escapeMarkdownV2('Volumen • Order Book • RSI • MACD • Bollinger')}_\n\n`;
 
-  // Sort signals by RSI extremity (most extreme first)
   const sortedSignals = [...signals].sort((a, b) => {
-    const extremityA = Math.abs(a.rsiValue - 50);
-    const extremityB = Math.abs(b.rsiValue - 50);
+    const rsiA = Number.isFinite(a.rsiValue) ? a.rsiValue : 50;
+    const rsiB = Number.isFinite(b.rsiValue) ? b.rsiValue : 50;
+    const extremityA = Math.abs(rsiA - 50);
+    const extremityB = Math.abs(rsiB - 50);
     return extremityB - extremityA;
   });
 
@@ -643,17 +683,36 @@ async function sendTelegramNotification(signals) {
 
     message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| ${escapeMarkdownV2(typeEmoji)}\n`;
 
-    const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
-    const changeIcon = parseFloat(sig.priceChange1h) >= 0 ? '📈' : '📉';
-    const changeSign = parseFloat(sig.priceChange1h) >= 0 ? '+' : '';
-    message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange1h)}% \\(1h\\)\n`;
+    if (Number.isFinite(sig.price)) {
+      const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
+      if (sig.priceChange1h !== undefined && sig.priceChange1h !== null) {
+        const ch = Number(sig.priceChange1h);
+        const changeIcon = Number.isFinite(ch) && ch >= 0 ? '📈' : '📉';
+        const changeSign = Number.isFinite(ch) && ch >= 0 ? '+' : '';
+        message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange1h)}% \\(1h\\)\n`;
+      } else {
+        message += `💰 $${escapeMarkdownV2(priceStr)}\n`;
+      }
+    }
 
-    message += `📊 RSI: ${escapeMarkdownV2(sig.rsi)} \\| BB: ${escapeMarkdownV2(sig.bbPosition)} \\| ${sig.macdBullish ? 'MACD\\+' : 'MACD\\-'}\n`;
-    message += `📚 Spread: ${escapeMarkdownV2(String(sig.spreadBps))} bps \\| OBI: ${escapeMarkdownV2(String(sig.obi))} \\| Depth: ${escapeMarkdownV2(String(sig.depthQuoteTopN))}\n`;
-    if (sig.atrPercent !== null) {
+    if (sig.rsi !== undefined || sig.bbPosition !== undefined || sig.macdBullish !== undefined) {
+      const rsiText = sig.rsi !== undefined && sig.rsi !== null ? String(sig.rsi) : 'N/A';
+      const bbText = sig.bbPosition !== undefined && sig.bbPosition !== null ? String(sig.bbPosition) : 'N/A';
+      const macdText = sig.macdBullish === true ? 'MACD\\+' : sig.macdBullish === false ? 'MACD\\-' : 'MACD\\?';
+      message += `📊 RSI: ${escapeMarkdownV2(rsiText)} \\| BB: ${escapeMarkdownV2(bbText)} \\| ${macdText}\n`;
+    }
+
+    if (sig.spreadBps !== undefined || sig.obi !== undefined || sig.depthQuoteTopN !== undefined) {
+      const spreadText = sig.spreadBps !== undefined && sig.spreadBps !== null ? String(sig.spreadBps) : 'N/A';
+      const obiText = sig.obi !== undefined && sig.obi !== null ? String(sig.obi) : 'N/A';
+      const depthText = sig.depthQuoteTopN !== undefined && sig.depthQuoteTopN !== null ? String(sig.depthQuoteTopN) : 'N/A';
+      message += `📚 Spread: ${escapeMarkdownV2(spreadText)} bps \\| OBI: ${escapeMarkdownV2(obiText)} \\| Depth: ${escapeMarkdownV2(depthText)}\n`;
+    }
+
+    if (sig.atrPercent !== undefined && sig.atrPercent !== null) {
       message += `🌀 ATR: ${escapeMarkdownV2(String(sig.atrPercent))}%`;
-      if (sig.vwapDistancePct !== null) message += ` \\| VWAPΔ: ${escapeMarkdownV2(String(sig.vwapDistancePct))}%`;
-      if (sig.deltaRatio !== null) message += ` \\| Δ: ${escapeMarkdownV2(String(sig.deltaRatio))}`;
+      if (sig.vwapDistancePct !== undefined && sig.vwapDistancePct !== null) message += ` \\| VWAPΔ: ${escapeMarkdownV2(String(sig.vwapDistancePct))}%`;
+      if (sig.deltaRatio !== undefined && sig.deltaRatio !== null) message += ` \\| Δ: ${escapeMarkdownV2(String(sig.deltaRatio))}`;
       message += `\n`;
     }
 
@@ -663,10 +722,12 @@ async function sendTelegramNotification(signals) {
     if (sig.volumeConfirmed) badges.push('📊VOL');
     const badgeStr = badges.length > 0 ? ` ${badges.join(' ')}` : '';
 
-    message += `🎯 Score: ${escapeMarkdownV2(String(sig.score))}/100${escapeMarkdownV2(badgeStr)}\n`;
+    const scoreText = Number.isFinite(sig.score) ? String(sig.score) : 'N/A';
+    message += `🎯 Score: ${escapeMarkdownV2(scoreText)}/100${escapeMarkdownV2(badgeStr)}\n`;
 
-    if (sig.reasons.length > 0) {
-      message += `💡 _${escapeMarkdownV2(sig.reasons[0])}_\n`;
+    const reasonsArr = Array.isArray(sig.reasons) ? sig.reasons : [];
+    if (reasonsArr.length > 0) {
+      message += `💡 _${escapeMarkdownV2(reasonsArr[0])}_\n`;
     }
 
     message += `───────────────────\n`;
@@ -739,8 +800,18 @@ async function runAnalysis() {
 
       const signal = generateSignal(symbol, candles, orderBook, ticker24h);
       if (signal) {
-        signals.push(signal);
-        console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
+        const reasonKey = Array.isArray(signal.reasons) && signal.reasons.length > 0 ? signal.reasons[0] : '';
+        const key = `${signal.symbol}:${signal.type}:${reasonKey}`;
+        const now = Date.now();
+        const lastTs = lastNotifiedAtByKey.get(key) || 0;
+        const cooldownMs = Math.max(0, ALERT_COOLDOWN_MIN) * 60 * 1000;
+        if (cooldownMs > 0 && now - lastTs < cooldownMs) {
+          console.log(`Signal skipped (cooldown): ${symbol} - Type: ${signal.type}`);
+        } else {
+          lastNotifiedAtByKey.set(key, now);
+          signals.push(signal);
+          console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
+        }
       }
 
       await new Promise(r => setTimeout(r, 150));
@@ -773,10 +844,57 @@ async function runAnalysis() {
 
 // ==================== SCHEDULED HANDLER (Netlify) ====================
 
-// This is the scheduled handler that runs every 20 minutes
 const scheduledHandler = async (event) => {
-  const result = await runAnalysis();
+  const method = event && event.httpMethod ? String(event.httpMethod).toUpperCase() : '';
 
+  if (method) {
+    if (method !== 'POST') {
+      return {
+        statusCode: 405,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: false, error: 'Method not allowed' })
+      };
+    }
+
+    const headers = event.headers || {};
+    const clientSecret = headers['x-notify-secret'] || headers['X-Notify-Secret'] || headers['x-notify-Secret'] || '';
+    if (NOTIFY_SECRET && clientSecret !== NOTIFY_SECRET) {
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: false, error: 'Unauthorized' })
+      };
+    }
+
+    let payload = null;
+    try {
+      payload = event.body ? JSON.parse(event.body) : null;
+    } catch {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: false, error: 'Invalid JSON body' })
+      };
+    }
+
+    const incomingSignals = payload && Array.isArray(payload.signals) ? payload.signals : null;
+    if (!incomingSignals || incomingSignals.length === 0) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: false, error: 'No signals provided' })
+      };
+    }
+
+    const telegram = await sendTelegramNotification(incomingSignals);
+    return {
+      statusCode: telegram.success ? 200 : 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ success: telegram.success, telegram })
+    };
+  }
+
+  const result = await runAnalysis();
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
