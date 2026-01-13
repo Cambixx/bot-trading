@@ -845,20 +845,11 @@ async function runAnalysis() {
 // ==================== SCHEDULED HANDLER (Netlify) ====================
 
 const scheduledHandler = async (event) => {
-  const method = event && event.httpMethod ? String(event.httpMethod).toUpperCase() : '';
+  const method = event && (event.httpMethod || event.method) ? String(event.httpMethod || event.method).toUpperCase() : '';
 
   if (method) {
     const headers = event.headers || {};
     const nfEvent = (headers['x-nf-event'] || headers['X-NF-Event'] || headers['x-nf-Event'] || '').toString().toLowerCase();
-    if (nfEvent === 'schedule') {
-      const result = await runAnalysis();
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result)
-      };
-    }
-
     if (method === 'OPTIONS') {
       return {
         statusCode: 200,
@@ -880,23 +871,43 @@ const scheduledHandler = async (event) => {
       };
     }
 
+    let payload = null;
+    if (event.body) {
+      try {
+        payload = JSON.parse(event.body);
+      } catch {
+        return {
+          statusCode: 400,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ success: false, error: 'Invalid JSON body' })
+        };
+      }
+    }
+
+    const nextRun = payload && typeof payload.next_run === 'string' ? payload.next_run : null;
+    const isSchedule = nfEvent === 'schedule' || nextRun !== null;
+
+    console.log('scheduled-analysis invocation:', {
+      method,
+      isSchedule,
+      nfEvent: nfEvent || null
+    });
+
+    if (isSchedule) {
+      const result = await runAnalysis();
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(result)
+      };
+    }
+
     const clientSecret = headers['x-notify-secret'] || headers['X-Notify-Secret'] || headers['x-notify-Secret'] || '';
     if (NOTIFY_SECRET && clientSecret !== NOTIFY_SECRET) {
       return {
         statusCode: 401,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ success: false, error: 'Unauthorized' })
-      };
-    }
-
-    let payload = null;
-    try {
-      payload = event.body ? JSON.parse(event.body) : null;
-    } catch {
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ success: false, error: 'Invalid JSON body' })
       };
     }
 
