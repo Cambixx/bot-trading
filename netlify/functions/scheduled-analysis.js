@@ -848,6 +848,30 @@ const scheduledHandler = async (event) => {
   const method = event && event.httpMethod ? String(event.httpMethod).toUpperCase() : '';
 
   if (method) {
+    const headers = event.headers || {};
+    const nfEvent = (headers['x-nf-event'] || headers['X-NF-Event'] || headers['x-nf-Event'] || '').toString().toLowerCase();
+    if (nfEvent === 'schedule') {
+      const result = await runAnalysis();
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(result)
+      };
+    }
+
+    if (method === 'OPTIONS') {
+      return {
+        statusCode: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type, x-notify-secret',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Content-Type': 'application/json'
+        },
+        body: ''
+      };
+    }
+
     if (method !== 'POST') {
       return {
         statusCode: 405,
@@ -856,7 +880,6 @@ const scheduledHandler = async (event) => {
       };
     }
 
-    const headers = event.headers || {};
     const clientSecret = headers['x-notify-secret'] || headers['X-Notify-Secret'] || headers['x-notify-Secret'] || '';
     if (NOTIFY_SECRET && clientSecret !== NOTIFY_SECRET) {
       return {
