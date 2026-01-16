@@ -1,9 +1,8 @@
 /**
- * Netlify Scheduled Function - Advanced Day Trading Analysis (15m)
- * Optimized for aggressive day trading with 15m timeframe
- * Uses MEXC Public API for OHLCV + Order Book metrics
- * Implements: RSI, MACD, Bollinger, ATR, VWAP, Stochastic, CCI, EMAs, Pivot Points, S/R, Candle Patterns
- * Calculates TP/SL levels and provides detailed entry signals with multi-timeframe confirmation
+ * Netlify Scheduled Function - Advanced Background Trading Analysis
+ * Uses Binance Public API for OHLCV + Order Book metrics.
+ * Implements real indicators: RSI, MACD, Bollinger Bands, ATR, VWAP, Order Book Imbalance.
+ * Runs on a schedule to detect fewer, stronger alerts and send Telegram notifications.
  */
 
 import { schedule } from "@netlify/functions";
@@ -14,11 +13,11 @@ console.log('--- MEXC Advanced Analysis Module Loaded ---');
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 60;
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 70;
 const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 10;
 const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 50000;
-const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.5;
-const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 5;
+const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.25;
+const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 8;
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 15;
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 5000000;
@@ -330,324 +329,6 @@ function calculateOrderBookMetrics(orderBook) {
   return { spreadBps, depthQuoteTopN, obi };
 }
 
-function calculateStochastic(candles, kPeriod = 14, dPeriod = 3, smoothK = 3) {
-  if (!candles || candles.length < kPeriod + smoothK) return null;
-
-  const lows = candles.map(c => c.low);
-  const highs = candles.map(c => c.high);
-  const closes = candles.map(c => c.close);
-
-  const rawKValues = [];
-  for (let i = kPeriod - 1; i < closes.length; i++) {
-    const recentHigh = Math.max(...highs.slice(i - kPeriod + 1, i + 1));
-    const recentLow = Math.min(...lows.slice(i - kPeriod + 1, i + 1));
-    const rawK = recentHigh - recentLow === 0 ? 50 : ((closes[i] - recentLow) / (recentHigh - recentLow)) * 100;
-    rawKValues.push(rawK);
-  }
-
-  if (rawKValues.length < smoothK + dPeriod) return null;
-
-  const kValues = [];
-  for (let i = smoothK - 1; i < rawKValues.length; i++) {
-    const smoothedK = rawKValues.slice(i - smoothK + 1, i + 1).reduce((a, b) => a + b, 0) / smoothK;
-    kValues.push(smoothedK);
-  }
-
-  const dValues = [];
-  for (let i = dPeriod - 1; i < kValues.length; i++) {
-    const d = kValues.slice(i - dPeriod + 1, i + 1).reduce((a, b) => a + b, 0) / dPeriod;
-    dValues.push(d);
-  }
-
-  const lastK = kValues[kValues.length - 1];
-  const lastD = dValues[dValues.length - 1];
-  const prevK = kValues.length > 1 ? kValues[kValues.length - 2] : lastK;
-  const prevD = dValues.length > 1 ? dValues[dValues.length - 2] : lastD;
-
-  return {
-    k: lastK,
-    d: lastD,
-    prevK,
-    prevD,
-    oversold: lastK < 20 && lastD < 20,
-    overbought: lastK > 80 && lastD > 80,
-    bullishCross: prevK <= prevD && lastK > lastD,
-    bearishCross: prevK >= prevD && lastK < lastD,
-    bullish: lastK > lastD
-  };
-}
-
-function calculateCCI(candles, period = 20) {
-  if (!candles || candles.length < period) return null;
-
-  const typicalPrices = candles.map(c => (c.high + c.low + c.close) / 3);
-  const sma = typicalPrices.slice(-period).reduce((a, b) => a + b, 0) / period;
-  const meanDeviation = typicalPrices.slice(-period).reduce((sum, tp) => sum + Math.abs(tp - sma), 0) / period;
-
-  if (meanDeviation === 0) return null;
-
-  const currentCCI = (typicalPrices[typicalPrices.length - 1] - sma) / (0.015 * meanDeviation);
-
-  return {
-    value: currentCCI,
-    oversold: currentCCI < -100,
-    overbought: currentCCI > 100,
-    bullish: currentCCI > 0
-  };
-}
-
-function calculateEMASeries(data, period) {
-  if (!Array.isArray(data) || data.length === 0) return null;
-  if (data.length < period) return null;
-
-  const multiplier = 2 / (period + 1);
-  const result = new Array(data.length).fill(null);
-
-  let ema = data.slice(0, period).reduce((a, b) => a + b, 0) / period;
-  result[period - 1] = ema;
-
-  for (let i = period; i < data.length; i++) {
-    ema = (data[i] - ema) * multiplier + ema;
-    result[i] = ema;
-  }
-
-  return result;
-}
-
-function calculateMACDCrossover(candles) {
-  if (!candles || candles.length < 26 + 9) return null;
-
-  const closes = candles.map(c => c.close);
-  const ema12Series = calculateEMASeries(closes, 12);
-  const ema26Series = calculateEMASeries(closes, 26);
-
-  if (!ema12Series || !ema26Series) return null;
-
-  const macdSeries = closes.map((_, idx) => {
-    const e12 = ema12Series[idx];
-    const e26 = ema26Series[idx];
-    if (e12 === null || e26 === null) return null;
-    return e12 - e26;
-  });
-
-  const macdValues = macdSeries.filter(v => v !== null);
-  if (macdValues.length < 9) return null;
-
-  const signalSeries = calculateEMASeries(macdValues, 9);
-  if (!signalSeries) return null;
-
-  const lastMACD = macdValues[macdValues.length - 1];
-  const lastSignal = signalSeries[signalSeries.length - 1];
-  const prevMACD = macdValues.length > 1 ? macdValues[macdValues.length - 2] : lastMACD;
-  const prevSignal = signalSeries.length > 1 ? signalSeries[signalSeries.length - 2] : lastSignal;
-
-  return {
-    macd: lastMACD,
-    signal: lastSignal,
-    histogram: lastMACD - lastSignal,
-    bullish: lastMACD > lastSignal,
-    bullishCross: prevMACD <= prevSignal && lastMACD > lastSignal,
-    bearishCross: prevMACD >= prevSignal && lastMACD < lastSignal
-  };
-}
-
-function calculateEMACrossover(candles, fastPeriod = 9, slowPeriod = 21) {
-  if (!candles || candles.length < slowPeriod + 1) return null;
-
-  const closes = candles.map(c => c.close);
-  const emaFast = calculateEMA(closes, fastPeriod);
-  const emaSlow = calculateEMA(closes, slowPeriod);
-  const emaFastPrev = calculateEMA(closes.slice(0, -1), fastPeriod);
-  const emaSlowPrev = calculateEMA(closes.slice(0, -1), slowPeriod);
-
-  if (emaFast === null || emaSlow === null || emaFastPrev === null || emaSlowPrev === null) return null;
-
-  return {
-    emaFast,
-    emaSlow,
-    bullish: emaFast > emaSlow,
-    bullishCross: emaFastPrev <= emaSlowPrev && emaFast > emaSlow,
-    bearishCross: emaFastPrev >= emaSlowPrev && emaFast < emaSlow
-  };
-}
-
-async function getDailyKlines(symbol, limit = 2) {
-  const url = `${MEXC_API}/klines?symbol=${symbol}&interval=1d&limit=${limit}`;
-  const response = await fetchWithTimeout(url);
-  if (!response.ok) return null;
-
-  const json = await response.json();
-  if (!Array.isArray(json)) return null;
-
-  return json.map(candle => ({
-    time: Number(candle[0]),
-    open: Number(candle[1]),
-    high: Number(candle[2]),
-    low: Number(candle[3]),
-    close: Number(candle[4]),
-    volume: Number(candle[5])
-  }));
-}
-
-function calculatePivotPoints(dailyCandle) {
-  if (!dailyCandle) return null;
-
-  const { high, low, close } = dailyCandle;
-  const pp = (high + low + close) / 3;
-  const r1 = (2 * pp) - low;
-  const s1 = (2 * pp) - high;
-  const r2 = pp + (high - low);
-  const s2 = pp - (high - low);
-
-  return { pp, r1, r2, s1, s2 };
-}
-
-function calculateDynamicLevels(candles, lookback = 20) {
-  if (!candles || candles.length < lookback) return null;
-
-  const recent = candles.slice(-lookback);
-  const highs = recent.map(c => c.high);
-  const lows = recent.map(c => c.low);
-  const close = candles[candles.length - 1].close;
-
-  const highest = Math.max(...highs);
-  const lowest = Math.min(...lows);
-
-  const resistanceLevels = [];
-  const supportLevels = [];
-
-  highs.forEach(h => {
-    if (h > close && !resistanceLevels.includes(h)) resistanceLevels.push(h);
-  });
-
-  lows.forEach(l => {
-    if (l < close && !supportLevels.includes(l)) supportLevels.push(l);
-  });
-
-  resistanceLevels.sort((a, b) => a - close);
-  supportLevels.sort((a, b) => close - a);
-
-  const nearestResistance = resistanceLevels[0] || null;
-  const nearestSupport = supportLevels[0] || null;
-
-  const resistanceDistance = nearestResistance ? ((nearestResistance - close) / close) * 100 : null;
-  const supportDistance = nearestSupport ? ((close - nearestSupport) / close) * 100 : null;
-
-  return {
-    highest,
-    lowest,
-    nearestResistance,
-    nearestSupport,
-    resistanceDistance,
-    supportDistance,
-    isNearResistance: resistanceDistance !== null && resistanceDistance < 1,
-    isNearSupport: supportDistance !== null && supportDistance < 1
-  };
-}
-
-function detectCandlePatterns(candles) {
-  if (!candles || candles.length < 3) return [];
-
-  const last = candles[candles.length - 1];
-  const prev = candles[candles.length - 2];
-  const prev2 = candles[candles.length - 3];
-
-  const bodySize = Math.abs(last.close - last.open);
-  const upperWick = last.high - Math.max(last.open, last.close);
-  const lowerWick = Math.min(last.open, last.close) - last.low;
-  const totalRange = last.high - last.low;
-  const prevBodySize = Math.abs(prev.close - prev.open);
-
-  const patterns = [];
-
-  const isBullish = last.close > last.open;
-  const isBearish = last.close < last.open;
-
-  if (totalRange === 0) return patterns;
-
-  const bodyRatio = bodySize / totalRange;
-  const upperWickRatio = upperWick / totalRange;
-  const lowerWickRatio = lowerWick / totalRange;
-
-  if (lowerWickRatio > 0.6 && bodyRatio < 0.3 && upperWickRatio < 0.1) {
-    patterns.push({ name: 'Hammer', type: 'BULLISH', strength: 20 });
-  }
-
-  if (upperWickRatio > 0.6 && bodyRatio < 0.3 && lowerWickRatio < 0.1) {
-    patterns.push({ name: 'Shooting Star', type: 'BEARISH', strength: 20 });
-  }
-
-  if (isBullish && prev.isBearish && last.open <= prev.low && last.close >= prev.open) {
-    patterns.push({ name: 'Bullish Engulfing', type: 'BULLISH', strength: 25 });
-  }
-
-  if (isBearish && prev.isBullish && last.open >= prev.high && last.close <= prev.open) {
-    patterns.push({ name: 'Bearish Engulfing', type: 'BEARISH', strength: 25 });
-  }
-
-  if (bodyRatio < 0.05 && upperWickRatio < 0.1 && lowerWickRatio < 0.1) {
-    patterns.push({ name: 'Doji', type: 'NEUTRAL', strength: 10 });
-  }
-
-  if (prev2.close > prev2.open && prev.close < prev.open && last.close > last.open &&
-      last.close > (prev.open + prev.close) / 2 && prev2.close > prev.open) {
-    patterns.push({ name: 'Morning Star', type: 'BULLISH', strength: 30 });
-  }
-
-  if (prev2.close < prev2.open && prev.close > prev.open && last.close < last.open &&
-      last.close < (prev.open + prev.close) / 2 && prev2.close < prev.open) {
-    patterns.push({ name: 'Evening Star', type: 'BEARISH', strength: 30 });
-  }
-
-  if (last.isBullish && prev.isBullish && prev2.isBullish &&
-      last.close > prev.close && prev.close > prev2.close &&
-      last.close > last.open && prev.close > prev.open && prev2.close > prev2.open) {
-    patterns.push({ name: 'Three White Soldiers', type: 'BULLISH', strength: 35 });
-  }
-
-  if (last.isBearish && prev.isBearish && prev2.isBearish &&
-      last.close < prev.close && prev.close < prev2.close &&
-      last.close < last.open && prev.close < prev.open && prev2.close < prev2.open) {
-    patterns.push({ name: 'Three Black Crows', type: 'BEARISH', strength: 35 });
-  }
-
-  return patterns;
-}
-
-function calculateTPSL(price, atr, signalType, riskMultiplier = 1.5) {
-  if (!atr || !price) return null;
-
-  const slDistance = atr * riskMultiplier;
-  const tp1Distance = atr * 2;
-  const tp2Distance = atr * 3;
-
-  let sl, tp1, tp2;
-
-  if (signalType === 'BUY') {
-    sl = price - slDistance;
-    tp1 = price + tp1Distance;
-    tp2 = price + tp2Distance;
-  } else {
-    sl = price + slDistance;
-    tp1 = price - tp1Distance;
-    tp2 = price - tp2Distance;
-  }
-
-  const riskReward1 = Math.abs(tp1Distance / slDistance);
-  const riskReward2 = Math.abs(tp2Distance / slDistance);
-
-  return {
-    sl,
-    tp1,
-    tp2,
-    slPercent: ((sl - price) / price * 100).toFixed(2),
-    tp1Percent: ((tp1 - price) / price * 100).toFixed(2),
-    tp2Percent: ((tp2 - price) / price * 100).toFixed(2),
-    riskReward1: riskReward1.toFixed(1),
-    riskReward2: riskReward2.toFixed(1)
-  };
-}
-
 // ==================== SIGNAL GENERATION ====================
 
 // Detect regular and hidden RSI divergences
@@ -776,11 +457,11 @@ function detectDivergences(candles, closes) {
   return divergences;
 }
 
-async function generateSignal(symbol, candles, orderBook, ticker24h) {
-  if (!candles || candles.length < 101) return null;
+function generateSignal(symbol, candles, orderBook, ticker24h) {
+  if (!candles || candles.length < 201) return null;
 
   const closedCandles = candles.slice(0, -1);
-  if (closedCandles.length < 100) return null;
+  if (closedCandles.length < 200) return null;
 
   const closes = closedCandles.map(c => c.close);
   const currentPrice = closes[closes.length - 1];
@@ -792,28 +473,13 @@ async function generateSignal(symbol, candles, orderBook, ticker24h) {
   if (obMetrics.spreadBps > MAX_SPREAD_BPS) return null;
   if (obMetrics.depthQuoteTopN < MIN_DEPTH_QUOTE) return null;
 
+  // Core indicators
   const rsi = calculateRSI(closes, 14);
-  const macd = calculateMACDCrossover(closedCandles);
-  const bb = calculateBollingerBands(closes, 15, 2);
-  const ema200 = calculateEMA(closes, 200);
+  const macd = calculateMACD(closes);
+  const bb = calculateBollingerBands(closes, 20, 2);
+  const ema200 = calculateEMA(closes, 200); // Trend Filter
 
-  const stochastic = calculateStochastic(closedCandles, 14, 3, 3);
-  const cci = calculateCCI(closedCandles, 20);
-  const emaCrossover = calculateEMACrossover(closedCandles, 9, 21);
-  
-  let pivotPoints = null;
-  try {
-    const dailyKlines = await getDailyKlines(symbol, 2);
-    if (dailyKlines && dailyKlines.length > 0) {
-      pivotPoints = calculatePivotPoints(dailyKlines[0]);
-    }
-  } catch (e) {
-    console.log(`Could not fetch daily data for ${symbol}`);
-  }
-
-  const dynamicLevels = calculateDynamicLevels(closedCandles, 20);
-  const candlePatterns = detectCandlePatterns(closedCandles);
-
+  // Advanced indicators
   const volumeSMA = calculateVolumeSMA(closedCandles, 20);
   const currentVolume = closedCandles[closedCandles.length - 1].volume;
   const divergences = detectDivergences(closedCandles, closes);
@@ -821,7 +487,7 @@ async function generateSignal(symbol, candles, orderBook, ticker24h) {
   const atrPercent = atr ? (atr / currentPrice) * 100 : null;
   if (!atrPercent || atrPercent < MIN_ATR_PCT || atrPercent > MAX_ATR_PCT) return null;
 
-  const vwap = calculateVWAP(closedCandles, 20);
+  const vwap = calculateVWAP(closedCandles, 50);
   const vwapDistancePct = vwap ? ((currentPrice - vwap) / vwap) * 100 : null;
 
   const lastCandle = closedCandles[closedCandles.length - 1];
@@ -834,28 +500,34 @@ async function generateSignal(symbol, candles, orderBook, ticker24h) {
 
   let score = 0;
   const reasons = [];
-  let signalType = null;
+  let signalType = null; // BUY, SELL_ALERT, WATCH
 
+  // Trend Direction (EMA 200)
   const isUptrend = currentPrice > ema200;
+
+  // Volume Validation
   const volumeRatio = volumeSMA ? currentVolume / volumeSMA : 1;
-  const volumeMultiplier = volumeRatio > 2 ? 1.15 : (volumeRatio > 1.5 ? 1.1 : (volumeRatio > 1.0 ? 1.05 : 0.9));
+  const volumeMultiplier = volumeRatio > 1.5 ? 1.2 : (volumeRatio > 1.0 ? 1.05 : 0.95);
 
   const quoteVol24h = ticker24h ? Number(ticker24h.quoteVolume) : null;
   if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return null;
 
-  // === 1. DIVERGENCES RSI/CCI (30 points) ===
+  // === 1. DIVERGENCES (High Weight) ===
   if (divergences.length > 0) {
-    const sortedDivs = divergences.sort((a, b) => b.strength - a.strength);
+    const sortedDivs = divergences.sort((a, b) => b.strength - a.strength); // Strongest first
     const bestDiv = sortedDivs[0];
 
     if (bestDiv.type === 'BULLISH') {
+      // Filter: Only take Regular Bullish if RSI < 45 (Not too high)
+      // Filter: Only take Hidden Bullish if in Uptrend (EMA200)
       if (bestDiv.name.includes('Hidden')) {
         if (isUptrend) {
-          score += 30;
+          score += 35;
           reasons.unshift(`💎 ${bestDiv.name}`);
           signalType = 'BUY';
         }
       } else {
+        // Regular divergence - good for reversal
         if (rsi < 50) {
           score += 30;
           reasons.unshift(`🔥 ${bestDiv.name}`);
@@ -865,7 +537,7 @@ async function generateSignal(symbol, candles, orderBook, ticker24h) {
     } else if (bestDiv.type === 'BEARISH') {
       if (bestDiv.name.includes('Hidden')) {
         if (!isUptrend) {
-          score += 30;
+          score += 35;
           reasons.unshift(`🔻 ${bestDiv.name}`);
           signalType = 'SELL_ALERT';
         }
@@ -879,137 +551,54 @@ async function generateSignal(symbol, candles, orderBook, ticker24h) {
     }
   }
 
-  // === 2. STOCHASTIC EXTREME ZONES (20 points) ===
-  if (stochastic) {
-    if (stochastic.oversold && stochastic.bullishCross) {
-      score += 20;
-      reasons.push(`📊 Stochastic Sobreventa & Cruzamiento Alcista`);
-      signalType = signalType || 'BUY';
-    } else if (stochastic.overbought && stochastic.bearishCross) {
-      score += 20;
-      reasons.push(`📊 Stochastic Sobrecompra & Cruzamiento Bajista`);
-      signalType = signalType || 'SELL_ALERT';
-    } else if (stochastic.oversold) {
-      score += 15;
-      reasons.push(`📊 Stochastic Sobreventa (${stochastic.k.toFixed(1)})`);
-      signalType = signalType || 'BUY';
-    } else if (stochastic.overbought) {
-      score += 15;
-      reasons.push(`📊 Stochastic Sobrecompra (${stochastic.k.toFixed(1)})`);
-      signalType = signalType || 'SELL_ALERT';
-    }
-  }
-
-  // === 3. CCI EXTREME ZONES (15 points) ===
-  if (cci) {
-    if (cci.oversold) {
-      score += 15;
-      reasons.push(`📈 CCI Sobreventa (${cci.value.toFixed(0)})`);
-      signalType = signalType || 'BUY';
-    } else if (cci.overbought) {
-      score += 15;
-      reasons.push(`📉 CCI Sobrecompra (${cci.value.toFixed(0)})`);
-      signalType = signalType || 'SELL_ALERT';
-    }
-  }
-
-  // === 4. EMA CROSSOVER (15 points) ===
-  if (emaCrossover) {
-    if (emaCrossover.bullishCross) {
-      score += 15;
-      reasons.push(`📈 EMA9 > EMA21 (Cruzamiento Alcista)`);
-      signalType = signalType || 'BUY';
-    } else if (emaCrossover.bearishCross) {
-      score += 15;
-      reasons.push(`📉 EMA9 < EMA21 (Cruzamiento Bajista)`);
-      signalType = signalType || 'SELL_ALERT';
-    } else if (emaCrossover.bullish && signalType === 'BUY') {
-      score += 8;
-      reasons.push(`✅ Alineado EMA9 > EMA21`);
-    } else if (!emaCrossover.bullish && signalType === 'SELL_ALERT') {
-      score += 8;
-      reasons.push(`✅ Alineado EMA9 < EMA21`);
-    }
-  }
-
-  // === 5. MACD + BOLLINGER COMBO (15 points) ===
+  // === 2. MACD + BOLLINGER COMBO (Squeeze & Breakout) ===
+  // Bullish Breakout w/ MACD
   if (currentPrice > bb.upper && macd.bullish && macd.histogram > 0) {
     if (isUptrend) {
-      score += 15;
+      score += 25;
       reasons.push('🚀 Breakout Bollinger + MACD Bullish (Tendencia)');
       signalType = signalType || 'BUY';
     } else {
-      score += 10;
+      score += 15;
       reasons.push('🚀 Breakout Bollinger + MACD Bullish');
     }
   }
 
+  // Reversal from Lower Band
   if (currentPrice <= bb.lower * 1.005 && currentPrice > prevPrice && macd.bullish) {
-    score += 15;
-    reasons.push('🛡️ Rebote Bollinger Inferior + MACD');
+    score += 20;
+    reasons.push('🛡️ Rebote en Bollinger Inferior + MACD');
     signalType = signalType || 'BUY';
   }
 
-  // === 6. CANDLE PATTERNS (15 points) ===
-  if (candlePatterns.length > 0) {
-    const bullishPatterns = candlePatterns.filter(p => p.type === 'BULLISH');
-    const bearishPatterns = candlePatterns.filter(p => p.type === 'BEARISH');
-    
-    if (bullishPatterns.length > 0 && signalType !== 'SELL_ALERT') {
-      const bestBullish = bullishPatterns.sort((a, b) => b.strength - a.strength)[0];
-      score += bestBullish.strength;
-      reasons.push(`🕯️ ${bestBullish.name}`);
-      signalType = signalType || 'BUY';
-    } else if (bearishPatterns.length > 0 && signalType !== 'BUY') {
-      const bestBearish = bearishPatterns.sort((a, b) => b.strength - a.strength)[0];
-      score += bestBearish.strength;
-      reasons.push(`🕯️ ${bestBearish.name}`);
-      signalType = signalType || 'SELL_ALERT';
-    }
+  // === 3. RSI EXTREME ZONES ===
+  if (rsi < 30) {
+    score += 25;
+    reasons.push(`⚡ RSI Sobreventa extrema (${rsi.toFixed(1)})`);
+    signalType = signalType || 'BUY';
+  } else if (rsi > 70) {
+    score += 25;
+    reasons.push(`⚠️ RSI Sobrecompra (${rsi.toFixed(1)})`);
+    signalType = signalType || 'SELL_ALERT';
   }
 
-  // === 7. DYNAMIC S/R LEVELS (10 points) ===
-  if (dynamicLevels) {
-    if (dynamicLevels.isNearSupport && signalType !== 'SELL_ALERT') {
-      score += 10;
-      reasons.push(`📍 Cercano a Soporte Dinámico`);
-    } else if (dynamicLevels.isNearResistance && signalType !== 'BUY') {
-      score += 10;
-      reasons.push(`📍 Cercano a Resistencia Dinámica`);
-    }
-  }
-
-  // === 8. PIVOT POINTS (10 points) ===
-  if (pivotPoints) {
-    const ppDistance = Math.abs((currentPrice - pivotPoints.pp) / currentPrice) * 100;
-    if (ppDistance < 0.5) {
-      score += 10;
-      reasons.push(`📊 Pivot Point cercano`);
-    } else if (signalType === 'BUY' && Math.abs((currentPrice - pivotPoints.s1) / currentPrice) * 100 < 0.5) {
-      score += 8;
-      reasons.push(`📊 Pivot S1 cercano`);
-    } else if (signalType === 'SELL_ALERT' && Math.abs((currentPrice - pivotPoints.r1) / currentPrice) * 100 < 0.5) {
-      score += 8;
-      reasons.push(`📊 Pivot R1 cercano`);
-    }
-  }
-
-  // === 9. TREND CONFLUENCE (10 points) ===
+  // === 4. TREND CONFLUENCE ===
   if (signalType === 'BUY' && isUptrend) {
-    score += 10;
-    reasons.push('✅ A favor tendencia (EMA200)');
-  } else if (signalType === 'SELL_ALERT' && !isUptrend) {
-    score += 10;
-    reasons.push('✅ A favor tendencia bajista (EMA200)');
+    score += 15;
+    reasons.push('✅ A favor de tendencia principal (EMA200)');
   }
 
-  // === 10. ORDER FLOW + OBI (10 points) ===
+  if (signalType === 'SELL_ALERT' && !isUptrend) {
+    score += 15;
+    reasons.push('✅ A favor de tendencia bajista (EMA200)');
+  }
+
   const direction = signalType === 'BUY' ? 1 : signalType === 'SELL_ALERT' ? -1 : 0;
   if (direction !== 0 && deltaRatio !== null) {
     const aligned = direction === 1 ? deltaRatio > 0.05 : deltaRatio < -0.05;
     if (aligned) {
       score += 10;
-      reasons.push('📈 Order flow alineado');
+      reasons.push('📈 Order flow alineado (taker imbalance)');
     } else {
       score -= 10;
       reasons.push('⚠️ Order flow no alineado');
@@ -1026,22 +615,17 @@ async function generateSignal(symbol, candles, orderBook, ticker24h) {
     }
   }
 
-  // === 11. VOLUME SPIKE (8 points) ===
-  if (volumeRatio > 2) {
-    score += 8;
-    reasons.push(`📊 Volume Spike x${volumeRatio.toFixed(1)}`);
-  } else if (volumeRatio > 1.5) {
-    score += 5;
-    reasons.push(`📊 Volumen Alto x${volumeRatio.toFixed(1)}`);
-  }
-
+  // Apply Volume Multiplier
   score = Math.max(0, Math.min(100, Math.round(score * volumeMultiplier)));
+  if (volumeRatio > 1.5) reasons.push(`📊 Alto Volumen x${volumeRatio.toFixed(1)}`);
 
+  // Final Decision Threshold
   const bbPercentage = ((currentPrice - bb.lower) / (bb.upper - bb.lower) * 100).toFixed(0);
 
-  if (score >= SIGNAL_SCORE_THRESHOLD && reasons.length > 0 && signalType) {
-    const tpsl = calculateTPSL(currentPrice, atr, signalType, 1.5);
+  // Need higher score for non-trend trades
+  const effectiveThreshold = isUptrend ? SIGNAL_SCORE_THRESHOLD : SIGNAL_SCORE_THRESHOLD + 10;
 
+  if (score >= effectiveThreshold && reasons.length > 0 && signalType) {
     return {
       symbol,
       price: currentPrice,
@@ -1049,28 +633,17 @@ async function generateSignal(symbol, candles, orderBook, ticker24h) {
       type: signalType || 'WATCH',
       rsi: rsi.toFixed(1),
       rsiValue: rsi,
-      stochastic: stochastic ? { k: stochastic.k.toFixed(1), d: stochastic.d.toFixed(1) } : null,
-      cci: cci ? cci.value.toFixed(0) : null,
-      ema9: emaCrossover ? emaCrossover.emaFast.toFixed(2) : null,
-      ema21: emaCrossover ? emaCrossover.emaSlow.toFixed(2) : null,
       macdBullish: macd.bullish,
-      macdHistogram: macd.histogram.toFixed(6),
-      priceChange15m: ((currentPrice - prevPrice) / prevPrice * 100).toFixed(2),
+      priceChange1h: ((currentPrice - prevPrice) / prevPrice * 100).toFixed(2),
       bbPosition: `${bbPercentage}%`,
       hasDivergence: divergences.length > 0,
-      candlePatterns: candlePatterns.length > 0 ? candlePatterns.map(p => p.name).join(', ') : null,
       volumeConfirmed: volumeRatio > 1.2,
-      volumeRatio: volumeRatio.toFixed(2),
       spreadBps: Number(obMetrics.spreadBps.toFixed(1)),
       depthQuoteTopN: Math.round(obMetrics.depthQuoteTopN),
       obi: Number(obMetrics.obi.toFixed(3)),
       atrPercent: atrPercent ? Number(atrPercent.toFixed(2)) : null,
-      atrValue: atr ? atr.toFixed(2) : null,
       vwapDistancePct: vwapDistancePct ? Number(vwapDistancePct.toFixed(2)) : null,
       deltaRatio: deltaRatio === null ? null : Number(deltaRatio.toFixed(3)),
-      pivotPoints: pivotPoints ? { pp: pivotPoints.pp.toFixed(2), r1: pivotPoints.r1.toFixed(2), s1: pivotPoints.s1.toFixed(2) } : null,
-      dynamicLevels: dynamicLevels ? { support: dynamicLevels.nearestSupport?.toFixed(2), resistance: dynamicLevels.nearestResistance?.toFixed(2) } : null,
-      tpsl,
       reasons
     };
   }
@@ -1090,10 +663,16 @@ async function sendTelegramNotification(signals) {
     return { success: true, sent: 0 };
   }
 
-  let message = '🎯 *ANÁLISIS DAY TRADING 15m* 🎯\n';
-  message += `_${escapeMarkdownV2('RSI • MACD • Stoch • CCI • EMAs • Pivots • S/R • Patrones')}_\n\n`;
+  let message = '🔔 *ANÁLISIS TÉCNICO AUTOMÁTICO* 🔔\n';
+  message += `_${escapeMarkdownV2('Volumen • Order Book • RSI • MACD • Bollinger')}_\n\n`;
 
-  const sortedSignals = [...signals].sort((a, b) => b.score - a.score);
+  const sortedSignals = [...signals].sort((a, b) => {
+    const rsiA = Number.isFinite(a.rsiValue) ? a.rsiValue : 50;
+    const rsiB = Number.isFinite(b.rsiValue) ? b.rsiValue : 50;
+    const extremityA = Math.abs(rsiA - 50);
+    const extremityB = Math.abs(rsiB - 50);
+    return extremityB - extremityA;
+  });
 
   for (const sig of sortedSignals.slice(0, 5)) {
     let icon = '📊';
@@ -1106,91 +685,49 @@ async function sendTelegramNotification(signals) {
 
     if (Number.isFinite(sig.price)) {
       const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
-      if (sig.priceChange15m !== undefined && sig.priceChange15m !== null) {
-        const ch = Number(sig.priceChange15m);
+      if (sig.priceChange1h !== undefined && sig.priceChange1h !== null) {
+        const ch = Number(sig.priceChange1h);
         const changeIcon = Number.isFinite(ch) && ch >= 0 ? '📈' : '📉';
         const changeSign = Number.isFinite(ch) && ch >= 0 ? '+' : '';
-        message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange15m)}% \\(15m\\)\n`;
+        message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + sig.priceChange1h)}% \\(1h\\)\n`;
       } else {
         message += `💰 $${escapeMarkdownV2(priceStr)}\n`;
       }
     }
 
-    // TP/SL Section
-    if (sig.tpsl) {
-      const slIcon = sig.type === 'BUY' ? '🛑' : '🛑';
-      const tpIcon = sig.type === 'BUY' ? '🎯' : '🎯';
-      message += `${tpIcon} TP1: $${escapeMarkdownV2(sig.tpsl.tp1.toFixed(sig.price < 1 ? 6 : 2))} (${escapeMarkdownV2(sig.tpsl.tp1Percent)}%) \\| `;
-      message += `${slIcon} SL: $${escapeMarkdownV2(sig.tpsl.sl.toFixed(sig.price < 1 ? 6 : 2))} (${escapeMarkdownV2(sig.tpsl.slPercent)}%)\n`;
-      if (sig.tpsl.riskReward1) {
-        message += `📊 R:R ${escapeMarkdownV2(sig.tpsl.riskReward1)}:1 \\| ATR: ${sig.atrPercent ? escapeMarkdownV2(sig.atrPercent + '%') : 'N/A'}\n`;
-      }
+    if (sig.rsi !== undefined || sig.bbPosition !== undefined || sig.macdBullish !== undefined) {
+      const rsiText = sig.rsi !== undefined && sig.rsi !== null ? String(sig.rsi) : 'N/A';
+      const bbText = sig.bbPosition !== undefined && sig.bbPosition !== null ? String(sig.bbPosition) : 'N/A';
+      const macdText = sig.macdBullish === true ? 'MACD\\+' : sig.macdBullish === false ? 'MACD\\-' : 'MACD\\?';
+      message += `📊 RSI: ${escapeMarkdownV2(rsiText)} \\| BB: ${escapeMarkdownV2(bbText)} \\| ${macdText}\n`;
     }
 
-    // Key Indicators
-    let indicators = [];
-    if (sig.rsi !== null) indicators.push(`RSI:${escapeMarkdownV2(sig.rsi)}`);
-    if (sig.stochastic && sig.stochastic.k !== null) indicators.push(`Stoch:${escapeMarkdownV2(sig.stochastic.k)}`);
-    if (sig.cci !== null) indicators.push(`CCI:${escapeMarkdownV2(sig.cci)}`);
-    if (indicators.length > 0) {
-      message += `📊 ${indicators.join(' \\| ')}\n`;
+    if (sig.spreadBps !== undefined || sig.obi !== undefined || sig.depthQuoteTopN !== undefined) {
+      const spreadText = sig.spreadBps !== undefined && sig.spreadBps !== null ? String(sig.spreadBps) : 'N/A';
+      const obiText = sig.obi !== undefined && sig.obi !== null ? String(sig.obi) : 'N/A';
+      const depthText = sig.depthQuoteTopN !== undefined && sig.depthQuoteTopN !== null ? String(sig.depthQuoteTopN) : 'N/A';
+      message += `📚 Spread: ${escapeMarkdownV2(spreadText)} bps \\| OBI: ${escapeMarkdownV2(obiText)} \\| Depth: ${escapeMarkdownV2(depthText)}\n`;
     }
 
-    // EMAs
-    if (sig.ema9 !== null && sig.ema21 !== null) {
-      message += `📈 EMA9:${escapeMarkdownV2(sig.ema9)} \\| EMA21:${escapeMarkdownV2(sig.ema21)}`;
-      if (sig.ema9 > sig.ema21) message += ` ✅`;
-      else message += ` ❌`;
+    if (sig.atrPercent !== undefined && sig.atrPercent !== null) {
+      message += `🌀 ATR: ${escapeMarkdownV2(String(sig.atrPercent))}%`;
+      if (sig.vwapDistancePct !== undefined && sig.vwapDistancePct !== null) message += ` \\| VWAPΔ: ${escapeMarkdownV2(String(sig.vwapDistancePct))}%`;
+      if (sig.deltaRatio !== undefined && sig.deltaRatio !== null) message += ` \\| Δ: ${escapeMarkdownV2(String(sig.deltaRatio))}`;
       message += `\n`;
     }
 
-    // MACD + Bollinger
-    if (sig.macdBullish !== null || sig.bbPosition !== null) {
-      const macdIcon = sig.macdBullish === true ? 'MACD\\+' : 'MACD\\-';
-      message += `📊 ${macdIcon} \\| BB:${escapeMarkdownV2(sig.bbPosition)}\n`;
-    }
-
-    // Pivot Points & S/R
-    let levels = [];
-    if (sig.pivotPoints && sig.pivotPoints.pp !== null) {
-      levels.push(`PP:${escapeMarkdownV2(sig.pivotPoints.pp)}`);
-    }
-    if (sig.dynamicLevels) {
-      if (sig.dynamicLevels.support !== null) levels.push(`S:${escapeMarkdownV2(sig.dynamicLevels.support)}`);
-      if (sig.dynamicLevels.resistance !== null) levels.push(`R:${escapeMarkdownV2(sig.dynamicLevels.resistance)}`);
-    }
-    if (levels.length > 0) {
-      message += `📍 ${levels.join(' \\| ')}\n`;
-    }
-
-    // Order Flow
-    if (sig.obi !== null || sig.deltaRatio !== null) {
-      const obiText = sig.obi !== null ? `OBI:${escapeMarkdownV2(String(sig.obi))}` : '';
-      const deltaText = sig.deltaRatio !== null ? `Δ:${escapeMarkdownV2(String(sig.deltaRatio))}` : '';
-      if (obiText || deltaText) {
-        message += `📚 ${obiText} ${obiText && deltaText ? '\\| ' : ''}${deltaText}\n`;
-      }
-    }
-
-    // Badges
+    // Show special badges for divergence and volume
     let badges = [];
     if (sig.hasDivergence) badges.push('🔥DIV');
     if (sig.volumeConfirmed) badges.push('📊VOL');
-    if (sig.candlePatterns && sig.candlePatterns.length > 0) badges.push('🕯️VELA');
     const badgeStr = badges.length > 0 ? ` ${badges.join(' ')}` : '';
 
     const scoreText = Number.isFinite(sig.score) ? String(sig.score) : 'N/A';
     message += `🎯 Score: ${escapeMarkdownV2(scoreText)}/100${escapeMarkdownV2(badgeStr)}\n`;
 
-    // Main Reason
     const reasonsArr = Array.isArray(sig.reasons) ? sig.reasons : [];
     if (reasonsArr.length > 0) {
       message += `💡 _${escapeMarkdownV2(reasonsArr[0])}_\n`;
-    }
-
-    // Candle Pattern
-    if (sig.candlePatterns && sig.candlePatterns.length > 0) {
-      message += `🕯️ ${escapeMarkdownV2(sig.candlePatterns)}\n`;
     }
 
     message += `───────────────────\n`;
@@ -1201,7 +738,7 @@ async function sendTelegramNotification(signals) {
     minute: '2-digit',
     timeZone: 'Europe/Madrid'
   });
-  message += `🤖 _Day Trading 15m • Análisis avanzado_ • ${escapeMarkdownV2(timeStr)}`;
+  message += `🤖 _Análisis avanzado_ • ${escapeMarkdownV2(timeStr)}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -1256,12 +793,12 @@ async function runAnalysis() {
 
   for (const symbol of topSymbols) {
     try {
-      const candles = await getKlines(symbol, '15m', 200);
+      const candles = await getKlines(symbol, '60m', 300);
       const orderBook = await getOrderBookDepth(symbol, 20);
       const ticker24h = tickersBySymbol.get(symbol) || null;
       analyzed++;
 
-      const signal = await generateSignal(symbol, candles, orderBook, ticker24h);
+      const signal = generateSignal(symbol, candles, orderBook, ticker24h);
       if (signal) {
         const reasonKey = Array.isArray(signal.reasons) && signal.reasons.length > 0 ? signal.reasons[0] : '';
         const key = `${signal.symbol}:${signal.type}:${reasonKey}`;
