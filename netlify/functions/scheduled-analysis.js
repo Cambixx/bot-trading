@@ -74,6 +74,47 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function intervalToMs(interval) {
+  if (typeof interval !== 'string' || interval.length < 2) return null;
+  const match = interval.trim().match(/^(\d+)\s*([mhd])$/i);
+  if (!match) return null;
+  const value = Number(match[1]);
+  const unit = match[2].toLowerCase();
+  if (!Number.isFinite(value) || value <= 0) return null;
+
+  if (unit === 'm') return value * 60 * 1000;
+  if (unit === 'h') return value * 60 * 60 * 1000;
+  if (unit === 'd') return value * 24 * 60 * 60 * 1000;
+  return null;
+}
+
+function getClosedCandles(candles, interval, now = Date.now()) {
+  if (!Array.isArray(candles) || candles.length === 0) return [];
+  const intervalMs = intervalToMs(interval);
+
+  if (candles.length === 1) {
+    const only = candles[0];
+    const closeTime = Number.isFinite(only?.closeTime)
+      ? only.closeTime
+      : (Number.isFinite(intervalMs) && Number.isFinite(only?.time) ? (only.time + intervalMs) : null);
+    if (!Number.isFinite(closeTime)) return [];
+    const toleranceMs = 2000;
+    return now < (closeTime - toleranceMs) ? [] : candles;
+  }
+
+  const last = candles[candles.length - 1];
+  const lastCloseTime = Number.isFinite(last?.closeTime)
+    ? last.closeTime
+    : (Number.isFinite(intervalMs) && Number.isFinite(last?.time) ? (last.time + intervalMs) : null);
+
+  if (!Number.isFinite(lastCloseTime)) return candles.slice(0, -1);
+
+  const toleranceMs = 2000;
+  if (now < (lastCloseTime - toleranceMs)) return candles.slice(0, -1);
+
+  return candles;
+}
+
 // ==================== MARKET DATA ====================
 
 async function getKlines(symbol, interval = '15m', limit = 200) {
@@ -90,18 +131,29 @@ async function getKlines(symbol, interval = '15m', limit = 200) {
     throw new Error(`MEXC: Invalid klines response for ${symbol}`);
   }
 
-  return json.map(candle => ({
-    time: Number(candle[0]),
-    open: Number(candle[1]),
-    high: Number(candle[2]),
-    low: Number(candle[3]),
-    close: Number(candle[4]),
-    volume: Number(candle[5]),
-    quoteVolume: Number(candle[7]),
-    trades: candle[8] ? Number(candle[8]) : 0,
-    takerBuyBaseVolume: candle[9] ? Number(candle[9]) : null,
-    takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : null
-  }));
+  const intervalMs = intervalToMs(interval);
+
+  return json.map(candle => {
+    const openTime = Number(candle[0]);
+    const closeTimeRaw = candle[6] ? Number(candle[6]) : null;
+    const closeTime = Number.isFinite(closeTimeRaw) && Number.isFinite(openTime) && Number.isFinite(intervalMs)
+      ? (closeTimeRaw >= openTime && closeTimeRaw <= (openTime + intervalMs * 2) ? closeTimeRaw : null)
+      : (Number.isFinite(closeTimeRaw) ? closeTimeRaw : null);
+
+    return {
+      time: openTime,
+      open: Number(candle[1]),
+      high: Number(candle[2]),
+      low: Number(candle[3]),
+      close: Number(candle[4]),
+      volume: Number(candle[5]),
+      closeTime,
+      quoteVolume: Number(candle[7]),
+      trades: candle[8] ? Number(candle[8]) : 0,
+      takerBuyBaseVolume: candle[9] ? Number(candle[9]) : null,
+      takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : null
+    };
+  });
 }
 
 async function getOrderBookDepth(symbol, limit = 20) {
@@ -741,8 +793,8 @@ function detectDivergences(candles, closes) {
 async function analyzeMultiTimeframe(symbol, candles15m, ticker24h) {
   const candles1h = await getKlines(symbol, '60m', 200);
 
-  const analysis15m = analyzeTimeframe(symbol, candles15m);
-  const analysis1h = analyzeTimeframe(symbol, candles1h);
+  const analysis15m = analyzeTimeframe(symbol, candles15m, '15m');
+  const analysis1h = analyzeTimeframe(symbol, candles1h, '60m');
 
   return {
     tf15m: analysis15m,
@@ -751,10 +803,11 @@ async function analyzeMultiTimeframe(symbol, candles15m, ticker24h) {
   };
 }
 
-function analyzeTimeframe(symbol, candles) {
+function analyzeTimeframe(symbol, candles, interval) {
   if (!candles || candles.length < 200) return null;
 
-  const closedCandles = candles.slice(0, -1);
+  const closedCandles = getClosedCandles(candles, interval);
+  if (closedCandles.length < 200) return null;
   const closes = closedCandles.map(c => c.close);
   const currentPrice = closes[closes.length - 1];
 
@@ -832,7 +885,7 @@ function calculateConfluence(analysis15m, analysis1h) {
 function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
   if (!candles15m || candles15m.length < 201) return null;
 
-  const closedCandles15m = candles15m.slice(0, -1);
+  const closedCandles15m = getClosedCandles(candles15m, '15m');
   if (closedCandles15m.length < 200) return null;
 
   const closes15m = closedCandles15m.map(c => c.close);
@@ -845,7 +898,9 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
   if (obMetrics.spreadBps > MAX_SPREAD_BPS) return null;
   if (obMetrics.depthQuoteTopN < MIN_DEPTH_QUOTE) return null;
 
-  const closes1h = candles1h.slice(0, -1).map(c => c.close);
+  const closedCandles1h = getClosedCandles(candles1h, '60m');
+  if (closedCandles1h.length < 50) return null;
+  const closes1h = closedCandles1h.map(c => c.close);
   const currentPrice1h = closes1h[closes1h.length - 1];
 
   const rsi15m = calculateRSI(closes15m, 14);
@@ -863,7 +918,7 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
 
   const rsi1h = calculateRSI(closes1h, 14);
   const macd1h = calculateMACD(closes1h);
-  const superTrend1h = calculateSuperTrend(candles1h.slice(0, -1), 10, 3);
+  const superTrend1h = calculateSuperTrend(closedCandles1h, 10, 3);
 
   const vwap15m = calculateVWAP(closedCandles15m, 50);
   const volumeSMA15m = calculateVolumeSMA(closedCandles15m, 20);
