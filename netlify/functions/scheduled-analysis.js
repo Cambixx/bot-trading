@@ -48,7 +48,8 @@ const FALLBACK_SYMBOLS = [
 function escapeMarkdownV2(text = '') {
   if (typeof text !== 'string') text = String(text);
   // Escape ALL reserved MarkdownV2 characters: _ * [ ] ( ) ~ ` > # + - = | { } . !
-  return text.replace(/([_*\[\]()~`>#+\-=|{}.!])/g, '\\$1');
+  // Note: We need to escape parentheses \(\) in the regex pattern
+  return text.replace(/([_*\[\]\(\)~`>#+\-=|{}.!])/g, '\\$1');
 }
 
 async function fetchWithTimeout(url, timeout = 15000) {
