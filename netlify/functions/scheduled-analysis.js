@@ -21,11 +21,11 @@ const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() 
 const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 65;
 const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 8;
 const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 75000;
-const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.15;
-const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 5;
+const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.08;
+const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 8;
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 20;
-const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 10000000;
+const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 2000000;
 const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 30;
 const USE_MULTI_TF = (process.env.USE_MULTI_TF || 'true').toLowerCase() === 'true';
@@ -798,7 +798,8 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
   const buyRatio = takerBuyBase !== null && totalBaseVol > 0 ? takerBuyBase / totalBaseVol : null;
   const deltaRatio = buyRatio === null ? null : (2 * buyRatio - 1);
 
-  if (!rsi15m || !macd15m || !bb15m || !ema9_15m || !ema21_15m) return null;
+  // Relaxed indicator validation - allow some indicators to fail
+  if (!rsi15m && !macd15m && !bb15m) return null; // At least one major indicator must work
 
   let score = 0;
   const reasons = [];
@@ -1216,7 +1217,7 @@ async function runAnalysis() {
       await sleep(150);
 
     } catch (error) {
-      console.error(`Error analyzing ${symbol}:`, error.message);
+      console.error(`Error analyzing ${symbol}:`, error.message, error.stack?.split('\n')[0]);
       errors++;
       await sleep(150);
     }
