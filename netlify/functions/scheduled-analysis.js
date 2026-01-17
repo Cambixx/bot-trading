@@ -49,7 +49,7 @@ function escapeMarkdownV2(text = '') {
   if (typeof text !== 'string') text = String(text);
   // Escape ALL reserved MarkdownV2 characters: _ * [ ] ( ) ~ ` > # + - = | { } . !
   // Note: We need to escape parentheses \(\) in the regex pattern
-  return text.replace(/([_*\[\]\(\)~`>#+\-=|{}.!])/g, '\\$1');
+  return text.replace(/([_*\u005B\u005D()~`>#+=|{}.!-])/g, '\\$1');
 }
 
 async function fetchWithTimeout(url, timeout = 15000) {
@@ -1298,8 +1298,7 @@ const scheduledHandler = async (event) => {
       }
     }
 
-    const nextRun = payload && typeof payload.next_run === 'string' ? payload.next_run : null;
-    const isSchedule = nfEvent === 'schedule' || nextRun !== null;
+    const isSchedule = nfEvent === 'schedule';
 
     console.log('scheduled-analysis invocation:', {
       method,
@@ -1316,8 +1315,16 @@ const scheduledHandler = async (event) => {
       };
     }
 
+    if (!NOTIFY_SECRET) {
+      return {
+        statusCode: 503,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: false, error: 'NOTIFY_SECRET not configured' })
+      };
+    }
+
     const clientSecret = headers['x-notify-secret'] || headers['X-Notify-Secret'] || headers['x-notify-Secret'] || '';
-    if (NOTIFY_SECRET && clientSecret !== NOTIFY_SECRET) {
+    if (clientSecret !== NOTIFY_SECRET) {
       return {
         statusCode: 401,
         headers: { 'Content-Type': 'application/json' },
