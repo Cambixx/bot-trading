@@ -336,54 +336,103 @@ function calculateStochasticRSI(closes, rsiPeriod = 14, stochasticPeriod = 14, s
 }
 
 function calculateADX(candles, period = 14) {
-  if (candles.length < period + 1) return null;
+  if (!candles || candles.length < (period * 2 + 1)) return null;
 
-  const trueRanges = [];
-  const plusDMs = [];
-  const minusDMs = [];
+  let trSum = 0;
+  let plusDMSum = 0;
+  let minusDMSum = 0;
 
-  for (let i = 1; i < candles.length; i++) {
+  for (let i = 1; i <= period; i++) {
     const current = candles[i];
     const prev = candles[i - 1];
+
+    const upMove = current.high - prev.high;
+    const downMove = prev.low - current.low;
+
+    const plusDM = upMove > downMove && upMove > 0 ? upMove : 0;
+    const minusDM = downMove > upMove && downMove > 0 ? downMove : 0;
 
     const tr = Math.max(
       current.high - current.low,
       Math.abs(current.high - prev.close),
       Math.abs(current.low - prev.close)
     );
-    trueRanges.push(tr);
 
-    const plusDM = current.high - prev.high;
-    const minusDM = prev.low - current.low;
-
-    if (plusDM > minusDM && plusDM > 0) {
-      plusDMs.push(plusDM);
-    } else {
-      plusDMs.push(0);
-    }
-
-    if (minusDM > plusDM && minusDM > 0) {
-      minusDMs.push(minusDM);
-    } else {
-      minusDMs.push(0);
-    }
+    trSum += tr;
+    plusDMSum += plusDM;
+    minusDMSum += minusDM;
   }
 
-  const atr = trueRanges.slice(-period).reduce((a, b) => a + b, 0) / period;
-  if (atr === 0) return null;
+  let atr = trSum;
+  let plusDM14 = plusDMSum;
+  let minusDM14 = minusDMSum;
 
-  const plusDI14 = (plusDMs.slice(-period).reduce((a, b) => a + b, 0) / atr) * 100;
-  const minusDI14 = (minusDMs.slice(-period).reduce((a, b) => a + b, 0) / atr) * 100;
+  const dxSeries = new Array(candles.length).fill(null);
 
-  const dx = Math.abs(plusDI14 - minusDI14) / (plusDI14 + minusDI14) * 100;
+  for (let i = period; i < candles.length; i++) {
+    if (i > period) {
+      const current = candles[i];
+      const prev = candles[i - 1];
+
+      const upMove = current.high - prev.high;
+      const downMove = prev.low - current.low;
+
+      const plusDM = upMove > downMove && upMove > 0 ? upMove : 0;
+      const minusDM = downMove > upMove && downMove > 0 ? downMove : 0;
+
+      const tr = Math.max(
+        current.high - current.low,
+        Math.abs(current.high - prev.close),
+        Math.abs(current.low - prev.close)
+      );
+
+      atr = atr - (atr / period) + tr;
+      plusDM14 = plusDM14 - (plusDM14 / period) + plusDM;
+      minusDM14 = minusDM14 - (minusDM14 / period) + minusDM;
+    }
+
+    if (!Number.isFinite(atr) || atr <= 0) continue;
+
+    const plusDI = (plusDM14 / atr) * 100;
+    const minusDI = (minusDM14 / atr) * 100;
+    const denom = plusDI + minusDI;
+    if (!Number.isFinite(denom) || denom === 0) continue;
+
+    const dx = (Math.abs(plusDI - minusDI) / denom) * 100;
+    if (!Number.isFinite(dx)) continue;
+    dxSeries[i] = dx;
+  }
+
+  let adx = null;
+  const firstADXIndex = period * 2;
+  let dxSum = 0;
+  for (let i = period; i < firstADXIndex; i++) {
+    const dx = dxSeries[i];
+    if (!Number.isFinite(dx)) return null;
+    dxSum += dx;
+  }
+  adx = dxSum / period;
+
+  for (let i = firstADXIndex; i < candles.length; i++) {
+    const dx = dxSeries[i];
+    if (!Number.isFinite(dx) || adx === null) continue;
+    adx = ((adx * (period - 1)) + dx) / period;
+  }
+
+  if (adx === null || !Number.isFinite(adx)) return null;
+
+  if (!Number.isFinite(atr) || atr <= 0) return null;
+  const plusDI = (plusDM14 / atr) * 100;
+  const minusDI = (minusDM14 / atr) * 100;
+  if (!Number.isFinite(plusDI) || !Number.isFinite(minusDI)) return null;
 
   return {
-    adx: dx,
-    plusDI: plusDI14,
-    minusDI: minusDI14,
-    trending: dx > 20,
-    bullishTrend: plusDI14 > minusDI14,
-    bearishTrend: minusDI14 > plusDI14
+    adx,
+    plusDI,
+    minusDI,
+    trending: adx > 20,
+    bullishTrend: plusDI > minusDI,
+    bearishTrend: minusDI > plusDI
   };
 }
 
