@@ -46,7 +46,9 @@ const FALLBACK_SYMBOLS = [
 // ==================== HELPERS ====================
 
 function escapeMarkdownV2(text = '') {
-  return String(text).replace(/([[\]_*()~`>#+\-=|{}.!])/g, '\\$1');
+  if (typeof text !== 'string') text = String(text);
+  // Escape ALL reserved MarkdownV2 characters: _ * [ ] ( ) ~ ` > # + - = | { } . !
+  return text.replace(/([_*\[\]()~`>#+\-=|{}.!])/g, '\\$1');
 }
 
 async function fetchWithTimeout(url, timeout = 15000) {
@@ -1078,7 +1080,7 @@ async function sendTelegramNotification(signals) {
       if (ch !== undefined && ch !== null) {
         const changeIcon = ch >= 0 ? '📈' : '📉';
         const changeSign = ch >= 0 ? '+' : '';
-        message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${changeSign}${ch}% (VWAP)\n`;
+        message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + ch)}% (VWAP)\n`;
       } else {
         message += `💰 $${escapeMarkdownV2(priceStr)}\n`;
       }
