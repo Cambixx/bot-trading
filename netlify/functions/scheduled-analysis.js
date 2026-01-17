@@ -1298,12 +1298,14 @@ const scheduledHandler = async (event) => {
       }
     }
 
-    const isSchedule = nfEvent === 'schedule';
+    const hasNextRun = payload && typeof payload.next_run === 'string';
+    const isSchedule = nfEvent === 'schedule' || hasNextRun;
 
     console.log('scheduled-analysis invocation:', {
       method,
       isSchedule,
-      nfEvent: nfEvent || null
+      nfEvent: nfEvent || null,
+      hasNextRun
     });
 
     if (isSchedule) {
