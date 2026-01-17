@@ -216,28 +216,51 @@ function getTopSymbolsByOpportunity(tickers, quoteAsset, limit, minQuoteVolume) 
 
 // ==================== TECHNICAL INDICATORS ====================
 
-function calculateRSI(closes, period = 14) {
-  if (closes.length < period + 1) return null;
+function calculateRSISeries(closes, period = 14) {
+  if (!Array.isArray(closes) || closes.length < period + 1) return null;
 
-  const gains = [];
-  const losses = [];
+  const series = new Array(closes.length).fill(null);
 
-  for (let i = 1; i < closes.length; i++) {
+  let avgGain = 0;
+  let avgLoss = 0;
+
+  for (let i = 1; i <= period; i++) {
     const change = closes[i] - closes[i - 1];
-    gains.push(change > 0 ? change : 0);
-    losses.push(change < 0 ? -change : 0);
+    avgGain += change > 0 ? change : 0;
+    avgLoss += change < 0 ? -change : 0;
   }
 
-  const recentGains = gains.slice(-period);
-  const recentLosses = losses.slice(-period);
+  avgGain /= period;
+  avgLoss /= period;
 
-  const avgGain = recentGains.reduce((a, b) => a + b, 0) / period;
-  const avgLoss = recentLosses.reduce((a, b) => a + b, 0) / period;
+  const firstRSI = avgLoss === 0 ? 100 : (100 - (100 / (1 + (avgGain / avgLoss))));
+  series[period] = firstRSI;
 
-  if (avgLoss === 0) return 100;
+  for (let i = period + 1; i < closes.length; i++) {
+    const change = closes[i] - closes[i - 1];
+    const gain = change > 0 ? change : 0;
+    const loss = change < 0 ? -change : 0;
 
-  const rs = avgGain / avgLoss;
-  return 100 - (100 / (1 + rs));
+    avgGain = ((avgGain * (period - 1)) + gain) / period;
+    avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+
+    const rsi = avgLoss === 0 ? 100 : (100 - (100 / (1 + (avgGain / avgLoss))));
+    series[i] = rsi;
+  }
+
+  return series;
+}
+
+function calculateRSI(closes, period = 14) {
+  const series = calculateRSISeries(closes, period);
+  if (!series) return null;
+
+  for (let i = series.length - 1; i >= 0; i--) {
+    const v = series[i];
+    if (Number.isFinite(v)) return v;
+  }
+
+  return null;
 }
 
 function calculateEMA(data, period) {
@@ -318,24 +341,15 @@ function calculateBollingerBands(closes, period = 20, stdDev = 2) {
 }
 
 function calculateATR(candles, period = 14) {
-  if (candles.length < period + 1) return null;
+  const series = calculateATRSeries(candles, period);
+  if (!series) return null;
 
-  const trueRanges = [];
-  for (let i = 1; i < candles.length; i++) {
-    const high = candles[i].high;
-    const low = candles[i].low;
-    const prevClose = candles[i - 1].close;
-
-    const tr = Math.max(
-      high - low,
-      Math.abs(high - prevClose),
-      Math.abs(low - prevClose)
-    );
-    trueRanges.push(tr);
+  for (let i = series.length - 1; i >= 0; i--) {
+    const v = series[i];
+    if (Number.isFinite(v)) return v;
   }
 
-  const recentTR = trueRanges.slice(-period);
-  return recentTR.reduce((a, b) => a + b, 0) / period;
+  return null;
 }
 
 function calculateVolumeSMA(candles, period = 20) {
@@ -362,18 +376,20 @@ function calculateVWAP(candles, lookback = 50) {
 function calculateStochasticRSI(closes, rsiPeriod = 14, stochasticPeriod = 14, smoothK = 3, smoothD = 3) {
   if (closes.length < rsiPeriod + stochasticPeriod) return null;
 
-  const rsiValues = [];
-  for (let i = rsiPeriod; i < closes.length; i++) {
-    const slice = closes.slice(i - rsiPeriod, i + 1);
-    const rsi = calculateRSI(slice, rsiPeriod);
-    if (rsi !== null) rsiValues.push(rsi);
+  const rsiSeries = calculateRSISeries(closes, rsiPeriod);
+  if (!rsiSeries) return null;
+
+  const rsiWindow = [];
+  for (let i = rsiSeries.length - 1; i >= 0 && rsiWindow.length < stochasticPeriod; i--) {
+    const v = rsiSeries[i];
+    if (Number.isFinite(v)) rsiWindow.unshift(v);
   }
 
-  if (rsiValues.length < stochasticPeriod) return null;
+  if (rsiWindow.length < stochasticPeriod) return null;
 
-  const lowest = Math.min(...rsiValues.slice(-stochasticPeriod));
-  const highest = Math.max(...rsiValues.slice(-stochasticPeriod));
-  const currentRSI = rsiValues[rsiValues.length - 1];
+  const lowest = Math.min(...rsiWindow);
+  const highest = Math.max(...rsiWindow);
+  const currentRSI = rsiWindow[rsiWindow.length - 1];
 
   if (highest === lowest) return null;
 
