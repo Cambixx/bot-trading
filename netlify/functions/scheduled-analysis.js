@@ -793,7 +793,7 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
   const currentVolume15m = closedCandles15m[closedCandles15m.length - 1].volume;
 
   const divergences = detectDivergences(closedCandles15m, closes15m);
-  const patterns = detectPriceActionPatterns(candles15m);
+  const patterns = detectPriceActionPatterns(closedCandles15m);
 
   const lastCandle = closedCandles15m[closedCandles15m.length - 1];
   const takerBuyBase = Number.isFinite(lastCandle.takerBuyBaseVolume) ? lastCandle.takerBuyBaseVolume : null;
@@ -1010,6 +1010,8 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
     }
   }
 
+  score = Math.max(0, Math.min(100, score));
+
   // === FINAL FILTERS ===
 
   const effectiveThreshold = signalType === 'BUY' ? SIGNAL_SCORE_THRESHOLD : SIGNAL_SCORE_THRESHOLD + 5;
@@ -1126,7 +1128,7 @@ async function sendTelegramNotification(signals) {
     // ATR & Delta
     if (sig.atrPercent !== undefined) {
       message += `🌀 ATR: ${esc(sig.atrPercent)}%`;
-      if (sig.deltaRatio !== undefined) message += ` \\| Δ: ${esc(sig.deltaRatio)}`;
+      if (sig.deltaRatio !== undefined && sig.deltaRatio !== null) message += ` \\| Δ: ${esc(sig.deltaRatio)}`;
       message += `\n`;
     }
 
