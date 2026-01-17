@@ -387,72 +387,100 @@ function calculateADX(candles, period = 14) {
   };
 }
 
+function calculateATRSeries(candles, period = 14) {
+  if (!candles || candles.length < period + 1) return null;
+
+  const atrSeries = new Array(candles.length).fill(null);
+
+  let trSum = 0;
+  for (let i = 1; i <= period; i++) {
+    const current = candles[i];
+    const prevClose = candles[i - 1].close;
+    const tr = Math.max(
+      current.high - current.low,
+      Math.abs(current.high - prevClose),
+      Math.abs(current.low - prevClose)
+    );
+    trSum += tr;
+  }
+
+  let atr = trSum / period;
+  if (!Number.isFinite(atr) || atr === 0) return null;
+  atrSeries[period] = atr;
+
+  for (let i = period + 1; i < candles.length; i++) {
+    const current = candles[i];
+    const prevClose = candles[i - 1].close;
+    const tr = Math.max(
+      current.high - current.low,
+      Math.abs(current.high - prevClose),
+      Math.abs(current.low - prevClose)
+    );
+    atr = ((atr * (period - 1)) + tr) / period;
+    atrSeries[i] = atr;
+  }
+
+  return atrSeries;
+}
+
 function calculateSuperTrend(candles, period = 10, multiplier = 3) {
-  if (candles.length < period) return null;
+  if (!candles || candles.length < period + 1) return null;
 
-  const closes = candles.map(c => c.close);
-  const highs = candles.map(c => c.high);
-  const lows = candles.map(c => c.low);
+  const atrSeries = calculateATRSeries(candles, period);
+  if (!atrSeries) return null;
 
-  const atr = calculateATR(candles, period);
-  if (atr === null) return null;
-
-  const results = [];
+  let finalUpper = null;
+  let finalLower = null;
+  let superTrend = null;
   let direction = 1;
+  let prevDirection = null;
+  let flipped = false;
 
-  for (let i = 0; i < closes.length; i++) {
-    const hl2 = (highs[i] + lows[i]) / 2;
-    const upperBand = hl2 + (multiplier * atr);
-    const lowerBand = hl2 - (multiplier * atr);
+  for (let i = 0; i < candles.length; i++) {
+    const atr = atrSeries[i];
+    if (atr === null) continue;
 
-    let prevClose = i > 0 ? closes[i - 1] : closes[i];
+    const hl2 = (candles[i].high + candles[i].low) / 2;
+    const basicUpper = hl2 + (multiplier * atr);
+    const basicLower = hl2 - (multiplier * atr);
 
-    if (i === 0) {
-      results.push({
-        close: closes[i],
-        upperBand,
-        lowerBand,
-        direction: 1,
-        superTrend: lowerBand
-      });
+    if (finalUpper === null || finalLower === null || superTrend === null) {
+      finalUpper = basicUpper;
+      finalLower = basicLower;
+      const close = candles[i].close;
+      superTrend = close <= finalUpper ? finalUpper : finalLower;
+      direction = superTrend === finalLower ? 1 : -1;
+      prevDirection = direction;
+      flipped = false;
       continue;
     }
 
-    const prev = results[i - 1];
+    const prevClose = candles[i - 1].close;
+    finalUpper = (basicUpper < finalUpper || prevClose > finalUpper) ? basicUpper : finalUpper;
+    finalLower = (basicLower > finalLower || prevClose < finalLower) ? basicLower : finalLower;
 
-    if (closes[i] > prev.superTrend) {
-      direction = 1;
-    } else if (closes[i] < prev.superTrend) {
-      direction = -1;
-    }
-
-    let superTrend;
-    if (direction === 1) {
-      superTrend = Math.max(lowerBand, prev.superTrend);
+    const close = candles[i].close;
+    if (superTrend === finalUpper) {
+      superTrend = close <= finalUpper ? finalUpper : finalLower;
     } else {
-      superTrend = Math.min(upperBand, prev.superTrend);
+      superTrend = close >= finalLower ? finalLower : finalUpper;
     }
 
-    results.push({
-      close: closes[i],
-      upperBand,
-      lowerBand,
-      direction,
-      superTrend
-    });
+    direction = superTrend === finalLower ? 1 : -1;
+    flipped = prevDirection !== null && direction !== prevDirection;
+    prevDirection = direction;
   }
 
-  const current = results[results.length - 1];
-  const prev = results[results.length - 2];
+  if (superTrend === null || finalUpper === null || finalLower === null) return null;
 
   return {
-    superTrend: current.superTrend,
-    direction: current.direction,
-    bullish: current.direction === 1,
-    bearish: current.direction === -1,
-    flipped: prev.direction !== current.direction,
-    upperBand: current.upperBand,
-    lowerBand: current.lowerBand
+    superTrend,
+    direction,
+    bullish: direction === 1,
+    bearish: direction === -1,
+    flipped,
+    upperBand: finalUpper,
+    lowerBand: finalLower
   };
 }
 
