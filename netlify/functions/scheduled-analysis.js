@@ -1061,8 +1061,11 @@ async function sendTelegramNotification(signals) {
     return { success: true, sent: 0 };
   }
 
+  // Helper to ensure values are safe for MarkdownV2
+  const esc = (val) => escapeMarkdownV2(val !== undefined && val !== null ? val : '');
+
   let message = '🔔 *DAY TRADE ALERT* 🔔\n';
-  message += `_${escapeMarkdownV2('15m • Multi-TF • Order Flow')}_\n\n`;
+  message += `_${esc('15m • Multi-TF • Order Flow')}_\n\n`;
 
   const sortedSignals = [...signals].sort((a, b) => b.score - a.score);
 
@@ -1073,56 +1076,64 @@ async function sendTelegramNotification(signals) {
     else if (sig.type === 'SELL_ALERT') { icon = '🔴'; typeEmoji = '📤 VENTA'; }
     else { typeEmoji = '👁️ VIGILAR'; }
 
-    message += `${icon} *${escapeMarkdownV2(sig.symbol)}* \\| ${escapeMarkdownV2(typeEmoji)}\n`;
+    // Symbol and Type
+    message += `${icon} *${esc(sig.symbol)}* \\| ${esc(typeEmoji)}\n`;
 
+    // Price
     if (Number.isFinite(sig.price)) {
       const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
       const ch = sig.vwapDistance;
       if (ch !== undefined && ch !== null) {
         const changeIcon = ch >= 0 ? '📈' : '📉';
         const changeSign = ch >= 0 ? '+' : '';
-        message += `💰 $${escapeMarkdownV2(priceStr)} ${changeIcon} ${escapeMarkdownV2(changeSign + ch)}% (VWAP)\n`;
+        message += `💰 $${esc(priceStr)} ${changeIcon} ${esc(changeSign + ch)}% \\(VWAP\\)\n`;
       } else {
-        message += `💰 $${escapeMarkdownV2(priceStr)}\n`;
+        message += `💰 $${esc(priceStr)}\n`;
       }
     }
 
-    message += `📊 RSI: ${sig.rsi} (15m) / ${sig.rsi1h} (1h)`;
-    if (sig.stochRSI) message += ` | Stoch: ${sig.stochRSI}`;
+    // Indicators
+    message += `📊 RSI: ${esc(sig.rsi)} \\(15m\\) / ${esc(sig.rsi1h)} \\(1h\\)`;
+    if (sig.stochRSI) message += ` \\| Stoch: ${esc(sig.stochRSI)}`;
     message += `\n`;
 
-    message += `📍 BB: ${sig.bbPosition}%`;
-    if (sig.superTrend) message += ` | ST: ${sig.superTrend}`;
+    message += `📍 BB: ${esc(sig.bbPosition)}%`;
+    if (sig.superTrend) message += ` \\| ST: ${esc(sig.superTrend)}`;
     if (sig.superTrendFlipped) message += ` 🔄`;
-    if (sig.macdBullish !== undefined) message += ` | MACD: ${sig.macdBullish ? '🟢' : '🔴'}`;
+    if (sig.macdBullish !== undefined) message += ` \\| MACD: ${sig.macdBullish ? '🟢' : '🔴'}`;
     message += `\n`;
 
+    // Score and Badges
     if (sig.hasPattern || sig.hasDivergence) {
       let badges = [];
       if (sig.hasDivergence) badges.push('🔥DIV');
       if (sig.hasPattern) badges.push('🕯️PAT');
-      message += `🎯 Score: ${sig.score}/100 ${badges.join(' ')}\n`;
+      message += `🎯 Score: ${esc(sig.score)}/100 ${badges.join(' ')}\n`;
     } else {
-      message += `🎯 Score: ${sig.score}/100\n`;
+      message += `🎯 Score: ${esc(sig.score)}/100\n`;
     }
 
-    if (sig.volumeConfirmed) message += `📊 Vol: ${sig.volumeRatio}x\n`;
+    // Volume
+    if (sig.volumeConfirmed) message += `📊 Vol: ${esc(sig.volumeRatio)}x\n`;
 
+    // Order Flow
     if (sig.spreadBps !== undefined || sig.obi !== undefined) {
       const spreadText = sig.spreadBps !== undefined ? String(sig.spreadBps) : 'N/A';
       const obiText = sig.obi !== undefined ? String(sig.obi) : 'N/A';
-      message += `📚 Spread: ${spreadText} bps | OBI: ${obiText}\n`;
+      message += `📚 Spread: ${esc(spreadText)} bps \\| OBI: ${esc(obiText)}\n`;
     }
 
+    // ATR & Delta
     if (sig.atrPercent !== undefined) {
-      message += `🌀 ATR: ${sig.atrPercent}%`;
-      if (sig.deltaRatio !== undefined) message += ` | Δ: ${sig.deltaRatio}`;
+      message += `🌀 ATR: ${esc(sig.atrPercent)}%`;
+      if (sig.deltaRatio !== undefined) message += ` \\| Δ: ${esc(sig.deltaRatio)}`;
       message += `\n`;
     }
 
+    // Reasons
     const reasonsArr = Array.isArray(sig.reasons) ? sig.reasons : [];
     if (reasonsArr.length > 0) {
-      message += `💡 _${escapeMarkdownV2(reasonsArr[0])}_\n`;
+      message += `💡 _${esc(reasonsArr[0])}_\n`;
     }
 
     message += `───────────────────\n`;
@@ -1133,7 +1144,7 @@ async function sendTelegramNotification(signals) {
     minute: '2-digit',
     timeZone: 'Europe/Madrid'
   });
-  message += `🤖 _Day Trade Scanner_ • ${escapeMarkdownV2(timeStr)}`;
+  message += `🤖 _Day Trade Scanner_ • ${esc(timeStr)}`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
