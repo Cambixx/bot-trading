@@ -11,6 +11,7 @@
  */
 
 import { schedule } from "@netlify/functions";
+import { getStore } from "@netlify/blobs";
 
 console.log('--- DAY TRADE Analysis Module Loaded ---');
 
@@ -30,7 +31,9 @@ const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 30;
 const USE_MULTI_TF = (process.env.USE_MULTI_TF || 'true').toLowerCase() === 'true';
 
-const lastNotifiedAtByKey = new Map();
+// Persistent cooldown storage using Netlify Blobs
+const COOLDOWN_STORE_KEY = 'signal-cooldowns';
+const COOLDOWN_EXPIRY_HOURS = 24; // Clean old entries after 24h
 
 const MEXC_API = 'https://api.mexc.com/api/v3';
 
@@ -114,6 +117,69 @@ function getClosedCandles(candles, interval, now = Date.now()) {
 
   return candles;
 }
+
+// ==================== PERSISTENT COOLDOWN MANAGEMENT ====================
+
+async function loadCooldowns() {
+  try {
+    const store = getStore('trading-signals');
+    const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
+
+    if (!data || typeof data !== 'object') {
+      console.log('No existing cooldown data found, starting fresh');
+      return {};
+    }
+
+    // Clean expired entries (older than COOLDOWN_EXPIRY_HOURS)
+    const now = Date.now();
+    const expiryMs = COOLDOWN_EXPIRY_HOURS * 60 * 60 * 1000;
+    const cleaned = {};
+    let cleanedCount = 0;
+
+    for (const [key, timestamp] of Object.entries(data)) {
+      if (Number.isFinite(timestamp) && (now - timestamp) < expiryMs) {
+        cleaned[key] = timestamp;
+      } else {
+        cleanedCount++;
+      }
+    }
+
+    if (cleanedCount > 0) {
+      console.log(`Cleaned ${cleanedCount} expired cooldown entries`);
+    }
+
+    console.log(`Loaded ${Object.keys(cleaned).length} active cooldowns from persistent storage`);
+    return cleaned;
+  } catch (error) {
+    console.error('Error loading cooldowns:', error.message);
+    return {};
+  }
+}
+
+async function saveCooldowns(cooldowns) {
+  try {
+    const store = getStore('trading-signals');
+    await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
+    console.log(`Saved ${Object.keys(cooldowns).length} cooldowns to persistent storage`);
+    return true;
+  } catch (error) {
+    console.error('Error saving cooldowns:', error.message);
+    return false;
+  }
+}
+
+function shouldNotify(cooldowns, key, cooldownMinutes) {
+  const now = Date.now();
+  const lastTs = cooldowns[key] || 0;
+  const cooldownMs = Math.max(0, cooldownMinutes) * 60 * 1000;
+
+  if (cooldownMs > 0 && now - lastTs < cooldownMs) {
+    return false;
+  }
+
+  return true;
+}
+
 
 // ==================== MARKET DATA ====================
 
@@ -1330,6 +1396,9 @@ async function runAnalysis() {
   console.log('--- DAY TRADE Analysis Started ---');
   console.log('Time:', new Date().toISOString());
 
+  // Load persistent cooldown state
+  const cooldowns = await loadCooldowns();
+
   const signals = [];
   let analyzed = 0;
   let errors = 0;
@@ -1366,15 +1435,13 @@ async function runAnalysis() {
       if (signal) {
         const reasonKey = Array.isArray(signal.reasons) && signal.reasons.length > 0 ? signal.reasons[0] : '';
         const key = `${signal.symbol}:${signal.type}:${reasonKey}`;
-        const now = Date.now();
-        const lastTs = lastNotifiedAtByKey.get(key) || 0;
-        const cooldownMs = Math.max(0, ALERT_COOLDOWN_MIN) * 60 * 1000;
-        if (cooldownMs > 0 && now - lastTs < cooldownMs) {
-          console.log(`Signal skipped (cooldown): ${symbol} - Type: ${signal.type}`);
-        } else {
-          lastNotifiedAtByKey.set(key, now);
+
+        if (shouldNotify(cooldowns, key, ALERT_COOLDOWN_MIN)) {
+          cooldowns[key] = Date.now();
           signals.push(signal);
           console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
+        } else {
+          console.log(`Signal skipped (cooldown): ${symbol} - Type: ${signal.type}`);
         }
       }
 
@@ -1388,6 +1455,11 @@ async function runAnalysis() {
   }
 
   console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
+
+  // Save updated cooldown state
+  if (Object.keys(cooldowns).length > 0) {
+    await saveCooldowns(cooldowns);
+  }
 
   let telegramResult = { success: true, sent: 0 };
   if (signals.length > 0) {

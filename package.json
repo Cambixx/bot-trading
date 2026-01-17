@@ -13,6 +13,7 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.5.0",
     "@netlify/functions": "^5.1.1",
     "@supabase/supabase-js": "^2.86.2",
     "axios": "^1.6.2",
