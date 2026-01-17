@@ -123,7 +123,7 @@ function getClosedCandles(candles, interval, now = Date.now()) {
 async function loadCooldowns(context) {
   try {
     const siteID = context?.site?.id || process.env.SITE_ID;
-    const token = context?.token || process.env.NETLIFY_AUTH_TOKEN; // Fallback attempts
+    const token = context?.token || process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_API_TOKEN; // Fallback attempts
 
     console.log(`DEBUG Blobs config: siteID=${siteID ? 'OK' : 'MISSING'}, token=${token ? 'OK' : 'MISSING'}`);
 
@@ -169,7 +169,7 @@ async function loadCooldowns(context) {
 async function saveCooldowns(cooldowns, context) {
   try {
     const siteID = context?.site?.id || process.env.SITE_ID;
-    const token = context?.token || process.env.NETLIFY_AUTH_TOKEN;
+    const token = context?.token || process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_API_TOKEN;
 
     const store = getStore({
       name: 'trading-signals',
@@ -1503,7 +1503,10 @@ const scheduledHandler = async (event, context) => {
   // DEBUG: Inspect context for Blobs
   if (context) {
     console.log('DEBUG Context Keys:', Object.keys(context));
-    if (context.clientContext) console.log('DEBUG clientContext Keys:', Object.keys(context.clientContext));
+    if (context.clientContext) {
+      console.log('DEBUG clientContext Keys:', Object.keys(context.clientContext));
+      if (context.clientContext.custom) console.log('DEBUG clientContext.custom:', JSON.stringify(context.clientContext.custom));
+    }
   } else {
     console.log('DEBUG Link: Context is MISSING');
   }
