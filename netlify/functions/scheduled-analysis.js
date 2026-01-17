@@ -122,10 +122,15 @@ function getClosedCandles(candles, interval, now = Date.now()) {
 
 async function loadCooldowns(context) {
   try {
+    const siteID = context?.site?.id || process.env.SITE_ID;
+    const token = context?.token || process.env.NETLIFY_AUTH_TOKEN; // Fallback attempts
+
+    console.log(`DEBUG Blobs config: siteID=${siteID ? 'OK' : 'MISSING'}, token=${token ? 'OK' : 'MISSING'}`);
+
     const store = getStore({
       name: 'trading-signals',
-      siteID: context?.site?.id,
-      token: context?.token
+      siteID,
+      token
     });
     const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
 
@@ -163,10 +168,13 @@ async function loadCooldowns(context) {
 
 async function saveCooldowns(cooldowns, context) {
   try {
+    const siteID = context?.site?.id || process.env.SITE_ID;
+    const token = context?.token || process.env.NETLIFY_AUTH_TOKEN;
+
     const store = getStore({
       name: 'trading-signals',
-      siteID: context?.site?.id,
-      token: context?.token
+      siteID,
+      token
     });
     await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
     console.log(`Saved ${Object.keys(cooldowns).length} cooldowns to persistent storage`);
@@ -1491,6 +1499,18 @@ async function runAnalysis(context = null) {
 
 const scheduledHandler = async (event, context) => {
   const method = event && (event.httpMethod || event.method) ? String(event.httpMethod || event.method).toUpperCase() : '';
+
+  // DEBUG: Inspect context for Blobs
+  if (context) {
+    console.log('DEBUG Context Keys:', Object.keys(context));
+    if (context.clientContext) console.log('DEBUG clientContext Keys:', Object.keys(context.clientContext));
+  } else {
+    console.log('DEBUG Link: Context is MISSING');
+  }
+  console.log('DEBUG Env:', {
+    SITE_ID: process.env.SITE_ID ? 'Present' : 'Missing',
+    NETLIFY_BLOBS_CONTEXT: process.env.NETLIFY_BLOBS_CONTEXT ? 'Present' : 'Missing'
+  });
 
   if (method) {
     const headers = event.headers || {};
