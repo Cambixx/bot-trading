@@ -120,9 +120,13 @@ function getClosedCandles(candles, interval, now = Date.now()) {
 
 // ==================== PERSISTENT COOLDOWN MANAGEMENT ====================
 
-async function loadCooldowns() {
+async function loadCooldowns(context) {
   try {
-    const store = getStore('trading-signals');
+    const store = getStore({
+      name: 'trading-signals',
+      siteID: context?.site?.id,
+      token: context?.token
+    });
     const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
 
     if (!data || typeof data !== 'object') {
@@ -152,13 +156,18 @@ async function loadCooldowns() {
     return cleaned;
   } catch (error) {
     console.error('Error loading cooldowns:', error.message);
+    console.log('Falling back to in-memory cooldown (will not persist between executions)');
     return {};
   }
 }
 
-async function saveCooldowns(cooldowns) {
+async function saveCooldowns(cooldowns, context) {
   try {
-    const store = getStore('trading-signals');
+    const store = getStore({
+      name: 'trading-signals',
+      siteID: context?.site?.id,
+      token: context?.token
+    });
     await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
     console.log(`Saved ${Object.keys(cooldowns).length} cooldowns to persistent storage`);
     return true;
@@ -1392,12 +1401,12 @@ async function sendTelegramNotification(signals) {
 
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
-async function runAnalysis() {
+async function runAnalysis(context = null) {
   console.log('--- DAY TRADE Analysis Started ---');
   console.log('Time:', new Date().toISOString());
 
   // Load persistent cooldown state
-  const cooldowns = await loadCooldowns();
+  const cooldowns = await loadCooldowns(context);
 
   const signals = [];
   let analyzed = 0;
@@ -1458,7 +1467,7 @@ async function runAnalysis() {
 
   // Save updated cooldown state
   if (Object.keys(cooldowns).length > 0) {
-    await saveCooldowns(cooldowns);
+    await saveCooldowns(cooldowns, context);
   }
 
   let telegramResult = { success: true, sent: 0 };
@@ -1480,7 +1489,7 @@ async function runAnalysis() {
 
 // ==================== SCHEDULED HANDLER (Netlify) ====================
 
-const scheduledHandler = async (event) => {
+const scheduledHandler = async (event, context) => {
   const method = event && (event.httpMethod || event.method) ? String(event.httpMethod || event.method).toUpperCase() : '';
 
   if (method) {
@@ -1531,7 +1540,7 @@ const scheduledHandler = async (event) => {
     });
 
     if (isSchedule) {
-      const result = await runAnalysis();
+      const result = await runAnalysis(context);
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -1573,7 +1582,7 @@ const scheduledHandler = async (event) => {
     };
   }
 
-  const result = await runAnalysis();
+  const result = await runAnalysis(context);
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
