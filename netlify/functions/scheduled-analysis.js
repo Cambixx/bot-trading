@@ -11,6 +11,7 @@
  */
 
 import { schedule } from "@netlify/functions";
+import { getStore } from "@netlify/blobs";
 
 console.log('--- DAY TRADE Analysis Module Loaded ---');
 
@@ -30,7 +31,11 @@ const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 30;
 const USE_MULTI_TF = (process.env.USE_MULTI_TF || 'true').toLowerCase() === 'true';
 
-const lastNotifiedAtByKey = new Map();
+// Persistent cooldown storage using Netlify Blobs
+const COOLDOWN_STORE_KEY = 'signal-cooldowns';
+const COOLDOWN_EXPIRY_HOURS = 24;
+
+// const lastNotifiedAtByKey = new Map(); // Replaced by Blobs
 
 const MEXC_API = 'https://api.mexc.com/api/v3';
 
@@ -115,6 +120,40 @@ function getClosedCandles(candles, interval, now = Date.now()) {
   return candles;
 }
 
+async function loadCooldowns(context) {
+  if (!context?.site?.id || !context?.token) {
+    console.warn('⚠️ No Netlify context - using memory-only cooldowns');
+    return {};
+  }
+  try {
+    const store = getStore({ name: 'trading-signals', siteID: context.site.id, token: context.token });
+    const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
+    if (!data) return {};
+
+    // Cleanup expired
+    const now = Date.now();
+    const fresh = {};
+    const expiryMs = COOLDOWN_EXPIRY_HOURS * 3600 * 1000;
+    for (const [k, ts] of Object.entries(data)) {
+      if (Number(ts) && (now - Number(ts) < expiryMs)) fresh[k] = ts;
+    }
+    return fresh;
+  } catch (e) {
+    console.error('Error loading cooldowns:', e.message);
+    return {};
+  }
+}
+
+async function saveCooldowns(cooldowns, context) {
+  if (!context?.site?.id || !context?.token) return;
+  try {
+    const store = getStore({ name: 'trading-signals', siteID: context.site.id, token: context.token });
+    await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
+  } catch (e) {
+    console.error('Error saving cooldowns:', e.message);
+  }
+}
+
 // ==================== MARKET DATA ====================
 
 async function getKlines(symbol, interval = '15m', limit = 200) {
@@ -153,7 +192,22 @@ async function getKlines(symbol, interval = '15m', limit = 200) {
       takerBuyBaseVolume: candle[9] ? Number(candle[9]) : null,
       takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : null
     };
-  });
+  }).filter(c => validateCandle(c));
+}
+
+function validateCandle(candle) {
+  return (
+    Number.isFinite(candle.open) && candle.open > 0 &&
+    Number.isFinite(candle.high) && candle.high > 0 &&
+    Number.isFinite(candle.low) && candle.low > 0 &&
+    Number.isFinite(candle.close) && candle.close > 0 &&
+    candle.high >= candle.low &&
+    candle.high >= candle.open &&
+    candle.high >= candle.close &&
+    candle.low <= candle.open &&
+    candle.low <= candle.close &&
+    Number.isFinite(candle.volume) && candle.volume >= 0
+  );
 }
 
 async function getOrderBookDepth(symbol, limit = 20) {
@@ -1326,9 +1380,13 @@ async function sendTelegramNotification(signals) {
 
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
-async function runAnalysis() {
+async function runAnalysis(context = null) {
   console.log('--- DAY TRADE Analysis Started ---');
   console.log('Time:', new Date().toISOString());
+
+  // Load persistent cooldowns
+  const cooldowns = await loadCooldowns(context);
+  console.log(`Loaded ${Object.keys(cooldowns).length} cooldown entries`);
 
   const signals = [];
   let analyzed = 0;
@@ -1367,12 +1425,12 @@ async function runAnalysis() {
         const reasonKey = Array.isArray(signal.reasons) && signal.reasons.length > 0 ? signal.reasons[0] : '';
         const key = `${signal.symbol}:${signal.type}:${reasonKey}`;
         const now = Date.now();
-        const lastTs = lastNotifiedAtByKey.get(key) || 0;
+        const lastTs = cooldowns[key] || 0;
         const cooldownMs = Math.max(0, ALERT_COOLDOWN_MIN) * 60 * 1000;
         if (cooldownMs > 0 && now - lastTs < cooldownMs) {
           console.log(`Signal skipped (cooldown): ${symbol} - Type: ${signal.type}`);
         } else {
-          lastNotifiedAtByKey.set(key, now);
+          cooldowns[key] = now;
           signals.push(signal);
           console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
         }
@@ -1396,6 +1454,11 @@ async function runAnalysis() {
     console.log('No significant signals detected this cycle');
   }
 
+  // Save updated cooldowns
+  if (Object.keys(cooldowns).length > 0) {
+    await saveCooldowns(cooldowns, context);
+  }
+
   return {
     success: true,
     analyzed,
@@ -1408,7 +1471,7 @@ async function runAnalysis() {
 
 // ==================== SCHEDULED HANDLER (Netlify) ====================
 
-const scheduledHandler = async (event) => {
+const scheduledHandler = async (event, context) => {
   const method = event && (event.httpMethod || event.method) ? String(event.httpMethod || event.method).toUpperCase() : '';
 
   if (method) {
@@ -1459,7 +1522,7 @@ const scheduledHandler = async (event) => {
     });
 
     if (isSchedule) {
-      const result = await runAnalysis();
+      const result = await runAnalysis(context);
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -1501,7 +1564,7 @@ const scheduledHandler = async (event) => {
     };
   }
 
-  const result = await runAnalysis();
+  const result = await runAnalysis(context);
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
