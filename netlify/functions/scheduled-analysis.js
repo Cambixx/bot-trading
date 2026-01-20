@@ -145,6 +145,7 @@ async function loadCooldowns(context) {
     const fresh = {};
     const expiryMs = COOLDOWN_EXPIRY_HOURS * 3600 * 1000;
     for (const [k, ts] of Object.entries(data)) {
+      // Logic for backward compatibility with old keys
       if (Number(ts) && (now - Number(ts) < expiryMs)) fresh[k] = ts;
     }
     return fresh;
@@ -173,18 +174,18 @@ async function recordSignalHistory(signal, context) {
     const store = getInternalStore(context);
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
 
-    // Risk/Reward Setup (1:1.5)
+    // Risk/Reward Setup (2:1.5)
     // ATR is used for dynamic SL/TP
     const atrFactor = signal.atrPercent || 1;
     const entryPrice = signal.price;
     let tp, sl;
 
     if (signal.type === 'BUY') {
-      tp = entryPrice * (1 + (atrFactor / 100) * 1.5);
-      sl = entryPrice * (1 - (atrFactor / 100) * 1.0);
+      tp = entryPrice * (1 + (atrFactor / 100) * 2.0);
+      sl = entryPrice * (1 - (atrFactor / 100) * 1.5);
     } else {
-      tp = entryPrice * (1 - (atrFactor / 100) * 1.5);
-      sl = entryPrice * (1 + (atrFactor / 100) * 1.0);
+      tp = entryPrice * (1 - (atrFactor / 100) * 2.0);
+      sl = entryPrice * (1 + (atrFactor / 100) * 1.5);
     }
 
     const record = {
@@ -1460,19 +1461,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Adaptive Strategy by Regime
   if (regime === 'TRENDING') {
-    weights.trend = 0.50;    // Trend is king (Increased from 0.45)
-    weights.momentum = 0.15; // Reduced momentum impact (oscilators fail in strong trends)
-    MIN_QUALITY_SCORE = 76;  // Stricter threshold (was 70)
+    weights.trend = 0.45;    // Trend is king
+    weights.momentum = 0.20;
+    MIN_QUALITY_SCORE = 75;  // Higher bar for trend continuation
   } else if (regime === 'RANGING') {
-    weights.structure = 0.45; // S/R and OBs are king (Increased from 0.40)
-    weights.momentum = 0.30;
-    weights.trend = 0.10;
-    MIN_QUALITY_SCORE = 78;   // Higher bar for range trades (was 75)
+    weights.structure = 0.40; // S/R and OBs are king
+    weights.momentum = 0.35;  // RSI extremes are important
+    weights.trend = 0.10;     // Trend is less relevant
+    MIN_QUALITY_SCORE = 75;   // Higher bar for range trades
   } else if (regime === 'HIGH_VOLATILITY') {
     weights.structure = 0.40;
     weights.volume = 0.40;    // Volume/OrderFlow is king
     weights.trend = 0.10;
-    MIN_QUALITY_SCORE = 85;   // Very high bar for volatile markets (was 82)
+    MIN_QUALITY_SCORE = 85;   // Very high bar for volatile markets
   }
 
   score = Math.round(
@@ -1488,31 +1489,34 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Confluence bonus
   if (strongCategories >= 4) {
-    score = Math.round(score * 1.15); // Reduced bonus to avoid score inflation (was 1.20)
+    score = Math.round(score * 1.20); // +20% bonus
     reasons.push('🎯 CONFLUENCIA EXCEPCIONAL');
   } else if (strongCategories >= 3) {
-    score = Math.round(score * 1.05); // Reduced bonus (was 1.10)
+    score = Math.round(score * 1.10); // +10% bonus
     reasons.push('🎯 Alta Confluencia');
   }
 
   score = Math.min(100, score);
 
+  // === OVEREXTENSION FILTERS (NO-CHASE) ===
+  if (signalType === 'BUY' && (rsi15m > 68 || bbPercent > 0.85)) {
+    // If buying on too high RSI or too near Upper BB, reject
+    return null;
+  }
+  if (signalType === 'SELL_ALERT' && (rsi15m < 32 || bbPercent < 0.15)) {
+    // If selling on too low RSI or too near Lower BB, reject
+    return null;
+  }
+
   // === STRICT FILTERS ===
   // Reject low-volume setups
-  if (volumeRatio < 0.8) return null;
-
-  // High Score Trap Filter: If score is very high (>85), we need volume confirmation
-  // Analysis showed 0% win rate for scores > 86 without strong volume
-  if (score > 85 && volumeRatio < 1.5) {
-    // Downgrade score if volume doesn't support the "perfect" setup
-    score = Math.round(score * 0.85);
-    reasons.push('⚠️ High Score / Low Vol Penalty');
-  }
+  if (volumeRatio < 1.0) return null; // Increased from 0.8
 
   if (score < MIN_QUALITY_SCORE) return null;
 
-  // Must have at least 2 strong categories
-  if (strongCategories < 2) return null;
+  // Must have at least 3 strong categories if Trending, or 2 otherwise
+  const requiredStrong = regime === 'TRENDING' ? 3 : 2;
+  if (strongCategories < requiredStrong) return null;
 
   // === FINAL OUTPUT ===
   if (score >= MIN_QUALITY_SCORE && reasons.length > 0 && signalType) {
@@ -1738,7 +1742,7 @@ async function runAnalysis(context = null) {
       const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h);
       if (signal) {
         const reasonKey = Array.isArray(signal.reasons) && signal.reasons.length > 0 ? signal.reasons[0] : '';
-        const key = `${signal.symbol}:${signal.type}:${reasonKey}`;
+        const key = `${signal.symbol}:${signal.type}`;
         const now = Date.now();
         const lastTs = cooldowns[key] || 0;
         const cooldownMs = Math.max(0, ALERT_COOLDOWN_MIN) * 60 * 1000;
