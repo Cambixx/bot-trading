@@ -775,7 +775,7 @@ function calculateOrderBookMetrics(orderBook) {
 // ==================== MARKET REGIME DETECTION ====================
 
 function calculateVolatilityPercentile(candles, atrPeriod = 14) {
-  const atrs = calculateATR(candles, atrPeriod);
+  const atrs = calculateATRSeries(candles, atrPeriod);
   if (!atrs || atrs.length < 50) return 50; // Neutral if not enough data
 
   const currentATR = atrs[atrs.length - 1];
@@ -784,6 +784,7 @@ function calculateVolatilityPercentile(candles, atrPeriod = 14) {
   const sorted = [...last50ATRs].sort((a, b) => a - b);
   const rank = sorted.findIndex(v => v >= currentATR);
 
+  if (sorted.length === 0) return 50;
   return (rank / sorted.length) * 100;
 }
 
