@@ -145,12 +145,104 @@ async function loadCooldowns(context) {
 }
 
 async function saveCooldowns(cooldowns, context) {
-  if (!context?.site?.id || !context?.token) return;
+  if (!context?.token || !context?.site?.id) return;
   try {
     const store = getStore({ name: 'trading-signals', siteID: context.site.id, token: context.token });
     await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
-  } catch (e) {
-    console.error('Error saving cooldowns:', e.message);
+  } catch (error) {
+    console.error('Error saving cooldowns to Blob:', error.message);
+  }
+}
+
+// ==================== SIGNAL HISTORY & BACKTESTING ====================
+
+const HISTORY_STORE_KEY = 'signal-history-v2';
+
+async function recordSignalHistory(signal, context) {
+  if (!context?.token || !context?.site?.id) return;
+  try {
+    const store = getStore({ name: 'trading-signals', siteID: context.site.id, token: context.token });
+    const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
+
+    // Risk/Reward Setup (1:1.5)
+    // ATR is used for dynamic SL/TP
+    const atrFactor = signal.atrPercent || 1;
+    const entryPrice = signal.price;
+    let tp, sl;
+
+    if (signal.type === 'BUY') {
+      tp = entryPrice * (1 + (atrFactor / 100) * 1.5);
+      sl = entryPrice * (1 - (atrFactor / 100) * 1.0);
+    } else {
+      tp = entryPrice * (1 - (atrFactor / 100) * 1.5);
+      sl = entryPrice * (1 + (atrFactor / 100) * 1.0);
+    }
+
+    const record = {
+      id: `${Date.now()}-${signal.symbol}`,
+      symbol: signal.symbol,
+      entry: entryPrice,
+      tp,
+      sl,
+      type: signal.type,
+      time: Date.now(),
+      status: 'OPEN',
+      score: signal.score,
+      regime: signal.regime
+    };
+
+    history.push(record);
+    await store.setJSON(HISTORY_STORE_KEY, history.slice(-200)); // Last 200 signals
+  } catch (error) {
+    console.error('Error recording history:', error.message);
+  }
+}
+
+async function updateSignalHistory(tickers, context) {
+  if (!context?.token || !context?.site?.id || !tickers.length) return { open: 0, wins: 0, losses: 0 };
+
+  try {
+    const store = getStore({ name: 'trading-signals', siteID: context.site.id, token: context.token });
+    let history = await store.get(HISTORY_STORE_KEY, { type: 'json' });
+    if (!history || !history.length) return { open: 0, wins: 0, losses: 0 };
+
+    const prices = new Map(tickers.map(t => [t.symbol, Number(t.lastPrice)]));
+    let updated = false;
+
+    for (const item of history) {
+      if (item.status === 'OPEN') {
+        const currentPrice = prices.get(item.symbol);
+        if (!currentPrice) continue;
+
+        if (item.type === 'BUY') {
+          if (currentPrice >= item.tp) { item.status = 'CLOSED'; item.outcome = 'WIN'; updated = true; }
+          else if (currentPrice <= item.sl) { item.status = 'CLOSED'; item.outcome = 'LOSS'; updated = true; }
+        } else {
+          if (currentPrice <= item.tp) { item.status = 'CLOSED'; item.outcome = 'WIN'; updated = true; }
+          else if (currentPrice >= item.sl) { item.status = 'CLOSED'; item.outcome = 'LOSS'; updated = true; }
+        }
+
+        // Auto-expire after 48 hours
+        if (item.status === 'OPEN' && Date.now() - item.time > 48 * 3600 * 1000) {
+          item.status = 'EXPIRED';
+          updated = true;
+        }
+      }
+    }
+
+    if (updated) await store.setJSON(HISTORY_STORE_KEY, history);
+
+    const closed = history.filter(h => h.status === 'CLOSED');
+    const wins = closed.filter(h => h.outcome === 'WIN').length;
+    return {
+      open: history.filter(h => h.status === 'OPEN').length,
+      wins,
+      losses: closed.length - wins,
+      winRate: closed.length > 0 ? (wins / closed.length * 100).toFixed(1) : 0
+    };
+  } catch (error) {
+    console.error('Error updating history:', error.message);
+    return null;
   }
 }
 
@@ -680,6 +772,102 @@ function calculateOrderBookMetrics(orderBook) {
   return { spreadBps, depthQuoteTopN: totalNotional, obi, volumeImbalance };
 }
 
+// ==================== MARKET REGIME DETECTION ====================
+
+function calculateVolatilityPercentile(candles, atrPeriod = 14) {
+  const atrs = calculateATR(candles, atrPeriod);
+  if (!atrs || atrs.length < 50) return 50; // Neutral if not enough data
+
+  const currentATR = atrs[atrs.length - 1];
+  const last50ATRs = atrs.slice(-50).filter(v => v !== null);
+
+  const sorted = [...last50ATRs].sort((a, b) => a - b);
+  const rank = sorted.findIndex(v => v >= currentATR);
+
+  return (rank / sorted.length) * 100;
+}
+
+function detectMarketRegime(candles, adx) {
+  const atrPercentile = calculateVolatilityPercentile(candles);
+  const trendStrength = adx ? adx.adx : 0;
+
+  if (trendStrength > 25 && atrPercentile < 70) {
+    return 'TRENDING';
+  } else if (trendStrength < 20 && atrPercentile < 40) {
+    return 'RANGING';
+  } else if (atrPercentile > 85) {
+    return 'HIGH_VOLATILITY';
+  } else {
+    return 'TRANSITION';
+  }
+}
+
+// ==================== SMART MONEY CONCEPTS ====================
+
+function detectSmartMoneyConcepts(candles, lookback = 50) {
+  const fvgs = [];
+  const orderBlocks = [];
+
+  if (candles.length < 5) return { fvgs: [], orderBlocks: [] };
+
+  const start = Math.max(2, candles.length - lookback);
+
+  for (let i = start; i < candles.length; i++) {
+    const c0 = candles[i - 2];
+    const c1 = candles[i - 1];
+    const c2 = candles[i];
+
+    // --- FVG Detection ---
+    // Bullish FVG: Gap between c0.high and c2.low
+    if (c2.low > c0.high) {
+      fvgs.push({
+        type: 'BULLISH',
+        top: c2.low,
+        bottom: c0.high,
+        price: (c2.low + c0.high) / 2,
+        time: c1.time
+      });
+    }
+    // Bearish FVG: Gap between c0.low and c2.high
+    else if (c2.high < c0.low) {
+      fvgs.push({
+        type: 'BEARISH',
+        top: c0.low,
+        bottom: c2.high,
+        price: (c0.low + c2.high) / 2,
+        time: c1.time
+      });
+    }
+
+    // --- Order Block Detection ---
+    const bodySize = Math.abs(c2.close - c2.open);
+    const prevBody = Math.abs(c1.close - c1.open);
+
+    // Bullish OB: Bearish candle followed by strong bullish move
+    if (c1.close < c1.open && c2.close > c2.open && bodySize > prevBody * 1.5 && c2.close > c1.high) {
+      orderBlocks.push({
+        type: 'BULLISH',
+        top: c1.high,
+        bottom: c1.low,
+        price: (c1.high + c1.low) / 2,
+        time: c1.time
+      });
+    }
+    // Bearish OB: Bullish candle followed by strong bearish move
+    else if (c1.close > c1.open && c2.close < c2.open && bodySize > prevBody * 1.5 && c2.close < c1.low) {
+      orderBlocks.push({
+        type: 'BEARISH',
+        top: c1.high,
+        bottom: c1.low,
+        price: (c1.high + c1.low) / 2,
+        time: c1.time
+      });
+    }
+  }
+
+  return { fvgs, orderBlocks };
+}
+
 // ==================== PRICE ACTION PATTERNS ====================
 
 function detectPriceActionPatterns(candles) {
@@ -952,7 +1140,7 @@ function calculateConfluence(analysis15m, analysis1h) {
 
 // ==================== SIGNAL GENERATION ====================
 
-function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
+function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h) {
   if (!candles15m || candles15m.length < 201) return null;
 
   const closedCandles15m = getClosedCandles(candles15m, '15m');
@@ -990,6 +1178,21 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
   const macd1h = calculateMACD(closes1h);
   const superTrend1h = calculateSuperTrend(closedCandles1h, 10, 3);
 
+  let superTrend4h = null;
+  let trend4h = 'NEUTRAL';
+  if (candles4h && candles4h.length > 20) {
+    const closedCandles4h = getClosedCandles(candles4h, '4h');
+    const closes4h = closedCandles4h.map(c => c.close);
+    superTrend4h = calculateSuperTrend(closedCandles4h, 10, 3);
+    const ema50_4h = calculateEMA(closes4h, 50);
+
+    if (superTrend4h && ema50_4h) {
+      const lastClose = closes4h[closes4h.length - 1];
+      if (superTrend4h.bullish && lastClose > ema50_4h) trend4h = 'BULLISH';
+      else if (superTrend4h.bearish && lastClose < ema50_4h) trend4h = 'BEARISH';
+    }
+  }
+
   const vwap15m = calculateVWAP(closedCandles15m, 50);
   const volumeSMA15m = calculateVolumeSMA(closedCandles15m, 20);
   const currentVolume15m = closedCandles15m[closedCandles15m.length - 1].volume;
@@ -1006,230 +1209,311 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
   // Relaxed indicator validation - allow some indicators to fail
   if (!rsi15m && !macd15m && !bb15m) return null; // At least one major indicator must work
 
-  let score = 0;
-  const reasons = [];
+  // === CATEGORY-BASED QUALITY FRAMEWORK ===
   let signalType = null;
-
-  const isUptrend = ema9_15m > ema21_15m && ema21_15m > ema50_15m;
+  const reasons = [];
   const volumeRatio = volumeSMA15m ? currentVolume15m / volumeSMA15m : 1;
-  const volumeMultiplier = volumeRatio > 1.5 ? 1.15 : (volumeRatio > 1.0 ? 1.05 : 0.95);
 
-  const quoteVol24h = ticker24h ? Number(ticker24h.quoteVolume) : null;
-  if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return null;
+  const categoryScores = {
+    momentum: 0,
+    trend: 0,
+    structure: 0,
+    volume: 0,
+    patterns: 0
+  };
 
-  // === MOMENTUM SCORE (0-40) ===
+  // === CATEGORY 1: MOMENTUM (0-100) ===
+  let momentumScore = 0;
 
-  // RSI Conditions
+  // RSI (0-40)
   if (rsi15m < 30) {
-    score += 15;
+    momentumScore += 40;
     reasons.push(`⚡ RSI Sobrevendido (${rsi15m.toFixed(1)})`);
     signalType = 'BUY';
   } else if (rsi15m > 70) {
-    score += 15;
+    momentumScore += 40;
     reasons.push(`⚠️ RSI Sobrecomprado (${rsi15m.toFixed(1)})`);
     signalType = 'SELL_ALERT';
   } else if (rsi15m < 40 && rsi1h < 45) {
-    score += 10;
+    momentumScore += 25;
     reasons.push(`📊 RSI zona de compra (${rsi15m.toFixed(1)})`);
     if (!signalType) signalType = 'BUY';
   } else if (rsi15m > 60 && rsi1h > 55) {
-    score += 10;
+    momentumScore += 25;
     reasons.push(`📊 RSI zona de venta (${rsi15m.toFixed(1)})`);
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // Stochastic RSI
+  // Stochastic RSI (0-30)
   if (stoch15m) {
     if (stoch15m.oversold) {
-      score += 10;
+      momentumScore += 30;
       reasons.push('🎯 StochRSI Sobrevendido');
       if (!signalType) signalType = 'BUY';
     } else if (stoch15m.overbought) {
-      score += 10;
+      momentumScore += 30;
       reasons.push('🎯 StochRSI Sobrecomprado');
       if (!signalType) signalType = 'SELL_ALERT';
     }
   }
 
-  // MACD Confirmation
+  // MACD (0-30)
   if (macd15m.bullish) {
-    score += 8;
+    momentumScore += 20;
     reasons.push('📈 MACD Alcista');
-    if (signalType === 'BUY') score += 3;
+    if (signalType === 'BUY') momentumScore += 10; // Alignment bonus
   } else {
-    score -= 5;
     reasons.push('📉 MACD Bajista');
-    if (signalType === 'SELL_ALERT') score += 3;
+    if (signalType === 'SELL_ALERT') momentumScore += 20;
   }
 
-  // === TECHNICAL SCORE (0-40) ===
+  categoryScores.momentum = Math.min(100, momentumScore);
 
-  // SuperTrend Direction
+  // === CATEGORY 2: TREND (0-100) ===
+  let trendScore = 0;
+
+  // SuperTrend 15m (0-40)
   if (superTrend15m.bullish) {
-    score += 12;
+    trendScore += 30;
     reasons.push('🟢 SuperTrend Alcista');
     if (!signalType || signalType === 'BUY') signalType = 'BUY';
   } else if (superTrend15m.bearish) {
-    score += 12;
+    trendScore += 30;
     reasons.push('🔴 SuperTrend Bajista');
     if (!signalType || signalType === 'SELL_ALERT') signalType = 'SELL_ALERT';
   }
 
-  // SuperTrend Flip (strong signal)
   if (superTrend15m.flipped) {
-    score += 10;
-    reasons.push(superTrend15m.bullish ? '🔄 SuperTrend FLIP ALCISTA' : '🔄 SuperTrend FLIP BAJISTA');
+    trendScore += 10;
+    reasons.push(superTrend15m.bullish ? '🔄 FLIP ALCISTA' : '🔄 FLIP BAJISTA');
   }
 
-  // Bollinger Bands Position
-  const bbPercent = (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower);
-  if (bbPercent < 0.1) {
-    score += 8;
-    reasons.push('🏀 Precio en Banda Inferior BB');
+  // Multi-TF Confluence (0-50)
+  if (USE_MULTI_TF) {
+    // Strict 4H filter already applied above
+    const stAligned1h = superTrend15m.bullish === superTrend1h.bullish;
+    const stAligned4h = superTrend4h ? superTrend15m.bullish === superTrend4h.bullish : false;
+
+    if (stAligned1h && stAligned4h) {
+      trendScore += 50;
+      reasons.push('✅ Confluencia Total (3-TF)');
+    } else if (stAligned1h) {
+      trendScore += 25;
+      reasons.push('✅ Confluencia 1H');
+    }
+  }
+
+  // ADX Strength (0-10)
+  if (adx15m && adx15m.trending) {
+    trendScore += 10;
+    const trendDir = adx15m.bullishTrend ? 'Alcista' : 'Bajista';
+    reasons.push(`💨 ADX ${trendDir}`);
+  }
+
+  categoryScores.trend = Math.min(100, trendScore);
+
+  // === CATEGORY 3: STRUCTURE (Smart Money + BB) (0-100) ===
+  let structureScore = 0;
+
+  // Smart Money Concepts (0-70)
+  const smc = detectSmartMoneyConcepts(closedCandles15m, 100);
+  const nearbyBullishFVG = smc.fvgs.find(f => f.type === 'BULLISH' && currentPrice <= f.top * 1.002 && currentPrice >= f.bottom * 0.998);
+  const nearbyBullishOB = smc.orderBlocks.find(ob => ob.type === 'BULLISH' && currentPrice <= ob.top * 1.005 && currentPrice >= ob.bottom * 0.995);
+  const nearbyBearishFVG = smc.fvgs.find(f => f.type === 'BEARISH' && currentPrice >= f.bottom * 0.998 && currentPrice <= f.top * 1.002);
+  const nearbyBearishOB = smc.orderBlocks.find(ob => ob.type === 'BEARISH' && currentPrice >= ob.bottom * 0.995 && currentPrice <= ob.top * 1.005);
+
+  if (nearbyBullishOB && (signalType === 'BUY' || !signalType)) {
+    structureScore += 70;
+    reasons.unshift('🏦 Order Block Alcista');
     if (!signalType) signalType = 'BUY';
-  } else if (bbPercent > 0.9) {
-    score += 8;
-    reasons.push('🎈 Precio en Banda Superior BB');
+  } else if (nearbyBullishFVG && (signalType === 'BUY' || !signalType)) {
+    structureScore += 50;
+    reasons.unshift('🏦 FVG Alcista');
+    if (!signalType) signalType = 'BUY';
+  }
+
+  if (nearbyBearishOB && (signalType === 'SELL_ALERT' || !signalType)) {
+    structureScore += 70;
+    reasons.unshift('🏦 Order Block Bajista');
+    if (!signalType) signalType = 'SELL_ALERT';
+  } else if (nearbyBearishFVG && (signalType === 'SELL_ALERT' || !signalType)) {
+    structureScore += 50;
+    reasons.unshift('🏦 FVG Bajista');
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // Price breakout from BB
-  if (currentPrice > bb15m.upper && macd15m.bullish) {
-    score += 12;
-    reasons.push('🚀 Breakout BB Superior + MACD');
-    signalType = 'BUY';
+  // Bollinger Bands (0-30)
+  const bbPercent = (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower);
+  if (bbPercent < 0.1) {
+    structureScore += 25;
+    reasons.push('🏀 BB Inferior');
+    if (!signalType) signalType = 'BUY';
+  } else if (bbPercent > 0.9) {
+    structureScore += 25;
+    reasons.push('🎈 BB Superior');
+    if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // === TREND & CONFLUENCE SCORE (0-20) ===
+  categoryScores.structure = Math.min(100, structureScore);
 
-  // Multi-timeframe Trend Alignment
-  if (USE_MULTI_TF) {
-    const stAligned = superTrend15m.bullish === superTrend1h.bullish;
-    const trendAligned = (superTrend15m.bullish && ema9_15m > ema21_15m) ||
-      (superTrend15m.bearish && ema9_15m < ema21_15m);
+  // === CATEGORY 4: VOLUME & ORDER FLOW (0-100) ===
+  let volumeScore = 0;
 
-    if (stAligned && trendAligned) {
-      score += 15;
-      reasons.push('✅ Multi-TF Alineado');
-    } else if (stAligned) {
-      score += 8;
-    }
-
-    // ADX Trend Strength
-    if (adx15m && adx15m.trending) {
-      score += 5;
-      const trendDir = adx15m.bullishTrend ? 'Alcista' : 'Bajista';
-      reasons.push(`💨 ADX confirma tendencia ${trendDir}`);
-    }
-  } else {
-    if (isUptrend) {
-      score += 10;
-      reasons.push('✅ Tendencia Alcista (EMA9>21>50)');
-      if (signalType === 'BUY') signalType = 'BUY';
-    } else {
-      score += 10;
-      reasons.push('🔻 Tendencia Bajista');
-      if (signalType === 'SELL_ALERT') signalType = 'SELL_ALERT';
-    }
+  // Volume Confirmation (0-40)
+  if (volumeRatio > 1.5) {
+    volumeScore += 40;
+    reasons.push(`📊 Vol x${volumeRatio.toFixed(1)}`);
+  } else if (volumeRatio > 1.2) {
+    volumeScore += 25;
   }
 
-  // === PATTERNS & DIVERGENCES (0-25) ===
-
-  if (patterns.length > 0) {
-    const bestPattern = patterns.sort((a, b) => b.strength - a.strength)[0];
-    if (signalType === 'BUY' && bestPattern.type === 'BULLISH') {
-      score += bestPattern.strength;
-      reasons.unshift(`🕯️ ${bestPattern.name}`);
-    } else if (signalType === 'SELL_ALERT' && bestPattern.type === 'BEARISH') {
-      score += bestPattern.strength;
-      reasons.unshift(`🕯️ ${bestPattern.name}`);
-    } else if (bestPattern.type === 'BULLISH') {
-      score += bestPattern.strength * 0.5;
-      reasons.push(`🕯️ ${bestPattern.name}`);
-      if (!signalType) signalType = 'BUY';
-    } else if (bestPattern.type === 'BEARISH') {
-      score += bestPattern.strength * 0.5;
-      reasons.push(`🕯️ ${bestPattern.name}`);
-      if (!signalType) signalType = 'SELL_ALERT';
-    }
-  }
-
-  if (divergences.length > 0) {
-    const sortedDivs = divergences.sort((a, b) => b.strength - a.strength);
-    const bestDiv = sortedDivs[0];
-
-    if (bestDiv.type === 'BULLISH' && signalType === 'BUY') {
-      score += 20;
-      reasons.unshift(`🔥 ${bestDiv.name}`);
-    } else if (bestDiv.type === 'BEARISH' && signalType === 'SELL_ALERT') {
-      score += 20;
-      reasons.unshift(`🔥 ${bestDiv.name}`);
-    } else if (bestDiv.type === 'BULLISH') {
-      score += 10;
-      reasons.push(`🔥 ${bestDiv.name}`);
-    } else if (bestDiv.type === 'BEARISH') {
-      score += 10;
-      reasons.push(`🔥 ${bestDiv.name}`);
-    }
-  }
-
-  // === ORDER FLOW SCORE (0-15) ===
-
+  // Order Flow Delta (0-35)
   const direction = signalType === 'BUY' ? 1 : signalType === 'SELL_ALERT' ? -1 : 0;
   if (direction !== 0 && deltaRatio !== null) {
     const aligned = direction === 1 ? deltaRatio > 0 : deltaRatio < 0;
     if (aligned) {
-      score += 10;
-      reasons.push('📊 Order Flow Comprador' + (direction === 1 ? '↑' : '↓'));
-    } else {
-      score -= 5;
+      volumeScore += 35;
+      reasons.push('📊 Order Flow Aligned');
     }
   }
 
+  // OBI (0-25)
   if (direction !== 0) {
     const obiAligned = direction === 1 ? obMetrics.obi > 0.05 : obMetrics.obi < -0.05;
     if (obiAligned) {
-      score += 5;
-      reasons.push('📚 Book Imbalance Favorable');
+      volumeScore += 25;
+      reasons.push('📚 OBI Favorable');
     }
   }
 
-  // Apply Volume Multiplier
-  score = Math.max(0, Math.min(100, Math.round(score * volumeMultiplier)));
-  if (volumeRatio > 1.5) {
-    reasons.push(`📊 Volumen x${volumeRatio.toFixed(1)}`);
-  }
+  categoryScores.volume = Math.min(100, volumeScore);
 
-  // VWAP Distance
-  if (vwap15m) {
-    const vwapDist = ((currentPrice - vwap15m) / vwap15m) * 100;
-    if (signalType === 'BUY' && vwapDist > -2) {
-      score += 5;
-      reasons.push('📍 Sobre VWAP');
-    } else if (signalType === 'SELL_ALERT' && vwapDist < 2) {
-      score += 5;
-      reasons.push('📍 Bajo VWAP');
+  // === CATEGORY 5: PATTERNS & DIVERGENCES (0-100) ===
+  let patternsScore = 0;
+
+  // Candlestick Patterns (0-50)
+  if (patterns.length > 0) {
+    const bestPattern = patterns.sort((a, b) => b.strength - a.strength)[0];
+    if (signalType === 'BUY' && bestPattern.type === 'BULLISH') {
+      patternsScore += 50;
+      reasons.unshift(`🕯️ ${bestPattern.name}`);
+    } else if (signalType === 'SELL_ALERT' && bestPattern.type === 'BEARISH') {
+      patternsScore += 50;
+      reasons.unshift(`🕯️ ${bestPattern.name}`);
+    } else if (bestPattern.type === 'BULLISH' || bestPattern.type === 'BEARISH') {
+      patternsScore += 30;
+      reasons.push(`🕯️ ${bestPattern.name}`);
     }
   }
 
-  score = Math.max(0, Math.min(100, score));
+  // Divergences (0-50)
+  if (divergences.length > 0) {
+    const bestDiv = divergences.sort((a, b) => b.strength - a.strength)[0];
+    if ((bestDiv.type === 'BULLISH' && signalType === 'BUY') ||
+      (bestDiv.type === 'BEARISH' && signalType === 'SELL_ALERT')) {
+      patternsScore += 50;
+      reasons.unshift(`🔥 ${bestDiv.name}`);
+    } else {
+      patternsScore += 30;
+      reasons.push(`🔥 ${bestDiv.name}`);
+    }
+  }
 
-  // === FINAL FILTERS ===
+  categoryScores.patterns = Math.min(100, patternsScore);
 
-  const effectiveThreshold = signalType === 'BUY' ? SIGNAL_SCORE_THRESHOLD : SIGNAL_SCORE_THRESHOLD + 5;
+  // === CALCULATE FINAL SCORE ===
+  const quoteVol24h = ticker24h ? Number(ticker24h.quoteVolume) : null;
+  if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return null;
 
-  if (score >= effectiveThreshold && reasons.length > 0 && signalType) {
+  let score = 0;
+
+  // Apply 4H Trend Filter
+  if (USE_MULTI_TF) {
+    if (trend4h === 'BULLISH' && signalType === 'SELL_ALERT') return null;
+    if (trend4h === 'BEARISH' && signalType === 'BUY') return null;
+  }
+
+  // Detect Market Regime
+  const regime = detectMarketRegime(closedCandles15m, adx15m);
+  reasons.push(`🌐 Regime: ${regime}`);
+
+  if (regime === 'TRANSITION') return null; // Avoid low-probability transition phases
+
+  let MIN_QUALITY_SCORE = 70;
+  const weights = {
+    momentum: 0.25,
+    trend: 0.30,
+    structure: 0.25,
+    volume: 0.15,
+    patterns: 0.05
+  };
+
+  // Adaptive Strategy by Regime
+  if (regime === 'TRENDING') {
+    weights.trend = 0.45;    // Trend is king
+    weights.momentum = 0.20;
+    MIN_QUALITY_SCORE = 70;
+  } else if (regime === 'RANGING') {
+    weights.structure = 0.40; // S/R and OBs are king
+    weights.momentum = 0.35;  // RSI extremes are important
+    weights.trend = 0.10;     // Trend is less relevant
+    MIN_QUALITY_SCORE = 75;   // Higher bar for range trades
+  } else if (regime === 'HIGH_VOLATILITY') {
+    weights.structure = 0.40;
+    weights.volume = 0.40;    // Volume/OrderFlow is king
+    weights.trend = 0.10;
+    MIN_QUALITY_SCORE = 82;   // Very high bar for volatile markets
+  }
+
+  score = Math.round(
+    categoryScores.momentum * weights.momentum +
+    categoryScores.trend * weights.trend +
+    categoryScores.structure * weights.structure +
+    categoryScores.volume * weights.volume +
+    categoryScores.patterns * weights.patterns
+  );
+
+  // Count strong categories (>60%)
+  const strongCategories = Object.values(categoryScores).filter(s => s >= 60).length;
+
+  // Confluence bonus
+  if (strongCategories >= 4) {
+    score = Math.round(score * 1.20); // +20% bonus
+    reasons.push('🎯 CONFLUENCIA EXCEPCIONAL');
+  } else if (strongCategories >= 3) {
+    score = Math.round(score * 1.10); // +10% bonus
+    reasons.push('🎯 Alta Confluencia');
+  }
+
+  score = Math.min(100, score);
+
+  // === STRICT FILTERS ===
+  // Reject low-volume setups
+  if (volumeRatio < 0.8) return null;
+
+  if (score < MIN_QUALITY_SCORE) return null;
+
+  // Must have at least 2 strong categories
+  if (strongCategories < 2) return null;
+
+  // === FINAL OUTPUT ===
+  if (score >= MIN_QUALITY_SCORE && reasons.length > 0 && signalType) {
     return {
       symbol,
       price: currentPrice,
       price1h: currentPrice1h,
       score,
+      regime,
+      categoryScores, // Include breakdown
+      strongCategories,
       type: signalType,
       rsi: rsi15m.toFixed(1),
       rsi1h: rsi1h.toFixed(1),
       stochRSI: stoch15m ? stoch15m.k.toFixed(1) : null,
       macdBullish: macd15m.bullish,
       macdBullish1h: macd1h.bullish,
+      hasSMC: !!(nearbyBullishOB || nearbyBullishFVG || nearbyBearishOB || nearbyBearishFVG),
+      smcSignal: nearbyBullishOB ? 'OB_BULL' : nearbyBearishOB ? 'OB_BEAR' : nearbyBullishFVG ? 'FVG_BULL' : nearbyBearishFVG ? 'FVG_BEAR' : null,
       superTrend: superTrend15m.bullish ? 'BULL' : 'BEAR',
       superTrendFlipped: superTrend15m.flipped,
       bbPosition: Math.round(bbPercent * 100),
@@ -1255,13 +1539,13 @@ function generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h) {
 
 // ==================== TELEGRAM ====================
 
-async function sendTelegramNotification(signals) {
+async function sendTelegramNotification(signals, stats = null) {
   if (!TELEGRAM_ENABLED || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.log('Telegram disabled or missing credentials');
     return { success: false, reason: 'disabled' };
   }
 
-  if (signals.length === 0) {
+  if (signals.length === 0 && !stats) {
     return { success: true, sent: 0 };
   }
 
@@ -1269,7 +1553,12 @@ async function sendTelegramNotification(signals) {
   const esc = (val) => escapeMarkdownV2(val !== undefined && val !== null ? val : '');
 
   let message = '🔔 *DAY TRADE ALERT* 🔔\n';
-  message += `_${esc('15m • Multi-TF • Order Flow')}_\n\n`;
+
+  if (stats) {
+    message += `📊 _Win Rate: ${esc(stats.winRate)}% \\| Open: ${esc(stats.open)} \\| W/L: ${esc(stats.wins)}/${esc(stats.losses)}_\n`;
+  }
+
+  message += `_${esc('15m • Multi-TF • Institutional Quality')}_\n\n`;
 
   const sortedSignals = [...signals].sort((a, b) => b.score - a.score);
 
@@ -1307,15 +1596,16 @@ async function sendTelegramNotification(signals) {
     if (sig.macdBullish !== undefined) message += ` \\| MACD: ${sig.macdBullish ? '🟢' : '🔴'}`;
     message += `\n`;
 
-    // Score and Badges
-    if (sig.hasPattern || sig.hasDivergence) {
-      let badges = [];
-      if (sig.hasDivergence) badges.push('🔥DIV');
-      if (sig.hasPattern) badges.push('🕯️PAT');
-      message += `🎯 Score: ${esc(sig.score)}/100 ${badges.join(' ')}\n`;
-    } else {
-      message += `🎯 Score: ${esc(sig.score)}/100\n`;
-    }
+    // Regime & Score
+    const regimeIcon = sig.regime === 'TRENDING' ? '📈' : (sig.regime === 'RANGING' ? '↔️' : '⚠️');
+    message += `${regimeIcon} Regime: ${esc(sig.regime)} \\| 🎯 Score: *${esc(sig.score)}*/100\n`;
+
+    // SMC & Confluence
+    let badges = [];
+    if (sig.hasSMC) badges.push(`🏦 ${sig.smcSignal}`);
+    if (sig.hasDivergence) badges.push('🔥DIV');
+    if (sig.hasPattern) badges.push('🕯️PAT');
+    if (badges.length > 0) message += `✨ ${badges.join(' ')}\n`;
 
     // Volume
     if (sig.volumeConfirmed) message += `📊 Vol: ${esc(sig.volumeRatio)}x\n`;
@@ -1412,15 +1702,18 @@ async function runAnalysis(context = null) {
       const ticker24h = tickersBySymbol.get(symbol) || null;
 
       let candles1h = [];
+      let candles4h = [];
       if (USE_MULTI_TF) {
         candles1h = await getKlines(symbol, '60m', 200);
+        candles4h = await getKlines(symbol, '4h', 100);
       } else {
         candles1h = candles15m.slice(-200);
+        // Fallback for 4h if disabled? Just empty.
       }
 
       analyzed++;
 
-      const signal = generateSignal(symbol, candles15m, candles1h, orderBook, ticker24h);
+      const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h);
       if (signal) {
         const reasonKey = Array.isArray(signal.reasons) && signal.reasons.length > 0 ? signal.reasons[0] : '';
         const key = `${signal.symbol}:${signal.type}:${reasonKey}`;
@@ -1447,9 +1740,18 @@ async function runAnalysis(context = null) {
 
   console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
 
+  // Update Backtesting History & Stats
+  const stats = await updateSignalHistory(tickers24h, context);
+  if (stats) console.log('Performance Stats:', stats);
+
+  // Record signals to persistent history
+  for (const sig of signals) {
+    await recordSignalHistory(sig, context);
+  }
+
   let telegramResult = { success: true, sent: 0 };
-  if (signals.length > 0) {
-    telegramResult = await sendTelegramNotification(signals);
+  if (signals.length > 0 || stats) {
+    telegramResult = await sendTelegramNotification(signals, stats);
   } else {
     console.log('No significant signals detected this cycle');
   }
@@ -1573,3 +1875,5 @@ const scheduledHandler = async (event, context) => {
 };
 
 export const handler = schedule("*/15 * * * *", scheduledHandler);
+
+export { detectSmartMoneyConcepts };
