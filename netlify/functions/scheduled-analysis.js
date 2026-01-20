@@ -1460,19 +1460,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Adaptive Strategy by Regime
   if (regime === 'TRENDING') {
-    weights.trend = 0.45;    // Trend is king
-    weights.momentum = 0.20;
-    MIN_QUALITY_SCORE = 70;
+    weights.trend = 0.50;    // Trend is king (Increased from 0.45)
+    weights.momentum = 0.15; // Reduced momentum impact (oscilators fail in strong trends)
+    MIN_QUALITY_SCORE = 76;  // Stricter threshold (was 70)
   } else if (regime === 'RANGING') {
-    weights.structure = 0.40; // S/R and OBs are king
-    weights.momentum = 0.35;  // RSI extremes are important
-    weights.trend = 0.10;     // Trend is less relevant
-    MIN_QUALITY_SCORE = 75;   // Higher bar for range trades
+    weights.structure = 0.45; // S/R and OBs are king (Increased from 0.40)
+    weights.momentum = 0.30;
+    weights.trend = 0.10;
+    MIN_QUALITY_SCORE = 78;   // Higher bar for range trades (was 75)
   } else if (regime === 'HIGH_VOLATILITY') {
     weights.structure = 0.40;
     weights.volume = 0.40;    // Volume/OrderFlow is king
     weights.trend = 0.10;
-    MIN_QUALITY_SCORE = 82;   // Very high bar for volatile markets
+    MIN_QUALITY_SCORE = 85;   // Very high bar for volatile markets (was 82)
   }
 
   score = Math.round(
@@ -1488,10 +1488,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Confluence bonus
   if (strongCategories >= 4) {
-    score = Math.round(score * 1.20); // +20% bonus
+    score = Math.round(score * 1.15); // Reduced bonus to avoid score inflation (was 1.20)
     reasons.push('🎯 CONFLUENCIA EXCEPCIONAL');
   } else if (strongCategories >= 3) {
-    score = Math.round(score * 1.10); // +10% bonus
+    score = Math.round(score * 1.05); // Reduced bonus (was 1.10)
     reasons.push('🎯 Alta Confluencia');
   }
 
@@ -1500,6 +1500,14 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === STRICT FILTERS ===
   // Reject low-volume setups
   if (volumeRatio < 0.8) return null;
+
+  // High Score Trap Filter: If score is very high (>85), we need volume confirmation
+  // Analysis showed 0% win rate for scores > 86 without strong volume
+  if (score > 85 && volumeRatio < 1.5) {
+    // Downgrade score if volume doesn't support the "perfect" setup
+    score = Math.round(score * 0.85);
+    reasons.push('⚠️ High Score / Low Vol Penalty');
+  }
 
   if (score < MIN_QUALITY_SCORE) return null;
 
