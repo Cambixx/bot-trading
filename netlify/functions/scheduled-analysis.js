@@ -1607,7 +1607,10 @@ async function sendTelegramNotification(signals, stats = null) {
     if (sig.hasSMC) badges.push(`🏦 ${sig.smcSignal}`);
     if (sig.hasDivergence) badges.push('🔥DIV');
     if (sig.hasPattern) badges.push('🕯️PAT');
-    if (badges.length > 0) message += `✨ ${badges.join(' ')}\n`;
+    if (badges.length > 0) {
+      const escapedBadges = badges.map(b => esc(b));
+      message += `✨ ${escapedBadges.join(' ')}\n`;
+    }
 
     // Volume
     if (sig.volumeConfirmed) message += `📊 Vol: ${esc(sig.volumeRatio)}x\n`;
