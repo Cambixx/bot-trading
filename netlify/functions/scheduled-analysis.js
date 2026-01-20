@@ -1831,7 +1831,13 @@ const scheduledHandler = async (event, context) => {
       hasNextRun,
       contextKeys: context ? Object.keys(context) : [],
       hasSiteId: !!context?.site?.id,
-      hasToken: !!context?.token
+      hasToken: !!context?.token,
+      envDebug: {
+        NETLIFY: !!process.env.NETLIFY,
+        SITE_ID: !!process.env.SITE_ID,
+        BLOBS_CONTEXT: !!process.env.NETLIFY_BLOBS_CONTEXT,
+        NETLIFY_SITE_ID: !!process.env.NETLIFY_SITE_ID
+      }
     });
 
     if (isSchedule) {
