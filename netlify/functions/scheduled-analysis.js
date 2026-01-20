@@ -120,9 +120,17 @@ function getClosedCandles(candles, interval, now = Date.now()) {
   return candles;
 }
 
+function getInternalStore(context) {
+  const options = { name: 'trading-signals' };
+  // Manually provide credentials if available in context
+  if (context?.site?.id) options.siteID = context.site.id;
+  if (context?.token) options.token = context.token;
+  return getStore(options);
+}
+
 async function loadCooldowns(context) {
   try {
-    const store = getStore({ name: 'trading-signals' });
+    const store = getInternalStore(context);
     const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
     if (!data) return {};
 
@@ -142,7 +150,7 @@ async function loadCooldowns(context) {
 
 async function saveCooldowns(cooldowns, context) {
   try {
-    const store = getStore({ name: 'trading-signals' });
+    const store = getInternalStore(context);
     await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
   } catch (error) {
     // Only warn if we're theoretically in production or if it's a real error
@@ -156,7 +164,7 @@ const HISTORY_STORE_KEY = 'signal-history-v2';
 
 async function recordSignalHistory(signal, context) {
   try {
-    const store = getStore({ name: 'trading-signals' });
+    const store = getInternalStore(context);
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
 
     // Risk/Reward Setup (1:1.5)
@@ -197,7 +205,7 @@ async function updateSignalHistory(tickers, context) {
   if (!tickers || !tickers.length) return { open: 0, wins: 0, losses: 0 };
 
   try {
-    const store = getStore({ name: 'trading-signals' });
+    const store = getInternalStore(context);
     let history = await store.get(HISTORY_STORE_KEY, { type: 'json' });
     if (!history || !history.length) return { open: 0, wins: 0, losses: 0 };
 
@@ -1820,7 +1828,10 @@ const scheduledHandler = async (event, context) => {
       method,
       isSchedule,
       nfEvent: nfEvent || null,
-      hasNextRun
+      hasNextRun,
+      contextKeys: context ? Object.keys(context) : [],
+      hasSiteId: !!context?.site?.id,
+      hasToken: !!context?.token
     });
 
     if (isSchedule) {
