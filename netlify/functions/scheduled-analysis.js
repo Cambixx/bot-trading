@@ -121,13 +121,6 @@ function getClosedCandles(candles, interval, now = Date.now()) {
 }
 
 async function loadCooldowns(context) {
-  // Try to use automatic store discovery if on Netlify, or explicit credentials if provided
-  const isNetlify = !!(process.env.NETLIFY || context?.site?.id);
-  if (!isNetlify) {
-    console.warn('⚠️ Not on Netlify or missing context - using memory-only cooldowns');
-    return {};
-  }
-
   try {
     const store = getStore({ name: 'trading-signals' });
     const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
@@ -148,12 +141,12 @@ async function loadCooldowns(context) {
 }
 
 async function saveCooldowns(cooldowns, context) {
-  if (!(process.env.NETLIFY || context?.site?.id)) return;
   try {
     const store = getStore({ name: 'trading-signals' });
     await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
   } catch (error) {
-    console.error('Error saving cooldowns to Blob:', error.message);
+    // Only warn if we're theoretically in production or if it's a real error
+    if (process.env.NETLIFY) console.error('Error saving cooldowns to Blob:', error.message);
   }
 }
 
@@ -162,7 +155,6 @@ async function saveCooldowns(cooldowns, context) {
 const HISTORY_STORE_KEY = 'signal-history-v2';
 
 async function recordSignalHistory(signal, context) {
-  if (!(process.env.NETLIFY || context?.site?.id)) return;
   try {
     const store = getStore({ name: 'trading-signals' });
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
@@ -202,7 +194,7 @@ async function recordSignalHistory(signal, context) {
 }
 
 async function updateSignalHistory(tickers, context) {
-  if (!(process.env.NETLIFY || context?.site?.id) || !tickers.length) return { open: 0, wins: 0, losses: 0 };
+  if (!tickers || !tickers.length) return { open: 0, wins: 0, losses: 0 };
 
   try {
     const store = getStore({ name: 'trading-signals' });
