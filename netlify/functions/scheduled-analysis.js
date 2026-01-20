@@ -1546,7 +1546,8 @@ async function sendTelegramNotification(signals, stats = null) {
     return { success: false, reason: 'disabled' };
   }
 
-  if (signals.length === 0 && !stats) {
+  const hasHistory = stats && (stats.open > 0 || stats.wins > 0 || stats.losses > 0);
+  if (signals.length === 0 && !hasHistory) {
     return { success: true, sent: 0 };
   }
 
