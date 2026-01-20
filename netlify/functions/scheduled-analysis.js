@@ -122,9 +122,15 @@ function getClosedCandles(candles, interval, now = Date.now()) {
 
 function getInternalStore(context) {
   const options = { name: 'trading-signals' };
-  // Manually provide credentials if available in context
-  if (context?.site?.id) options.siteID = context.site.id;
-  if (context?.token) options.token = context.token;
+
+  // Try to get Site ID from context or environment
+  const siteID = context?.site?.id || process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  // Try to get Token from context or environment (needs to be set manually in Netlify env vars)
+  const token = context?.token || process.env.NETLIFY_AUTH_TOKEN;
+
+  if (siteID) options.siteID = siteID;
+  if (token) options.token = token;
+
   return getStore(options);
 }
 
