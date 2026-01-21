@@ -23,7 +23,7 @@ El algoritmo busca huellas de dinero institucional para evitar "trampas" de reta
 - **Scoring**: Se otorga alta prioridad a señales que rebotan o nacen en estas zonas.
 
 ### B. Análisis Multi-Timeframe (3-TF) 📊
-- **4H (Macro)**: Define la dirección permitida. *Filtro estricto*: No se compra en tendencia bajista 4H ni se vende en tendencia alcista 4H.
+- **4H (Macro)**: Define la dirección permitida. *Filtro estricto*: Solo se permiten compras si la tendencia macro es favorable.
 - **1H (Contexto)**: Mide la fuerza del movimiento (ADX) y la alineación de tendencia media.
 - **15M (Ejecución)**: Busca el timing preciso usando RSI, StochRSI y Patrones de Velas.
 

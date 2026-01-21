@@ -1503,10 +1503,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     // If buying on too high RSI or too near Upper BB, reject
     return null;
   }
-  if (signalType === 'SELL_ALERT' && (rsi15m < 32 || bbPercent < 0.15)) {
-    // If selling on too low RSI or too near Lower BB, reject
-    return null;
-  }
+  if (signalType === 'SELL_ALERT') return null;
 
   // === STRICT FILTERS ===
   // Reject low-volume setups
@@ -1552,6 +1549,12 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       atrPercent: Number(atrPercent15m.toFixed(2)),
       vwap: vwap15m,
       vwapDistance: vwap15m ? Number((((currentPrice - vwap15m) / vwap15m) * 100).toFixed(2)) : null,
+      tp: signalType === 'BUY'
+        ? currentPrice * (1 + (atrPercent15m / 100) * 2.0)
+        : currentPrice * (1 - (atrPercent15m / 100) * 2.0),
+      sl: signalType === 'BUY'
+        ? currentPrice * (1 - (atrPercent15m / 100) * 1.5)
+        : currentPrice * (1 + (atrPercent15m / 100) * 1.5),
       reasons
     };
   }
@@ -1595,17 +1598,21 @@ async function sendTelegramNotification(signals, stats = null) {
     // Symbol and Type
     message += `${icon} *${esc(sig.symbol)}* \\| ${esc(typeEmoji)}\n`;
 
-    // Price
+    // Price & Levels
     if (Number.isFinite(sig.price)) {
       const priceStr = sig.price < 1 ? sig.price.toFixed(6) : sig.price.toFixed(2);
+      const tpStr = sig.tp < 1 ? sig.tp.toFixed(6) : sig.tp.toFixed(2);
+      const slStr = sig.sl < 1 ? sig.sl.toFixed(6) : sig.sl.toFixed(2);
+
       const ch = sig.vwapDistance;
       if (ch !== undefined && ch !== null) {
         const changeIcon = ch >= 0 ? '📈' : '📉';
         const changeSign = ch >= 0 ? '+' : '';
-        message += `💰 $${esc(priceStr)} ${changeIcon} ${esc(changeSign + ch)}% \\(VWAP\\)\n`;
+        message += `💰 *$${esc(priceStr)}* ${changeIcon} ${esc(changeSign + ch)}% \\(VWAP\\)\n`;
       } else {
-        message += `💰 $${esc(priceStr)}\n`;
+        message += `💰 *$${esc(priceStr)}*\n`;
       }
+      message += `🎯 *TP: ${esc(tpStr)}* \\| 🛡️ *SL: ${esc(slStr)}*\n`;
     }
 
     // Indicators
