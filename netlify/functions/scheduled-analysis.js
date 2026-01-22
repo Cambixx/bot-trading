@@ -25,10 +25,10 @@ const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEP
 const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.08;
 const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 8;
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
-const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 20;
-const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 2000000;
+const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 25;
+const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 5000000;
 const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
-const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 30;
+const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 120;
 const USE_MULTI_TF = (process.env.USE_MULTI_TF || 'true').toLowerCase() === 'true';
 
 // Persistent cooldown storage using Netlify Blobs
@@ -174,18 +174,18 @@ async function recordSignalHistory(signal, context) {
     const store = getInternalStore(context);
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
 
-    // Risk/Reward Setup (2:1.5)
-    // ATR is used for dynamic SL/TP
+    // Risk/Reward Setup (2.5:2.0)
+    // Widened SL for better spot endurance
     const atrFactor = signal.atrPercent || 1;
     const entryPrice = signal.price;
     let tp, sl;
 
     if (signal.type === 'BUY') {
-      tp = entryPrice * (1 + (atrFactor / 100) * 2.0);
-      sl = entryPrice * (1 - (atrFactor / 100) * 1.5);
+      tp = entryPrice * (1 + (atrFactor / 100) * 2.5);
+      sl = entryPrice * (1 - (atrFactor / 100) * 2.0);
     } else {
-      tp = entryPrice * (1 - (atrFactor / 100) * 2.0);
-      sl = entryPrice * (1 + (atrFactor / 100) * 1.5);
+      tp = entryPrice * (1 - (atrFactor / 100) * 2.5);
+      sl = entryPrice * (1 + (atrFactor / 100) * 2.0);
     }
 
     const record = {
@@ -244,15 +244,20 @@ async function updateSignalHistory(tickers, context) {
 
     const closed = history.filter(h => h.status === 'CLOSED');
     const wins = closed.filter(h => h.outcome === 'WIN').length;
+    const openSignals = history.filter(h => h.status === 'OPEN');
+
     return {
-      open: history.filter(h => h.status === 'OPEN').length,
-      wins,
-      losses: closed.length - wins,
-      winRate: closed.length > 0 ? (wins / closed.length * 100).toFixed(1) : 0
+      stats: {
+        open: openSignals.length,
+        wins,
+        losses: closed.length - wins,
+        winRate: closed.length > 0 ? (wins / closed.length * 100).toFixed(1) : 0
+      },
+      openSymbols: openSignals.map(s => s.symbol)
     };
   } catch (error) {
     console.error('Error updating history:', error.message);
-    return null;
+    return { stats: { open: 0, wins: 0, losses: 0, winRate: 0 }, openSymbols: [] };
   }
 }
 
@@ -1442,6 +1447,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (USE_MULTI_TF) {
     if (trend4h === 'BULLISH' && signalType === 'SELL_ALERT') return null;
     if (trend4h === 'BEARISH' && signalType === 'BUY') return null;
+
+    // Macro exhaustion filter for BUY
+    if (signalType === 'BUY' && rsi1h > 65) return null;
   }
 
   // Detect Market Regime
@@ -1550,11 +1558,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       vwap: vwap15m,
       vwapDistance: vwap15m ? Number((((currentPrice - vwap15m) / vwap15m) * 100).toFixed(2)) : null,
       tp: signalType === 'BUY'
-        ? currentPrice * (1 + (atrPercent15m / 100) * 2.0)
-        : currentPrice * (1 - (atrPercent15m / 100) * 2.0),
+        ? currentPrice * (1 + (atrPercent15m / 100) * 2.5)
+        : currentPrice * (1 - (atrPercent15m / 100) * 2.5),
       sl: signalType === 'BUY'
-        ? currentPrice * (1 - (atrPercent15m / 100) * 1.5)
-        : currentPrice * (1 + (atrPercent15m / 100) * 1.5),
+        ? currentPrice * (1 - (atrPercent15m / 100) * 2.0)
+        : currentPrice * (1 + (atrPercent15m / 100) * 2.0),
       reasons
     };
   }
@@ -1728,7 +1736,18 @@ async function runAnalysis(context = null) {
 
   const tickersBySymbol = new Map(tickers24h.map(t => [t.symbol, t]));
 
+  // Update Backtesting History & Stats BEFORE scanning to avoid redundant signals
+  const histData = await updateSignalHistory(tickers24h, context);
+  const stats = histData?.stats || { open: 0, wins: 0, losses: 0, winRate: 0 };
+  const openSymbols = histData?.openSymbols || [];
+
+  if (stats) console.log('Performance Stats:', stats);
+
   for (const symbol of topSymbols) {
+    if (openSymbols.includes(symbol)) {
+      console.log(`Skipping ${symbol} - Already have an OPEN position`);
+      continue;
+    }
     try {
       const candles15m = await getKlines(symbol, '15m', 300);
       const orderBook = await getOrderBookDepth(symbol, 20);
@@ -1773,17 +1792,13 @@ async function runAnalysis(context = null) {
 
   console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
 
-  // Update Backtesting History & Stats
-  const stats = await updateSignalHistory(tickers24h, context);
-  if (stats) console.log('Performance Stats:', stats);
-
   // Record signals to persistent history
   for (const sig of signals) {
     await recordSignalHistory(sig, context);
   }
 
   let telegramResult = { success: true, sent: 0 };
-  if (signals.length > 0 || stats) {
+  if (signals.length > 0 || (stats && (stats.open > 0 || stats.wins > 0 || stats.losses > 0))) {
     telegramResult = await sendTelegramNotification(signals, stats);
   } else {
     console.log('No significant signals detected this cycle');
