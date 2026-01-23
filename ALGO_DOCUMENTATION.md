@@ -7,10 +7,12 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 ## 1. Arquitectura del Sistema
 
 El bot opera como un ecosistema serverless interconectado:
-- **Netlify Functions**: Ejecuta el análisis cada 15 minutos (cron job).
+- **Netlify Functions**: 
+    - `scheduled-analysis`: Ejecuta el análisis cada 15 minutos (cron job).
+    - `telegram-bot`: Gestiona comandos interactivos y webhooks de Telegram.
 - **MEXC API**: Fuente de datos en tiempo real (Klines y Order Book).
 - **Netlify Blobs**: "Cerebro" de persistencia (Historial y Cooldowns).
-- **Telegram API**: Interfaz de salida para alertas y métricas de performance.
+- **Telegram API**: Interfaz bidireccional para alertas, informes y comandos.
 
 ---
 
@@ -65,6 +67,11 @@ El bot implementa un check de seguridad antes de cada análisis:
 1. **Filtro de Posición Abierta**: Si una moneda ya tiene una operación `OPEN` en el historial, el bot la ignora por completo hasta que se cierre.
 2. **Cooldown Extendido**: Tiempo de espera de **120 minutos** entre señales de la misma moneda para evitar ruido.
 
+### C. Comandos Interactivos 💬
+El sistema incorpora un "oyente" de Telegram dedicado:
+- **Comando `informe`**: Genera un resumen en tiempo real del Win Rate, operaciones abiertas y resultados recientes extrayendo datos de Netlify Blobs.
+- **Seguridad por ID**: Solo responde a mensajes enviados desde el `TELEGRAM_CHAT_ID` autorizado.
+
 ---
 
 ## 5. Guía de Optimización Futura 🚀
@@ -97,4 +104,4 @@ Si el bot deja de enviar mensajes o de guardar datos, verifica estas variables e
 
 ---
 **Documentación actualizada el 23 de Enero, 2026**
-*Estado del Algoritmo: v2.2 "Spot Sniper Edition"*
+*Estado del Algoritmo: v2.3 "Interactive Sniper"*

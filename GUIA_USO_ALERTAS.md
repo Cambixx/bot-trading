@@ -43,7 +43,19 @@ Dentro de cada tarjeta de moneda en Telegram, verás tres precios clave:
 
 ---
 
-## 4. Consejos de Seguridad ⚠️
+## 4. Comandos Interactivos (Bajo Demanda) 💬
+
+Puedes hablarle directamente al bot en cualquier momento para obtener información:
+
+*   **`informe`**: El bot te responderá con un resumen de:
+    *   **Win Rate**: % de acierto real de las señales cerradas.
+    *   **Operaciones Abiertas**: Lista de monedas que estás operando actualmente.
+    *   **Historial**: Iconos ✅/❌ de los últimos resultados.
+*   **`/status`**: Sinónimo del comando informe.
+
+---
+
+## 5. Consejos de Seguridad ⚠️
 
 1.  **No entres tarde**: Si el precio ya se alejó más de un 0.5% del precio de entrada de la alerta, es mejor esperar a la siguiente.
 2.  **Gestión de Riesgo**: No inviertas más del 1-2% de tu capital total en una sola señal.
@@ -52,4 +64,4 @@ Dentro de cada tarjeta de moneda en Telegram, verás tres precios clave:
 4.  **Notificaciones Silenciosas**: El bot solo enviará un mensaje cuando encuentre una **nueva oportunidad**. Si no hay señales, no recibirás nada (evitando ruido innecesario). Además, si ya tienes una operación abierta con una moneda, el bot no enviará alertas repetidas de ese símbolo.
 
 ---
-*Esta guía corresponde a la versión v2.2 "Spot Sniper Edition".*
+*Esta guía corresponde a la versión v2.3 "Interactive Sniper".*
