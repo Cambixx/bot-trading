@@ -261,6 +261,62 @@ async function updateSignalHistory(tickers, context) {
   }
 }
 
+async function generateReportMessage(context) {
+  try {
+    const store = getInternalStore(context);
+    const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
+
+    if (history.length === 0) return "No hay historial de operaciones disponible\\.";
+
+    const open = history.filter(h => h.status === 'OPEN');
+    const closed = history.filter(h => h.status === 'CLOSED');
+    const wins = closed.filter(h => h.outcome === 'WIN');
+    const losses = closed.filter(h => h.outcome === 'LOSS');
+    const winRate = closed.length > 0 ? (wins.length / closed.length * 100).toFixed(1) : "0\\.0";
+
+    const esc = (val) => {
+      if (val === undefined || val === null) return '';
+      let s = String(val);
+      // Basic MarkdownV2 escaping for the report
+      return s.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+    };
+
+    let msg = `📊 *INFORME DE RENDIMIENTO*\n\n`;
+    msg += `📈 *Win Rate:* ${esc(winRate)}%\n`;
+    msg += `✅ *Ganadoras:* ${esc(wins.length)}\n`;
+    msg += `❌ *Perdedoras:* ${esc(losses.length)}\n`;
+    msg += `⏳ *Abiertas:* ${esc(open.length)}\n\n`;
+
+    if (open.length > 0) {
+      msg += `🔔 *OPERACIONES ABIERTAS:*\n`;
+      open.forEach(op => {
+        msg += `• ${esc(op.symbol)} \\($${esc(op.entry)}\\)\n`;
+      });
+      msg += `\n`;
+    }
+
+    if (closed.length > 0) {
+      msg += `📜 *ÚLTIMOS RESULTADOS:*\n`;
+      // Show last 10
+      closed.slice(-10).reverse().forEach(op => {
+        const icon = op.outcome === 'WIN' ? '✅' : '❌';
+        msg += `${icon} ${esc(op.symbol)}: ${esc(op.outcome)}\n`;
+      });
+    }
+
+    const timeStr = new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Madrid'
+    });
+    msg += `\n🤖 _Scanner Report_ • ${esc(timeStr)}`;
+
+    return msg;
+  } catch (e) {
+    return "Error al generar el informe: " + e.message;
+  }
+}
+
 // ==================== MARKET DATA ====================
 
 async function getKlines(symbol, interval = '15m', limit = 200) {
@@ -1859,6 +1915,38 @@ const scheduledHandler = async (event, context) => {
           body: JSON.stringify({ success: false, error: 'Invalid JSON body' })
         };
       }
+    }
+
+    // --- TELEGRAM WEBHOOK HANDLING ---
+    if (payload && payload.message && payload.message.chat) {
+      const chatId = String(payload.message.chat.id);
+      const text = (payload.message.text || '').toLowerCase().trim();
+
+      console.log('Incoming Telegram message:', { chatId, text });
+
+      // Security: Only respond to the authorized Chat ID
+      if (chatId === String(TELEGRAM_CHAT_ID)) {
+        if (text === 'informe' || text === '/informe' || text === 'status' || text === '/status') {
+          const report = await generateReportMessage(context);
+          const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+          await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: TELEGRAM_CHAT_ID,
+              text: report,
+              parse_mode: 'MarkdownV2'
+            })
+          });
+        }
+      }
+
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: true, message: 'Update processed' })
+      };
     }
 
     const hasNextRun = payload && typeof payload.next_run === 'string';
