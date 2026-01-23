@@ -120,7 +120,7 @@ function getClosedCandles(candles, interval, now = Date.now()) {
   return candles;
 }
 
-function getInternalStore(context) {
+export function getInternalStore(context) {
   const options = { name: 'trading-signals' };
 
   // Try to get Site ID from context or environment
@@ -258,62 +258,6 @@ async function updateSignalHistory(tickers, context) {
   } catch (error) {
     console.error('Error updating history:', error.message);
     return { stats: { open: 0, wins: 0, losses: 0, winRate: 0 }, openSymbols: [] };
-  }
-}
-
-async function generateReportMessage(context) {
-  try {
-    const store = getInternalStore(context);
-    const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
-
-    if (history.length === 0) return "No hay historial de operaciones disponible\\.";
-
-    const open = history.filter(h => h.status === 'OPEN');
-    const closed = history.filter(h => h.status === 'CLOSED');
-    const wins = closed.filter(h => h.outcome === 'WIN');
-    const losses = closed.filter(h => h.outcome === 'LOSS');
-    const winRate = closed.length > 0 ? (wins.length / closed.length * 100).toFixed(1) : "0\\.0";
-
-    const esc = (val) => {
-      if (val === undefined || val === null) return '';
-      let s = String(val);
-      // Basic MarkdownV2 escaping for the report
-      return s.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
-    };
-
-    let msg = `📊 *INFORME DE RENDIMIENTO*\n\n`;
-    msg += `📈 *Win Rate:* ${esc(winRate)}%\n`;
-    msg += `✅ *Ganadoras:* ${esc(wins.length)}\n`;
-    msg += `❌ *Perdedoras:* ${esc(losses.length)}\n`;
-    msg += `⏳ *Abiertas:* ${esc(open.length)}\n\n`;
-
-    if (open.length > 0) {
-      msg += `🔔 *OPERACIONES ABIERTAS:*\n`;
-      open.forEach(op => {
-        msg += `• ${esc(op.symbol)} \\($${esc(op.entry)}\\)\n`;
-      });
-      msg += `\n`;
-    }
-
-    if (closed.length > 0) {
-      msg += `📜 *ÚLTIMOS RESULTADOS:*\n`;
-      // Show last 10
-      closed.slice(-10).reverse().forEach(op => {
-        const icon = op.outcome === 'WIN' ? '✅' : '❌';
-        msg += `${icon} ${esc(op.symbol)}: ${esc(op.outcome)}\n`;
-      });
-    }
-
-    const timeStr = new Date().toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Europe/Madrid'
-    });
-    msg += `\n🤖 _Scanner Report_ • ${esc(timeStr)}`;
-
-    return msg;
-  } catch (e) {
-    return "Error al generar el informe: " + e.message;
   }
 }
 
@@ -1883,6 +1827,7 @@ const scheduledHandler = async (event, context) => {
   if (method) {
     const headers = event.headers || {};
     const nfEvent = (headers['x-nf-event'] || headers['X-NF-Event'] || headers['x-nf-Event'] || '').toString().toLowerCase();
+
     if (method === 'OPTIONS') {
       return {
         statusCode: 200,
@@ -1917,70 +1862,8 @@ const scheduledHandler = async (event, context) => {
       }
     }
 
-    // --- TELEGRAM WEBHOOK HANDLING ---
-    if (payload && payload.message && payload.message.chat) {
-      const chatId = String(payload.message.chat.id);
-      const text = (payload.message.text || '').toLowerCase().trim();
-
-      console.log(`Incoming message from ${chatId}: "${text}" (Searching for Admin: ${TELEGRAM_CHAT_ID})`);
-
-      // Security: Respond to the authorized Chat ID OR log it for the user
-      if (chatId === String(TELEGRAM_CHAT_ID)) {
-        if (text === 'informe' || text === '/informe' || text === 'status' || text === '/status') {
-          console.log('Generating report for authorized user...');
-          const report = await generateReportMessage(context);
-          const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-          const tgRes = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: chatId, // Reply to the sender
-              text: report,
-              parse_mode: 'MarkdownV2'
-            })
-          });
-
-          if (!tgRes.ok) {
-            const err = await tgRes.text();
-            console.error('Failed to send Telegram report:', err);
-          } else {
-            console.log('Report sent successfully');
-          }
-        }
-      } else {
-        console.warn(`Unauthorized Chat ID: ${chatId}. Expected: ${TELEGRAM_CHAT_ID}`);
-        // Optional: Send a small message to the user telling them their ID (helpful for setup)
-        if (text === 'id' || text === 'informe') {
-          const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-          await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: `⚠️ Tu ID de usuario \\(${chatId}\\) no coincide con el ID autorizado en el bot\\. Por favor, avísame para actualizarlo\\.`,
-              parse_mode: 'MarkdownV2'
-            })
-          });
-        }
-      }
-
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ success: true, message: 'Update processed' })
-      };
-    }
-
     const hasNextRun = payload && typeof payload.next_run === 'string';
     const isSchedule = nfEvent === 'schedule' || hasNextRun;
-
-    console.log('scheduled-analysis invocation:', {
-      method,
-      isSchedule,
-      nfEvent: nfEvent || null,
-      hasNextRun
-    });
 
     if (isSchedule) {
       const result = await runAnalysis(context);
