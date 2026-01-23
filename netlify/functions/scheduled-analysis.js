@@ -1798,10 +1798,10 @@ async function runAnalysis(context = null) {
   }
 
   let telegramResult = { success: true, sent: 0 };
-  if (signals.length > 0 || (stats && (stats.open > 0 || stats.wins > 0 || stats.losses > 0))) {
+  if (signals.length > 0) {
     telegramResult = await sendTelegramNotification(signals, stats);
   } else {
-    console.log('No significant signals detected this cycle');
+    console.log('No new signals detected this cycle. Skipping notification.');
   }
 
   // Save updated cooldowns
