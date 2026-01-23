@@ -1922,20 +1922,43 @@ const scheduledHandler = async (event, context) => {
       const chatId = String(payload.message.chat.id);
       const text = (payload.message.text || '').toLowerCase().trim();
 
-      console.log('Incoming Telegram message:', { chatId, text });
+      console.log(`Incoming message from ${chatId}: "${text}" (Searching for Admin: ${TELEGRAM_CHAT_ID})`);
 
-      // Security: Only respond to the authorized Chat ID
+      // Security: Respond to the authorized Chat ID OR log it for the user
       if (chatId === String(TELEGRAM_CHAT_ID)) {
         if (text === 'informe' || text === '/informe' || text === 'status' || text === '/status') {
+          console.log('Generating report for authorized user...');
           const report = await generateReportMessage(context);
           const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
+          const tgRes = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId, // Reply to the sender
+              text: report,
+              parse_mode: 'MarkdownV2'
+            })
+          });
+
+          if (!tgRes.ok) {
+            const err = await tgRes.text();
+            console.error('Failed to send Telegram report:', err);
+          } else {
+            console.log('Report sent successfully');
+          }
+        }
+      } else {
+        console.warn(`Unauthorized Chat ID: ${chatId}. Expected: ${TELEGRAM_CHAT_ID}`);
+        // Optional: Send a small message to the user telling them their ID (helpful for setup)
+        if (text === 'id' || text === 'informe') {
+          const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
           await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              chat_id: TELEGRAM_CHAT_ID,
-              text: report,
+              chat_id: chatId,
+              text: `⚠️ Tu ID de usuario \\(${chatId}\\) no coincide con el ID autorizado en el bot\\. Por favor, avísame para actualizarlo\\.`,
               parse_mode: 'MarkdownV2'
             })
           });
