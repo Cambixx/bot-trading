@@ -1,6 +1,6 @@
-# 🦅 Documentación del Algoritmo de Trading "Élite"
+🦅 Documentación del Algoritmo de Trading "Élite" (Spot Sniper Edition)
 
-Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading institucional alojado en Netlify Functions.
+Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions. El bot está configurado exclusivamente para operaciones de compra.
 
 ---
 
@@ -23,9 +23,9 @@ El algoritmo busca huellas de dinero institucional para evitar "trampas" de reta
 - **Scoring**: Se otorga alta prioridad a señales que rebotan o nacen en estas zonas.
 
 ### B. Análisis Multi-Timeframe (3-TF) 📊
-- **4H (Macro)**: Define la dirección permitida. *Filtro estricto*: Solo se permiten compras si la tendencia macro es favorable.
-- **1H (Contexto)**: Mide la fuerza del movimiento (ADX) y la alineación de tendencia media.
-- **15M (Ejecución)**: Busca el timing preciso usando RSI, StochRSI y Patrones de Velas.
+- **4H (Macro)**: Define la dirección permitida. *Filtro estricto*: Solo se permiten compras si la tendencia macro es alcista.
+- **1H (Contexto)**: Mide la fuerza del movimiento (ADX) y filtra el **Agotamiento Macro**. *Filtro*: Se rechazan compras si el RSI 1H es > 65.
+- **15M (Ejecución)**: Busca el timing preciso usando RSI, StochRSI y Patrones de Velas. Requiere RSI < 68 para evitar Fomo.
 
 ### C. Detección de Régimen de Mercado 🌐
 El bot adapta su estrategia según la volatilidad y la fuerza de tendencia:
@@ -46,15 +46,24 @@ El puntaje final (0-100) es una media ponderada de 5 categorías:
 
 **Bonus de Confluencia**: Si 3 o más categorías son "excelentes" (>60), se aplica un multiplicador de bonificación.
 
+**Umbrales de Calidad (Mínimo Score)**:
+- **TRENDING/RANGING**: 75/100
+- **HIGH_VOLATILITY**: 85/100
+*Nota: En modo Trending se exigen al menos 3 categorías fuertes (confluencia) para entrar.*
+
 ---
 
-## 4. Backtesting Automático y Performance ⚙️
+## 4. Gestión de Riesgo y Duplicidad ⚙️
 
+### A. Backtesting Dinámico
 Cada señal generada se registra en el almacén `signal-history-v2` con:
-- **Stop Loss (SL)**: Precio - 1.0 * ATR.
-- **Take Profit (TP)**: Precio + 1.5 * ATR (Ratio Riesgo/Beneficio 1.5).
+- **Stop Loss (SL)**: Precio - 2.0 * ATR (Mayor margen para absorber volatilidad).
+- **Take Profit (TP)**: Precio + 2.5 * ATR (Ratio de Beneficio mejorado).
 
-En cada ejecución, el bot recorre las señales abiertas y las actualiza a `WIN` o `LOSS` comparándolas con el precio actual. El **Win Rate** que ves en Telegram es el resultado real de este seguimiento.
+### B. Control de Duplicidad
+El bot implementa un check de seguridad antes de cada análisis:
+1. **Filtro de Posición Abierta**: Si una moneda ya tiene una operación `OPEN` en el historial, el bot la ignora por completo hasta que se cierre.
+2. **Cooldown Extendido**: Tiempo de espera de **120 minutos** entre señales de la misma moneda para evitar ruido.
 
 ---
 
@@ -78,13 +87,14 @@ Para pedirme (o pedir a otra IA) una optimización, debes seguir estos pasos:
 
 ---
 
-## 6. Mantenimiento y Variables de Entorno
+## 6. Mantenimiento y Parámetros del Sistema
 
 Si el bot deja de enviar mensajes o de guardar datos, verifica estas variables en Netlify:
-- `NETLIFY_AUTH_TOKEN`: Tu Personal Access Token de Netlify (necesario para los Blobs).
-- `NETLIFY_SITE_ID`: El ID de tu sitio.
+- `NETLIFY_AUTH_TOKEN`: Personal Access Token (necesario para Blobs).
+- `MIN_QUOTE_VOL_24H`: Configurado en **5,000,000 USDT** (Filtro de liquidez).
+- `ALERT_COOLDOWN_MIN`: Configurado en **120 minutos**.
 - `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`: Para las notificaciones.
 
 ---
-**Documentación creada el 20 de Enero, 2026**
-*Estado del Algoritmo: v2.0 "Institutional Elite"*
+**Documentación actualizada el 23 de Enero, 2026**
+*Estado del Algoritmo: v2.2 "Spot Sniper Edition"*

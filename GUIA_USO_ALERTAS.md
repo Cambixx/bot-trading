@@ -18,8 +18,8 @@ Cada mensaje de Telegram contiene una o varias señales. Los tipos principales s
 Dentro de cada tarjeta de moneda en Telegram, verás tres precios clave:
 
 1.  **Precio Actual (💰)**: Es el precio de entrada sugerido en el momento de la alerta.
-2.  **Take Profit (🎯 TP)**: El precio objetivo donde deberías cerrar la operación con **ganancias**. Calculado para un ratio de 2.0x riesgo.
-3.  **Stop Loss (🛡️ SL)**: El precio límite donde deberías cerrar la operación para **minimizar pérdidas**. Calculado a 1.5x el ATR (volatilidad) para dar espacio a la operación.
+2.  **Take Profit (🎯 TP)**: El precio objetivo donde deberías cerrar la operación con **ganancias**. Calculado para un ratio de **2.5x beneficio** (Ratio 2.5:2.0).
+3.  **Stop Loss (🛡️ SL)**: El precio límite donde deberías cerrar la operación para **minimizar pérdidas**. Calculado a **2.0x el ATR** (volatilidad) para dar un margen de seguridad frente a mechas.
 
 > **Ejemplo de Ejecución:**
 > Si recibes: `🟢 BTCUSDT | COMPRA | $90,000 | TP: $92,000 | SL: $88,500`
@@ -38,7 +38,8 @@ Dentro de cada tarjeta de moneda en Telegram, verás tres precios clave:
 *   **SMC (Smart Money Concepts)**:
     *   **OB (Order Block)**: Indica que bancos o instituciones han dejado órdenes en esa zona.
     *   **FVG (Fair Value Gap)**: Indica un desequilibrio de precio que el mercado suele ir a "rellenar".
-*   **Volumen (Vol x2.5)**: Indica que hay mucho más dinero de lo habitual entrando en esa moneda.
+*   **Volumen (Vol x1.5)**: Indica que hay una entrada de capital significativa. El bot solo analiza monedas con volumen diario > 5.0M USDT.
+*   **Agotamiento Macro**: El bot filtra automáticamente compras si el RSI en 1H es > 65.
 
 ---
 
@@ -48,5 +49,7 @@ Dentro de cada tarjeta de moneda en Telegram, verás tres precios clave:
 2.  **Gestión de Riesgo**: No inviertas más del 1-2% de tu capital total en una sola señal.
 3.  **Alineación 4H**: El bot ya filtra por la tendencia de 4 horas, lo cual aumenta mucho la probabilidad de éxito.
 
+4.  **Notificaciones Silenciosas**: El bot solo enviará un mensaje cuando encuentre una **nueva oportunidad**. Si no hay señales, no recibirás nada (evitando ruido innecesario). Además, si ya tienes una operación abierta con una moneda, el bot no enviará alertas repetidas de ese símbolo.
+
 ---
-*Esta guía corresponde a la versión v2.1 de optimización de precisión.*
+*Esta guía corresponde a la versión v2.2 "Spot Sniper Edition".*
