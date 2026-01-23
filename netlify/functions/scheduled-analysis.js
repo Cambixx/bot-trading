@@ -1458,7 +1458,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (regime === 'TRANSITION') return null; // Avoid low-probability transition phases
 
-  let MIN_QUALITY_SCORE = 70;
+  let MIN_QUALITY_SCORE = 80; // Raised from 70 to eliminate mediocre signals
   const weights = {
     momentum: 0.25,
     trend: 0.30,
@@ -1469,19 +1469,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Adaptive Strategy by Regime
   if (regime === 'TRENDING') {
-    weights.trend = 0.45;    // Trend is king
+    weights.trend = 0.45;
     weights.momentum = 0.20;
-    MIN_QUALITY_SCORE = 75;  // Higher bar for trend continuation
+    MIN_QUALITY_SCORE = 80;  // Raised from 75
   } else if (regime === 'RANGING') {
-    weights.structure = 0.40; // S/R and OBs are king
-    weights.momentum = 0.35;  // RSI extremes are important
-    weights.trend = 0.10;     // Trend is less relevant
-    MIN_QUALITY_SCORE = 75;   // Higher bar for range trades
+    weights.structure = 0.40;
+    weights.momentum = 0.35;
+    weights.trend = 0.10;
+    MIN_QUALITY_SCORE = 80;   // Raised from 75
   } else if (regime === 'HIGH_VOLATILITY') {
     weights.structure = 0.40;
-    weights.volume = 0.40;    // Volume/OrderFlow is king
+    weights.volume = 0.40;
     weights.trend = 0.10;
-    MIN_QUALITY_SCORE = 85;   // Very high bar for volatile markets
+    MIN_QUALITY_SCORE = 85;
   }
 
   score = Math.round(
@@ -1507,10 +1507,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   score = Math.min(100, score);
 
   // === OVEREXTENSION FILTERS (NO-CHASE) ===
-  if (signalType === 'BUY' && (rsi15m > 68 || bbPercent > 0.85)) {
-    // If buying on too high RSI or too near Upper BB, reject
-    return null;
+  const ema21 = ema21_15m;
+  const distToEma21 = ema21 ? (currentPrice - ema21) / ema21 * 100 : 0;
+
+  if (signalType === 'BUY') {
+    // 1. RSI/BB Overextension
+    if (rsi15m > 65 || bbPercent > 0.82) return null; // Tightened from 68/0.85
+
+    // 2. Distance to EMA21 (Don't buy the top of a vertical candle)
+    if (distToEma21 > 1.2) return null; // If price is > 1.2% above EMA21, it's overextended
   }
+
   if (signalType === 'SELL_ALERT') return null;
 
   // === STRICT FILTERS ===
@@ -1518,6 +1525,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (volumeRatio < 1.0) return null; // Increased from 0.8
 
   if (score < MIN_QUALITY_SCORE) return null;
+
+  // Medium quality signals (80-84) REQUIRE extra visual proof
+  if (score < 85 && divergences.length === 0 && patterns.length === 0) {
+    return null; // Reject signals without pattern/div confirmation if score isn't elite
+  }
 
   // Must have at least 3 strong categories if Trending, or 2 otherwise
   const requiredStrong = regime === 'TRENDING' ? 3 : 2;
