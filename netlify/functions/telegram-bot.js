@@ -1,33 +1,20 @@
-import { getStore } from '@netlify/blobs';
+import { getInternalStore } from './scheduled-analysis.js';
 
 const HISTORY_STORE_KEY = 'signal-history-v2';
-const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, NETLIFY_AUTH_TOKEN, SITE_ID } = process.env;
-
-// Localized store helper
-function getInternalStore(context) {
-    const options = { name: 'trading-signals' };
-    const siteID = context?.site?.id || context?.siteID || SITE_ID;
-    const token = context?.token || NETLIFY_AUTH_TOKEN;
-    if (siteID) options.siteID = siteID;
-    if (token) options.token = token;
-    return getStore(options);
-}
+const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
 async function generateReportMessage(context) {
     try {
         const store = getInternalStore(context);
         const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
 
-        if (history.length === 0) return "No hay historial de señales disponible todavía.";
+        if (history.length === 0) return "No hay historial de operaciones disponible.";
 
         const open = history.filter(h => h.status === 'OPEN');
-        const closed = history.filter(h => h.status === 'CLOSED' || h.outcome);
+        const closed = history.filter(h => h.status === 'CLOSED');
         const wins = closed.filter(h => h.outcome === 'WIN');
         const losses = closed.filter(h => h.outcome === 'LOSS');
-        const bes = closed.filter(h => h.outcome === 'BREAK_EVEN');
-
-        const totalDecisive = wins.length + losses.length;
-        const winRate = totalDecisive > 0 ? (wins.length / totalDecisive * 100).toFixed(1) : "0.0";
+        const winRate = closed.length > 0 ? (wins.length / closed.length * 100).toFixed(1) : "0.0";
 
         const esc = (val) => {
             if (val === undefined || val === null) return '';
@@ -35,31 +22,25 @@ async function generateReportMessage(context) {
             return s.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
         };
 
-        let msg = `📊 *ESTADÍSTICAS DEL ALGORITMO (v2.4)*\n\n`;
+        let msg = `📊 *INFORME DE RENDIMIENTO*\n\n`;
         msg += `📈 *Win Rate:* ${esc(winRate)}%\n`;
         msg += `✅ *Ganadoras:* ${esc(wins.length)}\n`;
         msg += `❌ *Perdedoras:* ${esc(losses.length)}\n`;
-        msg += `🤝 *Break-Even:* ${esc(bes.length)}\n`;
         msg += `⏳ *Abiertas:* ${esc(open.length)}\n\n`;
 
         if (open.length > 0) {
-            msg += `🔔 *MONEDAS EN SEGUIMIENTO:*\n`;
-            open.slice(0, 5).forEach(op => {
-                const entry = op.price || op.entry || 0;
-                msg += `• ${esc(op.symbol)} \\($${esc(entry)}\\)\n`;
+            msg += `🔔 *OPERACIONES ABIERTAS:*\n`;
+            open.forEach(op => {
+                msg += `• ${esc(op.symbol)} \\($${esc(op.entry)}\\)\n`;
             });
-            if (open.length > 5) msg += `_...y ${open.length - 5} más_\n`;
             msg += `\n`;
         }
 
         if (closed.length > 0) {
             msg += `📜 *ÚLTIMOS RESULTADOS:*\n`;
             closed.slice(-10).reverse().forEach(op => {
-                let icon = '⚪';
-                if (op.outcome === 'WIN') icon = '✅';
-                if (op.outcome === 'LOSS') icon = '❌';
-                if (op.outcome === 'BREAK_EVEN') icon = '🤝';
-                msg += `${icon} ${esc(op.symbol)}: ${esc(op.outcome || 'N/A')}\n`;
+                const icon = op.outcome === 'WIN' ? '✅' : '❌';
+                msg += `${icon} ${esc(op.symbol)}: ${esc(op.outcome)}\n`;
             });
         }
 
@@ -68,76 +49,59 @@ async function generateReportMessage(context) {
             minute: '2-digit',
             timeZone: 'Europe/Madrid'
         });
-        msg += `\n🤖 _Scanner Auto-Report_ • ${esc(timeStr)}`;
+        msg += `\n🤖 _Scanner Report_ • ${esc(timeStr)}`;
 
         return msg;
     } catch (e) {
-        console.error('[BOT] Error in generateReportMessage:', e);
-        return "⚠️ Error al generar informe: " + e.message;
+        return "Error al generar el informe: " + e.message;
     }
 }
 
-async function sendTelegram(chatId, text, parseMode = 'MarkdownV2') {
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    const body = { chat_id: chatId, text };
-    if (parseMode) body.parse_mode = parseMode;
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-
-    if (!response.ok) {
-        const errText = await response.text();
-        console.error(`[BOT] Telegram API Error for chat ${chatId}:`, errText);
-        throw new Error(errText);
-    }
-    return await response.json();
-}
-
-export const handler = async (event, context) => {
+export const handler = async (event) => {
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 200, body: 'Use POST' }; // Return 200 for Netlify ping
+        return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
     try {
-        const body = event.body ? JSON.parse(event.body) : null;
-        if (!body || !body.message) {
-            console.log('[BOT] Empty update or not a message');
-            return { statusCode: 200, body: 'No message' };
-        }
+        const payload = JSON.parse(event.body);
+        if (!payload.message || !payload.message.chat) return { statusCode: 200, body: 'OK' };
 
-        const message = body.message;
-        const chatId = String(message.chat.id);
-        const text = (message.text || '').toLowerCase().trim();
-        const isAdmin = (chatId === String(TELEGRAM_CHAT_ID).trim());
+        const chatId = String(payload.message.chat.id);
+        const text = (payload.message.text || '').toLowerCase().trim();
 
-        console.log(`[BOT] Update from @${message.from?.username || 'user'} (${chatId}). Admin? ${isAdmin}. Text: "${text}"`);
+        // Verificamos si es un informe solicitado por el ADMIN
+        if (chatId === String(TELEGRAM_CHAT_ID)) {
+            if (text === 'informe' || text === '/informe' || text === 'status') {
+                const message = await generateReportMessage({ siteID: process.env.SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
 
-        // BASIC COMMANDS FOR EVERYONE (To ensure bot is live)
-        if (text === '/start' || text === 'hola' || text === 'ping') {
-            await sendTelegram(chatId, `🚀 Bot de Trading v2.4 activo.\nTu ID: \`${chatId}\`\nAdmin ID: \`${TELEGRAM_CHAT_ID}\``, null);
-            return { statusCode: 200, body: 'OK' };
-        }
-
-        if (isAdmin) {
-            if (text === 'informe' || text === '/informe' || text === 'status' || text === 'stats') {
-                const report = await generateReportMessage(context);
-                await sendTelegram(chatId, report);
-            } else {
-                await sendTelegram(chatId, `✅ Bot Online. Comando desconocido para admin: ${text}`, null);
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'MarkdownV2'
+                    })
+                });
             }
         } else {
-            // Non-admin attempting admin commands
-            if (text.includes('informe') || text === 'id') {
-                await sendTelegram(chatId, `⚠️ No autorizado. Tu ID \`${chatId}\` debe ser configurado en Netlify como \`TELEGRAM_CHAT_ID\`.`, 'Markdown');
+            // Si no es el ADMIN, le avisamos de su ID para que pueda configurarlo
+            if (text === 'informe' || text === 'id') {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: `⚠️ No autorizado personales\\. Tu ID: \\(${chatId}\\)\\.`,
+                        parse_mode: 'MarkdownV2'
+                    })
+                });
             }
         }
 
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        return { statusCode: 200, body: JSON.stringify({ success: true }) };
     } catch (error) {
-        console.error('[BOT] Global Handler Error:', error);
-        return { statusCode: 200, body: 'Error handled' };
+        console.error('Bot Error:', error);
+        return { statusCode: 200, body: 'Error but OK to Telegram' };
     }
 };
