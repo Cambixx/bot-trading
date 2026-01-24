@@ -205,31 +205,21 @@ async function recordSignalHistory(signal, context) {
     const store = getInternalStore(context);
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
 
-    // Risk/Reward Setup (2.5:2.0)
-    // Widened SL for better spot endurance
-    const atrFactor = signal.atrPercent || 1;
-    const entryPrice = signal.price;
-    let tp, sl;
-
-    if (signal.type === 'BUY') {
-      tp = entryPrice * (1 + (atrFactor / 100) * 2.5);
-      sl = entryPrice * (1 - (atrFactor / 100) * 2.0);
-    } else {
-      tp = entryPrice * (1 - (atrFactor / 100) * 2.5);
-      sl = entryPrice * (1 + (atrFactor / 100) * 2.0);
-    }
 
     const record = {
       id: `${Date.now()}-${signal.symbol}`,
       symbol: signal.symbol,
-      entry: entryPrice,
-      tp,
-      sl,
+      entry: signal.price,
+      tp: signal.tp,
+      sl: signal.sl,
       type: signal.type,
       time: Date.now(),
       status: 'OPEN',
       score: signal.score,
-      regime: signal.regime
+      regime: signal.regime,
+      hasMSS: !!signal.hasMSS,
+      hasSweep: !!signal.hasSweep,
+      btcRisk: signal.btcContext?.status || 'UNKNOWN'
     };
 
     history.push(record);
@@ -255,12 +245,57 @@ async function updateSignalHistory(tickers, context) {
         const currentPrice = prices.get(item.symbol);
         if (!currentPrice) continue;
 
+        // Initialize maxFavorable if not present
+        if (item.maxFavorable === undefined) item.maxFavorable = item.price; // Start at entry
+
         if (item.type === 'BUY') {
+          // Update Max Favorable Excursion
+          if (currentPrice > item.maxFavorable) item.maxFavorable = currentPrice;
+
+          // Check for Break Even Trigger (1:1 R:R reached)
+          // Risk = Entry - SL. If price moves Entry + Risk, set BE.
+          const risk = item.price - item.sl;
+          if (!item.breakeven && currentPrice >= (item.price + risk)) {
+            item.breakeven = true;
+            updated = true;
+          }
+
           if (currentPrice >= item.tp) { item.status = 'CLOSED'; item.outcome = 'WIN'; updated = true; }
-          else if (currentPrice <= item.sl) { item.status = 'CLOSED'; item.outcome = 'LOSS'; updated = true; }
+          else if (currentPrice <= item.sl) {
+            // If we hit SL but had moved to BE, it's a BE outcome (simulated)
+            // Or if price hit entry after being at BE
+            item.status = 'CLOSED';
+            item.outcome = item.breakeven ? 'BREAK_EVEN' : 'LOSS';
+            updated = true;
+          }
+          // Virtual BE hit (price returned to entry after 1:1)
+          else if (item.breakeven && currentPrice <= item.price) {
+            item.status = 'CLOSED';
+            item.outcome = 'BREAK_EVEN';
+            updated = true;
+          }
+
         } else {
+          // SELL LOGIC
+          if (currentPrice < item.maxFavorable) item.maxFavorable = currentPrice;
+
+          const risk = item.sl - item.price;
+          if (!item.breakeven && currentPrice <= (item.price - risk)) {
+            item.breakeven = true;
+            updated = true;
+          }
+
           if (currentPrice <= item.tp) { item.status = 'CLOSED'; item.outcome = 'WIN'; updated = true; }
-          else if (currentPrice >= item.sl) { item.status = 'CLOSED'; item.outcome = 'LOSS'; updated = true; }
+          else if (currentPrice >= item.sl) {
+            item.status = 'CLOSED';
+            item.outcome = item.breakeven ? 'BREAK_EVEN' : 'LOSS';
+            updated = true;
+          }
+          else if (item.breakeven && currentPrice >= item.price) {
+            item.status = 'CLOSED';
+            item.outcome = 'BREAK_EVEN';
+            updated = true;
+          }
         }
 
         // Auto-expire after 48 hours
@@ -274,15 +309,24 @@ async function updateSignalHistory(tickers, context) {
     if (updated) await store.setJSON(HISTORY_STORE_KEY, history);
 
     const closed = history.filter(h => h.status === 'CLOSED');
+    // Win Rate Calculation considering BE as neutral (excludes from denominator or counts as 0.5?)
+    // Standard approach: BE doesn't count as Loss, but not a Win either. 
+    // Win Rate = Wins / (Wins + Losses). BE excluded.
     const wins = closed.filter(h => h.outcome === 'WIN').length;
+    const losses = closed.filter(h => h.outcome === 'LOSS').length;
+    const bes = closed.filter(h => h.outcome === 'BREAK_EVEN').length;
+
+    const totalDecisive = wins + losses;
+    const winRate = totalDecisive > 0 ? (wins / totalDecisive * 100).toFixed(1) : 0;
     const openSignals = history.filter(h => h.status === 'OPEN');
 
     return {
       stats: {
         open: openSignals.length,
         wins,
-        losses: closed.length - wins,
-        winRate: closed.length > 0 ? (wins / closed.length * 100).toFixed(1) : 0
+        losses,
+        bes,
+        winRate
       },
       openSymbols: openSignals.map(s => s.symbol)
     };
@@ -793,6 +837,47 @@ function calculateSuperTrend(candles, period = 10, multiplier = 3) {
   };
 }
 
+function calculateSimpleVolumeProfile(candles, lookback = 200) {
+  if (!candles || candles.length < 50) return null;
+  const data = candles.slice(-lookback);
+
+  let min = Infinity, max = -Infinity;
+  data.forEach(c => {
+    if (c.low < min) min = c.low;
+    if (c.high > max) max = c.high;
+  });
+
+  if (min === max) return null;
+
+  const bins = 24;
+  const binSize = (max - min) / bins;
+  const volumeProfile = new Array(bins).fill(0);
+
+  data.forEach(c => {
+    // Distribute volume across bins intersected by candle
+    const startBin = Math.floor((c.low - min) / binSize);
+    const endBin = Math.floor((c.high - min) / binSize);
+    // Simple approach: add full volume to midpoint bin (faster)
+    const mid = (c.low + c.high) / 2;
+    const binIndex = Math.floor((mid - min) / binSize);
+    if (binIndex >= 0 && binIndex < bins) {
+      volumeProfile[binIndex] += Number(c.volume);
+    }
+  });
+
+  let maxVol = 0;
+  let pocIndex = 0;
+  volumeProfile.forEach((vol, i) => {
+    if (vol > maxVol) {
+      maxVol = vol;
+      pocIndex = i;
+    }
+  });
+
+  const pocPrice = min + (pocIndex + 0.5) * binSize;
+  return { poc: pocPrice, min, max };
+}
+
 function calculateOrderBookMetrics(orderBook) {
   if (!orderBook || !orderBook.bids?.length || !orderBook.asks?.length) return null;
 
@@ -916,6 +1001,133 @@ function detectSmartMoneyConcepts(candles, lookback = 50) {
 }
 
 // ==================== PRICE ACTION PATTERNS ====================
+
+function detectMarketStructureShift(candles, lookback = 50) {
+  if (candles.length < lookback) return null;
+
+  const relevantCandles = candles.slice(-lookback);
+  // Find Swing Points (Highs and Lows)
+  const swings = [];
+
+  for (let i = 2; i < relevantCandles.length - 2; i++) {
+    const current = relevantCandles[i];
+    const prev = relevantCandles[i - 1];
+    const prev2 = relevantCandles[i - 2];
+    const next = relevantCandles[i + 1];
+    const next2 = relevantCandles[i + 2];
+
+    // Swing High
+    if (current.high > prev.high && current.high > prev2.high &&
+      current.high > next.high && current.high > next2.high) {
+      swings.push({ type: 'HIGH', price: current.high, time: current.time, index: i });
+    }
+
+    // Swing Low
+    if (current.low < prev.low && current.low < prev2.low &&
+      current.low < next.low && current.low < next2.low) {
+      swings.push({ type: 'LOW', price: current.low, time: current.time, index: i });
+    }
+  }
+
+  if (swings.length < 2) return null;
+
+  const lastCandle = relevantCandles[relevantCandles.length - 1];
+  const prevCandle = relevantCandles[relevantCandles.length - 2];
+
+  // Check for Bullish MSS (Break of last Swing High)
+  // Needs to happen recently (last 3 candles)
+  const lastSwingHigh = swings.filter(s => s.type === 'HIGH').pop();
+
+  if (lastSwingHigh) {
+    // Check if price broke above the last swing high RECENTLY
+    const brokenIndex = relevantCandles.findIndex((c, idx) => idx > lastSwingHigh.index && c.close > lastSwingHigh.price);
+
+    if (brokenIndex !== -1 && brokenIndex >= relevantCandles.length - 3) {
+      const breakCandle = relevantCandles[brokenIndex];
+      const bodySize = Math.abs(breakCandle.close - breakCandle.open);
+      const totalSize = breakCandle.high - breakCandle.low;
+
+      // Validation: Break must be impulsive (large body)
+      if (bodySize > totalSize * 0.5) {
+        return {
+          type: 'BULLISH_MSS',
+          price: lastSwingHigh.price,
+          breakTime: breakCandle.time
+        };
+      }
+    }
+  }
+
+  // Check for Bearish MSS (Break of last Swing Low)
+  const lastSwingLow = swings.filter(s => s.type === 'LOW').pop();
+
+  if (lastSwingLow) {
+    const brokenIndex = relevantCandles.findIndex((c, idx) => idx > lastSwingLow.index && c.close < lastSwingLow.price);
+
+    if (brokenIndex !== -1 && brokenIndex >= relevantCandles.length - 3) {
+      const breakCandle = relevantCandles[brokenIndex];
+      return {
+        type: 'BEARISH_MSS',
+        price: lastSwingLow.price,
+        breakTime: breakCandle.time
+      };
+    }
+  }
+
+  return null;
+}
+
+function detectLiquiditySweep(candles, lookback = 50) {
+  if (candles.length < lookback) return null;
+  // Exclude last few candles to find established lows
+  const analysisCandles = candles.slice(-lookback, -3);
+  const recentCandles = candles.slice(-3);
+
+  // Find significant lowest low in established window
+  let minLow = Infinity;
+
+  for (let i = 0; i < analysisCandles.length; i++) {
+    if (analysisCandles[i].low < minLow) {
+      minLow = analysisCandles[i].low;
+    }
+  }
+
+  if (minLow === Infinity) return null;
+
+  // Check if any recent candle swept the low
+  for (const candle of recentCandles) {
+    // Bullish Sweep: Price went below establish low but closed ABOVE it
+    if (candle.low < minLow && candle.close > minLow) {
+      return {
+        type: 'BULLISH_SWEEP',
+        level: minLow,
+        time: candle.time
+      };
+    }
+  }
+
+  // Find significant highest high for bearish sweep
+  let maxHigh = -Infinity;
+  for (let i = 0; i < analysisCandles.length; i++) {
+    if (analysisCandles[i].high > maxHigh) {
+      maxHigh = analysisCandles[i].high;
+    }
+  }
+
+  for (const candle of recentCandles) {
+    // Bearish Sweep: Price went above established high but closed BELOW it
+    if (candle.high > maxHigh && candle.close < maxHigh) {
+      return {
+        type: 'BEARISH_SWEEP',
+        level: maxHigh,
+        time: candle.time
+      };
+    }
+  }
+
+  return null;
+}
+
 
 function detectPriceActionPatterns(candles) {
   if (candles.length < 3) return [];
@@ -1187,7 +1399,7 @@ function calculateConfluence(analysis15m, analysis1h) {
 
 // ==================== SIGNAL GENERATION ====================
 
-function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h) {
+function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext = null) {
   if (!candles15m || candles15m.length < 201) return null;
 
   const closedCandles15m = getClosedCandles(candles15m, '15m');
@@ -1401,6 +1613,24 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
+
+
+  // Volume Profile (POC) (0-15)
+  const vp = calculateSimpleVolumeProfile(closedCandles1h, 168); // ~1 week on 1H
+  if (vp) {
+    const distPoc = (currentPrice - vp.poc) / vp.poc * 100;
+    // Buying above POC (Support)
+    if (signalType === 'BUY' && distPoc > 0 && distPoc < 2.0) {
+      structureScore += 15;
+      reasons.push('🧱 Above POC (Support)');
+    }
+    // Selling below POC (Resistance)
+    else if (signalType === 'SELL_ALERT' && distPoc < 0 && distPoc > -2.0) {
+      structureScore += 15;
+      reasons.push('🧱 Below POC (Resist)');
+    }
+  }
+
   categoryScores.structure = Math.min(100, structureScore);
 
   // === CATEGORY 4: VOLUME & ORDER FLOW (0-100) ===
@@ -1551,6 +1781,46 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (signalType === 'SELL_ALERT') return null;
 
+  // === BTC CONTEXT FILTER (GLOBAL) ===
+  // btcContext is now passed as the last argument
+  if (btcContext) {
+    if (btcContext.status === 'RED') {
+      // Extreme Filter during BTC corrections
+      if (score < 95) return null;
+      reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
+    } else if (btcContext.status === 'AMBER') {
+      // Moderate Filter
+      if (score < 85) return null;
+      reasons.push('⚠️ Precaución Macro (BTC Ambar)');
+    }
+  }
+
+  // === MSS DETECTION (NEW) ===
+  const mss = detectMarketStructureShift(closedCandles15m);
+  if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
+    score += 35; // Significant boost
+    reasons.unshift('🔄 MSS (Cambio Estructural)');
+    if (!signalType) signalType = 'BUY';
+    // If we have a confirmed MSS, we can lower the requirement slightly
+    if (score >= 75) MIN_QUALITY_SCORE = 75;
+  } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
+    score += 35;
+    if (!signalType) signalType = 'SELL_ALERT';
+  }
+
+  // === LIQUIDITY SWEEP DETECTION (NEW) ===
+  const sweep = detectLiquiditySweep(closedCandles15m);
+  if (sweep && sweep.type === 'BULLISH_SWEEP' && (signalType === 'BUY' || !signalType)) {
+    score += 40; // High Value Setup
+    reasons.unshift('🧹 Liquidity Sweep (Barrido)');
+    if (!signalType) signalType = 'BUY';
+    if (score >= 75) MIN_QUALITY_SCORE = 75;
+  } else if (sweep && sweep.type === 'BEARISH_SWEEP' && (signalType === 'SELL_ALERT' || !signalType)) {
+    score += 40;
+    reasons.unshift('🧹 Liquidity Sweep (Barrido)');
+    if (!signalType) signalType = 'SELL_ALERT';
+  }
+
   // === STRICT FILTERS ===
   // Reject low-volume setups
   if (volumeRatio < 1.0) return null; // Increased from 0.8
@@ -1558,13 +1828,18 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (score < MIN_QUALITY_SCORE) return null;
 
   // Medium quality signals (80-84) REQUIRE extra visual proof
-  if (score < 85 && divergences.length === 0 && patterns.length === 0) {
-    return null; // Reject signals without pattern/div confirmation if score isn't elite
+  // IF MSS or Sweep exists, we bypass this check
+  if (score < 85 && divergences.length === 0 && patterns.length === 0 && !mss && !sweep) {
+    return null; // Reject signals without pattern/div/mss/sweep confirmation if score isn't elite
   }
 
   // Must have at least 3 strong categories if Trending, or 2 otherwise
+  // MSS counts as a strong "Structure" confirmation
   const requiredStrong = regime === 'TRENDING' ? 3 : 2;
-  if (strongCategories < requiredStrong) return null;
+  // If we have MSS or Sweep, we treat it as satisfying one strong category requirement inherently
+  const adjustedStrongCategories = (mss || sweep) ? strongCategories + 1 : strongCategories;
+
+  if (adjustedStrongCategories < requiredStrong) return null;
 
   // === FINAL OUTPUT ===
   if (score >= MIN_QUALITY_SCORE && reasons.length > 0 && signalType) {
@@ -1574,7 +1849,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       price1h: currentPrice1h,
       score,
       regime,
-      categoryScores, // Include breakdown
+      categoryScores,
       strongCategories,
       type: signalType,
       rsi: rsi15m.toFixed(1),
@@ -1582,8 +1857,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       stochRSI: stoch15m ? stoch15m.k.toFixed(1) : null,
       macdBullish: macd15m.bullish,
       macdBullish1h: macd1h.bullish,
+
       hasSMC: !!(nearbyBullishOB || nearbyBullishFVG || nearbyBearishOB || nearbyBearishFVG),
       smcSignal: nearbyBullishOB ? 'OB_BULL' : nearbyBearishOB ? 'OB_BEAR' : nearbyBullishFVG ? 'FVG_BULL' : nearbyBearishFVG ? 'FVG_BEAR' : null,
+      hasMSS: !!mss,
+      hasSweep: !!sweep,
       superTrend: superTrend15m.bullish ? 'BULL' : 'BEAR',
       superTrendFlipped: superTrend15m.flipped,
       bbPosition: Math.round(bbPercent * 100),
@@ -1601,12 +1879,13 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       vwap: vwap15m,
       vwapDistance: vwap15m ? Number((((currentPrice - vwap15m) / vwap15m) * 100).toFixed(2)) : null,
       tp: signalType === 'BUY'
-        ? currentPrice * (1 + (atrPercent15m / 100) * 2.5)
-        : currentPrice * (1 - (atrPercent15m / 100) * 2.5),
+        ? currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 4.0 : 2.0))
+        : currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 4.0 : 2.0)),
       sl: signalType === 'BUY'
-        ? currentPrice * (1 - (atrPercent15m / 100) * 2.0)
-        : currentPrice * (1 + (atrPercent15m / 100) * 2.0),
-      reasons
+        ? currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 1.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0))
+        : currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 1.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0)),
+      reasons,
+      btcContext // Include context in result
     };
   }
 
@@ -1681,9 +1960,16 @@ async function sendTelegramNotification(signals, stats = null) {
     const regimeIcon = sig.regime === 'TRENDING' ? '📈' : (sig.regime === 'RANGING' ? '↔️' : '⚠️');
     message += `${regimeIcon} Regime: ${esc(sig.regime)} \\| 🎯 Score: *${esc(sig.score)}*/100\n`;
 
+    if (sig.btcContext && sig.btcContext.status !== 'GREEN') {
+      const btcIcon = sig.btcContext.status === 'RED' ? '🔴' : '🟡';
+      message += `${btcIcon} BTC Risk: ${esc(sig.btcContext.status)}\n`;
+    }
+
     // SMC & Confluence
     let badges = [];
     if (sig.hasSMC) badges.push(`🏦 ${sig.smcSignal}`);
+    if (sig.hasMSS) badges.push('🔄MSS');
+    if (sig.hasSweep) badges.push('🧹SWP');
     if (sig.hasDivergence) badges.push('🔥DIV');
     if (sig.hasPattern) badges.push('🕯️PAT');
     if (badges.length > 0) {
@@ -1772,13 +2058,40 @@ async function runAnalysis(context) {
     let analyzed = 0;
     let errors = 0;
 
-    let tickers24h = [];
+    // === BTC GLOBAL CONTEXT ANALYSIS ===
+    let btcContext = { status: 'GREEN', reason: 'BTC Analysis Passed (Default)' };
     try {
-      tickers24h = await getAllTickers24h();
-    } catch (error) {
-      console.error('Error fetching 24h tickers:', error.message);
+      const btcSymbol = `BTC${QUOTE_ASSET}`;
+      const [btcCandes4h, btcCandes1h] = await Promise.all([
+        getKlines(btcSymbol, '4h', 100),
+        getKlines(btcSymbol, '60m', 100)
+      ]);
+
+      if (btcCandes4h && btcCandes4h.length > 50) {
+        const closed4h = getClosedCandles(btcCandes4h, '4h');
+        const closes4h = closed4h.map(c => c.close);
+        const closes1h = getClosedCandles(btcCandes1h, '60m').map(c => c.close);
+
+        const btcSt4h = calculateSuperTrend(closed4h, 10, 3);
+        const btcRsi4h = calculateRSI(closes4h, 14);
+        const btcRsi1h = calculateRSI(closes1h, 14);
+
+        if (btcSt4h.bearish || btcRsi4h > 75) {
+          btcContext = { status: 'RED', reason: 'BTC 4H Bearish or Overextended' };
+          console.log(`[BTC-SEM] 🔴 RED: ST=${btcSt4h.bearish ? 'Bear' : 'Bull'}, RSI4H=${btcRsi4h.toFixed(1)}`);
+        } else if (btcSt4h.bullish && btcRsi1h > 65) {
+          btcContext = { status: 'AMBER', reason: 'BTC 1H Overbought' };
+          console.log(`[BTC-SEM] 🟡 AMBER: RSI1H=${btcRsi1h.toFixed(1)}`);
+        } else {
+          btcContext = { status: 'GREEN', reason: 'BTC Healthy' };
+          console.log(`[BTC-SEM] 🟢 GREEN: Trend Healthy`);
+        }
+      }
+    } catch (btcErr) {
+      console.warn('Failed to analyze BTC context:', btcErr.message);
     }
 
+    const tickers24h = await getAllTickers24h();
     const tickersBySymbol = new Map(tickers24h.map(t => [t.symbol, t]));
 
     const topSymbols = tickers24h.length > 0
@@ -1818,7 +2131,7 @@ async function runAnalysis(context) {
 
         analyzed++;
 
-        const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h);
+        const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext);
         if (signal) {
           // IMMEDIATE COOLDOWN PROTECTION
           cooldowns[symbol] = Date.now();
