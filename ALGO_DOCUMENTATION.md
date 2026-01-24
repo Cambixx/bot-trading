@@ -92,6 +92,10 @@ Para pedirme (o pedir a otra IA) una optimización, debes seguir estos pasos:
 - **Ajustar Pesos**: Si el mercado cambia, podemos dar más peso al Volumen y menos al Momentum.
 - **Ajustar SL/TP**: Cambiar el ratio de 1.5 a 2.0 si el mercado está muy tendencial.
 
+### Plan de Investigación V3.0
+Para una visión detallada de las próximas mejoras institucionales (Volume Profile, Liquidity Sweeps, MSS), consulta el archivo:
+👉 `ROADMAP_V3_RESEARCH.md`
+
 ---
 
 ## 6. Mantenimiento y Parámetros del Sistema

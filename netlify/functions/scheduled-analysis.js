@@ -155,13 +155,44 @@ async function loadCooldowns(context) {
   }
 }
 
+// ==================== EXECUTION LOCKING ====================
+const RUN_LOCK_KEY = 'global-run-lock';
+
+async function acquireRunLock(context) {
+  try {
+    const store = getInternalStore(context);
+    const lock = await store.get(RUN_LOCK_KEY, { type: 'json' });
+    const now = Date.now();
+
+    // If lock is less than 3 minutes old, it's considered active
+    if (lock && (now - lock.timestamp < 3 * 60000)) {
+      console.warn(`[LOCK] Analysis already in progress (started ${((now - lock.timestamp) / 1000).toFixed(0)}s ago). Aborting.`);
+      return false;
+    }
+
+    await store.setJSON(RUN_LOCK_KEY, { timestamp: now, id: `run-${now}` });
+    return true;
+  } catch (error) {
+    console.error('[LOCK] Error acquiring lock:', error.message);
+    return true; // Proceed anyway on error as fail-safe
+  }
+}
+
+async function releaseRunLock(context) {
+  try {
+    const store = getInternalStore(context);
+    await store.delete(RUN_LOCK_KEY);
+  } catch (error) {
+    console.error('[LOCK] Error releasing lock:', error.message);
+  }
+}
+
 async function saveCooldowns(cooldowns, context) {
   try {
     const store = getInternalStore(context);
     await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
-  } catch (error) {
-    // Only warn if we're theoretically in production or if it's a real error
-    if (process.env.NETLIFY) console.error('Error saving cooldowns to Blob:', error.message);
+  } catch (e) {
+    console.error('Error saving cooldowns:', e.message);
   }
 }
 
@@ -1723,112 +1754,114 @@ async function sendTelegramNotification(signals, stats = null) {
 
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
-async function runAnalysis(context = null) {
-  console.log('--- DAY TRADE Analysis Started ---');
-  console.log('Time:', new Date().toISOString());
+async function runAnalysis(context) {
+  // 0. Acquire Global Lock
+  const canProceed = await acquireRunLock(context);
+  if (!canProceed) return { success: false, error: 'Locked' };
 
-  // Load persistent cooldowns
-  const cooldowns = await loadCooldowns(context);
-  console.log(`Loaded ${Object.keys(cooldowns).length} cooldown entries`);
-
-  const signals = [];
-  let analyzed = 0;
-  let errors = 0;
-
-  let tickers24h = [];
   try {
-    tickers24h = await getAllTickers24h();
-  } catch (error) {
-    console.error('Error fetching 24h tickers:', error.message);
-  }
+    console.log('--- DAY TRADE Analysis Started ---');
+    const runId = `RUN-${Date.now().toString().slice(-6)}`;
+    console.log('Execution ID:', runId);
 
-  const topSymbols = tickers24h.length > 0
-    ? getTopSymbolsByOpportunity(tickers24h, QUOTE_ASSET, MAX_SYMBOLS, MIN_QUOTE_VOL_24H)
-    : FALLBACK_SYMBOLS;
+    // Load persistent cooldowns
+    const cooldowns = await loadCooldowns(context);
+    console.log(`Loaded ${Object.keys(cooldowns).length} cooldown entries`);
 
-  const tickersBySymbol = new Map(tickers24h.map(t => [t.symbol, t]));
+    const signals = [];
+    let analyzed = 0;
+    let errors = 0;
 
-  // Update Backtesting History & Stats BEFORE scanning to avoid redundant signals
-  const histData = await updateSignalHistory(tickers24h, context);
-  const stats = histData?.stats || { open: 0, wins: 0, losses: 0, winRate: 0 };
-  const openSymbols = histData?.openSymbols || [];
-
-  if (stats) console.log('Performance Stats:', stats);
-
-  for (const symbol of topSymbols) {
-    if (openSymbols.includes(symbol)) {
-      console.log(`Skipping ${symbol} - Already have an OPEN position`);
-      continue;
-    }
+    let tickers24h = [];
     try {
-      const candles15m = await getKlines(symbol, '15m', 300);
-      const orderBook = await getOrderBookDepth(symbol, 20);
-      const ticker24h = tickersBySymbol.get(symbol) || null;
-
-      let candles1h = [];
-      let candles4h = [];
-      if (USE_MULTI_TF) {
-        candles1h = await getKlines(symbol, '60m', 200);
-        candles4h = await getKlines(symbol, '4h', 100);
-      } else {
-        candles1h = candles15m.slice(-200);
-        // Fallback for 4h if disabled? Just empty.
-      }
-
-      analyzed++;
-
-      const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h);
-      if (signal) {
-        const reasonKey = Array.isArray(signal.reasons) && signal.reasons.length > 0 ? signal.reasons[0] : '';
-        const key = `${signal.symbol}:${signal.type}`;
-        const now = Date.now();
-        const lastTs = cooldowns[key] || 0;
-        const cooldownMs = Math.max(0, ALERT_COOLDOWN_MIN) * 60 * 1000;
-        if (cooldownMs > 0 && now - lastTs < cooldownMs) {
-          console.log(`Signal skipped (cooldown): ${symbol} - Type: ${signal.type}`);
-        } else {
-          cooldowns[key] = now;
-          signals.push(signal);
-          console.log(`Signal: ${symbol} - Score: ${signal.score} - Type: ${signal.type}`);
-        }
-      }
-
-      await sleep(150);
-
+      tickers24h = await getAllTickers24h();
     } catch (error) {
-      console.error(`Error analyzing ${symbol}:`, error.message, error.stack?.split('\n')[0]);
-      errors++;
-      await sleep(150);
+      console.error('Error fetching 24h tickers:', error.message);
     }
+
+    const tickersBySymbol = new Map(tickers24h.map(t => [t.symbol, t]));
+
+    const topSymbols = tickers24h.length > 0
+      ? getTopSymbolsByOpportunity(tickers24h, QUOTE_ASSET, MAX_SYMBOLS, MIN_QUOTE_VOL_24H)
+      : FALLBACK_SYMBOLS;
+
+    // Update Backtesting History & Stats BEFORE scanning
+    const histData = await updateSignalHistory(tickers24h, context);
+    const stats = histData?.stats || { open: 0, wins: 0, losses: 0, winRate: 0 };
+    const openSymbols = histData?.openSymbols || [];
+
+    if (stats) console.log(`[${runId}] Performance Stats:`, stats);
+
+    for (const symbol of topSymbols) {
+      if (openSymbols.includes(symbol)) {
+        console.log(`[${runId}] Skipping ${symbol} - Already have an OPEN position in history`);
+        continue;
+      }
+
+      if (cooldowns[symbol] && (Date.now() - cooldowns[symbol] < ALERT_COOLDOWN_MIN * 60000)) {
+        continue;
+      }
+      try {
+        const candles15m = await getKlines(symbol, '15m', 300);
+        const orderBook = await getOrderBookDepth(symbol, 20);
+        const ticker24h = tickersBySymbol.get(symbol) || null;
+
+        let candles1h = [];
+        let candles4h = [];
+        if (USE_MULTI_TF) {
+          candles1h = await getKlines(symbol, '60m', 200);
+          candles4h = await getKlines(symbol, '4h', 100);
+        } else {
+          candles1h = candles15m.slice(-200);
+          // Fallback for 4h if disabled? Just empty.
+        }
+
+        analyzed++;
+
+        const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h);
+        if (signal) {
+          // IMMEDIATE COOLDOWN PROTECTION
+          cooldowns[symbol] = Date.now();
+          await saveCooldowns(cooldowns, context); // Save immediately to prevent race conditions
+
+          await recordSignalHistory(signal, context);
+          signals.push(signal);
+          console.log(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score}`);
+        }
+
+        await sleep(150);
+
+      } catch (error) {
+        console.error(`Error analyzing ${symbol}:`, error.message, error.stack?.split('\n')[0]);
+        errors++;
+        await sleep(150);
+      }
+    }
+
+    console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
+
+    let telegramResult = { success: true, sent: 0 };
+    if (signals.length > 0) {
+      telegramResult = await sendTelegramNotification(signals, stats);
+    }
+
+    // Release lock on success
+    await releaseRunLock(context);
+
+    return {
+      success: true,
+      id: runId,
+      analyzed,
+      signals: signals.length,
+      errors,
+      telegram: telegramResult,
+      timestamp: new Date().toISOString()
+    };
+  } catch (globalErr) {
+    console.error('CRITICAL ERROR in runAnalysis:', globalErr.message);
+    await releaseRunLock(context);
+    return { success: false, error: globalErr.message };
   }
-
-  console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
-
-  // Record signals to persistent history
-  for (const sig of signals) {
-    await recordSignalHistory(sig, context);
-  }
-
-  let telegramResult = { success: true, sent: 0 };
-  if (signals.length > 0) {
-    telegramResult = await sendTelegramNotification(signals, stats);
-  } else {
-    console.log('No new signals detected this cycle. Skipping notification.');
-  }
-
-  // Save updated cooldowns
-  if (Object.keys(cooldowns).length > 0) {
-    await saveCooldowns(cooldowns, context);
-  }
-
-  return {
-    success: true,
-    analyzed,
-    signals: signals.length,
-    errors,
-    telegram: telegramResult,
-    timestamp: new Date().toISOString()
-  };
 }
 
 // ==================== SCHEDULED HANDLER (Netlify) ====================
