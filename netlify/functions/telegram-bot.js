@@ -12,9 +12,13 @@ async function generateReportMessage(context) {
 
         const open = history.filter(h => h.status === 'OPEN');
         const closed = history.filter(h => h.status === 'CLOSED');
-        const wins = closed.filter(h => h.outcome === 'WIN');
-        const losses = closed.filter(h => h.outcome === 'LOSS');
-        const winRate = closed.length > 0 ? (wins.length / closed.length * 100).toFixed(1) : "0.0";
+        const winsString = closed.filter(h => h.outcome === 'WIN');
+        const lossesString = closed.filter(h => h.outcome === 'LOSS');
+        const bes = closed.filter(h => h.outcome === 'BREAK_EVEN');
+
+        // Exact calculation: excluded BE from decisive trades
+        const totalDecisive = winsString.length + lossesString.length;
+        const winRate = totalDecisive > 0 ? (winsString.length / totalDecisive * 100).toFixed(1) : "0.0";
 
         const esc = (val) => {
             if (val === undefined || val === null) return '';
@@ -22,16 +26,18 @@ async function generateReportMessage(context) {
             return s.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
         };
 
-        let msg = `📊 *INFORME DE RENDIMIENTO*\n\n`;
+        let msg = `📊 *INFORME DE RENDIMIENTO (v2.4)*\n\n`;
         msg += `📈 *Win Rate:* ${esc(winRate)}%\n`;
-        msg += `✅ *Ganadoras:* ${esc(wins.length)}\n`;
-        msg += `❌ *Perdedoras:* ${esc(losses.length)}\n`;
+        msg += `✅ *Ganadoras:* ${esc(winsString.length)}\n`;
+        msg += `❌ *Perdedoras:* ${esc(lossesString.length)}\n`;
+        msg += `🤝 *Break-Even:* ${esc(bes.length)}\n`;
         msg += `⏳ *Abiertas:* ${esc(open.length)}\n\n`;
 
         if (open.length > 0) {
             msg += `🔔 *OPERACIONES ABIERTAS:*\n`;
             open.forEach(op => {
-                msg += `• ${esc(op.symbol)} \\($${esc(op.entry)}\\)\n`;
+                const entry = op.price || op.entry || 0;
+                msg += `• ${esc(op.symbol)} \\($${esc(entry)}\\)\n`;
             });
             msg += `\n`;
         }
@@ -39,7 +45,9 @@ async function generateReportMessage(context) {
         if (closed.length > 0) {
             msg += `📜 *ÚLTIMOS RESULTADOS:*\n`;
             closed.slice(-10).reverse().forEach(op => {
-                const icon = op.outcome === 'WIN' ? '✅' : '❌';
+                let icon = '❌';
+                if (op.outcome === 'WIN') icon = '✅';
+                if (op.outcome === 'BREAK_EVEN') icon = '🤝';
                 msg += `${icon} ${esc(op.symbol)}: ${esc(op.outcome)}\n`;
             });
         }
@@ -49,7 +57,7 @@ async function generateReportMessage(context) {
             minute: '2-digit',
             timeZone: 'Europe/Madrid'
         });
-        msg += `\n🤖 _Scanner Report_ • ${esc(timeStr)}`;
+        msg += `\n🤖 _Scanner Report v2.4_ • ${esc(timeStr)}`;
 
         return msg;
     } catch (e) {
@@ -71,7 +79,7 @@ export const handler = async (event) => {
 
         // Verificamos si es un informe solicitado por el ADMIN
         if (chatId === String(TELEGRAM_CHAT_ID)) {
-            if (text === 'informe' || text === '/informe' || text === 'status') {
+            if (text === 'informe' || text === '/informe' || text === 'status' || text === '/status' || text === 'stats' || text === '/stats' || text === 'stat') {
                 const message = await generateReportMessage({ siteID: process.env.SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
 
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
