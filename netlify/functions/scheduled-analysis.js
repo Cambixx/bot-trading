@@ -124,8 +124,8 @@ export function getInternalStore(context) {
   const options = { name: 'trading-signals' };
 
   // Try to get Site ID from context or environment
-  const siteID = context?.site?.id || process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  // Try to get Token from context or environment (needs to be set manually in Netlify env vars)
+  const siteID = context?.site?.id || context?.siteID || process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  // Try to get Token from context or environment
   const token = context?.token || process.env.NETLIFY_AUTH_TOKEN;
 
   if (siteID) options.siteID = siteID;
@@ -1765,7 +1765,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     reasons.push('🎯 Alta Confluencia');
   }
 
-  score = Math.min(100, score);
+  // Final Score Clamping (moved to end after all bonuses)
+  // score = Math.min(100, score); 
 
   // === OVEREXTENSION FILTERS (NO-CHASE) ===
   const ema21 = ema21_15m;
@@ -1824,6 +1825,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === STRICT FILTERS ===
   // Reject low-volume setups
   if (volumeRatio < 1.0) return null; // Increased from 0.8
+
+  // Final Score Clamping
+  score = Math.min(100, score);
 
   if (score < MIN_QUALITY_SCORE) return null;
 

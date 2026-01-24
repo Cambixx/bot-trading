@@ -65,7 +65,7 @@ async function generateReportMessage(context) {
     }
 }
 
-export const handler = async (event) => {
+export const handler = async (event, context) => {
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
@@ -76,11 +76,15 @@ export const handler = async (event) => {
 
         const chatId = String(payload.message.chat.id);
         const text = (payload.message.text || '').toLowerCase().trim();
+        const username = payload.message.from?.username || 'unknown';
+
+        console.log(`[BOT] Received: "${text}" from ${username} (${chatId})`);
 
         // Verificamos si es un informe solicitado por el ADMIN
         if (chatId === String(TELEGRAM_CHAT_ID)) {
-            if (text === 'informe' || text === '/informe' || text === 'status') {
-                const message = await generateReportMessage({ siteID: process.env.SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
+            console.log(`[BOT] Admin command detected: ${text}`);
+            if (text === 'informe' || text === '/informe' || text === 'status' || text === '/status' || text === 'stat') {
+                const message = await generateReportMessage(context);
 
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
