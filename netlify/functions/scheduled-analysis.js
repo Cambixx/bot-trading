@@ -1730,8 +1730,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Adaptive Strategy by Regime
   if (regime === 'TRENDING') {
-    weights.trend = 0.45;
-    weights.momentum = 0.20;
+    weights.trend = 0.40;
+    weights.volume = 0.30;
+    weights.momentum = 0.10;
     MIN_QUALITY_SCORE = 80;  // Raised from 75
   } else if (regime === 'RANGING') {
     weights.structure = 0.40;
@@ -1778,6 +1779,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
     // 2. Distance to EMA21 (Don't buy the top of a vertical candle)
     if (distToEma21 > 1.2) return null; // If price is > 1.2% above EMA21, it's overextended
+
+    // 3. Distance to EMA9 (Chase Filter) [NEW v2.5]
+    const distToEma9 = ema9_15m ? (currentPrice - ema9_15m) / ema9_15m * 100 : 0;
+    if (distToEma9 > 0.8) return null;
   }
 
   if (signalType === 'SELL_ALERT') return null;
@@ -1886,8 +1891,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         ? currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 4.0 : 2.0))
         : currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 4.0 : 2.0)),
       sl: signalType === 'BUY'
-        ? currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 1.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0))
-        : currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 1.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0)),
+        ? currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 4.5 : 2.0))
+        : currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 4.5 : 2.0)),
       reasons,
       btcContext // Include context in result
     };
