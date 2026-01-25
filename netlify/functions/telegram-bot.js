@@ -71,6 +71,21 @@ export const handler = async (event) => {
 
         // Verificamos si es un informe solicitado por el ADMIN
         if (chatId === String(TELEGRAM_CHAT_ID)) {
+            if (text === 'reset_history') {
+                const store = getInternalStore({ siteID: process.env.SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
+                await store.setJSON(HISTORY_STORE_KEY, []);
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: "🧹 Historial borrado correctamente. Empezando de cero (v2.5).",
+                        parse_mode: 'MarkdownV2'
+                    })
+                });
+                return { statusCode: 200, body: 'OK' };
+            }
+
             if (text === 'informe' || text === '/informe' || text === 'status') {
                 const message = await generateReportMessage({ siteID: process.env.SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN });
 
