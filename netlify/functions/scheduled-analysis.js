@@ -25,8 +25,8 @@ const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEP
 const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.08;
 const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 8;
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
-const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 25;
-const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 5000000;
+const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 50;
+const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 3000000;
 const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 120;
 const USE_MULTI_TF = (process.env.USE_MULTI_TF || 'true').toLowerCase() === 'true';
@@ -2124,18 +2124,19 @@ async function runAnalysis(context) {
         continue;
       }
       try {
-        const candles15m = await getKlines(symbol, '15m', 300);
-        const orderBook = await getOrderBookDepth(symbol, 20);
-        const ticker24h = tickersBySymbol.get(symbol) || null;
+        const [candles15m, orderBook, candles1hRaw, candles4hRaw] = await Promise.all([
+          getKlines(symbol, '15m', 300),
+          getOrderBookDepth(symbol, 20),
+          USE_MULTI_TF ? getKlines(symbol, '60m', 200) : Promise.resolve([]),
+          USE_MULTI_TF ? getKlines(symbol, '4h', 100) : Promise.resolve([])
+        ]);
 
-        let candles1h = [];
-        let candles4h = [];
-        if (USE_MULTI_TF) {
-          candles1h = await getKlines(symbol, '60m', 200);
-          candles4h = await getKlines(symbol, '4h', 100);
-        } else {
-          candles1h = candles15m.slice(-200);
-          // Fallback for 4h if disabled? Just empty.
+        const ticker24h = tickersBySymbol.get(symbol) || null;
+        let candles1h = candles1hRaw;
+        let candles4h = candles4hRaw;
+
+        if (!USE_MULTI_TF) {
+          candles1h = (candles15m && candles15m.length > 0) ? candles15m.slice(-200) : [];
         }
 
         analyzed++;
@@ -2151,12 +2152,12 @@ async function runAnalysis(context) {
           console.log(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score}`);
         }
 
-        await sleep(150);
+        await sleep(50); // Reduced sleep as we are more efficient
 
       } catch (error) {
-        console.error(`Error analyzing ${symbol}:`, error.message, error.stack?.split('\n')[0]);
+        console.error(`Error analyzing ${symbol}:`, error.message);
         errors++;
-        await sleep(150);
+        await sleep(50);
       }
     }
 
