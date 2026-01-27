@@ -1761,14 +1761,14 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     weights.structure = 0.15; // [FIX] Explicit to ensure sum = 1.0
     weights.momentum = 0.10;
     weights.patterns = 0.05; // [FIX] Explicit to ensure sum = 1.0
-    MIN_QUALITY_SCORE = 80;
+    // MIN_QUALITY_SCORE already set to 75
   } else if (regime === 'RANGING') {
     weights.structure = 0.40;
     weights.momentum = 0.35;
     weights.trend = 0.10;
     weights.volume = 0.10; // [FIX] Explicit
     weights.patterns = 0.05; // [FIX] Explicit
-    MIN_QUALITY_SCORE = 80;
+    // MIN_QUALITY_SCORE already set to 75
   } else if (regime === 'HIGH_VOLATILITY') {
     weights.structure = 0.40;
     weights.volume = 0.40;
