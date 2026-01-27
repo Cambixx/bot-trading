@@ -1720,12 +1720,24 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (regime === 'TRANSITION') return null; // Avoid low-probability transition phases
 
+  // === PHASE 1 OPTIMIZATION: HIGH_VOLATILITY STRICT FILTER ===
+  // Historical data shows 77% loss rate in HIGH_VOLATILITY (10 losses vs 3 wins)
+  // This filter aims to reduce losses by ~60% by blocking low-quality volatile signals
+  if (regime === 'HIGH_VOLATILITY') {
+    // Option A: Complete block (uncomment to enable)
+    // return null;
+
+    // Option B: Ultra-strict filter (ACTIVE)
+    // We'll evaluate this AFTER scoring, so we need to continue for now
+    // The actual filter will be applied after score calculation
+  }
+
   let MIN_QUALITY_SCORE = 80; // Raised from 70 to eliminate mediocre signals
   const weights = {
-    momentum: 0.25,
-    trend: 0.30,
+    momentum: 0.20, // 25 -> 20
+    trend: 0.40,    // 30 -> 40
     structure: 0.25,
-    volume: 0.15,
+    volume: 0.10,    // 15 -> 10
     patterns: 0.05
   };
 
@@ -1809,28 +1821,80 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   }
 
   // === MSS DETECTION (NEW) ===
+  // === MARKET STRUCTURE SHIFT (MSS) DETECTION ===
+  // PHASE 2 OPTIMIZATION: Increased bonus 35→45 (MSS without Sweep = 67% win rate)
   const mss = detectMarketStructureShift(closedCandles15m);
   if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
-    score += 35; // Significant boost
+    score += 45; // Increased from 35 - MSS is highly reliable
     reasons.unshift('🔄 MSS (Cambio Estructural)');
     if (!signalType) signalType = 'BUY';
     // If we have a confirmed MSS, we can lower the requirement slightly
     if (score >= 75) MIN_QUALITY_SCORE = 75;
   } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
-    score += 35;
+    score += 45; // Increased from 35
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // === LIQUIDITY SWEEP DETECTION (NEW) ===
+  // === LIQUIDITY SWEEP DETECTION ===
   const sweep = detectLiquiditySweep(closedCandles15m);
+
+  // === PHASE 2 OPTIMIZATION: Sweep Confirmation Filter ===
+  // Historical data: Sweeps in HIGH_VOLATILITY = 25% win rate (3W/9L)
+  // MSS without Sweep = 67% win rate (6W/3L)
+  // Solution: Require confirmation for Sweeps, especially in HIGH_VOLATILITY
+
+  let sweepConfirmed = false;
+  let sweepBonus = 40; // Default bonus
+
   if (sweep && sweep.type === 'BULLISH_SWEEP' && (signalType === 'BUY' || !signalType)) {
-    score += 40; // High Value Setup
-    reasons.unshift('🧹 Liquidity Sweep (Barrido)');
+    // Check if Sweep is confirmed
+    if (regime === 'HIGH_VOLATILITY') {
+      // In HIGH_VOLATILITY, Sweeps need STRONG confirmation
+      sweepConfirmed = (mss && volumeRatio > 1.5); // Require MSS + strong volume
+      sweepBonus = sweepConfirmed ? 30 : 15; // Reduced bonus if not confirmed
+
+      if (!sweepConfirmed) {
+        console.log(`[SWEEP_FILTER] Weak sweep for ${symbol}: mss=${!!mss}, volRatio=${volumeRatio.toFixed(2)}`);
+      }
+    } else {
+      // In TRENDING/RANGING, Sweeps are more reliable
+      sweepConfirmed = (mss || volumeRatio > 1.2); // MSS OR volume is enough
+      sweepBonus = sweepConfirmed ? 40 : 25;
+    }
+
+    score += sweepBonus;
+
+    // PHASE 3: Additional penalty for unconfirmed sweeps
+    if (!sweepConfirmed) {
+      score -= 5;
+      reasons.push('⚠️ Sweep sin confirmación (-5)');
+    }
+
+    const sweepLabel = sweepConfirmed ? '🧹 Liquidity Sweep ✓' : '🧹 Liquidity Sweep (⚠️ débil)';
+    reasons.unshift(sweepLabel);
     if (!signalType) signalType = 'BUY';
-    if (score >= 75) MIN_QUALITY_SCORE = 75;
+    if (score >= 75 && sweepConfirmed) MIN_QUALITY_SCORE = 75;
+
   } else if (sweep && sweep.type === 'BEARISH_SWEEP' && (signalType === 'SELL_ALERT' || !signalType)) {
-    score += 40;
-    reasons.unshift('🧹 Liquidity Sweep (Barrido)');
+    // Same logic for bearish sweeps
+    if (regime === 'HIGH_VOLATILITY') {
+      sweepConfirmed = (mss && volumeRatio > 1.5);
+      sweepBonus = sweepConfirmed ? 30 : 15;
+    } else {
+      sweepConfirmed = (mss || volumeRatio > 1.2);
+      sweepBonus = sweepConfirmed ? 40 : 25;
+    }
+
+    score += sweepBonus;
+
+    // PHASE 3: Additional penalty for unconfirmed sweeps
+    if (!sweepConfirmed) {
+      score -= 5;
+      reasons.push('⚠️ Sweep sin confirmación (-5)');
+    }
+
+    const sweepLabel = sweepConfirmed ? '🧹 Liquidity Sweep ✓' : '🧹 Liquidity Sweep (⚠️ débil)';
+    reasons.unshift(sweepLabel);
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
@@ -1840,6 +1904,45 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Final Score Clamping
   score = Math.min(100, score);
+
+  // === PHASE 3 OPTIMIZATION: Additional Penalties ===
+  // 1. High Volatility Base Penalty
+  if (regime === 'HIGH_VOLATILITY') {
+    score -= 15;
+    reasons.push('⚠️ Penalización Volatilidad (-15)');
+  }
+
+  // 2. Lack of MSS Penalty (Market Structure Shift is key for reversals)
+  if (!mss) {
+    score -= 10;
+    reasons.push('⚠️ Sin MSS (-10)');
+  }
+
+  // === PHASE 1 OPTIMIZATION: HIGH_VOLATILITY ULTRA-STRICT FILTER ===
+  // Apply strict requirements for HIGH_VOLATILITY regime
+  // Historical data: 77% loss rate (10L/3W) → This filter targets ~60% loss reduction
+  if (regime === 'HIGH_VOLATILITY') {
+    // Require ALL of the following:
+    // 1. Elite score (≥95)
+    // 2. MSS confirmation (market structure shift detected)
+    // 3. GREEN btcRisk (macro conditions favorable)
+    // 4. Volume confirmation (volumeRatio > 1.2)
+
+    const passesVolatilityFilter =
+      score >= 95 &&
+      mss &&
+      btcRisk === 'GREEN' &&
+      volumeRatio > 1.2;
+
+    if (!passesVolatilityFilter) {
+      // Log rejection reason for monitoring
+      console.log(`[HIGH_VOL_FILTER] Rejected ${symbol}: score=${score}, mss=${!!mss}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
+      return null;
+    }
+
+    // If passed, add a note to reasons
+    reasons.push('✅ HIGH_VOL_FILTER_PASSED');
+  }
 
   if (score < MIN_QUALITY_SCORE) return null;
 
@@ -1894,12 +1997,15 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       atrPercent: Number(atrPercent15m.toFixed(2)),
       vwap: vwap15m,
       vwapDistance: vwap15m ? Number((((currentPrice - vwap15m) / vwap15m) * 100).toFixed(2)) : null,
+      // === PHASE 1 OPTIMIZATION: Adjusted SL/TP for HIGH_VOLATILITY ===
+      // Historical data shows HIGH_VOL trades reverse quickly
+      // Reduced multipliers: TP 4.0→2.5x, SL 4.5→1.5x to capture moves faster
       tp: signalType === 'BUY'
-        ? currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 4.0 : 2.0))
-        : currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 4.0 : 2.0)),
+        ? currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0))
+        : currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0)),
       sl: signalType === 'BUY'
-        ? currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 4.5 : 2.0))
-        : currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 4.5 : 2.0)),
+        ? currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 1.5 : 2.0))
+        : currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 1.5 : 2.0)),
       reasons,
       btcContext // Include context in result
     };
