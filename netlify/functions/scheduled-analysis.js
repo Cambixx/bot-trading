@@ -1410,6 +1410,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const currentPrice = closes15m[closes15m.length - 1];
   const prevPrice = closes15m[closes15m.length - 2];
 
+  const btcRisk = btcContext?.status || 'UNKNOWN';
+
   const obMetrics = calculateOrderBookMetrics(orderBook);
   if (!obMetrics) return null;
 
