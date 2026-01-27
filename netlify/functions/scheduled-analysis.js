@@ -1709,18 +1709,28 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Apply 4H Trend Filter
   if (USE_MULTI_TF) {
-    if (trend4h === 'BULLISH' && signalType === 'SELL_ALERT') return null;
-    if (trend4h === 'BEARISH' && signalType === 'BUY') return null;
+    if (trend4h === 'BULLISH' && signalType === 'SELL_ALERT') {
+      console.log(`[REJECT] ${symbol}: Bearish signal against Bullish 4H Trend`);
+      return null;
+    }
+    if (trend4h === 'BEARISH' && signalType === 'BUY') {
+      console.log(`[REJECT] ${symbol}: Bullish signal against Bearish 4H Trend`);
+      return null;
+    }
 
     // Macro exhaustion filter for BUY
-    if (signalType === 'BUY' && rsi1h > 65) return null;
+    if (signalType === 'BUY' && rsi1h > 65) {
+      console.log(`[REJECT] ${symbol}: 1H RSI (${rsi1h.toFixed(1)}) too high for BUY`);
+      return null;
+    }
   }
 
   // Detect Market Regime
   const regime = detectMarketRegime(closedCandles15m, adx15m);
   reasons.push(`🌐 Regime: ${regime}`);
 
-  if (regime === 'TRANSITION') return null; // Avoid low-probability transition phases
+  // Relajado: No descartar TRANSITION inmediatamente, dejar que el score decida
+  // if (regime === 'TRANSITION') return null; 
 
   // === PHASE 1 OPTIMIZATION: HIGH_VOLATILITY STRICT FILTER ===
   // Historical data shows 77% loss rate in HIGH_VOLATILITY (10 losses vs 3 wins)
@@ -1734,7 +1744,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     // The actual filter will be applied after score calculation
   }
 
-  let MIN_QUALITY_SCORE = 80; // Raised from 70 to eliminate mediocre signals
+  let MIN_QUALITY_SCORE = 75; // Reducido de 80 para mayor sensibilidad
+  if (regime === 'TRANSITION') MIN_QUALITY_SCORE = 85; // TRANSITION sigue siendo estricto
   const weights = {
     momentum: 0.20, // 25 -> 20
     trend: 0.40,    // 30 -> 40
@@ -1795,15 +1806,24 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const distToEma21 = ema21 ? (currentPrice - ema21) / ema21 * 100 : 0;
 
   if (signalType === 'BUY') {
-    // 1. RSI/BB Overextension
-    if (rsi15m > 65 || bbPercent > 0.82) return null; // Tightened from 68/0.85
+    // 1. RSI/BB Overextension - RELAJADO
+    if (rsi15m > 70 || bbPercent > 0.88) {
+      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)})`);
+      return null;
+    }
 
-    // 2. Distance to EMA21 (Don't buy the top of a vertical candle)
-    if (distToEma21 > 1.2) return null; // If price is > 1.2% above EMA21, it's overextended
+    // 2. Distance to EMA21 - RELAJADO
+    if (distToEma21 > 1.8) {
+      console.log(`[REJECT] ${symbol}: Dist to EMA21 too high (${distToEma21.toFixed(2)}%)`);
+      return null;
+    }
 
-    // 3. Distance to EMA9 (Chase Filter) [AUDIT FIX: Relaxed]
+    // 3. Distance to EMA9 - RELAJADO
     const distToEma9 = ema9_15m ? (currentPrice - ema9_15m) / ema9_15m * 100 : 0;
-    if (distToEma9 > 1.5) return null; // Relaxed from 0.8% (was rejecting 70% of valid signals)
+    if (distToEma9 > 2.0) {
+      console.log(`[REJECT] ${symbol}: Chase Filter - Dist to EMA9 too high (${distToEma9.toFixed(2)}%)`);
+      return null;
+    }
   }
 
   if (signalType === 'SELL_ALERT') return null;
@@ -1813,11 +1833,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (btcContext) {
     if (btcContext.status === 'RED') {
       // Extreme Filter during BTC corrections
-      if (score < 95) return null;
+      if (score < 96) {
+        console.log(`[REJECT] ${symbol}: BTC RED requires score 96, got ${score}`);
+        return null;
+      }
       reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
     } else if (btcContext.status === 'AMBER') {
       // Moderate Filter
-      if (score < 85) return null;
+      if (score < 85) {
+        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 85, got ${score}`);
+        return null;
+      }
       reasons.push('⚠️ Precaución Macro (BTC Ambar)');
     }
   }
@@ -1924,43 +1950,42 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // Apply strict requirements for HIGH_VOLATILITY regime
   // Historical data: 77% loss rate (10L/3W) → This filter targets ~60% loss reduction
   if (regime === 'HIGH_VOLATILITY') {
-    // Require ALL of the following:
-    // 1. Elite score (≥95)
-    // 2. MSS confirmation (market structure shift detected)
-    // 3. GREEN btcRisk (macro conditions favorable)
-    // 4. Volume confirmation (volumeRatio > 1.2)
-
+    // RELAJADO: Score 88+, Requiere MSS O Volumen 1.2+, y BTC NO ROJO
     const passesVolatilityFilter =
-      score >= 95 &&
-      mss &&
-      btcRisk === 'GREEN' &&
-      volumeRatio > 1.2;
+      score >= 88 &&
+      (mss || volumeRatio > 1.2) &&
+      btcRisk !== 'RED';
 
     if (!passesVolatilityFilter) {
-      // Log rejection reason for monitoring
-      console.log(`[HIGH_VOL_FILTER] Rejected ${symbol}: score=${score}, mss=${!!mss}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
+      console.log(`[REJECT] ${symbol} (HighVol): score=${score}, mss=${!!mss}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
       return null;
     }
 
-    // If passed, add a note to reasons
     reasons.push('✅ HIGH_VOL_FILTER_PASSED');
   }
 
-  if (score < MIN_QUALITY_SCORE) return null;
+  if (score < MIN_QUALITY_SCORE) {
+    console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE}`);
+    return null;
+  }
 
   // Medium quality signals (80-84) REQUIRE extra visual proof
   // IF MSS or Sweep exists, we bypass this check
   if (score < 85 && divergences.length === 0 && patterns.length === 0 && !mss && !sweep) {
-    return null; // Reject signals without pattern/div/mss/sweep confirmation if score isn't elite
+    console.log(`[REJECT] ${symbol}: Score ${score} < 85 and no supporting Pattern/Div/MSS/Sweep`);
+    return null;
   }
 
   // Must have at least 3 strong categories if Trending, or 2 otherwise
   // MSS counts as a strong "Structure" confirmation
-  const requiredStrong = regime === 'TRENDING' ? 3 : 2;
+  const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
   // If we have MSS or Sweep, we treat it as satisfying one strong category requirement inherently
   const adjustedStrongCategories = (mss || sweep) ? strongCategories + 1 : strongCategories;
 
-  if (adjustedStrongCategories < requiredStrong) return null;
+  if (adjustedStrongCategories < requiredStrong) {
+    console.log(`[REJECT] ${symbol}: Strong Categories ${adjustedStrongCategories} < ${requiredStrong}`);
+    return null;
+  }
 
   // === FINAL OUTPUT ===
   if (score >= MIN_QUALITY_SCORE && reasons.length > 0 && signalType) {
