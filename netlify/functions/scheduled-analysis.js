@@ -205,11 +205,11 @@ async function recordSignalHistory(signal, context) {
     const store = getInternalStore(context);
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
 
-
+    // === ENHANCED: Record more metrics for post-analysis ===
     const record = {
       id: `${Date.now()}-${signal.symbol}`,
       symbol: signal.symbol,
-      price: signal.price, // [FIX] Unified field name (was 'entry')
+      price: signal.price,
       tp: signal.tp,
       sl: signal.sl,
       type: signal.type,
@@ -219,7 +219,14 @@ async function recordSignalHistory(signal, context) {
       regime: signal.regime,
       hasMSS: !!signal.hasMSS,
       hasSweep: !!signal.hasSweep,
-      btcRisk: signal.btcContext?.status || 'UNKNOWN'
+      btcRisk: signal.btcContext?.status || 'UNKNOWN',
+      
+      // Enhanced metrics for analysis
+      entryMetrics: signal.entryMetrics || null,
+      categoryScores: signal.categoryScores || null,
+      volumeRatio: signal.volumeRatio || null,
+      strongCategories: signal.strongCategories || null,
+      reasons: signal.reasons || []
     };
 
     history.push(record);
@@ -253,10 +260,12 @@ async function updateSignalHistory(tickers, context) {
           // Update Max Favorable Excursion
           if (currentPrice > item.maxFavorable) item.maxFavorable = currentPrice;
 
-          // Check for Break Even Trigger (1:1 R:R reached)
-          // Risk = Entry - SL. If price moves Entry + Risk, set BE.
+          // Check for Break Even Trigger (0.8:1 R:R reached - more conservative)
+          // Risk = Entry - SL. If price moves Entry + (Risk * 0.8), set BE.
+          // This protects capital earlier - key for improving win rate
           const risk = entryPrice - item.sl;
-          if (!item.breakeven && currentPrice >= (entryPrice + risk)) {
+          const beTrigger = entryPrice + (risk * 0.8); // 0.8:1 instead of 1:1
+          if (!item.breakeven && currentPrice >= beTrigger) {
             item.breakeven = true;
             updated = true;
           }
@@ -281,7 +290,8 @@ async function updateSignalHistory(tickers, context) {
           if (currentPrice < item.maxFavorable) item.maxFavorable = currentPrice;
 
           const risk = item.sl - entryPrice;
-          if (!item.breakeven && currentPrice <= (entryPrice - risk)) {
+          const beTrigger = entryPrice - (risk * 0.8); // 0.8:1 instead of 1:1
+          if (!item.breakeven && currentPrice <= beTrigger) {
             item.breakeven = true;
             updated = true;
           }
@@ -1729,23 +1739,24 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const regime = detectMarketRegime(closedCandles15m, adx15m);
   reasons.push(`🌐 Regime: ${regime}`);
 
-  // Relajado: No descartar TRANSITION inmediatamente, dejar que el score decida
-  // if (regime === 'TRANSITION') return null; 
+  // === ENHANCED REGIME FILTERS (Based on historical data analysis) ===
+  // RANGING: 75% WR - Best performing regime
+  // TRANSITION: 33% WR - Highly unreliable
+  // TRENDING: 27% WR - Worst performing (counter-trend signals)
+  // HIGH_VOLATILITY: 23% WR - Very unreliable
 
-  // === PHASE 1 OPTIMIZATION: HIGH_VOLATILITY STRICT FILTER ===
-  // Historical data shows 77% loss rate in HIGH_VOLATILITY (10 losses vs 3 wins)
-  // This filter aims to reduce losses by ~60% by blocking low-quality volatile signals
-  if (regime === 'HIGH_VOLATILITY') {
-    // Option A: Complete block (uncomment to enable)
-    // return null;
-
-    // Option B: Ultra-strict filter (ACTIVE)
-    // We'll evaluate this AFTER scoring, so we need to continue for now
-    // The actual filter will be applied after score calculation
+  let MIN_QUALITY_SCORE = 75;
+  
+  // Adaptive MIN_QUALITY_SCORE by regime
+  if (regime === 'TRANSITION') {
+    MIN_QUALITY_SCORE = 92; // Increased from 85 - TRANSITION is very unreliable
+  } else if (regime === 'TRENDING') {
+    MIN_QUALITY_SCORE = 88; // New - TRENDING needs strict filtering
+  } else if (regime === 'HIGH_VOLATILITY') {
+    MIN_QUALITY_SCORE = 90; // Increased - High volatility is dangerous
+  } else if (regime === 'RANGING') {
+    MIN_QUALITY_SCORE = 70; // Relaxed - RANGING is our best regime
   }
-
-  let MIN_QUALITY_SCORE = 75; // Reducido de 80 para mayor sensibilidad
-  if (regime === 'TRANSITION') MIN_QUALITY_SCORE = 85; // TRANSITION sigue siendo estricto
   const weights = {
     momentum: 0.20, // 25 -> 20
     trend: 0.40,    // 30 -> 40
@@ -1754,28 +1765,42 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     patterns: 0.05
   };
 
-  // Adaptive Strategy by Regime
+  // === ENHANCED ADAPTIVE STRATEGY BY REGIME ===
+  // Based on historical analysis of 33 signals (39.4% WR)
+  // RANGING: 75% WR - Prioritize structure and mean reversion
+  // TRANSITION: 33% WR - Require exceptional confluence, prioritize structure
+  // TRENDING: 27% WR - Follow trend, require pullbacks
+  // HIGH_VOLATILITY: 23% WR - Ultra strict, prioritize volume and structure
+  
   if (regime === 'TRENDING') {
-    weights.trend = 0.40;
-    weights.volume = 0.30;
-    weights.structure = 0.15; // [FIX] Explicit to ensure sum = 1.0
-    weights.momentum = 0.10;
-    weights.patterns = 0.05; // [FIX] Explicit to ensure sum = 1.0
-    // MIN_QUALITY_SCORE already set to 75
+    // In TRENDING, we need to FOLLOW the trend, not fight it
+    // Historical data shows counter-trend signals have 27% WR
+    weights.trend = 0.45;      // Increased - trend direction is critical
+    weights.structure = 0.25;  // Pullback to structure
+    weights.momentum = 0.15;   // Momentum in trend direction
+    weights.volume = 0.10;     // Volume confirmation
+    weights.patterns = 0.05;   // Pattern confirmation
   } else if (regime === 'RANGING') {
-    weights.structure = 0.40;
-    weights.momentum = 0.35;
-    weights.trend = 0.10;
-    weights.volume = 0.10; // [FIX] Explicit
-    weights.patterns = 0.05; // [FIX] Explicit
-    // MIN_QUALITY_SCORE already set to 75
+    // RANGING is our best regime (75% WR) - mean reversion works
+    weights.structure = 0.40;  // Key - buy at support (OB/FVG)
+    weights.momentum = 0.30;   // Oversold momentum
+    weights.trend = 0.10;      // Less important in ranges
+    weights.volume = 0.15;     // Volume at extremes
+    weights.patterns = 0.05;   // Pattern confirmation
+  } else if (regime === 'TRANSITION') {
+    // TRANSITION is dangerous (33% WR) - require strong structure
+    weights.structure = 0.50;  // Critical - only trade clear structure
+    weights.momentum = 0.20;   // Secondary
+    weights.trend = 0.15;      // Emerging trend direction
+    weights.volume = 0.10;     // Volume confirmation
+    weights.patterns = 0.05;   // Pattern confirmation
   } else if (regime === 'HIGH_VOLATILITY') {
-    weights.structure = 0.40;
-    weights.volume = 0.40;
-    weights.trend = 0.10;
-    weights.momentum = 0.05; // [FIX] Explicit
-    weights.patterns = 0.05; // [FIX] Explicit
-    MIN_QUALITY_SCORE = 85;
+    // HIGH_VOLATILITY is very dangerous (23% WR) - ultra strict
+    weights.structure = 0.40;  // Key support/resistance
+    weights.volume = 0.35;     // Volume is critical in volatility
+    weights.trend = 0.15;      // Trend direction
+    weights.momentum = 0.05;   // Momentum can be fake
+    weights.patterns = 0.05;   // Patterns less reliable
   }
 
   score = Math.round(
@@ -1801,28 +1826,61 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // Final Score Clamping (moved to end after all bonuses)
   // score = Math.min(100, score); 
 
-  // === OVEREXTENSION FILTERS (NO-CHASE) ===
+  // === ENHANCED OVEREXTENSION AND PULLBACK FILTERS ===
   const ema21 = ema21_15m;
+  const ema50 = ema50_15m;
   const distToEma21 = ema21 ? (currentPrice - ema21) / ema21 * 100 : 0;
+  const distToEma50 = ema50 ? (currentPrice - ema50) / ema50 * 100 : 0;
+  const distToEma9 = ema9_15m ? (currentPrice - ema9_15m) / ema9_15m * 100 : 0;
 
   if (signalType === 'BUY') {
-    // 1. RSI/BB Overextension - RELAJADO
+    // 1. RSI/BB Overextension
     if (rsi15m > 70 || bbPercent > 0.88) {
       console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)})`);
       return null;
     }
 
-    // 2. Distance to EMA21 - RELAJADO
+    // 2. Distance to EMA21 - Standard filter
     if (distToEma21 > 1.8) {
       console.log(`[REJECT] ${symbol}: Dist to EMA21 too high (${distToEma21.toFixed(2)}%)`);
       return null;
     }
 
-    // 3. Distance to EMA9 - RELAJADO
-    const distToEma9 = ema9_15m ? (currentPrice - ema9_15m) / ema9_15m * 100 : 0;
+    // 3. Distance to EMA9 - Chase filter
     if (distToEma9 > 2.0) {
       console.log(`[REJECT] ${symbol}: Chase Filter - Dist to EMA9 too high (${distToEma9.toFixed(2)}%)`);
       return null;
+    }
+
+    // === NEW: TRENDING REGIME PULLBACK FILTER ===
+    // In TRENDING regime, only buy pullbacks (near EMA21 or EMA50)
+    if (regime === 'TRENDING') {
+      const nearEMA21 = Math.abs(distToEma21) < 0.8;  // Within 0.8% of EMA21
+      const nearEMA50 = Math.abs(distToEma50) < 1.5;  // Within 1.5% of EMA50
+      const priceAboveEMA21 = distToEma21 > 0;        // Price above EMA21 (uptrend)
+      const priceAboveEMA50 = distToEma50 > 0;        // Price above EMA50 (uptrend)
+      
+      // Must be in uptrend
+      if (!priceAboveEMA21 || !priceAboveEMA50) {
+        console.log(`[REJECT] ${symbol}: TRENDING but not in uptrend (EMA21: ${distToEma21.toFixed(2)}%, EMA50: ${distToEma50.toFixed(2)}%)`);
+        return null;
+      }
+      
+      // Must be at pullback (near EMA21 or EMA50)
+      if (!nearEMA21 && !nearEMA50) {
+        console.log(`[REJECT] ${symbol}: TRENDING but no pullback to EMA21/50 (dist21: ${distToEma21.toFixed(2)}%, dist50: ${distToEma50.toFixed(2)}%)`);
+        return null;
+      }
+      
+      if (nearEMA21) reasons.push('📉 Pullback EMA21');
+      if (nearEMA50 && !nearEMA21) reasons.push('📉 Pullback EMA50');
+    }
+
+    // === NEW: RANGING REGIME STRUCTURE FILTER ===
+    // In RANGING, require MSS or Sweep for entry
+    if (regime === 'RANGING') {
+      // Will check mss and sweep after they're calculated
+      // This is a placeholder - actual check comes later
     }
   }
 
@@ -1848,18 +1906,31 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
   }
 
-  // === MSS DETECTION (NEW) ===
-  // === MARKET STRUCTURE SHIFT (MSS) DETECTION ===
-  // PHASE 2 OPTIMIZATION: Increased bonus 35→45 (MSS without Sweep = 67% win rate)
+  // === MSS DETECTION ===
   const mss = detectMarketStructureShift(closedCandles15m);
+  
+  // === ENHANCED: Adaptive MSS Bonus by Regime ===
+  // Historical data shows MSS effectiveness varies by regime:
+  // - RANGING: MSS works well
+  // - TRANSITION: MSS unreliable (many false signals)
+  // - TRENDING: MSS often catches tops/bottoms (bad)
+  let mssBonus = 35; // Base bonus reduced from 45
+  if (regime === 'RANGING') mssBonus = 40;      // Good regime for MSS
+  else if (regime === 'TRANSITION') mssBonus = 20; // Unreliable - reduced bonus
+  else if (regime === 'TRENDING') mssBonus = 25;   // Often counter-trend - reduced bonus
+  else if (regime === 'HIGH_VOLATILITY') mssBonus = 15; // Very unreliable
+  
   if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
-    score += 45; // Increased from 35 - MSS is highly reliable
-    reasons.unshift('🔄 MSS (Cambio Estructural)');
+    score += mssBonus;
+    reasons.unshift(`🔄 MSS (+${mssBonus})`);
     if (!signalType) signalType = 'BUY';
-    // If we have a confirmed MSS, we can lower the requirement slightly
-    if (score >= 75) MIN_QUALITY_SCORE = 75;
+    
+    // Only lower requirements in RANGING regime where MSS is reliable
+    if (regime === 'RANGING' && score >= 70) {
+      MIN_QUALITY_SCORE = Math.min(MIN_QUALITY_SCORE, 70);
+    }
   } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
-    score += 45; // Increased from 35
+    score += mssBonus;
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
@@ -1926,60 +1997,112 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // === STRICT FILTERS ===
+  // === ENHANCED STRICT FILTERS ===
   // Reject low-volume setups
-  if (volumeRatio < 1.0) return null; // Increased from 0.8
+  if (volumeRatio < 1.0) return null;
 
   // Final Score Clamping
   score = Math.min(100, score);
 
-  // === PHASE 3 OPTIMIZATION: Additional Penalties ===
+  // === ENHANCED REGIME-SPECIFIC PENALTIES ===
   // 1. High Volatility Base Penalty
   if (regime === 'HIGH_VOLATILITY') {
     score -= 15;
     reasons.push('⚠️ Penalización Volatilidad (-15)');
   }
 
-  // 2. Lack of MSS Penalty (Market Structure Shift is key for reversals)
+  // 2. Lack of MSS Penalty - Varies by regime
+  // In RANGING, MSS is less critical. In TRANSITION/TRENDING, it's more important
   if (!mss) {
-    score -= 10;
-    reasons.push('⚠️ Sin MSS (-10)');
+    let mssPenalty = 10;
+    if (regime === 'TRANSITION') mssPenalty = 20; // Critical in TRANSITION
+    if (regime === 'TRENDING') mssPenalty = 15;   // Important in TRENDING
+    if (regime === 'RANGING') mssPenalty = 5;     // Less critical in RANGING
+    score -= mssPenalty;
+    reasons.push(`⚠️ Sin MSS (-${mssPenalty})`);
   }
 
-  // === PHASE 1 OPTIMIZATION: HIGH_VOLATILITY ULTRA-STRICT FILTER ===
-  // Apply strict requirements for HIGH_VOLATILITY regime
-  // Historical data: 77% loss rate (10L/3W) → This filter targets ~60% loss reduction
+  // 3. Inflated Score Penalty
+  // If score depends too much on one category, it's risky
+  const maxCategoryScore = Math.max(...Object.values(categoryScores));
+  const scoreConcentration = maxCategoryScore / (score > 0 ? score : 1);
+  if (maxCategoryScore > 85 && strongCategories < 3 && scoreConcentration > 0.5) {
+    score -= 12;
+    reasons.push('⚠️ Score inflado (-12)');
+  }
+
+  // === ENHANCED REGIME-SPECIFIC FILTERS ===
+  
+  // HIGH_VOLATILITY: Ultra strict (23% WR historically)
   if (regime === 'HIGH_VOLATILITY') {
-    // RELAJADO: Score 88+, Requiere MSS O Volumen 1.2+, y BTC NO ROJO
     const passesVolatilityFilter =
-      score >= 88 &&
-      (mss || volumeRatio > 1.2) &&
+      score >= 90 &&                          // Increased from 88
+      mss &&                                  // MUST have MSS
+      volumeRatio > 1.3 &&                    // Strong volume required
       btcRisk !== 'RED';
 
     if (!passesVolatilityFilter) {
       console.log(`[REJECT] ${symbol} (HighVol): score=${score}, mss=${!!mss}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
       return null;
     }
-
     reasons.push('✅ HIGH_VOL_FILTER_PASSED');
   }
 
+  // TRANSITION: Block unless exceptional confluence (33% WR historically)
+  if (regime === 'TRANSITION') {
+    const exceptionalConfluence =
+      mss &&
+      sweep &&
+      volumeRatio > 1.5 &&
+      categoryScores.structure >= 60 &&
+      categoryScores.volume >= 60 &&
+      btcRisk === 'GREEN';
+    
+    if (!exceptionalConfluence) {
+      console.log(`[REJECT] ${symbol} (TRANSITION): Sin confluencia excepcional`);
+      return null;
+    }
+    reasons.push('✅ TRANSITION_EXCEPTIONAL');
+  }
+
+  // TRENDING: Require pullback confirmation (27% WR historically)
+  if (regime === 'TRENDING') {
+    // Must have either strong MSS or be at pullback with volume
+    const hasStrongStructure = mss && sweep;
+    const hasPullbackWithVolume = (Math.abs(distToEma21) < 0.8 || Math.abs(distToEma50) < 1.5) && volumeRatio > 1.2;
+    
+    if (!hasStrongStructure && !hasPullbackWithVolume) {
+      console.log(`[REJECT] ${symbol} (TRENDING): No estructura fuerte ni pullback confirmado`);
+      return null;
+    }
+    
+    if (hasStrongStructure) reasons.push('✅ TREND_STRUCTURE');
+    if (hasPullbackWithVolume) reasons.push('✅ TREND_PULLBACK');
+  }
+
+  // RANGING: Require MSS or Sweep (75% WR - our best regime)
+  if (regime === 'RANGING') {
+    if (!mss && !sweep) {
+      console.log(`[REJECT] ${symbol} (RANGING): Sin MSS ni Sweep`);
+      return null;
+    }
+  }
+
+  // Final score check after all penalties
   if (score < MIN_QUALITY_SCORE) {
     console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE}`);
     return null;
   }
 
-  // Medium quality signals (80-84) REQUIRE extra visual proof
-  // IF MSS or Sweep exists, we bypass this check
-  if (score < 85 && divergences.length === 0 && patterns.length === 0 && !mss && !sweep) {
+  // Medium quality signals require extra confirmation
+  const hasVisualConfirmation = divergences.length > 0 || patterns.length > 0 || mss || sweep;
+  if (score < 85 && !hasVisualConfirmation) {
     console.log(`[REJECT] ${symbol}: Score ${score} < 85 and no supporting Pattern/Div/MSS/Sweep`);
     return null;
   }
 
-  // Must have at least 3 strong categories if Trending, or 2 otherwise
-  // MSS counts as a strong "Structure" confirmation
+  // Strong categories requirement
   const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
-  // If we have MSS or Sweep, we treat it as satisfying one strong category requirement inherently
   const adjustedStrongCategories = (mss || sweep) ? strongCategories + 1 : strongCategories;
 
   if (adjustedStrongCategories < requiredStrong) {
@@ -2024,15 +2147,46 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       atrPercent: Number(atrPercent15m.toFixed(2)),
       vwap: vwap15m,
       vwapDistance: vwap15m ? Number((((currentPrice - vwap15m) / vwap15m) * 100).toFixed(2)) : null,
-      // === PHASE 1 OPTIMIZATION: Adjusted SL/TP for HIGH_VOLATILITY ===
-      // Historical data shows HIGH_VOL trades reverse quickly
-      // Reduced multipliers: TP 4.0→2.5x, SL 4.5→1.5x to capture moves faster
+      // === ENHANCED SL/TP BASED ON REGIME ANALYSIS ===
+      // RANGING (75% WR): Standard targets work well
+      // TRANSITION (33% WR): Tighter targets - take profit quicker
+      // TRENDING (27% WR): Wider targets to capture trend, but strict entry
+      // HIGH_VOLATILITY (23% WR): Very tight targets - quick in/out
       tp: signalType === 'BUY'
-        ? currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0))
-        : currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : 2.0)),
+        ? currentPrice * (1 + (atrPercent15m / 100) * (
+            regime === 'TRENDING' ? 4.0 :
+            regime === 'HIGH_VOLATILITY' ? 2.0 :
+            regime === 'TRANSITION' ? 2.5 :
+            3.0  // RANGING
+          ))
+        : currentPrice * (1 - (atrPercent15m / 100) * (
+            regime === 'TRENDING' ? 4.0 :
+            regime === 'HIGH_VOLATILITY' ? 2.0 :
+            regime === 'TRANSITION' ? 2.5 :
+            3.0  // RANGING
+          )),
       sl: signalType === 'BUY'
-        ? currentPrice * (1 - (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 1.5 : 2.0))
-        : currentPrice * (1 + (atrPercent15m / 100) * (regime === 'TRENDING' ? 3.0 : regime === 'HIGH_VOLATILITY' ? 1.5 : 2.0)),
+        ? currentPrice * (1 - (atrPercent15m / 100) * (
+            regime === 'TRENDING' ? 2.5 :
+            regime === 'HIGH_VOLATILITY' ? 1.2 :
+            regime === 'TRANSITION' ? 1.8 :
+            2.0  // RANGING
+          ))
+        : currentPrice * (1 + (atrPercent15m / 100) * (
+            regime === 'TRENDING' ? 2.5 :
+            regime === 'HIGH_VOLATILITY' ? 1.2 :
+            regime === 'TRANSITION' ? 1.8 :
+            2.0  // RANGING
+          )),
+      // Enhanced metrics for post-analysis
+      entryMetrics: {
+        distToEma9: Number(distToEma9.toFixed(2)),
+        distToEma21: Number(distToEma21.toFixed(2)),
+        distToEma50: Number(distToEma50.toFixed(2)),
+        bbPercent: Number((bbPercent || 0).toFixed(2)),
+        riskRewardRatio: Number(((regime === 'TRENDING' ? 4.0 : regime === 'HIGH_VOLATILITY' ? 2.0 : regime === 'TRANSITION' ? 2.5 : 3.0) /
+                                (regime === 'TRENDING' ? 2.5 : regime === 'HIGH_VOLATILITY' ? 1.2 : regime === 'TRANSITION' ? 1.8 : 2.0)).toFixed(2))
+      },
       reasons,
       btcContext // Include context in result
     };
