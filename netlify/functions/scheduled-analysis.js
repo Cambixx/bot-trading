@@ -220,7 +220,7 @@ async function recordSignalHistory(signal, context) {
       hasMSS: !!signal.hasMSS,
       hasSweep: !!signal.hasSweep,
       btcRisk: signal.btcContext?.status || 'UNKNOWN',
-      
+
       // Enhanced metrics for analysis
       entryMetrics: signal.entryMetrics || null,
       categoryScores: signal.categoryScores || null,
@@ -751,6 +751,38 @@ function calculateADX(candles, period = 14) {
   };
 }
 
+function calculateCMF(candles, period = 20) {
+  if (!candles || candles.length < period) return null;
+
+  const series = [];
+  let adSum = 0;
+
+  // Calculate Money Flow Multiplier and Volume for each candle
+  const moneyFlowVol = candles.map(c => {
+    const range = c.high - c.low;
+    if (range === 0) return 0;
+
+    // MFM = ((Close - Low) - (High - Close)) / (High - Low)
+    const mfm = ((c.close - c.low) - (c.high - c.close)) / range;
+    return mfm * c.volume;
+  });
+
+  // Calculate CMF for the latest candle
+  if (moneyFlowVol.length < period) return null;
+
+  let volSum = 0;
+  let mfSum = 0;
+
+  // Simple sum for the lookback period
+  for (let i = moneyFlowVol.length - period; i < moneyFlowVol.length; i++) {
+    mfSum += moneyFlowVol[i];
+    volSum += candles[i].volume;
+  }
+
+  if (volSum === 0) return 0;
+  return mfSum / volSum;
+}
+
 function calculateATRSeries(candles, period = 14) {
   if (!candles || candles.length < period + 1) return null;
 
@@ -933,9 +965,13 @@ function calculateVolatilityPercentile(candles, atrPeriod = 14) {
 function detectMarketRegime(candles, adx) {
   const atrPercentile = calculateVolatilityPercentile(candles);
   const trendStrength = adx ? adx.adx : 0;
+  const isBearish = adx ? adx.bearishTrend : false;
 
-  if (trendStrength > 25 && atrPercentile < 70) {
-    return 'TRENDING';
+  // Strict Downtrend detection: If trending AND bearish, it's a DOWNTREND (dangerous for longs)
+  if (trendStrength > 20 && isBearish) {
+    return 'DOWNTREND'; // New regime to separate from general TRENDING
+  } else if (trendStrength > 25 && atrPercentile < 70) {
+    return 'TRENDING'; // Uptrend implied (since DOWNTREND caught above)
   } else if (trendStrength < 20 && atrPercentile < 40) {
     return 'RANGING';
   } else if (atrPercentile > 85) {
@@ -1352,7 +1388,8 @@ function analyzeTimeframe(symbol, candles, interval) {
     superTrend: calculateSuperTrend(closedCandles, 10, 3),
     adx: calculateADX(closedCandles, 14),
     atr: calculateATR(closedCandles, 14),
-    vwap: calculateVWAP(closedCandles, 50)
+    vwap: calculateVWAP(closedCandles, 50),
+    cmf: calculateCMF(closedCandles, 20)
   };
 }
 
@@ -1446,6 +1483,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const atrPercent15m = atr15m ? (atr15m / currentPrice) * 100 : null;
   if (!atrPercent15m || atrPercent15m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) return null;
 
+  const cmf15m = calculateCMF(closedCandles15m, 20);
+
   const rsi1h = calculateRSI(closes1h, 14);
   const macd1h = calculateMACD(closes1h);
   const superTrend1h = calculateSuperTrend(closedCandles1h, 10, 3);
@@ -1518,13 +1557,14 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Stochastic RSI (0-30)
   if (stoch15m) {
-    if (stoch15m.oversold) {
+    // Only count Oversold if K is crossing above D (momentum shift)
+    if (stoch15m.oversold && stoch15m.k > stoch15m.d) {
       momentumScore += 30;
-      reasons.push('🎯 StochRSI Sobrevendido');
+      reasons.push('🎯 StochRSI Cross Up');
       if (!signalType) signalType = 'BUY';
-    } else if (stoch15m.overbought) {
+    } else if (stoch15m.overbought && stoch15m.k < stoch15m.d) {
       momentumScore += 30;
-      reasons.push('🎯 StochRSI Sobrecomprado');
+      reasons.push('🎯 StochRSI Cross Down');
       if (!signalType) signalType = 'SELL_ALERT';
     }
   }
@@ -1746,16 +1786,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // HIGH_VOLATILITY: 23% WR - Very unreliable
 
   let MIN_QUALITY_SCORE = 75;
-  
+
   // Adaptive MIN_QUALITY_SCORE by regime
-  if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 92; // Increased from 85 - TRANSITION is very unreliable
+  if (regime === 'DOWNTREND') {
+    console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
+    return null;
+  } else if (regime === 'TRANSITION') {
+    MIN_QUALITY_SCORE = 99; // DISABLED - TRANSITION is too unreliable (33% WR)
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 88; // New - TRENDING needs strict filtering
+    MIN_QUALITY_SCORE = 88; // TRENDING needs strict filtering
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 90; // Increased - High volatility is dangerous
+    MIN_QUALITY_SCORE = 92; // High volatility is dangerous
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 70; // Relaxed - RANGING is our best regime
+    MIN_QUALITY_SCORE = 75; // RANGING is our best regime, but needed confirmation
   }
   const weights = {
     momentum: 0.20, // 25 -> 20
@@ -1771,7 +1814,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // TRANSITION: 33% WR - Require exceptional confluence, prioritize structure
   // TRENDING: 27% WR - Follow trend, require pullbacks
   // HIGH_VOLATILITY: 23% WR - Ultra strict, prioritize volume and structure
-  
+
   if (regime === 'TRENDING') {
     // In TRENDING, we need to FOLLOW the trend, not fight it
     // Historical data shows counter-trend signals have 27% WR
@@ -1859,19 +1902,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       const nearEMA50 = Math.abs(distToEma50) < 1.5;  // Within 1.5% of EMA50
       const priceAboveEMA21 = distToEma21 > 0;        // Price above EMA21 (uptrend)
       const priceAboveEMA50 = distToEma50 > 0;        // Price above EMA50 (uptrend)
-      
+
       // Must be in uptrend
       if (!priceAboveEMA21 || !priceAboveEMA50) {
         console.log(`[REJECT] ${symbol}: TRENDING but not in uptrend (EMA21: ${distToEma21.toFixed(2)}%, EMA50: ${distToEma50.toFixed(2)}%)`);
         return null;
       }
-      
+
       // Must be at pullback (near EMA21 or EMA50)
       if (!nearEMA21 && !nearEMA50) {
         console.log(`[REJECT] ${symbol}: TRENDING but no pullback to EMA21/50 (dist21: ${distToEma21.toFixed(2)}%, dist50: ${distToEma50.toFixed(2)}%)`);
         return null;
       }
-      
+
       if (nearEMA21) reasons.push('📉 Pullback EMA21');
       if (nearEMA50 && !nearEMA21) reasons.push('📉 Pullback EMA50');
     }
@@ -1908,7 +1951,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // === MSS DETECTION ===
   const mss = detectMarketStructureShift(closedCandles15m);
-  
+
   // === ENHANCED: Adaptive MSS Bonus by Regime ===
   // Historical data shows MSS effectiveness varies by regime:
   // - RANGING: MSS works well
@@ -1919,12 +1962,12 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   else if (regime === 'TRANSITION') mssBonus = 20; // Unreliable - reduced bonus
   else if (regime === 'TRENDING') mssBonus = 25;   // Often counter-trend - reduced bonus
   else if (regime === 'HIGH_VOLATILITY') mssBonus = 15; // Very unreliable
-  
+
   if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
     score += mssBonus;
     reasons.unshift(`🔄 MSS (+${mssBonus})`);
     if (!signalType) signalType = 'BUY';
-    
+
     // Only lower requirements in RANGING regime where MSS is reliable
     if (regime === 'RANGING' && score >= 70) {
       MIN_QUALITY_SCORE = Math.min(MIN_QUALITY_SCORE, 70);
@@ -2032,7 +2075,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   }
 
   // === ENHANCED REGIME-SPECIFIC FILTERS ===
-  
+
   // HIGH_VOLATILITY: Ultra strict (23% WR historically)
   if (regime === 'HIGH_VOLATILITY') {
     const passesVolatilityFilter =
@@ -2057,7 +2100,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       categoryScores.structure >= 60 &&
       categoryScores.volume >= 60 &&
       btcRisk === 'GREEN';
-    
+
     if (!exceptionalConfluence) {
       console.log(`[REJECT] ${symbol} (TRANSITION): Sin confluencia excepcional`);
       return null;
@@ -2070,18 +2113,33 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     // Must have either strong MSS or be at pullback with volume
     const hasStrongStructure = mss && sweep;
     const hasPullbackWithVolume = (Math.abs(distToEma21) < 0.8 || Math.abs(distToEma50) < 1.5) && volumeRatio > 1.2;
-    
+
     if (!hasStrongStructure && !hasPullbackWithVolume) {
       console.log(`[REJECT] ${symbol} (TRENDING): No estructura fuerte ni pullback confirmado`);
       return null;
     }
-    
+
     if (hasStrongStructure) reasons.push('✅ TREND_STRUCTURE');
     if (hasPullbackWithVolume) reasons.push('✅ TREND_PULLBACK');
   }
 
-  // RANGING: Require MSS or Sweep (75% WR - our best regime)
+  // RANGING: Require MSS or Sweep + FALLING KNIFE PROTECTION
   if (regime === 'RANGING') {
+    // 1. Falling Knife Check: If MACD Histogram is negative AND decreasing (momentum accelerating down)
+    if (macd15m.histogram < 0 && macd15m.histogram < (macd15m.prevHistogram || 0)) { // Need prev histogram ideally, but checking value < -0.1 is a proxy
+      // Better proxy: check if price is below EMA9 significantly
+      if (distToEma9 < -1.5) {
+        console.log(`[REJECT] ${symbol} (RANGING): Falling Knife (DistEma9: ${distToEma9.toFixed(2)}%)`);
+        return null;
+      }
+    }
+
+    // 2. CMF Check: Money Flow must be showing accumulation (or at least not heavy distribution)
+    if (cmf15m < -0.05) {
+      console.log(`[REJECT] ${symbol} (RANGING): CMF too weak (${cmf15m.toFixed(3)})`);
+      return null;
+    }
+
     if (!mss && !sweep) {
       console.log(`[REJECT] ${symbol} (RANGING): Sin MSS ni Sweep`);
       return null;
@@ -2154,30 +2212,30 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       // HIGH_VOLATILITY (23% WR): Very tight targets - quick in/out
       tp: signalType === 'BUY'
         ? currentPrice * (1 + (atrPercent15m / 100) * (
-            regime === 'TRENDING' ? 4.0 :
+          regime === 'TRENDING' ? 4.0 :
             regime === 'HIGH_VOLATILITY' ? 2.0 :
-            regime === 'TRANSITION' ? 2.5 :
-            3.0  // RANGING
-          ))
+              regime === 'TRANSITION' ? 2.5 :
+                3.0  // RANGING
+        ))
         : currentPrice * (1 - (atrPercent15m / 100) * (
-            regime === 'TRENDING' ? 4.0 :
+          regime === 'TRENDING' ? 4.0 :
             regime === 'HIGH_VOLATILITY' ? 2.0 :
-            regime === 'TRANSITION' ? 2.5 :
-            3.0  // RANGING
-          )),
+              regime === 'TRANSITION' ? 2.5 :
+                3.0  // RANGING
+        )),
       sl: signalType === 'BUY'
         ? currentPrice * (1 - (atrPercent15m / 100) * (
-            regime === 'TRENDING' ? 2.5 :
+          regime === 'TRENDING' ? 2.5 :
             regime === 'HIGH_VOLATILITY' ? 1.2 :
-            regime === 'TRANSITION' ? 1.8 :
-            2.0  // RANGING
-          ))
+              regime === 'TRANSITION' ? 1.8 :
+                2.0  // RANGING
+        ))
         : currentPrice * (1 + (atrPercent15m / 100) * (
-            regime === 'TRENDING' ? 2.5 :
+          regime === 'TRENDING' ? 2.5 :
             regime === 'HIGH_VOLATILITY' ? 1.2 :
-            regime === 'TRANSITION' ? 1.8 :
-            2.0  // RANGING
-          )),
+              regime === 'TRANSITION' ? 1.8 :
+                2.0  // RANGING
+        )),
       // Enhanced metrics for post-analysis
       entryMetrics: {
         distToEma9: Number(distToEma9.toFixed(2)),
@@ -2185,7 +2243,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         distToEma50: Number(distToEma50.toFixed(2)),
         bbPercent: Number((bbPercent || 0).toFixed(2)),
         riskRewardRatio: Number(((regime === 'TRENDING' ? 4.0 : regime === 'HIGH_VOLATILITY' ? 2.0 : regime === 'TRANSITION' ? 2.5 : 3.0) /
-                                (regime === 'TRENDING' ? 2.5 : regime === 'HIGH_VOLATILITY' ? 1.2 : regime === 'TRANSITION' ? 1.8 : 2.0)).toFixed(2))
+          (regime === 'TRENDING' ? 2.5 : regime === 'HIGH_VOLATILITY' ? 1.2 : regime === 'TRANSITION' ? 1.8 : 2.0)).toFixed(2))
       },
       reasons,
       btcContext // Include context in result
