@@ -16,95 +16,84 @@ El bot opera como un ecosistema serverless interconectado:
 
 ---
 
-## 2. Pilares de Análisis Técnico (v2.8 - "Relax & Diagnose")
+## 2. Pilares de Análisis Técnico (v2.9 - "Precision Core")
 
 ### A. Smart Money Concepts (SMC) & Estructura 🏦
 El algoritmo busca huellas de dinero institucional:
 - **Fair Value Gaps (FVG) y Order Blocks (OB)**: Zonas de interés institucional.
-- **Market Structure Shift (MSS)**: Confirma reversiones de tendencia al romper máximos/mínimos previos con impulso. **Bonus: +45 puntos** (Incrementado para priorizar cambios estructurales).
-- **Liquidity Sweeps**: Detecta "cacería de stops" antes de un movimiento real. **Bonus: +40 puntos** (Requiere confirmación en alta volatilidad).
+- **Market Structure Shift (MSS)**: Confirma reversiones de tendencia. Penalizado en regímenes volátiles.
+- **Liquidity Sweeps**: Detecta "cacería de stops". **CRÍTICO:** En alta volatilidad, se requiere confirmación de volumen o MSS para evitar falsos positivos.
 
 ### B. Análisis Multi-Timeframe (3-TF) 📊
 - **4H (Macro)**: Define la dirección permitida. Solo compras en tendencia alcista macro.
-- **1H (Contexto)**: Mide la fuerza del movimiento y el **Volume Profile (POC)**. Filtro de sobreextensión (RSI1h < 65).
-- **15M (Ejecución)**: Busca el timing preciso con confluencia de indicadores.
+- **1H (Contexto)**: Mide la fuerza del movimiento y el **Volume Profile (POC)**. Filtro de sobreextensión.
+- **15M (Ejecución)**: Busca el timing preciso con confluencia de indicadores, incluyendo el **nuevo Chaikin Money Flow (CMF)**.
 
-### C. Contexto Global (BTC Semaphore) 🚦 (Optimizado)
+### C. Contexto Global (BTC Semaphore) 🚦
 Evalúa la salud de Bitcoin para ajustar el rigor del filtrado:
-- **🔴 ROJO (Bearish)**: BTC bajista en 4H. Filtro extremo (Score > 96 requerido).
+- **🔴 ROJO (Bearish)**: BTC bajista en 4H. Filtro ultra estricto (Score > 96).
 - **🟡 ÁMBAR (Caution)**: BTC sobreextendido. Filtro moderado (Score > 85).
 - **🟢 VERDE (Healthy)**: BTC saludable. Filtros estándar (Score > 75).
 
 ---
 
-## 3. Sistema de Scoring y Calidad
+## 3. Sistema de Scoring y Calidad (v2.9)
 
 El puntaje final (0-100) es una **media ponderada ajustada por régimen**:
 
-### Pesos por Régimen (v2.8):
+### Regímenes Refinados:
+1. **DOWNTREND**: ADX > 20 y tendencia bajista. **OPERATIVA BLOQUEADA**.
+2. **TRANSITION**: Volatilidad media, tendencia débil. **OPERATIVA BLOQUEADA** (Históricamente 0% WR).
+3. **HIGH_VOLATILITY**: ATR > 85%. Req score 90 + MSS + Volumen fuerte.
+4. **TRENDING**: ADX > 25, ATR bajo. Solo opera **Pullbacks** a medias móviles.
+5. **RANGING**: Regimen "Estrella" (75% WR). Busca reversiones a la media con protecciones.
+
+### Pesos por Régimen:
 
 | Régimen | Trend | Volume | Structure | Momentum | Patterns | Min Score |
 |:-------:|:-----:|:------:|:---------:|:--------:|:--------:|:---------:|
-| **TRENDING** | 40% | 30% | 15% | 10% | 5% | **75** |
-| **RANGING** | 10% | 10% | 40% | 35% | 5% | **75** |
-| **HIGH_VOL** | 10% | 40% | 40% | 5% | 5% | **88*** |
-| **TRANSITION**| 40% | 10% | 25% | 20% | 5% | **85** |
-
-*\*En HIGH_VOLATILITY se requiere además (MSS o Volumen > 1.2x) y BTC no puede estar en ROJO.*
-
-### Bonificaciones Especiales:
-- **MSS Confirmado**: +45 puntos
-- **Liquidity Sweep**: +40 puntos (si está confirmado por MSS/Volumen)
-- **Confluencia ≥4 categorías**: +20% multiplicador
-- **Confluencia ≥3 categorías**: +10% multiplicador
+| **TRENDING** | 45% | 10% | 25% | 15% | 5% | **88** |
+| **RANGING** | 10% | 15% | 40% | 30% | 5% | **75** |
+| **HIGH_VOL** | 15% | 35% | 40% | 5% | 5% | **92** |
 
 ---
 
-## 4. Gestión de Riesgo Dinámica (v2.8) ⚙️
+## 4. Gestión de Riesgo Dinámica ⚙️
 
 ### A. SL/TP Adaptativo por Régimen
 | Régimen | SL (ATR) | TP (ATR) | Ratio | Notas |
 |:-------:|:--------:|:--------:|:-----:|:------|
-| **TRENDING** | 3.0x | 3.5x | 1.17:1 | Captura tendencias extendidas. |
-| **RANGING** | 2.0x | 2.0x | 1:1 | Reversión rápida a la media. |
-| **HIGH_VOL** | 1.5x | 2.5x | 1.66:1 | **Relajado**: Captura movimientos rápidos antes de reversión. |
-| **TRANSITION**| 2.0x | 2.0x | 1:1 | Precaución en cambio de tendencia. |
+| **TRENDING** | 2.5x | 4.0x | 1.6:1 | Busca expansión de tendencia. |
+| **RANGING** | 2.0x | 3.0x | 1.5:1 | Targets amplios en rangos. |
+| **HIGH_VOL** | 1.2x | 2.0x | 1.6:1 | Scalping rápido y protegido. |
 
 ---
 
-## 5. Filtros de Calidad (Anti-Ruido v2.8)
+## 5. Nuevos Filtros "Anti-Bulls Trap" (v2.9)
 
-### Filtros de Sobreextensión (Relajados):
-Para evitar entrar en el pico de un movimiento pero permitir capturar impulsos reales:
-1. **RSI 15m**: < 70 (antes 65)
-2. **Bandas Bollinger**: %B < 0.88 (antes 0.82)
-3. **Distancia EMA21**: < 1.8% (antes 1.2%)
-4. **Distancia EMA9**: < 2.0% (antes 1.5%)
+### 1. Protección "Falling Knife" (RANGING)
+Evita comprar cuando el activo cae aceleradamente sin suelo:
+- **MACD Check**: Si el histograma es negativo y *decreciente* (acelerando a la baja), se bloquea la señal.
+- **Distancia EMA9**: Si el precio está muy lejos (>1.5%) de la EMA9 por debajo, se considera caída libre.
 
-### Sistema de Diagnóstico [REJECT]:
-Implementado para total transparencia en los logs de Netlify. Cada moneda descartada genera un log indicando el motivo:
-- `[REJECT] SYMBOL: Score X < Y`
-- `[REJECT] SYMBOL: Overextended RSI/BB`
-- `[REJECT] SYMBOL: Bearish signal against Bullish 4H Trend`
+### 2. Confirmación de Dinero Inteligente (CMF)
+Nuevo indicador **Chaikin Money Flow**:
+- Se requiere `CMF > -0.05` para cualquier compra en Rango.
+- Esto asegura que, aunque el precio baje, hay volumen acumulándose (divergencia de flujo).
 
----
-
-## 6. Escaneo de Mercado
-
-1. **Smart Selection**: Top 50 monedas basadas en Opportunity Score (Volumen + Volatilidad + Cambio%).
-2. **Multi-TF**: Análisis simultáneo de 15m, 1h y 4h.
-3. **Smart Money**: Detección de FVG y OB cercanos al precio actual.
+### 3. StochRSI Cross
+Ya no basta con estar "sobrevendido". La línea rápida (K) debe haber cruzado hacia arriba a la lenta (D), confirmando el giro.
 
 ---
 
-## 7. Mantenimiento y Auditoría
+## 6. Mantenimiento y Auditoría
 
-### Fixes v2.8 (27/01/2026):
-1. ✅ **Relax Filter**: Aumentada la tolerancia a la sobreextensión para generar más señales.
-2. ✅ **Transition Regime**: Se permite operar en transiciones con score 85+.
-3. ✅ **High Vol Optimization**: Bajado score requerido de 95 a 88 y SL/TP optimizados para reversiones rápidas.
-4. ✅ **Full Observability**: Logs de rechazo detallados instalados en el motor de análisis.
+### Fixes v2.9 (02/02/2026) - "Precision Core":
+1. ✅ **CMF Indicator**: Integrado para filtrar caídas sin volumen de compra.
+2. ✅ **Regime Lockdown**: `TRANSITION` y `DOWNTREND` deshabilitados para proteger capital.
+3. ✅ **Falling Knife Protection**: Bloqueo de compras con inercia bajista fuerte en rangos.
+4. ✅ **Trend Pullbacks**: En tendencia, solo se opera si el precio retrocede a la EMA21/50.
 
 ---
 
-**Documentación actualizada a v2.8 "Relax & Diagnose" - 27 Enero 2026**
+**Documentación actualizada a v2.9 "Precision Core" - 02 Febrero 2026**

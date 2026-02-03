@@ -12,6 +12,7 @@
     "packageJson": {
       "dependencies": [
         "npm:@eslint/js@^9.39.1",
+        "npm:@netlify/blobs@^10.5.0",
         "npm:@netlify/functions@^5.1.1",
         "npm:@supabase/supabase-js@^2.86.2",
         "npm:@testing-library/jest-dom@^6.9.1",
