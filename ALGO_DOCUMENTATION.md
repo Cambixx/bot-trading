@@ -94,6 +94,10 @@ Ya no basta con estar "sobrevendido". La línea rápida (K) debe haber cruzado h
 3. ✅ **Falling Knife Protection**: Bloqueo de compras con inercia bajista fuerte en rangos.
 4. ✅ **Trend Pullbacks**: En tendencia, solo se opera si el precio retrocede a la EMA21/50.
 
+### Fixes v2.9.1 (04/02/2026):
+1. ✅ **Swing Structure Bands**: Indicador de ChartPrime integrado para detectar estructura de precios dinámica.
+2. ✅ **Deep History**: Aumento de descarga de velas a 500 para cálculos de alta precisión (Swing Length 100).
+
 ---
 
-**Documentación actualizada a v2.9 "Precision Core" - 02 Febrero 2026**
+**Documentación actualizada a v2.9.1 - 04 Febrero 2026**

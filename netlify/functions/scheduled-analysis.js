@@ -921,6 +921,300 @@ function calculateSimpleVolumeProfile(candles, lookback = 200) {
   return { poc: pocPrice, min, max };
 }
 
+// ==================== SWING STRUCTURE BANDS (ChartPrime) ====================
+
+function calculateSwingStructureBands(candles, lenSwing = 100) {
+  if (!candles || candles.length < lenSwing + 1) return null;
+
+  // Helpers usually available in Pine
+  const taHighest = (src, len, idx) => {
+    let max = -Infinity;
+    for (let i = 0; i < len; i++) {
+      if (idx - i < 0) break;
+      const val = src[idx - i];
+      if (val > max) max = val;
+    }
+    return max;
+  };
+
+  const taLowest = (src, len, idx) => {
+    let min = Infinity;
+    for (let i = 0; i < len; i++) {
+      if (idx - i < 0) break;
+      const val = src[idx - i];
+      if (val < min) min = val;
+    }
+    return min;
+  };
+
+  const taSma = (src, len, idx) => {
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < len; i++) {
+      if (idx - i < 0) break;
+      sum += src[idx - i];
+      count++;
+    }
+    return count > 0 ? sum / count : 0;
+  };
+
+  // Need EMA for default MA Type "SMA" is used in script but f_ma supports EMA.
+  // Script defaults to "SMA" but inputs might vary. We will implement SMA as per default.
+
+  // We need to iterate through candles to build state
+  // State variables from Pine Script
+  let dir = 0;
+  let lh = 1; // length high
+  let ll = 1; // length low
+
+  // Vectors to store calculation history (needed for current bar logic)
+  // We only strictly need the *previous* bar's state, but for 'crossunder' we need a few bars.
+  // We'll run the loop for all candles to simulate the Pine Script runtime.
+
+  const highs = candles.map(c => c.high);
+  const lows = candles.map(c => c.low);
+  const closes = candles.map(c => c.close); // Not strictly used for core logic but good practice
+
+  // ATR 200 is used in script. Helper:
+  const atrSeries = calculateATRSeries(candles, 200);
+  if (!atrSeries) return null;
+
+  // We need to store computed bands to check for crossover later (at the end)
+  const ubSeries = new Array(candles.length).fill(NaN);
+  const lbSeries = new Array(candles.length).fill(NaN);
+  const ucSeries = new Array(candles.length).fill(0); // upper count
+  const lcSeries = new Array(candles.length).fill(0); // lower count
+
+  for (let i = lenSwing; i < candles.length; i++) {
+    const hiMax = taHighest(highs, lenSwing, i); // Include current? Pine 'highest' includes current unless [1] used.
+    // Script: hiMax = ta.highest(lenSwing) -> includes current bar
+    // Script: isHiSw = high[1] == hiMax and high < hiMax -> Note: hiMax here assumes highest of current window.
+    // WAIT. In Pine 'ta.highest(len)' is highest of 'len' bars ENDING at current bar.
+    // 'high[1] == hiMax' logic implies hiMax was calculated on current bar?
+    // Actually: `hiMax = ta.highest(lenSwing)` on bar `i`.
+    // `isHiSw = high[1] == hiMax and high < hiMax` 
+    // If high[1] is the highest of the last 100 bars (ending at i), and high[i] is lower...
+    // This detects a local top that just passed?
+
+    // Let's stick to the Pine logic interpretation:
+    const currentHigh = highs[i];
+    const prevHigh = highs[i - 1];
+    const currentLow = lows[i];
+    const prevLow = lows[i - 1];
+
+    const refHiMax = taHighest(highs, lenSwing, i);
+    const refLoMin = taLowest(lows, lenSwing, i);
+
+    // Check Swing Points
+    // Pine: isHiSw = high[1] == hiMax and high < hiMax
+    // Careful: hiMax in Pine on bar `n` considers `high[n]...high[n-len+1]`.
+    // So high[1] (bar n-1) being equal to hiMax (bar n highest) means the high was established 1 bar ago?
+    // Actually usually this pattern detects if the PREVIOUS high was the highest in the lookback.
+    // But verifying exact Pine semantics: `ta.highest(100)` includes current.
+
+    const isHiSw = (prevHigh === refHiMax) && (currentHigh < refHiMax);
+    const isLoSw = (prevLow === refLoMin) && (currentLow > refLoMin);
+
+    // Update Direction
+    if (currentHigh === refHiMax) dir = 1;
+    if (currentLow === refLoMin) dir = -1;
+
+    // Update Lengths
+    if (isLoSw) ll = 1;
+    if (isHiSw) lh = 1;
+
+    // Calculate MAs
+    // f_ma(high, lh, "SMA") -> SMA of high with length lh
+    // Note: lh/ll increment below, so we calculate BEFORE increment? 
+    // Script:
+    //   lh += 1, ll += 1
+    //   maHi = f_ma(..., lh, ...) 
+    // So increment happened first?
+    // WAIT. In code provided:
+    //   if isLoSw ... ll := 1
+    //   lh += 1
+    //   maHi = f_ma(...)
+    // Yes, increment happens every bar. Reset happens on Swing.
+
+    // Replicating order:
+    // 1. Check Swings & Reset Counters
+    if (isLoSw) ll = 1;
+    if (isHiSw) lh = 1;
+
+    // 2. Increment Counters (Pine execution order: top to bottom)
+    // Ah, script has:
+    //   if isLoSw ... ll:=1
+    //   lh += 1
+    //   ll += 1
+    //   maHi = ...
+    // So if isLoSw, ll becomes 1, then increments to 2? 
+    // Pine: `ll := 1` sets the vars. Then lines down `ll += 1`.
+    // So effective length used for MA is 2 at the swing start?
+
+    // Let's refine the Javascript flow:
+    if (isLoSw) ll = 1;
+    else ll++;
+
+    if (isHiSw) lh = 1;
+    else lh++;
+
+    const maHi = taSma(highs, lh, i);
+    const maLo = taSma(lows, ll, i);
+    const currentATR = atrSeries[i];
+
+    // Band Deviations
+    // dHi = math.abs(maHi - maHi[1]) > atr
+    const prevMaHi = (i > 0) ? (taSma(highs, lh > 1 ? lh - 1 : 1, i - 1)) : maHi; // Approx prev MA? 
+    // Actually in Pine `maHi[1]` is the value of `maHi` calculated on the previous bar.
+    // We can't easily access that without storing it.
+    // We need to store `maHi` and `maLo` history too? Or just previous.
+    // Let's assume we need to store them.
+
+    // RE-DESIGN LOOP: We need state preservation.
+  }
+}
+
+// Optimized Helper with State
+function calculateSwingStructureBands(candles, lenSwing = 100) {
+  if (!candles || candles.length < lenSwing + 50) return null; // Need warmup
+
+  const highs = candles.map(c => c.high);
+  const lows = candles.map(c => c.low);
+  const atrSeries = calculateATRSeries(candles, 200);
+  if (!atrSeries || !atrSeries[candles.length - 1]) return null;
+
+  // Pine State Variables
+  let lh = 1;
+  let ll = 1;
+  let dir = 0;
+
+  // History for previous values
+  const maHiHistory = new Array(candles.length).fill(0);
+  const maLoHistory = new Array(candles.length).fill(0);
+  const ubSeries = new Array(candles.length).fill(NaN); // Upper Band Middle
+  const lbSeries = new Array(candles.length).fill(NaN); // Lower Band Middle
+  const ucSeries = new Array(candles.length).fill(0); // Upper Count
+  const lcSeries = new Array(candles.length).fill(0); // Lower Count
+
+  // Helper for Highest/Lowest/SMA over window
+  const getHighest = (arr, len, idx) => {
+    let max = -Infinity;
+    const start = Math.max(0, idx - len + 1);
+    for (let k = start; k <= idx; k++) if (arr[k] > max) max = arr[k];
+    return max;
+  };
+  const getLowest = (arr, len, idx) => {
+    let min = Infinity;
+    const start = Math.max(0, idx - len + 1);
+    for (let k = start; k <= idx; k++) if (arr[k] < min) min = arr[k];
+    return min;
+  };
+  const getSma = (arr, len, idx) => {
+    let sum = 0;
+    let count = 0;
+    const start = Math.max(0, idx - len + 1);
+    for (let k = start; k <= idx; k++) { sum += arr[k]; count++; }
+    return count ? sum / count : 0;
+  };
+
+  // Main Loop
+  for (let i = 0; i < candles.length; i++) {
+    if (i < lenSwing) continue;
+
+    const hiMax = getHighest(highs, lenSwing, i);
+    const loMin = getLowest(lows, lenSwing, i);
+    const currentHigh = highs[i];
+    const currentLow = lows[i];
+    const prevHigh = highs[i - 1];
+    const prevLow = lows[i - 1];
+
+    // Swing Detection
+    const isHiSw = (prevHigh === hiMax) && (currentHigh < hiMax);
+    const isLoSw = (prevLow === loMin) && (currentLow > loMin);
+
+    if (currentHigh === hiMax) dir = 1;
+    if (currentLow === loMin) dir = -1;
+
+    if (isLoSw) ll = 1;
+    if (isHiSw) lh = 1;
+
+    // Increment (Post-reset logic from Pine: reset then increment? or increment existing?
+    // Script: `if isLoSw ... ll := 1` then `ll += 1`
+    // So effective LL at swing start is 2? Yes.
+    ll++;
+    lh++;
+
+    // Calculate MAs
+    const maHi = getSma(highs, lh, i);
+    const maLo = getSma(lows, ll, i);
+
+    maHiHistory[i] = maHi;
+    maLoHistory[i] = maLo;
+
+    if (i === 0) continue; // No prev metric
+
+    const atr = atrSeries[i];
+    const prevMaHi = maHiHistory[i - 1];
+    const prevMaLo = maLoHistory[i - 1];
+
+    // Deviation Logic
+    const dHi = Math.abs(maHi - prevMaHi) > atr;
+    const dLo = Math.abs(maLo - prevMaLo) > atr;
+
+    // Counters
+    const prevUc = ucSeries[i - 1] || 0;
+    const prevLc = lcSeries[i - 1] || 0;
+
+    ucSeries[i] = !dHi ? prevUc + 1 : 0;
+    lcSeries[i] = !dLo ? prevLc + 1 : 0;
+
+    // Bands (Middle)
+    // script: ub = dHi ? na : maHi
+    const ub = dHi ? NaN : maHi;
+    const lb = dLo ? NaN : maLo;
+
+    ubSeries[i] = ub;
+    lbSeries[i] = lb;
+  }
+
+  // Return the latest Signal state
+  const lastIdx = candles.length - 1;
+  const prevIdx = lastIdx - 1;
+
+  // Buy Logic: Crossover(low, lb) and lc > 15
+  // Sell Logic: Crossunder(high, ub) and uc > 20
+
+  // We check specifically the crossover event on the LAST candle
+  const low = lows[lastIdx];
+  const prevLow = lows[prevIdx];
+  const lb = lbSeries[lastIdx];
+  const prevLb = lbSeries[prevIdx];
+  const lc = lcSeries[lastIdx];
+
+  const high = highs[lastIdx];
+  const prevHigh = highs[prevIdx];
+  const ub = ubSeries[lastIdx];
+  const prevUb = ubSeries[prevIdx];
+  const uc = ucSeries[lastIdx];
+
+  // Crossover Low/LB: (prevLow < prevLb) && (low > lb) ? 
+  // Wait, Pine `ta.crossover(source, target)`: source crosses OVER target.
+  // `ta.crossover(low, lb)` -> Low was below LB, now is above LB.
+  const buySignal = (!Number.isNaN(lb) && !Number.isNaN(prevLb) && prevLow < prevLb && low > lb && lc > 15);
+
+  // Sell Logic: `ta.crossunder(high, ub)` -> High was above UB, now is below UB.
+  const sellSignal = (!Number.isNaN(ub) && !Number.isNaN(prevUb) && prevHigh > prevUb && high < ub && uc > 20);
+
+  return {
+    buy: buySignal,
+    sell: sellSignal,
+    lb: lbSeries[lastIdx],
+    ub: ubSeries[lastIdx],
+    lc,
+    uc
+  };
+}
+
 function calculateOrderBookMetrics(orderBook) {
   if (!orderBook || !orderBook.bids?.length || !orderBook.asks?.length) return null;
 
@@ -1355,7 +1649,7 @@ function detectDivergences(candles, closes) {
 // ==================== MULTI-TIMEFRAME ANALYSIS ====================
 
 async function analyzeMultiTimeframe(symbol, candles15m, ticker24h) {
-  const candles1h = await getKlines(symbol, '60m', 200);
+  const candles1h = await getKlines(symbol, '60m', 500);
 
   const analysis15m = analyzeTimeframe(symbol, candles15m, '15m');
   const analysis1h = analyzeTimeframe(symbol, candles1h, '60m');
@@ -1484,6 +1778,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (!atrPercent15m || atrPercent15m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) return null;
 
   const cmf15m = calculateCMF(closedCandles15m, 20);
+  const swingBands = calculateSwingStructureBands(closedCandles15m, 100);
 
   const rsi1h = calculateRSI(closes1h, 14);
   const macd1h = calculateMACD(closes1h);
@@ -1682,6 +1977,14 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       structureScore += 15;
       reasons.push('🧱 Below POC (Resist)');
     }
+  }
+
+  // Swing Structure Bands (ChartPrime)
+  // High confidence structure signal
+  if (swingBands && swingBands.buy && (signalType === 'BUY' || !signalType)) {
+    structureScore += 40;
+    reasons.unshift('🎯 Swing Structure Buy');
+    if (!signalType) signalType = 'BUY';
   }
 
   categoryScores.structure = Math.min(100, structureScore);
@@ -2477,7 +2780,7 @@ async function runAnalysis(context) {
       }
       try {
         const [candles15m, orderBook, candles1hRaw, candles4hRaw] = await Promise.all([
-          getKlines(symbol, '15m', 300),
+          getKlines(symbol, '15m', 500),
           getOrderBookDepth(symbol, 20),
           USE_MULTI_TF ? getKlines(symbol, '60m', 200) : Promise.resolve([]),
           USE_MULTI_TF ? getKlines(symbol, '4h', 100) : Promise.resolve([])
