@@ -173,9 +173,6 @@ const handler = async (event, context) => {
     return { statusCode: 200, body: JSON.stringify({ message: "Analysis complete" }) };
 };
 
-// Run every 15 minutes
-export const config = {
-    schedule: "*/15 * * * *"
-};
+const scheduledHandler = schedule("*/15 * * * *", handler);
 
-export { handler };
+export { scheduledHandler as handler };
