@@ -1,0 +1,56 @@
+{
+  "name": "@swarmvault/claude-skill",
+  "version": "1.0.2",
+  "description": "Claude skill for Swarm Vault manager trading - execute swaps and transactions through Claude",
+  "type": "module",
+  "bin": {
+    "swarm-check-holdings": "./dist/check-holdings.js",
+    "swarm-preview-swap": "./dist/preview-swap.js",
+    "swarm-execute-swap": "./dist/execute-swap.js",
+    "swarm-execute-transaction": "./dist/execute-transaction.js",
+    "swarm-check-transaction": "./dist/check-transaction.js"
+  },
+  "scripts": {
+    "build": "npx esbuild src/check-holdings.ts src/preview-swap.ts src/execute-swap.ts src/execute-transaction.ts src/check-transaction.ts --bundle --platform=node --target=node18 --format=esm --outdir=dist --banner:js='#!/usr/bin/env node'",
+    "check-holdings": "node dist/check-holdings.js",
+    "preview-swap": "node dist/preview-swap.js",
+    "execute-swap": "node dist/execute-swap.js",
+    "execute-transaction": "node dist/execute-transaction.js",
+    "check-transaction": "node dist/check-transaction.js"
+  },
+  "files": [
+    "dist",
+    "SKILL.md",
+    "README.md",
+    ".env.example"
+  ],
+  "dependencies": {
+    "@swarmvault/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "swarm-vault",
+    "claude",
+    "claude-code",
+    "skill",
+    "trading",
+    "defi",
+    "base",
+    "ethereum",
+    "ai-trading"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/swarm-vault.git",
+    "directory": "skills/claude-skill"
+  },
+  "homepage": "https://swarmvault.xyz",
+  "author": "Lit Protocol",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
