@@ -309,8 +309,21 @@ async function updateSignalHistory(tickers, context) {
           }
         }
 
+        // AUDIT v3.0: Early exit if no favorable movement after 12 hours
+        // Historical data: 50% of LOSS trades never moved in favorable direction
+        const hoursOpen = (Date.now() - item.time) / 3600000;
+        const favorableMove = item.type === 'BUY'
+          ? (item.maxFavorable - entryPrice) / entryPrice
+          : (entryPrice - item.maxFavorable) / entryPrice;
+
+        if (item.status === 'OPEN' && hoursOpen > 12 && favorableMove < 0.003) {
+          item.status = 'CLOSED';
+          item.outcome = 'STALE_EXIT';
+          updated = true;
+          console.log(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move only ${(favorableMove * 100).toFixed(2)}%`);
+        }
         // Auto-expire after 48 hours
-        if (item.status === 'OPEN' && Date.now() - item.time > 48 * 3600 * 1000) {
+        else if (item.status === 'OPEN' && Date.now() - item.time > 48 * 3600 * 1000) {
           item.status = 'EXPIRED';
           updated = true;
         }
@@ -324,8 +337,9 @@ async function updateSignalHistory(tickers, context) {
     // Standard approach: BE doesn't count as Loss, but not a Win either. 
     // Win Rate = Wins / (Wins + Losses). BE excluded.
     const wins = closed.filter(h => h.outcome === 'WIN').length;
-    const losses = closed.filter(h => h.outcome === 'LOSS').length;
+    const losses = closed.filter(h => h.outcome === 'LOSS' || h.outcome === 'STALE_EXIT').length;
     const bes = closed.filter(h => h.outcome === 'BREAK_EVEN').length;
+    const staleExits = closed.filter(h => h.outcome === 'STALE_EXIT').length;
 
     const totalDecisive = wins + losses;
     const winRate = totalDecisive > 0 ? (wins / totalDecisive * 100).toFixed(1) : 0;
@@ -337,6 +351,7 @@ async function updateSignalHistory(tickers, context) {
         wins,
         losses,
         bes,
+        staleExits,
         winRate
       },
       openSymbols: openSignals.map(s => s.symbol)
@@ -1943,7 +1958,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
     return null;
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 99; // DISABLED - TRANSITION is too unreliable (33% WR)
+    // AUDIT v3.0: TRANSITION completely blocked (0% WR on 19 real signals)
+    console.log(`[REJECT] ${symbol}: TRANSITION regime - completely disabled (0% WR).`);
+    return null;
   } else if (regime === 'TRENDING') {
     MIN_QUALITY_SCORE = 88; // TRENDING needs strict filtering
   } else if (regime === 'HIGH_VOLATILITY') {
@@ -2115,8 +2132,12 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   else if (regime === 'HIGH_VOLATILITY') mssBonus = 15; // Very unreliable
 
   if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
-    score += mssBonus;
-    reasons.unshift(`🔄 MSS (+${mssBonus})`);
+    // AUDIT v3.0: Cap MSS bonus to max 40% of base score to prevent inflation
+    // Historical data: scores >= 95 had 0% WR due to bonus stacking
+    const baseScoreBeforeMSS = score;
+    const cappedMssBonus = Math.min(mssBonus, Math.round(baseScoreBeforeMSS * 0.4));
+    score += cappedMssBonus;
+    reasons.unshift(`🔄 MSS (+${cappedMssBonus})`);
     if (!signalType) signalType = 'BUY';
 
     // Only lower requirements in RANGING regime where MSS is reliable
@@ -2124,7 +2145,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       MIN_QUALITY_SCORE = Math.min(MIN_QUALITY_SCORE, 70);
     }
   } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
-    score += mssBonus;
+    const cappedMssBonusBear = Math.min(mssBonus, Math.round(score * 0.4));
+    score += cappedMssBonusBear;
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
@@ -2155,7 +2177,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       sweepBonus = sweepConfirmed ? 40 : 25;
     }
 
-    score += sweepBonus;
+    // AUDIT v3.0: Cap sweep bonus to max 40% of base score
+    const baseScoreBeforeSweep = score;
+    const cappedSweepBonus = Math.min(sweepBonus, Math.round(baseScoreBeforeSweep * 0.4));
+    score += cappedSweepBonus;
 
     // PHASE 3: Additional penalty for unconfirmed sweeps
     if (!sweepConfirmed) {
@@ -2194,6 +2219,13 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === ENHANCED STRICT FILTERS ===
   // Reject low-volume setups
   if (volumeRatio < 1.0) return null;
+
+  // AUDIT v3.0: High volume selling pressure filter
+  // Historical data: SUIUSDT Vol x6.1, Score 97 = LOSS (volume was sell-side)
+  if (signalType === 'BUY' && volumeRatio > 2.0 && deltaRatio !== null && deltaRatio < 0) {
+    console.log(`[REJECT] ${symbol}: High volume but selling pressure (volRatio=${volumeRatio.toFixed(1)}, delta=${deltaRatio.toFixed(3)})`);
+    return null;
+  }
 
   // Final Score Clamping
   score = Math.min(100, score);
@@ -2276,9 +2308,22 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // RANGING: Require MSS or Sweep + FALLING KNIFE PROTECTION
   if (regime === 'RANGING') {
+    // AUDIT v3.0: Don't buy in the upper part of the range ("buy cheap" principle)
+    // Historical data: BB% > 0.75 in RANGING = 3 LOSS, 1 BE vs 1 WIN
+    if (signalType === 'BUY' && bbPercent > 0.75) {
+      console.log(`[REJECT] ${symbol} (RANGING): BB% too high for BUY (${bbPercent.toFixed(2)}) - not buying at top of range`);
+      return null;
+    }
+
+    // AUDIT v3.0: Require bullish momentum to buy
+    // Historical data: MACD Bajista + BUY = 40% WR vs 50% with MACD Alcista
+    if (signalType === 'BUY' && !macd15m.bullish) {
+      console.log(`[REJECT] ${symbol} (RANGING): MACD Bajista incompatible con BUY`);
+      return null;
+    }
+
     // 1. Falling Knife Check: If MACD Histogram is negative AND decreasing (momentum accelerating down)
-    if (macd15m.histogram < 0 && macd15m.histogram < (macd15m.prevHistogram || 0)) { // Need prev histogram ideally, but checking value < -0.1 is a proxy
-      // Better proxy: check if price is below EMA9 significantly
+    if (macd15m.histogram < 0 && macd15m.histogram < (macd15m.prevHistogram || 0)) {
       if (distToEma9 < -1.5) {
         console.log(`[REJECT] ${symbol} (RANGING): Falling Knife (DistEma9: ${distToEma9.toFixed(2)}%)`);
         return null;
@@ -2366,13 +2411,13 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
           regime === 'TRENDING' ? 4.0 :
             regime === 'HIGH_VOLATILITY' ? 2.0 :
               regime === 'TRANSITION' ? 2.5 :
-                3.0  // RANGING
+                2.0  // RANGING — AUDIT v3.0: Reduced from 3.0 (4 BE showed 3.0 is too aggressive)
         ))
         : currentPrice * (1 - (atrPercent15m / 100) * (
           regime === 'TRENDING' ? 4.0 :
             regime === 'HIGH_VOLATILITY' ? 2.0 :
               regime === 'TRANSITION' ? 2.5 :
-                3.0  // RANGING
+                2.0  // RANGING — AUDIT v3.0: Reduced from 3.0
         )),
       sl: signalType === 'BUY'
         ? currentPrice * (1 - (atrPercent15m / 100) * (
@@ -2393,7 +2438,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         distToEma21: Number(distToEma21.toFixed(2)),
         distToEma50: Number(distToEma50.toFixed(2)),
         bbPercent: Number((bbPercent || 0).toFixed(2)),
-        riskRewardRatio: Number(((regime === 'TRENDING' ? 4.0 : regime === 'HIGH_VOLATILITY' ? 2.0 : regime === 'TRANSITION' ? 2.5 : 3.0) /
+        riskRewardRatio: Number(((regime === 'TRENDING' ? 4.0 : regime === 'HIGH_VOLATILITY' ? 2.0 : regime === 'TRANSITION' ? 2.5 : 2.0) /
           (regime === 'TRENDING' ? 2.5 : regime === 'HIGH_VOLATILITY' ? 1.2 : regime === 'TRANSITION' ? 1.8 : 2.0)).toFixed(2))
       },
       reasons,
