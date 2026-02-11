@@ -25,11 +25,12 @@ const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEP
 const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.08;
 const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 8;
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
-const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 100;
+const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 50; // REDUCED: Better quality over quantity
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 3000000;
 const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
-const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 120;
+const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 240; // INCREASED: 4 hours to avoid overtrading
 const USE_MULTI_TF = (process.env.USE_MULTI_TF || 'true').toLowerCase() === 'true';
+const AVOID_ASIA_SESSION = (process.env.AVOID_ASIA_SESSION || 'true').toLowerCase() === 'true'; // NEW: Avoid low liquidity sessions
 
 // Persistent cooldown storage using Netlify Blobs
 const COOLDOWN_STORE_KEY = 'signal-cooldowns';
@@ -38,6 +39,61 @@ const COOLDOWN_EXPIRY_HOURS = 24;
 // const lastNotifiedAtByKey = new Map(); // Replaced by Blobs
 
 const MEXC_API = 'https://api.mexc.com/api/v3';
+
+// ==================== PERFORMANCE OPTIMIZATION: CACHING ====================
+// Simple in-memory cache for candles (reduces API calls)
+const candleCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache
+
+function getCachedCandles(key) {
+  const cached = candleCache.get(key);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
+    candleCache.delete(key);
+    return null;
+  }
+  return cached.data;
+}
+
+function setCachedCandles(key, data) {
+  candleCache.set(key, { data, timestamp: Date.now() });
+}
+
+// Sector classification for correlation analysis
+const SECTOR_MAP = {
+  'BTC': 'BLUE_CHIP', 'ETH': 'BLUE_CHIP', 'BNB': 'BLUE_CHIP', 'XRP': 'BLUE_CHIP',
+  'SOL': 'L1', 'AVAX': 'L1', 'ADA': 'L1', 'DOT': 'L1', 'NEAR': 'L1', 'ATOM': 'L1',
+  'DOGE': 'MEME', 'SHIB': 'MEME', 'PEPE': 'MEME', 'FLOKI': 'MEME',
+  'LINK': 'DEFI', 'UNI': 'DEFI', 'AAVE': 'DEFI', 'COMP': 'DEFI', 'MKR': 'DEFI',
+  'MATIC': 'L2', 'ARB': 'L2', 'OP': 'L2', 'STRK': 'L2',
+  'RENDER': 'AI', 'FET': 'AI', 'AGIX': 'AI', 'WLD': 'AI'
+};
+
+function getSector(symbol) {
+  const base = symbol.replace(QUOTE_ASSET, '');
+  return SECTOR_MAP[base] || 'OTHER';
+}
+
+// NEW: Session filter - avoid low liquidity periods
+function isTradingAllowed() {
+  if (!AVOID_ASIA_SESSION) return true;
+  
+  // Use UTC time for session checking
+  const now = new Date();
+  const utcHour = now.getUTCHours();
+  
+  // Asia session: 00:00 - 08:00 UTC (roughly)
+  // London session: 08:00 - 16:00 UTC
+  // NY session: 14:00 - 22:00 UTC
+  // Best liquidity: 08:00 - 22:00 UTC (London + NY overlap)
+  
+  if (utcHour >= 0 && utcHour < 7) {
+    console.log(`[SESSION] Asia session detected (${utcHour}:00 UTC) - trading restricted`);
+    return false;
+  }
+  
+  return true;
+}
 
 const FALLBACK_SYMBOLS = [
   `BTC${QUOTE_ASSET}`,
@@ -365,6 +421,13 @@ async function updateSignalHistory(tickers, context) {
 // ==================== MARKET DATA ====================
 
 async function getKlines(symbol, interval = '15m', limit = 200) {
+  const cacheKey = `${symbol}-${interval}-${limit}`;
+  const cached = getCachedCandles(cacheKey);
+  if (cached) {
+    console.log(`[CACHE] Hit for ${cacheKey}`);
+    return cached;
+  }
+
   const url = `${MEXC_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
   const response = await fetchWithTimeout(url);
 
@@ -380,7 +443,7 @@ async function getKlines(symbol, interval = '15m', limit = 200) {
 
   const intervalMs = intervalToMs(interval);
 
-  return json.map(candle => {
+  const candles = json.map(candle => {
     const openTime = Number(candle[0]);
     const closeTimeRaw = candle[6] ? Number(candle[6]) : null;
     const closeTime = Number.isFinite(closeTimeRaw) && Number.isFinite(openTime) && Number.isFinite(intervalMs)
@@ -401,6 +464,10 @@ async function getKlines(symbol, interval = '15m', limit = 200) {
       takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : null
     };
   }).filter(c => validateCandle(c));
+
+  // Cache the result
+  setCachedCandles(cacheKey, candles);
+  return candles;
 }
 
 function validateCandle(candle) {
@@ -554,6 +621,19 @@ function calculateEMASeries(data, period) {
   }
 
   return result;
+}
+
+// NEW: Calculate EMA slope for trend strength
+function calculateEMASlope(closes, period = 50) {
+  const emaSeries = calculateEMASeries(closes, period);
+  if (!emaSeries || emaSeries.length < period + 10) return null;
+  
+  const validEmas = emaSeries.filter(v => v !== null);
+  if (validEmas.length < 10) return null;
+  
+  const recent = validEmas.slice(-10);
+  const slope = (recent[recent.length - 1] - recent[0]) / recent[0];
+  return slope;
 }
 
 function calculateMACD(closes) {
@@ -1119,17 +1199,25 @@ function calculateVolatilityPercentile(candles, atrPeriod = 14) {
   return (rank / sorted.length) * 100;
 }
 
-function detectMarketRegime(candles, adx) {
+function detectMarketRegime(candles, adx, closes) {
   const atrPercentile = calculateVolatilityPercentile(candles);
   const trendStrength = adx ? adx.adx : 0;
   const isBearish = adx ? adx.bearishTrend : false;
-
-  // Strict Downtrend detection: If trending AND bearish, it's a DOWNTREND (dangerous for longs)
-  if (trendStrength > 20 && isBearish) {
-    return 'DOWNTREND'; // New regime to separate from general TRENDING
-  } else if (trendStrength > 25 && atrPercentile < 70) {
-    return 'TRENDING'; // Uptrend implied (since DOWNTREND caught above)
-  } else if (trendStrength < 20 && atrPercentile < 40) {
+  const isBullish = adx ? adx.bullishTrend : false;
+  
+  // NEW: Use EMA slope for additional trend confirmation
+  const emaSlope = closes ? calculateEMASlope(closes, 50) : null;
+  const hasValidTrend = emaSlope !== null && Math.abs(emaSlope) > 0.0005; // 0.05% slope threshold
+  
+  // IMPROVED: Higher ADX threshold (25 instead of 20) for more reliable trend detection
+  // IMPROVED: Require both ADX and EMA slope alignment
+  
+  // Strict Downtrend detection
+  if (trendStrength > 25 && isBearish && hasValidTrend) {
+    return 'DOWNTREND';
+  } else if (trendStrength > 25 && isBullish && hasValidTrend && atrPercentile < 70) {
+    return 'TRENDING';
+  } else if (trendStrength < 20 && atrPercentile < 40 && (!hasValidTrend || Math.abs(emaSlope) < 0.001)) {
     return 'RANGING';
   } else if (atrPercentile > 85) {
     return 'HIGH_VOLATILITY';
@@ -1678,7 +1766,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // Relaxed indicator validation - allow some indicators to fail
   if (!rsi15m && !macd15m && !bb15m) return null; // At least one major indicator must work
 
-  // === CATEGORY-BASED QUALITY FRAMEWORK ===
+  // === SIMPLIFIED CATEGORY-BASED SCORING FRAMEWORK v4.0 ===
+  // Fixed weights for transparency and easier debugging
   let signalType = null;
   const reasons = [];
   const volumeRatio = volumeSMA15m ? currentVolume15m / volumeSMA15m : 1;
@@ -1694,47 +1783,46 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === CATEGORY 1: MOMENTUM (0-100) ===
   let momentumScore = 0;
 
-  // RSI (0-40)
+  // RSI (0-35)
   if (rsi15m < 30) {
-    momentumScore += 40;
+    momentumScore += 35;
     reasons.push(`⚡ RSI Sobrevendido (${rsi15m.toFixed(1)})`);
     signalType = 'BUY';
   } else if (rsi15m > 70) {
-    momentumScore += 40;
+    momentumScore += 35;
     reasons.push(`⚠️ RSI Sobrecomprado (${rsi15m.toFixed(1)})`);
     signalType = 'SELL_ALERT';
   } else if (rsi15m < 40 && rsi1h < 45) {
-    momentumScore += 25;
+    momentumScore += 20;
     reasons.push(`📊 RSI zona de compra (${rsi15m.toFixed(1)})`);
     if (!signalType) signalType = 'BUY';
   } else if (rsi15m > 60 && rsi1h > 55) {
-    momentumScore += 25;
+    momentumScore += 20;
     reasons.push(`📊 RSI zona de venta (${rsi15m.toFixed(1)})`);
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // Stochastic RSI (0-30)
+  // Stochastic RSI (0-35)
   if (stoch15m) {
-    // Only count Oversold if K is crossing above D (momentum shift)
     if (stoch15m.oversold && stoch15m.k > stoch15m.d) {
-      momentumScore += 30;
+      momentumScore += 35;
       reasons.push('🎯 StochRSI Cross Up');
       if (!signalType) signalType = 'BUY';
     } else if (stoch15m.overbought && stoch15m.k < stoch15m.d) {
-      momentumScore += 30;
+      momentumScore += 35;
       reasons.push('🎯 StochRSI Cross Down');
       if (!signalType) signalType = 'SELL_ALERT';
     }
   }
 
   // MACD (0-30)
-  if (macd15m.bullish) {
-    momentumScore += 20;
+  if (macd15m?.bullish) {
+    momentumScore += 30;
     reasons.push('📈 MACD Alcista');
-    if (signalType === 'BUY') momentumScore += 10; // Alignment bonus
-  } else {
+    if (!signalType) signalType = 'BUY';
+  } else if (!macd15m?.bullish) {
     reasons.push('📉 MACD Bajista');
-    if (signalType === 'SELL_ALERT') momentumScore += 20;
+    if (!signalType) signalType = 'SELL_ALERT';
   }
 
   categoryScores.momentum = Math.min(100, momentumScore);
@@ -1743,49 +1831,47 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   let trendScore = 0;
 
   // SuperTrend 15m (0-40)
-  if (superTrend15m.bullish) {
-    trendScore += 30;
+  if (superTrend15m?.bullish) {
+    trendScore += 40;
     reasons.push('🟢 SuperTrend Alcista');
     if (!signalType || signalType === 'BUY') signalType = 'BUY';
-  } else if (superTrend15m.bearish) {
-    trendScore += 30;
+  } else if (superTrend15m?.bearish) {
+    trendScore += 40;
     reasons.push('🔴 SuperTrend Bajista');
     if (!signalType || signalType === 'SELL_ALERT') signalType = 'SELL_ALERT';
   }
 
-  if (superTrend15m.flipped) {
-    trendScore += 10;
+  if (superTrend15m?.flipped) {
     reasons.push(superTrend15m.bullish ? '🔄 FLIP ALCISTA' : '🔄 FLIP BAJISTA');
   }
 
-  // Multi-TF Confluence (0-50)
+  // Multi-TF Confluence (0-40)
   if (USE_MULTI_TF) {
-    // Strict 4H filter already applied above
-    const stAligned1h = superTrend15m.bullish === superTrend1h.bullish;
-    const stAligned4h = superTrend4h ? superTrend15m.bullish === superTrend4h.bullish : false;
+    const stAligned1h = superTrend15m?.bullish === superTrend1h?.bullish;
+    const stAligned4h = superTrend4h ? superTrend15m?.bullish === superTrend4h.bullish : false;
 
     if (stAligned1h && stAligned4h) {
-      trendScore += 50;
+      trendScore += 40;
       reasons.push('✅ Confluencia Total (3-TF)');
     } else if (stAligned1h) {
-      trendScore += 25;
+      trendScore += 20;
       reasons.push('✅ Confluencia 1H');
     }
   }
 
-  // ADX Strength (0-10)
-  if (adx15m && adx15m.trending) {
-    trendScore += 10;
+  // ADX Strength (0-20)
+  if (adx15m?.trending) {
+    trendScore += 20;
     const trendDir = adx15m.bullishTrend ? 'Alcista' : 'Bajista';
     reasons.push(`💨 ADX ${trendDir}`);
   }
 
   categoryScores.trend = Math.min(100, trendScore);
 
-  // === CATEGORY 3: STRUCTURE (Smart Money + BB) (0-100) ===
+  // === CATEGORY 3: STRUCTURE (0-100) ===
   let structureScore = 0;
 
-  // Smart Money Concepts (0-70)
+  // Smart Money Concepts (0-60)
   const smc = detectSmartMoneyConcepts(closedCandles15m, 100);
   const nearbyBullishFVG = smc.fvgs.find(f => f.type === 'BULLISH' && currentPrice <= f.top * 1.002 && currentPrice >= f.bottom * 0.998);
   const nearbyBullishOB = smc.orderBlocks.find(ob => ob.type === 'BULLISH' && currentPrice <= ob.top * 1.005 && currentPrice >= ob.bottom * 0.995);
@@ -1793,27 +1879,27 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const nearbyBearishOB = smc.orderBlocks.find(ob => ob.type === 'BEARISH' && currentPrice >= ob.bottom * 0.995 && currentPrice <= ob.top * 1.005);
 
   if (nearbyBullishOB && (signalType === 'BUY' || !signalType)) {
-    structureScore += 70;
+    structureScore += 60;
     reasons.unshift('🏦 Order Block Alcista');
     if (!signalType) signalType = 'BUY';
   } else if (nearbyBullishFVG && (signalType === 'BUY' || !signalType)) {
-    structureScore += 50;
+    structureScore += 40;
     reasons.unshift('🏦 FVG Alcista');
     if (!signalType) signalType = 'BUY';
   }
 
   if (nearbyBearishOB && (signalType === 'SELL_ALERT' || !signalType)) {
-    structureScore += 70;
+    structureScore += 60;
     reasons.unshift('🏦 Order Block Bajista');
     if (!signalType) signalType = 'SELL_ALERT';
   } else if (nearbyBearishFVG && (signalType === 'SELL_ALERT' || !signalType)) {
-    structureScore += 50;
+    structureScore += 40;
     reasons.unshift('🏦 FVG Bajista');
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // Bollinger Bands (0-30)
-  const bbPercent = (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower);
+  // Bollinger Bands (0-25)
+  const bbPercent = bb15m ? (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower) : 0.5;
   if (bbPercent < 0.1) {
     structureScore += 25;
     reasons.push('🏀 BB Inferior');
@@ -1824,28 +1910,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-
-
-  // Volume Profile (POC) (0-15)
-  const vp = calculateSimpleVolumeProfile(closedCandles1h, 168); // ~1 week on 1H
-  if (vp) {
-    const distPoc = (currentPrice - vp.poc) / vp.poc * 100;
-    // Buying above POC (Support)
-    if (signalType === 'BUY' && distPoc > 0 && distPoc < 2.0) {
-      structureScore += 15;
-      reasons.push('🧱 Above POC (Support)');
-    }
-    // Selling below POC (Resistance)
-    else if (signalType === 'SELL_ALERT' && distPoc < 0 && distPoc > -2.0) {
-      structureScore += 15;
-      reasons.push('🧱 Below POC (Resist)');
-    }
-  }
-
-  // Swing Structure Bands (ChartPrime)
-  // High confidence structure signal
-  if (swingBands && swingBands.buy && (signalType === 'BUY' || !signalType)) {
-    structureScore += 40;
+  // Swing Structure Bands (0-15)
+  if (swingBands?.buy && (signalType === 'BUY' || !signalType)) {
+    structureScore += 15;
     reasons.unshift('🎯 Swing Structure Buy');
     if (!signalType) signalType = 'BUY';
   }
@@ -1855,29 +1922,29 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === CATEGORY 4: VOLUME & ORDER FLOW (0-100) ===
   let volumeScore = 0;
 
-  // Volume Confirmation (0-40)
+  // Volume Confirmation (0-50) - IMPROVED: Higher threshold
   if (volumeRatio > 1.5) {
-    volumeScore += 40;
+    volumeScore += 50;
     reasons.push(`📊 Vol x${volumeRatio.toFixed(1)}`);
   } else if (volumeRatio > 1.2) {
     volumeScore += 25;
   }
 
-  // Order Flow Delta (0-35)
+  // Order Flow Delta (0-30) - IMPROVED: Stronger directional requirement
   const direction = signalType === 'BUY' ? 1 : signalType === 'SELL_ALERT' ? -1 : 0;
   if (direction !== 0 && deltaRatio !== null) {
-    const aligned = direction === 1 ? deltaRatio > 0 : deltaRatio < 0;
+    const aligned = direction === 1 ? deltaRatio > 0.1 : deltaRatio < -0.1; // IMPROVED: 0.1 threshold
     if (aligned) {
-      volumeScore += 35;
+      volumeScore += 30;
       reasons.push('📊 Order Flow Aligned');
     }
   }
 
-  // OBI (0-25)
-  if (direction !== 0) {
+  // OBI (0-20)
+  if (direction !== 0 && obMetrics) {
     const obiAligned = direction === 1 ? obMetrics.obi > 0.05 : obMetrics.obi < -0.05;
     if (obiAligned) {
-      volumeScore += 25;
+      volumeScore += 20;
       reasons.push('📚 OBI Favorable');
     }
   }
@@ -1896,9 +1963,6 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     } else if (signalType === 'SELL_ALERT' && bestPattern.type === 'BEARISH') {
       patternsScore += 50;
       reasons.unshift(`🕯️ ${bestPattern.name}`);
-    } else if (bestPattern.type === 'BULLISH' || bestPattern.type === 'BEARISH') {
-      patternsScore += 30;
-      reasons.push(`🕯️ ${bestPattern.name}`);
     }
   }
 
@@ -1909,9 +1973,6 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       (bestDiv.type === 'BEARISH' && signalType === 'SELL_ALERT')) {
       patternsScore += 50;
       reasons.unshift(`🔥 ${bestDiv.name}`);
-    } else {
-      patternsScore += 30;
-      reasons.push(`🔥 ${bestDiv.name}`);
     }
   }
 
@@ -1920,8 +1981,6 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === CALCULATE FINAL SCORE ===
   const quoteVol24h = ticker24h ? Number(ticker24h.quoteVolume) : null;
   if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return null;
-
-  let score = 0;
 
   // Apply 4H Trend Filter
   if (USE_MULTI_TF) {
@@ -1941,80 +2000,38 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
   }
 
-  // Detect Market Regime
-  const regime = detectMarketRegime(closedCandles15m, adx15m);
+  // Detect Market Regime - IMPROVED: Pass closes for EMA slope
+  const regime = detectMarketRegime(closedCandles15m, adx15m, closes15m);
   reasons.push(`🌐 Regime: ${regime}`);
 
-  // === ENHANCED REGIME FILTERS (Based on historical data analysis) ===
-  // RANGING: 75% WR - Best performing regime
-  // TRANSITION: 33% WR - Highly unreliable
-  // TRENDING: 27% WR - Worst performing (counter-trend signals)
-  // HIGH_VOLATILITY: 23% WR - Very unreliable
-
+  // === SIMPLIFIED REGIME FILTERS v4.0 ===
   let MIN_QUALITY_SCORE = 75;
 
-  // Adaptive MIN_QUALITY_SCORE by regime
   if (regime === 'DOWNTREND') {
     console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
     return null;
   } else if (regime === 'TRANSITION') {
-    // AUDIT v3.0: TRANSITION completely blocked (0% WR on 19 real signals)
-    console.log(`[REJECT] ${symbol}: TRANSITION regime - completely disabled (0% WR).`);
+    console.log(`[REJECT] ${symbol}: TRANSITION regime - completely disabled.`);
     return null;
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 88; // TRENDING needs strict filtering
+    MIN_QUALITY_SCORE = 85; // REDUCED from 88 for better signal frequency
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 92; // High volatility is dangerous
+    MIN_QUALITY_SCORE = 90; // REDUCED from 92
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 75; // RANGING is our best regime, but needed confirmation
+    MIN_QUALITY_SCORE = 75; // RANGING is our best regime
   }
+
+  // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
+  // No dynamic weight changes - easier to debug and optimize
   const weights = {
-    momentum: 0.20, // 25 -> 20
-    trend: 0.40,    // 30 -> 40
+    momentum: 0.25,
+    trend: 0.30,
     structure: 0.25,
-    volume: 0.10,    // 15 -> 10
+    volume: 0.15,
     patterns: 0.05
   };
 
-  // === ENHANCED ADAPTIVE STRATEGY BY REGIME ===
-  // Based on historical analysis of 33 signals (39.4% WR)
-  // RANGING: 75% WR - Prioritize structure and mean reversion
-  // TRANSITION: 33% WR - Require exceptional confluence, prioritize structure
-  // TRENDING: 27% WR - Follow trend, require pullbacks
-  // HIGH_VOLATILITY: 23% WR - Ultra strict, prioritize volume and structure
-
-  if (regime === 'TRENDING') {
-    // In TRENDING, we need to FOLLOW the trend, not fight it
-    // Historical data shows counter-trend signals have 27% WR
-    weights.trend = 0.45;      // Increased - trend direction is critical
-    weights.structure = 0.25;  // Pullback to structure
-    weights.momentum = 0.15;   // Momentum in trend direction
-    weights.volume = 0.10;     // Volume confirmation
-    weights.patterns = 0.05;   // Pattern confirmation
-  } else if (regime === 'RANGING') {
-    // RANGING is our best regime (75% WR) - mean reversion works
-    weights.structure = 0.40;  // Key - buy at support (OB/FVG)
-    weights.momentum = 0.30;   // Oversold momentum
-    weights.trend = 0.10;      // Less important in ranges
-    weights.volume = 0.15;     // Volume at extremes
-    weights.patterns = 0.05;   // Pattern confirmation
-  } else if (regime === 'TRANSITION') {
-    // TRANSITION is dangerous (33% WR) - require strong structure
-    weights.structure = 0.50;  // Critical - only trade clear structure
-    weights.momentum = 0.20;   // Secondary
-    weights.trend = 0.15;      // Emerging trend direction
-    weights.volume = 0.10;     // Volume confirmation
-    weights.patterns = 0.05;   // Pattern confirmation
-  } else if (regime === 'HIGH_VOLATILITY') {
-    // HIGH_VOLATILITY is very dangerous (23% WR) - ultra strict
-    weights.structure = 0.40;  // Key support/resistance
-    weights.volume = 0.35;     // Volume is critical in volatility
-    weights.trend = 0.15;      // Trend direction
-    weights.momentum = 0.05;   // Momentum can be fake
-    weights.patterns = 0.05;   // Patterns less reliable
-  }
-
-  score = Math.round(
+  let score = Math.round(
     categoryScores.momentum * weights.momentum +
     categoryScores.trend * weights.trend +
     categoryScores.structure * weights.structure +
@@ -2022,20 +2039,20 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     categoryScores.patterns * weights.patterns
   );
 
-  // Count strong categories (>60%)
+  // Count strong categories (>60%) - simplified confluence check
   const strongCategories = Object.values(categoryScores).filter(s => s >= 60).length;
 
-  // Confluence bonus
+  // Minimal confluence bonus (removed aggressive multipliers)
   if (strongCategories >= 4) {
-    score = Math.round(score * 1.20); // +20% bonus
+    score += 5; // Small fixed bonus instead of percentage
     reasons.push('🎯 CONFLUENCIA EXCEPCIONAL');
   } else if (strongCategories >= 3) {
-    score = Math.round(score * 1.10); // +10% bonus
+    score += 3;
     reasons.push('🎯 Alta Confluencia');
   }
 
-  // Final Score Clamping (moved to end after all bonuses)
-  // score = Math.min(100, score); 
+  // Ensure score is non-negative before clamping
+  score = Math.max(0, score); 
 
   // === ENHANCED OVEREXTENSION AND PULLBACK FILTERS ===
   const ema21 = ema21_15m;
@@ -2120,247 +2137,138 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === MSS DETECTION ===
   const mss = detectMarketStructureShift(closedCandles15m);
 
-  // === ENHANCED: Adaptive MSS Bonus by Regime ===
-  // Historical data shows MSS effectiveness varies by regime:
-  // - RANGING: MSS works well
-  // - TRANSITION: MSS unreliable (many false signals)
-  // - TRENDING: MSS often catches tops/bottoms (bad)
-  let mssBonus = 35; // Base bonus reduced from 45
-  if (regime === 'RANGING') mssBonus = 40;      // Good regime for MSS
-  else if (regime === 'TRANSITION') mssBonus = 20; // Unreliable - reduced bonus
-  else if (regime === 'TRENDING') mssBonus = 25;   // Often counter-trend - reduced bonus
-  else if (regime === 'HIGH_VOLATILITY') mssBonus = 15; // Very unreliable
-
+  // SIMPLIFIED v4.0: Small fixed bonus for MSS (no percentage caps)
+  // MSS is a confirmation factor, not a score multiplier
   if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
-    // AUDIT v3.0: Cap MSS bonus to max 40% of base score to prevent inflation
-    // Historical data: scores >= 95 had 0% WR due to bonus stacking
-    const baseScoreBeforeMSS = score;
-    const cappedMssBonus = Math.min(mssBonus, Math.round(baseScoreBeforeMSS * 0.4));
-    score += cappedMssBonus;
-    reasons.unshift(`🔄 MSS (+${cappedMssBonus})`);
+    score += 5; // Small fixed bonus
+    reasons.unshift('🔄 MSS Confirm');
     if (!signalType) signalType = 'BUY';
-
-    // Only lower requirements in RANGING regime where MSS is reliable
-    if (regime === 'RANGING' && score >= 70) {
-      MIN_QUALITY_SCORE = Math.min(MIN_QUALITY_SCORE, 70);
-    }
   } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
-    const cappedMssBonusBear = Math.min(mssBonus, Math.round(score * 0.4));
-    score += cappedMssBonusBear;
+    score += 5;
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
   // === LIQUIDITY SWEEP DETECTION ===
   const sweep = detectLiquiditySweep(closedCandles15m);
 
-  // === PHASE 2 OPTIMIZATION: Sweep Confirmation Filter ===
-  // Historical data: Sweeps in HIGH_VOLATILITY = 25% win rate (3W/9L)
-  // MSS without Sweep = 67% win rate (6W/3L)
-  // Solution: Require confirmation for Sweeps, especially in HIGH_VOLATILITY
-
+  // SIMPLIFIED v4.0: Small fixed bonus for confirmed Sweep only
   let sweepConfirmed = false;
-  let sweepBonus = 40; // Default bonus
 
   if (sweep && sweep.type === 'BULLISH_SWEEP' && (signalType === 'BUY' || !signalType)) {
-    // Check if Sweep is confirmed
-    if (regime === 'HIGH_VOLATILITY') {
-      // In HIGH_VOLATILITY, Sweeps need STRONG confirmation
-      sweepConfirmed = (mss && volumeRatio > 1.5); // Require MSS + strong volume
-      sweepBonus = sweepConfirmed ? 30 : 15; // Reduced bonus if not confirmed
-
-      if (!sweepConfirmed) {
-        console.log(`[SWEEP_FILTER] Weak sweep for ${symbol}: mss=${!!mss}, volRatio=${volumeRatio.toFixed(2)}`);
-      }
+    // Require MSS or strong volume for confirmation
+    sweepConfirmed = (mss || volumeRatio > 1.5);
+    
+    if (sweepConfirmed) {
+      score += 5; // Small fixed bonus only for confirmed sweeps
+      reasons.unshift('🧹 Liquidity Sweep ✓');
     } else {
-      // In TRENDING/RANGING, Sweeps are more reliable
-      sweepConfirmed = (mss || volumeRatio > 1.2); // MSS OR volume is enough
-      sweepBonus = sweepConfirmed ? 40 : 25;
+      reasons.unshift('🧹 Liquidity Sweep (⚠️ débil)');
     }
-
-    // AUDIT v3.0: Cap sweep bonus to max 40% of base score
-    const baseScoreBeforeSweep = score;
-    const cappedSweepBonus = Math.min(sweepBonus, Math.round(baseScoreBeforeSweep * 0.4));
-    score += cappedSweepBonus;
-
-    // PHASE 3: Additional penalty for unconfirmed sweeps
-    if (!sweepConfirmed) {
-      score -= 5;
-      reasons.push('⚠️ Sweep sin confirmación (-5)');
-    }
-
-    const sweepLabel = sweepConfirmed ? '🧹 Liquidity Sweep ✓' : '🧹 Liquidity Sweep (⚠️ débil)';
-    reasons.unshift(sweepLabel);
+    
     if (!signalType) signalType = 'BUY';
-    if (score >= 75 && sweepConfirmed) MIN_QUALITY_SCORE = 75;
 
   } else if (sweep && sweep.type === 'BEARISH_SWEEP' && (signalType === 'SELL_ALERT' || !signalType)) {
-    // Same logic for bearish sweeps
-    if (regime === 'HIGH_VOLATILITY') {
-      sweepConfirmed = (mss && volumeRatio > 1.5);
-      sweepBonus = sweepConfirmed ? 30 : 15;
-    } else {
-      sweepConfirmed = (mss || volumeRatio > 1.2);
-      sweepBonus = sweepConfirmed ? 40 : 25;
+    sweepConfirmed = (mss || volumeRatio > 1.5);
+    
+    if (sweepConfirmed) {
+      score += 5;
     }
-
-    score += sweepBonus;
-
-    // PHASE 3: Additional penalty for unconfirmed sweeps
-    if (!sweepConfirmed) {
-      score -= 5;
-      reasons.push('⚠️ Sweep sin confirmación (-5)');
-    }
-
-    const sweepLabel = sweepConfirmed ? '🧹 Liquidity Sweep ✓' : '🧹 Liquidity Sweep (⚠️ débil)';
-    reasons.unshift(sweepLabel);
+    
+    reasons.unshift(sweepConfirmed ? '🧹 Liquidity Sweep ✓' : '🧹 Liquidity Sweep (⚠️ débil)');
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // === ENHANCED STRICT FILTERS ===
-  // Reject low-volume setups
-  if (volumeRatio < 1.0) return null;
+  // === IMPROVED VOLUME FILTERS v4.0 ===
+  // IMPROVED: Higher minimum volume threshold (1.5x instead of 1.0x)
+  if (volumeRatio < 1.5) {
+    console.log(`[REJECT] ${symbol}: Volume ratio too low (${volumeRatio.toFixed(2)} < 1.5)`);
+    return null;
+  }
 
-  // AUDIT v3.0: High volume selling pressure filter
-  // Historical data: SUIUSDT Vol x6.1, Score 97 = LOSS (volume was sell-side)
+  // IMPROVED: Stronger directional volume requirement
+  // For BUY: need positive delta (>0.1 = buying pressure)
+  // For SELL: need negative delta (<-0.1 = selling pressure)
+  if (signalType === 'BUY' && deltaRatio !== null && deltaRatio < 0.1) {
+    console.log(`[REJECT] ${symbol}: BUY requires delta > 0.1, got ${deltaRatio.toFixed(3)}`);
+    return null;
+  }
+  if (signalType === 'SELL_ALERT' && deltaRatio !== null && deltaRatio > -0.1) {
+    console.log(`[REJECT] ${symbol}: SELL requires delta < -0.1, got ${deltaRatio.toFixed(3)}`);
+    return null;
+  }
+
+  // AUDIT v3.0: High volume selling pressure filter (kept from v3.0)
   if (signalType === 'BUY' && volumeRatio > 2.0 && deltaRatio !== null && deltaRatio < 0) {
     console.log(`[REJECT] ${symbol}: High volume but selling pressure (volRatio=${volumeRatio.toFixed(1)}, delta=${deltaRatio.toFixed(3)})`);
     return null;
   }
 
   // Final Score Clamping
-  score = Math.min(100, score);
+  score = Math.min(100, Math.max(0, score));
 
-  // === ENHANCED REGIME-SPECIFIC PENALTIES ===
-  // 1. High Volatility Base Penalty
-  if (regime === 'HIGH_VOLATILITY') {
-    score -= 15;
-    reasons.push('⚠️ Penalización Volatilidad (-15)');
-  }
+  // === SIMPLIFIED REGIME FILTERS v4.0 ===
 
-  // 2. Lack of MSS Penalty - Varies by regime
-  // In RANGING, MSS is less critical. In TRANSITION/TRENDING, it's more important
-  if (!mss) {
-    let mssPenalty = 10;
-    if (regime === 'TRANSITION') mssPenalty = 20; // Critical in TRANSITION
-    if (regime === 'TRENDING') mssPenalty = 15;   // Important in TRENDING
-    if (regime === 'RANGING') mssPenalty = 5;     // Less critical in RANGING
-    score -= mssPenalty;
-    reasons.push(`⚠️ Sin MSS (-${mssPenalty})`);
-  }
-
-  // 3. Inflated Score Penalty
-  // If score depends too much on one category, it's risky
-  const maxCategoryScore = Math.max(...Object.values(categoryScores));
-  const scoreConcentration = maxCategoryScore / (score > 0 ? score : 1);
-  if (maxCategoryScore > 85 && strongCategories < 3 && scoreConcentration > 0.5) {
-    score -= 12;
-    reasons.push('⚠️ Score inflado (-12)');
-  }
-
-  // === ENHANCED REGIME-SPECIFIC FILTERS ===
-
-  // HIGH_VOLATILITY: Ultra strict (23% WR historically)
+  // HIGH_VOLATILITY: Ultra strict
   if (regime === 'HIGH_VOLATILITY') {
     const passesVolatilityFilter =
-      score >= 90 &&                          // Increased from 88
-      mss &&                                  // MUST have MSS
-      volumeRatio > 1.3 &&                    // Strong volume required
+      score >= 90 &&
+      (mss || sweep) &&                       // Must have structure
+      volumeRatio > 1.5 &&                    // Strong volume required
       btcRisk !== 'RED';
 
     if (!passesVolatilityFilter) {
-      console.log(`[REJECT] ${symbol} (HighVol): score=${score}, mss=${!!mss}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
+      console.log(`[REJECT] ${symbol} (HighVol): score=${score}, structure=${!!(mss||sweep)}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
       return null;
     }
     reasons.push('✅ HIGH_VOL_FILTER_PASSED');
   }
 
-  // TRANSITION: Block unless exceptional confluence (33% WR historically)
-  if (regime === 'TRANSITION') {
-    const exceptionalConfluence =
-      mss &&
-      sweep &&
-      volumeRatio > 1.5 &&
-      categoryScores.structure >= 60 &&
-      categoryScores.volume >= 60 &&
-      btcRisk === 'GREEN';
-
-    if (!exceptionalConfluence) {
-      console.log(`[REJECT] ${symbol} (TRANSITION): Sin confluencia excepcional`);
-      return null;
-    }
-    reasons.push('✅ TRANSITION_EXCEPTIONAL');
-  }
-
-  // TRENDING: Require pullback confirmation (27% WR historically)
+  // TRENDING: Require pullback confirmation
   if (regime === 'TRENDING') {
-    // Must have either strong MSS or be at pullback with volume
-    const hasStrongStructure = mss && sweep;
-    const hasPullbackWithVolume = (Math.abs(distToEma21) < 0.8 || Math.abs(distToEma50) < 1.5) && volumeRatio > 1.2;
+    const hasStructure = mss || sweep;
+    const hasPullback = Math.abs(distToEma21) < 0.8 || Math.abs(distToEma50) < 1.5;
 
-    if (!hasStrongStructure && !hasPullbackWithVolume) {
-      console.log(`[REJECT] ${symbol} (TRENDING): No estructura fuerte ni pullback confirmado`);
+    if (!hasStructure && !hasPullback) {
+      console.log(`[REJECT] ${symbol} (TRENDING): No structure or pullback (dist21: ${distToEma21.toFixed(2)}%)`);
       return null;
     }
 
-    if (hasStrongStructure) reasons.push('✅ TREND_STRUCTURE');
-    if (hasPullbackWithVolume) reasons.push('✅ TREND_PULLBACK');
+    if (hasStructure) reasons.push('✅ TREND_STRUCTURE');
+    if (hasPullback) reasons.push('✅ TREND_PULLBACK');
   }
 
-  // RANGING: Require MSS or Sweep + FALLING KNIFE PROTECTION
+  // RANGING: Require structure + buy cheap principle
   if (regime === 'RANGING') {
-    // AUDIT v3.0: Don't buy in the upper part of the range ("buy cheap" principle)
-    // Historical data: BB% > 0.75 in RANGING = 3 LOSS, 1 BE vs 1 WIN
+    // Don't buy in the upper part of the range
     if (signalType === 'BUY' && bbPercent > 0.75) {
-      console.log(`[REJECT] ${symbol} (RANGING): BB% too high for BUY (${bbPercent.toFixed(2)}) - not buying at top of range`);
+      console.log(`[REJECT] ${symbol} (RANGING): BB% too high (${bbPercent.toFixed(2)})`);
       return null;
     }
 
-    // AUDIT v3.0: Require bullish momentum to buy
-    // Historical data: MACD Bajista + BUY = 40% WR vs 50% with MACD Alcista
-    if (signalType === 'BUY' && !macd15m.bullish) {
-      console.log(`[REJECT] ${symbol} (RANGING): MACD Bajista incompatible con BUY`);
-      return null;
-    }
-
-    // 1. Falling Knife Check: If MACD Histogram is negative AND decreasing (momentum accelerating down)
-    if (macd15m.histogram < 0 && macd15m.histogram < (macd15m.prevHistogram || 0)) {
-      if (distToEma9 < -1.5) {
-        console.log(`[REJECT] ${symbol} (RANGING): Falling Knife (DistEma9: ${distToEma9.toFixed(2)}%)`);
-        return null;
-      }
-    }
-
-    // 2. CMF Check: Money Flow must be showing accumulation (or at least not heavy distribution)
-    if (cmf15m < -0.05) {
-      console.log(`[REJECT] ${symbol} (RANGING): CMF too weak (${cmf15m.toFixed(3)})`);
-      return null;
-    }
-
+    // Require structure
     if (!mss && !sweep) {
       console.log(`[REJECT] ${symbol} (RANGING): Sin MSS ni Sweep`);
       return null;
     }
   }
 
-  // Final score check after all penalties
+  // Final score check
   if (score < MIN_QUALITY_SCORE) {
     console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE}`);
     return null;
   }
 
-  // Medium quality signals require extra confirmation
+  // Require visual confirmation for borderline scores
   const hasVisualConfirmation = divergences.length > 0 || patterns.length > 0 || mss || sweep;
-  if (score < 85 && !hasVisualConfirmation) {
-    console.log(`[REJECT] ${symbol}: Score ${score} < 85 and no supporting Pattern/Div/MSS/Sweep`);
+  if (score < 80 && !hasVisualConfirmation) {
+    console.log(`[REJECT] ${symbol}: Score ${score} < 80 and no confirmation`);
     return null;
   }
 
-  // Strong categories requirement
+  // Minimum strong categories
   const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
-  const adjustedStrongCategories = (mss || sweep) ? strongCategories + 1 : strongCategories;
-
-  if (adjustedStrongCategories < requiredStrong) {
-    console.log(`[REJECT] ${symbol}: Strong Categories ${adjustedStrongCategories} < ${requiredStrong}`);
+  if (strongCategories < requiredStrong) {
+    console.log(`[REJECT] ${symbol}: Strong Categories ${strongCategories} < ${requiredStrong}`);
     return null;
   }
 
@@ -2598,12 +2506,18 @@ async function sendTelegramNotification(signals, stats = null) {
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
 async function runAnalysis(context) {
-  // 0. Acquire Global Lock
+  // 0. Check trading session
+  if (!isTradingAllowed()) {
+    console.log('[SESSION] Trading paused - Low liquidity session');
+    return { success: true, signals: 0, reason: 'Asia session - trading restricted' };
+  }
+
+  // 1. Acquire Global Lock
   const canProceed = await acquireRunLock(context);
   if (!canProceed) return { success: false, error: 'Locked' };
 
   try {
-    console.log('--- DAY TRADE Analysis Started ---');
+    console.log('--- DAY TRADE Analysis Started v4.0 ---');
     const runId = `RUN-${Date.now().toString().slice(-6)}`;
     console.log('Execution ID:', runId);
 
@@ -2614,20 +2528,21 @@ async function runAnalysis(context) {
     const signals = [];
     let analyzed = 0;
     let errors = 0;
+    const selectedSectors = new Set(); // NEW: Track sectors to avoid correlation
 
     // === BTC GLOBAL CONTEXT ANALYSIS ===
     let btcContext = { status: 'GREEN', reason: 'BTC Analysis Passed (Default)' };
     try {
       const btcSymbol = `BTC${QUOTE_ASSET}`;
-      const [btcCandes4h, btcCandes1h] = await Promise.all([
+      const [btcCandles4h, btcCandles1h] = await Promise.all([  // FIXED: typo
         getKlines(btcSymbol, '4h', 100),
         getKlines(btcSymbol, '60m', 100)
       ]);
 
-      if (btcCandes4h && btcCandes4h.length > 50) {
-        const closed4h = getClosedCandles(btcCandes4h, '4h');
+      if (btcCandles4h && btcCandles4h.length > 50) {  // FIXED: typo
+        const closed4h = getClosedCandles(btcCandles4h, '4h');
         const closes4h = closed4h.map(c => c.close);
-        const closes1h = getClosedCandles(btcCandes1h, '60m').map(c => c.close);
+        const closes1h = getClosedCandles(btcCandles1h, '60m').map(c => c.close);
 
         const btcSt4h = calculateSuperTrend(closed4h, 10, 3);
         const btcRsi4h = calculateRSI(closes4h, 14);
@@ -2664,13 +2579,21 @@ async function runAnalysis(context) {
 
     for (const symbol of topSymbols) {
       if (openSymbols.includes(symbol)) {
-        console.log(`[${runId}] Skipping ${symbol} - Already have an OPEN position in history`);
+        console.log(`[${runId}] Skipping ${symbol} - Already have an OPEN position`);
         continue;
       }
 
       if (cooldowns[symbol] && (Date.now() - cooldowns[symbol] < ALERT_COOLDOWN_MIN * 60000)) {
         continue;
       }
+
+      // NEW: Sector correlation check - skip if we already have signal from same sector
+      const sector = getSector(symbol);
+      if (selectedSectors.has(sector)) {
+        console.log(`[${runId}] Skipping ${symbol} - Sector ${sector} already selected`);
+        continue;
+      }
+
       try {
         const [candles15m, orderBook, candles1hRaw, candles4hRaw] = await Promise.all([
           getKlines(symbol, '15m', 500),
@@ -2693,19 +2616,22 @@ async function runAnalysis(context) {
         if (signal) {
           // IMMEDIATE COOLDOWN PROTECTION
           cooldowns[symbol] = Date.now();
-          await saveCooldowns(cooldowns, context); // Save immediately to prevent race conditions
+          await saveCooldowns(cooldowns, context);
+
+          // NEW: Track sector for correlation protection
+          selectedSectors.add(sector);
 
           await recordSignalHistory(signal, context);
           signals.push(signal);
-          console.log(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score}`);
+          console.log(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Sector: ${sector}`);
         }
 
-        await sleep(10); // [AUDIT FIX] Optimized from 50ms
+        await sleep(10);
 
       } catch (error) {
         console.error(`Error analyzing ${symbol}:`, error.message);
         errors++;
-        await sleep(10); // [AUDIT FIX] Optimized from 50ms
+        await sleep(10);
       }
     }
 

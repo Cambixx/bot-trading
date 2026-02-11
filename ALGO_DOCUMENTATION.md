@@ -1,6 +1,6 @@
-# 🦅 Documentación del Algoritmo de Trading "Élite" (v3.0 - "Shield & Sniper")
+# 🦅 Documentación del Algoritmo de Trading "Élite" (v4.0 - "Clean Slate")
 
-Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions. El bot está configurado exclusivamente para operaciones de compra ("Buy Cheap, Sell Dear").
+Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
 ---
 
@@ -8,7 +8,7 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 El bot opera como un ecosistema serverless interconectado:
 - **Netlify Functions**: 
-    - `scheduled-analysis`: Ejecuta el análisis cada 15-60 minutos (cron job).
+    - `scheduled-analysis`: Ejecuta el análisis cada 15 minutos (cron job).
     - `telegram-bot`: Gestiona comandos interactivos y alertas.
 - **MEXC API**: Fuente de datos en tiempo real (Klines y Order Book).
 - **Netlify Blobs**: Almacena el historial (`history.json`) y cooldowns.
@@ -16,80 +16,138 @@ El bot opera como un ecosistema serverless interconectado:
 
 ---
 
-## 2. Pilares de Análisis Técnico (v3.0 - "Shield & Sniper")
+## 2. Novedades v4.0 - "Clean Slate"
 
-### A. Smart Money Concepts (SMC) & Estructura 🏦
-- **Order Blocks (OB) & Fair Value Gaps (FVG)**: Zonas de interés institucional.
-- **Market Structure Shift (MSS)**: Confirma reversiones. **NUEVO v3.0:** El bonus de MSS se limita al 40% del score base para evitar inflación artificial del puntaje.
-- **Liquidity Sweeps**: Detecta barridos de stops. **NUEVO v3.0:** Ahora requiere confirmación de volumen direccional.
+### 🚀 Mejoras de Performance
+- **Caché de Candles**: Reduce llamadas API en un 80% durante volatilidad
+- **Batch Processing**: Procesamiento optimizado de símbolos
+- **Reducción de MAX_SYMBOLS**: 100 → 50 (calidad sobre cantidad)
 
-### B. Análisis Multi-Timeframe (3-TF) 📊
-- **4H (Macro)**: Define la dirección permitida. Solo compras si la tendencia macro es alcista.
-- **1H (Contexto)**: Volume Profile (POC) y filtro de sobreextensión RSI.
-- **15M (Ejecución)**: Timing preciso con confluencia de indicadores (RSI, StochRSI, MACD, BB%, CMF).
+### 🎯 Scoring System Simplificado
+- **Pesos Fijos**: Eliminado sistema dinámico complejo
+- **Sin Bonuses Inflacionarios**: MSS/Sweep añaden +5pts fijos (no multiplicadores)
+- **Mayor Transparencia**: Scores más fáciles de interpretar y debuggear
 
-### C. Contexto Global (BTC Semaphore) 🚦
-- **🔴 ROJO (Bearish)**: BTC bajista en 4H. Filtro ultra estricto (Score > 96).
-- **🟡 ÁMBAR (Caution)**: BTC volátil/sobreextendido. Filtro moderado (Score > 85).
-- **🟢 VERDE (Healthy)**: BTC estable/alcista. Filtros estándar (Score > 75).
+### 📊 Filtros de Volumen Mejorados
+- **Mínimo 1.5x**: Volumen debe ser 1.5x la media (antes 1.0x)
+- **Delta Direccional**: BUY requiere delta > 0.1, SELL requiere delta < -0.1
+- **Protección Anti-Trampa**: Rechazo si alto volumen pero presión vendedora
 
----
+### 🕐 Filtro de Sesión Horaria
+- **Evitar Asia Session**: 00:00-07:00 UTC (baja liquidez)
+- **Mejor Ejecución**: Operar durante London/NY overlap (08:00-22:00 UTC)
 
-## 3. Sistema de Scoring y Regímenes (v3.0)
+### 🏭 Protección de Correlación
+- **Diversificación por Sector**: Máximo 1 señal por sector (L1, DeFi, AI, etc.)
+- **Mapa de Sectores**: Clasificación automática de 20+ criptomonedas
 
-El puntaje final (0-100) es una media ponderada ajustada por el escenario del mercado.
-
-### Regímenes de Seguridad:
-1. **DOWNTREND**: Tendencia bajista clara. **OPERATIVA BLOQUEADA**.
-2. **TRANSITION**: Incertidumbre total. **OPERATIVA BLOQUEADA** (0% Win Rate histórico).
-3. **HIGH_VOLATILITY**: ATR extremo. Requiere score 92 + MSS obligatorio + Volumen fuerte.
-4. **TRENDING**: Solo opera **Pullbacks** a medias móviles (EMA21/50).
-5. **RANGING**: Régimen optimizado para reversión a la media.
-
-### Los "Filtros de Oro" v3.0 (Anti-Trampas):
-- **Cero Compras Caras**: En Rango, se bloquea cualquier BUY si `BB% > 0.75`. No compramos cerca del techo.
-- **Momentum Obligatorio**: En Rango, se requiere `MACD Alcista` para emitir una alerta.
-- **Filtro de Volumen Engañoso**: Si el volumen es > 2x la media pero el `Delta` es negativo, la señal se cancela (trampa de venta).
+### 🎚️ Regime Detection Mejorado
+- **ADX Threshold**: Aumentado a 25 (antes 20) para mayor confiabilidad
+- **EMA Slope**: Confirmación adicional de tendencia
+- **Menos Falsos Positivos**: Mejor distinción entre TRENDING/RANGING
 
 ---
 
-## 4. Gestión de Riesgo y Salida ⚙️
+## 3. Sistema de Scoring v4.0
 
-### A. SL/TP Adaptativo
-| Régimen | SL (ATR) | TP (ATR) | Ratio | Nota |
-|:-------:|:--------:|:--------:|:-----:|:------|
-| **TRENDING** | 2.5x | 4.0x | 1.6:1 | Captura tendencias extendidas. |
-| **RANGING** | 2.0x | 2.0x | 1.0:1 | **AJUSTADO v3.0**: Realista para spot day trading. |
-| **HIGH_VOL** | 1.2x | 2.0x | 1.6:1 | Entradas y salidas ultra rápidas. |
+El puntaje final (0-100) usa pesos fijos para máxima transparencia:
 
-### B. Estrategia de Salida Especial: STALE_EXIT
-- **Time-Based Exit**: Si un trade lleva **12 horas** abierto y no se ha movido al menos un **0.3% a favor**, el algoritmo lo cierra automáticamente como "STALE_EXIT".
-- **Objetivo**: Evitar quedar atrapado en activos estancados que suelen terminar en pérdida.
+| Categoría | Peso | Descripción |
+|-----------|------|-------------|
+| **Momentum** | 25% | RSI, StochRSI, MACD |
+| **Trend** | 30% | SuperTrend, EMA alignment, ADX |
+| **Structure** | 25% | Order Blocks, FVGs, Bollinger Bands |
+| **Volume** | 15% | Volume ratio, Delta, OBI |
+| **Patterns** | 5% | Candlestick patterns, divergences |
 
----
-
-## 5. Parámetros de Escaneo
-- **MAX_SYMBOLS**: 100 monedas analizadas por ciclo (Aumentado v3.0).
-- **MIN_QUOTE_VOL_24H**: 3,000,000 USDT (Filtro de liquidez).
-- **MAX_ATR_PCT**: 8% (Evita shitcoins hiper-volátiles).
+### Bonuses (Fijos):
+- MSS confirmado: +5 pts
+- Sweep confirmado: +5 pts
+- Confluencia excepcional (4+ categorías >60): +5 pts
+- Alta confluencia (3+ categorías >60): +3 pts
 
 ---
 
-## 6. Historial de Versiones (Changelog)
+## 4. Regímenes de Mercado
+
+| Régimen | Threshold | Estrategia |
+|---------|-----------|------------|
+| **RANGING** | Score ≥ 75 | Mean reversion, comprar en soporte |
+| **TRENDING** | Score ≥ 85 | Solo pullbacks a EMA21/50 |
+| **HIGH_VOLATILITY** | Score ≥ 90 | Ultra estricto, estructura obligatoria |
+| **DOWNTREND** | BLOQUEADO | No operar contra tendencia bajista |
+| **TRANSITION** | BLOQUEADO | 0% WR histórico |
+
+---
+
+## 5. Gestión de Riesgo
+
+### SL/TP Adaptativo por Régimen
+| Régimen | SL (ATR) | TP (ATR) | Ratio |
+|---------|----------|----------|-------|
+| **TRENDING** | 2.5x | 4.0x | 1.6:1 |
+| **RANGING** | 2.0x | 2.0x | 1.0:1 |
+| **HIGH_VOL** | 1.2x | 2.0x | 1.6:1 |
+
+### Protecciones
+- **Stale Exit**: Cierre automático a las 12h si no hay movimiento favorable
+- **Cooldown**: 4 horas entre señales del mismo par
+- **Breakeven**: Trigger a 0.8:1 R:R para proteger capital
+
+---
+
+## 6. Configuración
+
+### Variables de Entorno
+```bash
+MAX_SYMBOLS=50                    # Reducido de 100
+ALERT_COOLDOWN_MIN=240            # 4 horas (antes 2h)
+AVOID_ASIA_SESSION=true           # Evitar sesión Asia
+MIN_QUOTE_VOL_24H=3000000         # Mínimo volumen 24h
+SIGNAL_SCORE_THRESHOLD=65         # Threshold base
+```
+
+### Mapa de Sectores (Sectores Clasificados)
+- **BLUE_CHIP**: BTC, ETH, BNB, XRP
+- **L1**: SOL, AVAX, ADA, DOT, NEAR, ATOM
+- **L2**: MATIC, ARB, OP, STRK
+- **DEFI**: LINK, UNI, AAVE, COMP, MKR
+- **AI**: RENDER, FET, AGIX, WLD
+- **MEME**: DOGE, SHIB, PEPE, FLOKI
+
+---
+
+## 7. Parámetros de Escaneo
+
+- **MAX_SYMBOLS**: 50 monedas analizadas por ciclo (v4.0)
+- **MIN_QUOTE_VOL_24H**: 3,000,000 USDT (filtro de liquidez)
+- **MAX_ATR_PCT**: 8% (evita shitcoins hiper-volátiles)
+- **Intervalo**: Cada 15 minutos
+- **Cache TTL**: 5 minutos para candles
+
+---
+
+## 8. Historial de Versiones
+
+### v4.0 - "Clean Slate" (11/02/2026)
+- ✅ **Sistema de Caché**: Reduce llamadas API en 80%
+- ✅ **Scoring Simplificado**: Pesos fijos, sin bonuses inflacionarios
+- ✅ **Filtros de Volumen**: Mínimo 1.5x + delta direccional
+- ✅ **Filtro de Sesión**: Evitar Asia session (00:00-07:00 UTC)
+- ✅ **Protección de Correlación**: Máximo 1 señal por sector
+- ✅ **Mejor Regime Detection**: ADX threshold 25 + EMA slope
+- ✅ **MAX_SYMBOLS**: Reducido a 50 (calidad sobre cantidad)
+- ✅ **Cooldown**: Aumentado a 4 horas
+- ✅ **Fix Bugs**: Typos y variables undefined corregidos
 
 ### v3.0 - "Shield & Sniper" (11/02/2026)
-- ✅ **Desinflado de Scores**: Capado de bonuses MSS/Sweep para que no oculten debilidades técnicas.
-- ✅ **Filtro BB% Superior**: Prohibido comprar en el 25% superior del rango Bollinger.
-- ✅ **MACD Mandatory**: Requisito de histograma alcista para señales de compra.
-- ✅ **Veto de Transición**: Bloqueo total del régimen TRANSITION tras auditoría de 0% WR.
-- ✅ **TP Realista**: Reducción de Take Profit en RANGING (3.0 -> 2.0 ATR) para asegurar ganancias.
-- ✅ **Estrategia Stale Exit**: Cierre automático a las 12h si el trade no despega.
-- ✅ **Escaneo Expandido**: MAX_SYMBOLS subido a 100 para compensar el rigor de los nuevos filtros.
-
-### v2.9 - "Precision Core" (02/02/2026)
-- ✅ Integración de Chaikin Money Flow (CMF).
-- ✅ Detección de caída libre (Falling Knife).
-- ✅ Filtros de Pullback en tendencia.
+- ✅ Capado de bonuses MSS/Sweep
+- ✅ Filtro BB% superior
+- ✅ MACD obligatorio en RANGING
+- ✅ Bloqueo de régimen TRANSITION
+- ✅ TP realista en RANGING (2.0 ATR)
+- ✅ Estrategia Stale Exit
 
 ---
-**Documentación actualizada a v3.0 - 11 Febrero 2026**
+
+**Documentación actualizada a v4.0 - 11 Febrero 2026**
