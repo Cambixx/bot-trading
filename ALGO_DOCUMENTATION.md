@@ -1,6 +1,6 @@
-# 🦅 Documentación del Algoritmo de Trading "Élite" (Spot Sniper Edition)
+# 🦅 Documentación del Algoritmo de Trading "Élite" (v3.0 - "Shield & Sniper")
 
-Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions. El bot está configurado exclusivamente para operaciones de compra.
+Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions. El bot está configurado exclusivamente para operaciones de compra ("Buy Cheap, Sell Dear").
 
 ---
 
@@ -8,96 +8,88 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 El bot opera como un ecosistema serverless interconectado:
 - **Netlify Functions**: 
-    - `scheduled-analysis`: Ejecuta el análisis cada 15 minutos (cron job).
-    - `telegram-bot`: Gestiona comandos interactivos y webhooks de Telegram.
+    - `scheduled-analysis`: Ejecuta el análisis cada 15-60 minutos (cron job).
+    - `telegram-bot`: Gestiona comandos interactivos y alertas.
 - **MEXC API**: Fuente de datos en tiempo real (Klines y Order Book).
-- **Netlify Blobs**: "Cerebro" de persistencia (Historial y Cooldowns).
-- **Telegram API**: Interfaz bidireccional para alertas, informes y comandos.
+- **Netlify Blobs**: Almacena el historial (`history.json`) y cooldowns.
+- **Telegram API**: Interfaz bidireccional para alertas e informes.
 
 ---
 
-## 2. Pilares de Análisis Técnico (v2.9 - "Precision Core")
+## 2. Pilares de Análisis Técnico (v3.0 - "Shield & Sniper")
 
 ### A. Smart Money Concepts (SMC) & Estructura 🏦
-El algoritmo busca huellas de dinero institucional:
-- **Fair Value Gaps (FVG) y Order Blocks (OB)**: Zonas de interés institucional.
-- **Market Structure Shift (MSS)**: Confirma reversiones de tendencia. Penalizado en regímenes volátiles.
-- **Liquidity Sweeps**: Detecta "cacería de stops". **CRÍTICO:** En alta volatilidad, se requiere confirmación de volumen o MSS para evitar falsos positivos.
+- **Order Blocks (OB) & Fair Value Gaps (FVG)**: Zonas de interés institucional.
+- **Market Structure Shift (MSS)**: Confirma reversiones. **NUEVO v3.0:** El bonus de MSS se limita al 40% del score base para evitar inflación artificial del puntaje.
+- **Liquidity Sweeps**: Detecta barridos de stops. **NUEVO v3.0:** Ahora requiere confirmación de volumen direccional.
 
 ### B. Análisis Multi-Timeframe (3-TF) 📊
-- **4H (Macro)**: Define la dirección permitida. Solo compras en tendencia alcista macro.
-- **1H (Contexto)**: Mide la fuerza del movimiento y el **Volume Profile (POC)**. Filtro de sobreextensión.
-- **15M (Ejecución)**: Busca el timing preciso con confluencia de indicadores, incluyendo el **nuevo Chaikin Money Flow (CMF)**.
+- **4H (Macro)**: Define la dirección permitida. Solo compras si la tendencia macro es alcista.
+- **1H (Contexto)**: Volume Profile (POC) y filtro de sobreextensión RSI.
+- **15M (Ejecución)**: Timing preciso con confluencia de indicadores (RSI, StochRSI, MACD, BB%, CMF).
 
 ### C. Contexto Global (BTC Semaphore) 🚦
-Evalúa la salud de Bitcoin para ajustar el rigor del filtrado:
 - **🔴 ROJO (Bearish)**: BTC bajista en 4H. Filtro ultra estricto (Score > 96).
-- **🟡 ÁMBAR (Caution)**: BTC sobreextendido. Filtro moderado (Score > 85).
-- **🟢 VERDE (Healthy)**: BTC saludable. Filtros estándar (Score > 75).
+- **🟡 ÁMBAR (Caution)**: BTC volátil/sobreextendido. Filtro moderado (Score > 85).
+- **🟢 VERDE (Healthy)**: BTC estable/alcista. Filtros estándar (Score > 75).
 
 ---
 
-## 3. Sistema de Scoring y Calidad (v2.9)
+## 3. Sistema de Scoring y Regímenes (v3.0)
 
-El puntaje final (0-100) es una **media ponderada ajustada por régimen**:
+El puntaje final (0-100) es una media ponderada ajustada por el escenario del mercado.
 
-### Regímenes Refinados:
-1. **DOWNTREND**: ADX > 20 y tendencia bajista. **OPERATIVA BLOQUEADA**.
-2. **TRANSITION**: Volatilidad media, tendencia débil. **OPERATIVA BLOQUEADA** (Históricamente 0% WR).
-3. **HIGH_VOLATILITY**: ATR > 85%. Req score 90 + MSS + Volumen fuerte.
-4. **TRENDING**: ADX > 25, ATR bajo. Solo opera **Pullbacks** a medias móviles.
-5. **RANGING**: Regimen "Estrella" (75% WR). Busca reversiones a la media con protecciones.
+### Regímenes de Seguridad:
+1. **DOWNTREND**: Tendencia bajista clara. **OPERATIVA BLOQUEADA**.
+2. **TRANSITION**: Incertidumbre total. **OPERATIVA BLOQUEADA** (0% Win Rate histórico).
+3. **HIGH_VOLATILITY**: ATR extremo. Requiere score 92 + MSS obligatorio + Volumen fuerte.
+4. **TRENDING**: Solo opera **Pullbacks** a medias móviles (EMA21/50).
+5. **RANGING**: Régimen optimizado para reversión a la media.
 
-### Pesos por Régimen:
-
-| Régimen | Trend | Volume | Structure | Momentum | Patterns | Min Score |
-|:-------:|:-----:|:------:|:---------:|:--------:|:--------:|:---------:|
-| **TRENDING** | 45% | 10% | 25% | 15% | 5% | **88** |
-| **RANGING** | 10% | 15% | 40% | 30% | 5% | **75** |
-| **HIGH_VOL** | 15% | 35% | 40% | 5% | 5% | **92** |
+### Los "Filtros de Oro" v3.0 (Anti-Trampas):
+- **Cero Compras Caras**: En Rango, se bloquea cualquier BUY si `BB% > 0.75`. No compramos cerca del techo.
+- **Momentum Obligatorio**: En Rango, se requiere `MACD Alcista` para emitir una alerta.
+- **Filtro de Volumen Engañoso**: Si el volumen es > 2x la media pero el `Delta` es negativo, la señal se cancela (trampa de venta).
 
 ---
 
-## 4. Gestión de Riesgo Dinámica ⚙️
+## 4. Gestión de Riesgo y Salida ⚙️
 
-### A. SL/TP Adaptativo por Régimen
-| Régimen | SL (ATR) | TP (ATR) | Ratio | Notas |
+### A. SL/TP Adaptativo
+| Régimen | SL (ATR) | TP (ATR) | Ratio | Nota |
 |:-------:|:--------:|:--------:|:-----:|:------|
-| **TRENDING** | 2.5x | 4.0x | 1.6:1 | Busca expansión de tendencia. |
-| **RANGING** | 2.0x | 3.0x | 1.5:1 | Targets amplios en rangos. |
-| **HIGH_VOL** | 1.2x | 2.0x | 1.6:1 | Scalping rápido y protegido. |
+| **TRENDING** | 2.5x | 4.0x | 1.6:1 | Captura tendencias extendidas. |
+| **RANGING** | 2.0x | 2.0x | 1.0:1 | **AJUSTADO v3.0**: Realista para spot day trading. |
+| **HIGH_VOL** | 1.2x | 2.0x | 1.6:1 | Entradas y salidas ultra rápidas. |
+
+### B. Estrategia de Salida Especial: STALE_EXIT
+- **Time-Based Exit**: Si un trade lleva **12 horas** abierto y no se ha movido al menos un **0.3% a favor**, el algoritmo lo cierra automáticamente como "STALE_EXIT".
+- **Objetivo**: Evitar quedar atrapado en activos estancados que suelen terminar en pérdida.
 
 ---
 
-## 5. Nuevos Filtros "Anti-Bulls Trap" (v2.9)
-
-### 1. Protección "Falling Knife" (RANGING)
-Evita comprar cuando el activo cae aceleradamente sin suelo:
-- **MACD Check**: Si el histograma es negativo y *decreciente* (acelerando a la baja), se bloquea la señal.
-- **Distancia EMA9**: Si el precio está muy lejos (>1.5%) de la EMA9 por debajo, se considera caída libre.
-
-### 2. Confirmación de Dinero Inteligente (CMF)
-Nuevo indicador **Chaikin Money Flow**:
-- Se requiere `CMF > -0.05` para cualquier compra en Rango.
-- Esto asegura que, aunque el precio baje, hay volumen acumulándose (divergencia de flujo).
-
-### 3. StochRSI Cross
-Ya no basta con estar "sobrevendido". La línea rápida (K) debe haber cruzado hacia arriba a la lenta (D), confirmando el giro.
+## 5. Parámetros de Escaneo
+- **MAX_SYMBOLS**: 100 monedas analizadas por ciclo (Aumentado v3.0).
+- **MIN_QUOTE_VOL_24H**: 3,000,000 USDT (Filtro de liquidez).
+- **MAX_ATR_PCT**: 8% (Evita shitcoins hiper-volátiles).
 
 ---
 
-## 6. Mantenimiento y Auditoría
+## 6. Historial de Versiones (Changelog)
 
-### Fixes v2.9 (02/02/2026) - "Precision Core":
-1. ✅ **CMF Indicator**: Integrado para filtrar caídas sin volumen de compra.
-2. ✅ **Regime Lockdown**: `TRANSITION` y `DOWNTREND` deshabilitados para proteger capital.
-3. ✅ **Falling Knife Protection**: Bloqueo de compras con inercia bajista fuerte en rangos.
-4. ✅ **Trend Pullbacks**: En tendencia, solo se opera si el precio retrocede a la EMA21/50.
+### v3.0 - "Shield & Sniper" (11/02/2026)
+- ✅ **Desinflado de Scores**: Capado de bonuses MSS/Sweep para que no oculten debilidades técnicas.
+- ✅ **Filtro BB% Superior**: Prohibido comprar en el 25% superior del rango Bollinger.
+- ✅ **MACD Mandatory**: Requisito de histograma alcista para señales de compra.
+- ✅ **Veto de Transición**: Bloqueo total del régimen TRANSITION tras auditoría de 0% WR.
+- ✅ **TP Realista**: Reducción de Take Profit en RANGING (3.0 -> 2.0 ATR) para asegurar ganancias.
+- ✅ **Estrategia Stale Exit**: Cierre automático a las 12h si el trade no despega.
+- ✅ **Escaneo Expandido**: MAX_SYMBOLS subido a 100 para compensar el rigor de los nuevos filtros.
 
-### Fixes v2.9.1 (04/02/2026):
-1. ✅ **Swing Structure Bands**: Indicador de ChartPrime integrado para detectar estructura de precios dinámica.
-2. ✅ **Deep History**: Aumento de descarga de velas a 500 para cálculos de alta precisión (Swing Length 100).
+### v2.9 - "Precision Core" (02/02/2026)
+- ✅ Integración de Chaikin Money Flow (CMF).
+- ✅ Detección de caída libre (Falling Knife).
+- ✅ Filtros de Pullback en tendencia.
 
 ---
-
-**Documentación actualizada a v2.9.1 - 04 Febrero 2026**
+**Documentación actualizada a v3.0 - 11 Febrero 2026**
