@@ -33,7 +33,7 @@ const USE_MULTI_TF = (process.env.USE_MULTI_TF || 'true').toLowerCase() === 'tru
 const AVOID_ASIA_SESSION = (process.env.AVOID_ASIA_SESSION || 'true').toLowerCase() === 'true'; // NEW: Avoid low liquidity sessions
 
 // Persistent cooldown storage using Netlify Blobs
-const COOLDOWN_STORE_KEY = 'signal-cooldowns';
+export const COOLDOWN_STORE_KEY = 'signal-cooldowns';
 const COOLDOWN_EXPIRY_HOURS = 24;
 
 // const lastNotifiedAtByKey = new Map(); // Replaced by Blobs
@@ -190,7 +190,7 @@ export function getInternalStore(context) {
   return getStore(options);
 }
 
-async function loadCooldowns(context) {
+export async function loadCooldowns(context) {
   try {
     const store = getInternalStore(context);
     const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
@@ -243,7 +243,7 @@ async function releaseRunLock(context) {
   }
 }
 
-async function saveCooldowns(cooldowns, context) {
+export async function saveCooldowns(cooldowns, context) {
   try {
     const store = getInternalStore(context);
     await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
@@ -254,7 +254,7 @@ async function saveCooldowns(cooldowns, context) {
 
 // ==================== SIGNAL HISTORY & BACKTESTING ====================
 
-const HISTORY_STORE_KEY = 'signal-history-v2';
+export const HISTORY_STORE_KEY = 'signal-history-v2';
 
 async function recordSignalHistory(signal, context) {
   try {
@@ -2499,7 +2499,7 @@ async function sendTelegramNotification(signals, stats = null) {
 
 // ==================== MAIN ANALYSIS FUNCTION ====================
 
-async function runAnalysis(context) {
+export async function runAnalysis(context) {
   // 0. Check trading session
   if (!isTradingAllowed()) {
     console.log('[SESSION] Trading paused - Low liquidity session');

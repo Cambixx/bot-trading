@@ -127,7 +127,26 @@ SIGNAL_SCORE_THRESHOLD=65         # Threshold base
 
 ---
 
-## 8. Historial de Versiones
+## 8. Comandos de Telegram (Panel de Control) 🤖
+
+El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para el ADMIN):
+
+- `/informe`: Resumen de ganancias, pérdidas y operaciones abiertas.
+- `/scan`: Fuerza una ejecución inmediata del scanner (útil para pruebas).
+- `/cooldowns`: Muestra qué monedas están bloqueadas y cuánto tiempo les queda.
+- `/reset_cooldowns`: Elimina todos los bloqueos temporales.
+- `/settings`: Muestra la configuración técnica activa (MAX_SYMBOLS, etc.).
+- `/limpiar`: Borra el historial almacenado (v2).
+- `/help`: Muestra la lista completa de comandos.
+
+---
+
+## 9. Historial de Versiones (Changelog)
+
+### v4.1 - "Admin Pro" (12/02/2026)
+- ✅ **Panel de Control**: Implementados comandos administrativos en Telegram.
+- ✅ **Scan Manual**: Posibilidad de disparar análisis vía comando `/scan`.
+- ✅ **Gestión de Cooldowns**: Comandos para ver y resetear bloqueos.
 
 ### v4.0 - "Clean Slate" (11/02/2026)
 - ✅ **Sistema de Caché**: Reduce llamadas API en 80%
@@ -150,4 +169,4 @@ SIGNAL_SCORE_THRESHOLD=65         # Threshold base
 
 ---
 
-**Documentación actualizada a v4.0 - 11 Febrero 2026**
+**Documentación actualizada a v4.1 - 12 Febrero 2026**
