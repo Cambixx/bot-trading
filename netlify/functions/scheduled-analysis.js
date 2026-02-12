@@ -59,26 +59,14 @@ function setCachedCandles(key, data) {
   candleCache.set(key, { data, timestamp: Date.now() });
 }
 
-// Sector classification for correlation analysis - EXPANDED v4.1
+// Sector classification for correlation analysis
 const SECTOR_MAP = {
-  // Blue Chips
   'BTC': 'BLUE_CHIP', 'ETH': 'BLUE_CHIP', 'BNB': 'BLUE_CHIP', 'XRP': 'BLUE_CHIP',
-  // Layer 1
   'SOL': 'L1', 'AVAX': 'L1', 'ADA': 'L1', 'DOT': 'L1', 'NEAR': 'L1', 'ATOM': 'L1',
-  'ALGO': 'L1', 'FTM': 'L1', 'APT': 'L1', 'SUI': 'L1', 'SEI': 'L1', 'INJ': 'L1',
-  // Memecoins
-  'DOGE': 'MEME', 'SHIB': 'MEME', 'PEPE': 'MEME', 'FLOKI': 'MEME', 'BONK': 'MEME',
-  // DeFi
+  'DOGE': 'MEME', 'SHIB': 'MEME', 'PEPE': 'MEME', 'FLOKI': 'MEME',
   'LINK': 'DEFI', 'UNI': 'DEFI', 'AAVE': 'DEFI', 'COMP': 'DEFI', 'MKR': 'DEFI',
-  'CRV': 'DEFI', 'LDO': 'DEFI', 'RPL': 'DEFI', 'SNX': 'DEFI', 'ENS': 'DEFI',
-  // Layer 2
-  'MATIC': 'L2', 'ARB': 'L2', 'OP': 'L2', 'STRK': 'L2', 'IMX': 'L2', 'BLAST': 'L2',
-  // AI/Tech
-  'RENDER': 'AI', 'FET': 'AI', 'AGIX': 'AI', 'WLD': 'AI', 'OCEAN': 'AI', 'RNDR': 'AI',
-  // GameFi
-  'GALA': 'GAMEFI', 'AXS': 'GAMEFI', 'MANA': 'GAMEFI', 'SAND': 'GAMEFI',
-  // Others
-  'TON': 'OTHER', 'FIL': 'OTHER', 'HBAR': 'OTHER', 'VET': 'OTHER', 'ICP': 'OTHER'
+  'MATIC': 'L2', 'ARB': 'L2', 'OP': 'L2', 'STRK': 'L2',
+  'RENDER': 'AI', 'FET': 'AI', 'AGIX': 'AI', 'WLD': 'AI'
 };
 
 function getSector(symbol) {
@@ -86,23 +74,24 @@ function getSector(symbol) {
   return SECTOR_MAP[base] || 'OTHER';
 }
 
-// NEW: Session filter - avoid low liquidity periods (DISABLED by default in v4.1)
+// NEW: Session filter - avoid low liquidity periods
 function isTradingAllowed() {
   if (!AVOID_ASIA_SESSION) return true;
-  
+
   // Use UTC time for session checking
   const now = new Date();
   const utcHour = now.getUTCHours();
-  
-  // Asia session: 02:00 - 05:00 UTC (most illiquid period)
-  // Allow trading outside this narrow window
-  // Note: This filter is now more permissive to allow signals
-  
-  if (utcHour >= 2 && utcHour < 5) {
-    console.log(`[SESSION] Ultra low liquidity (${utcHour}:00 UTC) - trading restricted`);
+
+  // Asia session: 00:00 - 08:00 UTC (roughly)
+  // London session: 08:00 - 16:00 UTC
+  // NY session: 14:00 - 22:00 UTC
+  // Best liquidity: 08:00 - 22:00 UTC (London + NY overlap)
+
+  if (utcHour >= 0 && utcHour < 7) {
+    console.log(`[SESSION] Asia session detected (${utcHour}:00 UTC) - trading restricted`);
     return false;
   }
-  
+
   return true;
 }
 
@@ -638,10 +627,10 @@ function calculateEMASeries(data, period) {
 function calculateEMASlope(closes, period = 50) {
   const emaSeries = calculateEMASeries(closes, period);
   if (!emaSeries || emaSeries.length < period + 10) return null;
-  
+
   const validEmas = emaSeries.filter(v => v !== null);
   if (validEmas.length < 10) return null;
-  
+
   const recent = validEmas.slice(-10);
   const slope = (recent[recent.length - 1] - recent[0]) / recent[0];
   return slope;
@@ -1215,31 +1204,25 @@ function detectMarketRegime(candles, adx, closes) {
   const trendStrength = adx ? adx.adx : 0;
   const isBearish = adx ? adx.bearishTrend : false;
   const isBullish = adx ? adx.bullishTrend : false;
-  
-  // IMPROVED v4.1: More permissive regime detection
-  // Use EMA slope but with lower threshold
+
+  // NEW: Use EMA slope for additional trend confirmation
   const emaSlope = closes ? calculateEMASlope(closes, 50) : null;
-  const hasValidTrend = emaSlope !== null && Math.abs(emaSlope) > 0.0002; // REDUCED: 0.02% (was 0.05%)
-  
-  // DOWNTREND: Strong bearish signals
-  if (trendStrength > 20 && isBearish && hasValidTrend) {
+  const hasValidTrend = emaSlope !== null && Math.abs(emaSlope) > 0.0005; // 0.05% slope threshold
+
+  // IMPROVED: Higher ADX threshold (25 instead of 20) for more reliable trend detection
+  // IMPROVED: Require both ADX and EMA slope alignment
+
+  // Strict Downtrend detection
+  if (trendStrength > 25 && isBearish && hasValidTrend) {
     return 'DOWNTREND';
-  } 
-  // TRENDING: Strong bullish signals
-  else if (trendStrength > 20 && isBullish && hasValidTrend && atrPercentile < 75) {
+  } else if (trendStrength > 25 && isBullish && hasValidTrend && atrPercentile < 70) {
     return 'TRENDING';
-  }
-  // RANGING: Low volatility, no clear trend
-  else if (atrPercentile < 45) {
+  } else if (trendStrength < 20 && atrPercentile < 40 && (!hasValidTrend || Math.abs(emaSlope) < 0.001)) {
     return 'RANGING';
-  }
-  // HIGH_VOLATILITY: Extreme volatility
-  else if (atrPercentile > 80) {
+  } else if (atrPercentile > 85) {
     return 'HIGH_VOLATILITY';
-  }
-  // Default to TRANSITION but treat as RANGING for scoring purposes
-  else {
-    return 'RANGING'; // Changed from TRANSITION to RANGING for more signals
+  } else {
+    return 'TRANSITION';
   }
 }
 
@@ -1947,10 +1930,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     volumeScore += 25;
   }
 
-  // Order Flow Delta (0-30) - IMPROVED: More permissive for MEXC data
+  // Order Flow Delta (0-30) - IMPROVED: Stronger directional requirement
   const direction = signalType === 'BUY' ? 1 : signalType === 'SELL_ALERT' ? -1 : 0;
   if (direction !== 0 && deltaRatio !== null) {
-    const aligned = direction === 1 ? deltaRatio > 0.05 : deltaRatio < -0.05; // REDUCED: 0.05 threshold (was 0.1)
+    const aligned = direction === 1 ? deltaRatio > 0.1 : deltaRatio < -0.1; // IMPROVED: 0.1 threshold
     if (aligned) {
       volumeScore += 30;
       reasons.push('📊 Order Flow Aligned');
@@ -2021,21 +2004,21 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const regime = detectMarketRegime(closedCandles15m, adx15m, closes15m);
   reasons.push(`🌐 Regime: ${regime}`);
 
-  // === SIMPLIFIED REGIME FILTERS v4.1 - MORE PERMISSIVE ===
-  let MIN_QUALITY_SCORE = 65; // REDUCED from 75
+  // === SIMPLIFIED REGIME FILTERS v4.0 ===
+  let MIN_QUALITY_SCORE = 75;
 
   if (regime === 'DOWNTREND') {
     console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
     return null;
   } else if (regime === 'TRANSITION') {
-    // Allow TRANSITION but with higher threshold
-    MIN_QUALITY_SCORE = 70;
+    console.log(`[REJECT] ${symbol}: TRANSITION regime - completely disabled.`);
+    return null;
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 70; // REDUCED from 85
+    MIN_QUALITY_SCORE = 85; // REDUCED from 88 for better signal frequency
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 80; // REDUCED from 90
+    MIN_QUALITY_SCORE = 90; // REDUCED from 92
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 65; // RANGING is our best regime
+    MIN_QUALITY_SCORE = 75; // RANGING is our best regime
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
@@ -2069,7 +2052,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   }
 
   // Ensure score is non-negative before clamping
-  score = Math.max(0, score); 
+  score = Math.max(0, score);
 
   // === ENHANCED OVEREXTENSION AND PULLBACK FILTERS ===
   const ema21 = ema21_15m;
@@ -2131,24 +2114,24 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (signalType === 'SELL_ALERT') return null;
 
-  // === BTC CONTEXT FILTER (GLOBAL) - MORE PERMISSIVE v4.1 ===
+  // === BTC CONTEXT FILTER (GLOBAL) ===
+  // btcContext is now passed as the last argument
   if (btcContext) {
     if (btcContext.status === 'RED') {
-      // REDUCED: Score threshold from 96 to 85 for RED
-      if (score < 85) {
-        console.log(`[REJECT] ${symbol}: BTC RED requires score 85, got ${score}`);
+      // Extreme Filter during BTC corrections
+      if (score < 96) {
+        console.log(`[REJECT] ${symbol}: BTC RED requires score 96, got ${score}`);
         return null;
       }
       reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
     } else if (btcContext.status === 'AMBER') {
-      // REDUCED: Score threshold from 85 to 75 for AMBER
-      if (score < 75) {
-        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 75, got ${score}`);
+      // Moderate Filter
+      if (score < 85) {
+        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 85, got ${score}`);
         return null;
       }
       reasons.push('⚠️ Precaución Macro (BTC Ambar)');
     }
-    // GREEN: Allow all scores (no additional filtering)
   }
 
   // === MSS DETECTION ===
@@ -2157,11 +2140,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // SIMPLIFIED v4.0: Small fixed bonus for MSS (no percentage caps)
   // MSS is a confirmation factor, not a score multiplier
   if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
-    score += 5; // Small fixed bonus
-    reasons.unshift('🔄 MSS Confirm');
+    score += 10; // Fixed bonus — enough to help reach threshold without inflating
+    reasons.unshift('🔄 MSS Confirm (+10)');
     if (!signalType) signalType = 'BUY';
   } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
-    score += 5;
+    score += 10;
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
@@ -2174,51 +2157,45 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (sweep && sweep.type === 'BULLISH_SWEEP' && (signalType === 'BUY' || !signalType)) {
     // Require MSS or strong volume for confirmation
     sweepConfirmed = (mss || volumeRatio > 1.5);
-    
+
     if (sweepConfirmed) {
-      score += 5; // Small fixed bonus only for confirmed sweeps
+      score += 10; // Fixed bonus for confirmed sweeps
       reasons.unshift('🧹 Liquidity Sweep ✓');
     } else {
       reasons.unshift('🧹 Liquidity Sweep (⚠️ débil)');
     }
-    
+
     if (!signalType) signalType = 'BUY';
 
   } else if (sweep && sweep.type === 'BEARISH_SWEEP' && (signalType === 'SELL_ALERT' || !signalType)) {
     sweepConfirmed = (mss || volumeRatio > 1.5);
-    
+
     if (sweepConfirmed) {
-      score += 5;
+      score += 10;
     }
-    
+
     reasons.unshift(sweepConfirmed ? '🧹 Liquidity Sweep ✓' : '🧹 Liquidity Sweep (⚠️ débil)');
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
   // === IMPROVED VOLUME FILTERS v4.0 ===
-  // IMPROVED: Higher minimum volume threshold (1.5x instead of 1.0x)
-  if (volumeRatio < 1.5) {
-    console.log(`[REJECT] ${symbol}: Volume ratio too low (${volumeRatio.toFixed(2)} < 1.5)`);
+  // Minimum volume threshold: 1.2x (balance between strictness and signal frequency)
+  if (volumeRatio < 1.2) {
+    console.log(`[REJECT] ${symbol}: Volume ratio too low (${volumeRatio.toFixed(2)} < 1.2)`);
     return null;
   }
 
-  // IMPROVED v4.1: More permissive delta ratio
-  // Allow signals if delta is available but not strictly required
-  // Only reject if delta is clearly against the signal direction
-  if (signalType === 'BUY' && deltaRatio !== null && deltaRatio < -0.15) {
-    console.log(`[REJECT] ${symbol}: Strong selling pressure, delta ${deltaRatio.toFixed(3)} < -0.15`);
+  // Directional volume check: volume must flow in signal direction
+  // BUY: net buying pressure (delta > 0). SELL: net selling pressure (delta < 0)
+  if (signalType === 'BUY' && deltaRatio !== null && deltaRatio < 0) {
+    console.log(`[REJECT] ${symbol}: BUY requires positive delta, got ${deltaRatio.toFixed(3)}`);
     return null;
   }
-  if (signalType === 'SELL_ALERT' && deltaRatio !== null && deltaRatio > 0.15) {
-    console.log(`[REJECT] ${symbol}: Strong buying pressure, delta ${deltaRatio.toFixed(3)} > 0.15`);
+  if (signalType === 'SELL_ALERT' && deltaRatio !== null && deltaRatio > 0) {
+    console.log(`[REJECT] ${symbol}: SELL requires negative delta, got ${deltaRatio.toFixed(3)}`);
     return null;
   }
 
-  // AUDIT v3.0: High volume selling pressure filter (kept from v3.0)
-  if (signalType === 'BUY' && volumeRatio > 2.0 && deltaRatio !== null && deltaRatio < 0) {
-    console.log(`[REJECT] ${symbol}: High volume but selling pressure (volRatio=${volumeRatio.toFixed(1)}, delta=${deltaRatio.toFixed(3)})`);
-    return null;
-  }
 
   // Final Score Clamping
   score = Math.min(100, Math.max(0, score));
@@ -2234,7 +2211,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       btcRisk !== 'RED';
 
     if (!passesVolatilityFilter) {
-      console.log(`[REJECT] ${symbol} (HighVol): score=${score}, structure=${!!(mss||sweep)}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
+      console.log(`[REJECT] ${symbol} (HighVol): score=${score}, structure=${!!(mss || sweep)}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
       return null;
     }
     reasons.push('✅ HIGH_VOL_FILTER_PASSED');
@@ -2282,8 +2259,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
-  // Minimum strong categories - REDUCED v4.1
-  const requiredStrong = (regime === 'HIGH_VOLATILITY') ? 2 : 1; // Reduced from 3/2 to 2/1
+  // Minimum strong categories
+  const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
   if (strongCategories < requiredStrong) {
     console.log(`[REJECT] ${symbol}: Strong Categories ${strongCategories} < ${requiredStrong}`);
     return null;
