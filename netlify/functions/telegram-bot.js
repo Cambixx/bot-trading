@@ -55,7 +55,7 @@ async function generateReportMessage(context) {
         }
         return msg;
     } catch (e) {
-        return `⚠️ Error: ${esc(e.message)}`;
+        return `⚠️ Error: ${String(e.message).replace(/([_\*\[\]\(\)~`>#+\-=|{}.!])/g, '\\$1')}`;
     }
 }
 
@@ -69,6 +69,29 @@ async function sendTelegramMessage(chatId, text) {
             parse_mode: 'MarkdownV2'
         })
     });
+}
+
+async function registerBotCommands() {
+    const commands = [
+        { command: 'informe', description: '📈 Resumen de rendimiento' },
+        { command: 'scan', description: '🔍 Ejecutar scanner ahora' },
+        { command: 'cooldowns', description: '🧊 Ver monedas bloqueadas' },
+        { command: 'settings', description: '⚙️ Ver configuración' },
+        { command: 'help', description: '❓ Lista de comandos' }
+    ];
+
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setMyCommands`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commands })
+        });
+        const res = await response.json();
+        return res.ok;
+    } catch (e) {
+        console.error('Error setting commands:', e);
+        return false;
+    }
 }
 
 export const handler = async (event) => {
@@ -97,15 +120,24 @@ export const handler = async (event) => {
         }
 
         // --- COMANDOS ADMIN ---
-        if (text === '/start' || text === 'help' || text === '/help') {
-            let help = `🚀 *Comandos Sniper Bot v4\.1*\n\n`;
+        if (text === '/start' || text === 'help' || text === '/help' || text === '/') {
+            let help = `🚀 *Comandos Sniper Bot v4\.2*\n\n`;
             help += `📊 /informe \- Ver resumen de rendimiento\n`;
             help += `🔍 /scan \- Forzar análisis del scanner ahora\n`;
             help += `🧊 /cooldowns \- Ver monedas bloqueadas\n`;
             help += `🔥 /reset\_cooldowns \- Limpiar todos los bloqueos\n`;
             help += `⚙️ /settings \- Ver configuración actual\n`;
-            help += `🧹 /limpiar \- Borrar historial de señales`;
+            help += `🧹 /limpiar \- Borrar historial de señales\n`;
+            help += `🛠️ /setup \- Configurar menú de Telegram`;
             await sendTelegramMessage(chatId, help);
+
+        } else if (text === '/setup') {
+            const ok = await registerBotCommands();
+            if (ok) {
+                await sendTelegramMessage(chatId, `✅ *Menú de comandos configurado*\. Reinicia tu app de Telegram si no ves la lista al escribir \/\.`);
+            } else {
+                await sendTelegramMessage(chatId, `❌ Error al configurar el menú de comandos\.`);
+            }
 
         } else if (text === '/informe' || text === 'informe') {
             const report = await generateReportMessage(context);
