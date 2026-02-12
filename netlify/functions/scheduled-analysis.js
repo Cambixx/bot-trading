@@ -59,14 +59,26 @@ function setCachedCandles(key, data) {
   candleCache.set(key, { data, timestamp: Date.now() });
 }
 
-// Sector classification for correlation analysis
+// Sector classification for correlation analysis - EXPANDED v4.1
 const SECTOR_MAP = {
+  // Blue Chips
   'BTC': 'BLUE_CHIP', 'ETH': 'BLUE_CHIP', 'BNB': 'BLUE_CHIP', 'XRP': 'BLUE_CHIP',
+  // Layer 1
   'SOL': 'L1', 'AVAX': 'L1', 'ADA': 'L1', 'DOT': 'L1', 'NEAR': 'L1', 'ATOM': 'L1',
-  'DOGE': 'MEME', 'SHIB': 'MEME', 'PEPE': 'MEME', 'FLOKI': 'MEME',
+  'ALGO': 'L1', 'FTM': 'L1', 'APT': 'L1', 'SUI': 'L1', 'SEI': 'L1', 'INJ': 'L1',
+  // Memecoins
+  'DOGE': 'MEME', 'SHIB': 'MEME', 'PEPE': 'MEME', 'FLOKI': 'MEME', 'BONK': 'MEME',
+  // DeFi
   'LINK': 'DEFI', 'UNI': 'DEFI', 'AAVE': 'DEFI', 'COMP': 'DEFI', 'MKR': 'DEFI',
-  'MATIC': 'L2', 'ARB': 'L2', 'OP': 'L2', 'STRK': 'L2',
-  'RENDER': 'AI', 'FET': 'AI', 'AGIX': 'AI', 'WLD': 'AI'
+  'CRV': 'DEFI', 'LDO': 'DEFI', 'RPL': 'DEFI', 'SNX': 'DEFI', 'ENS': 'DEFI',
+  // Layer 2
+  'MATIC': 'L2', 'ARB': 'L2', 'OP': 'L2', 'STRK': 'L2', 'IMX': 'L2', 'BLAST': 'L2',
+  // AI/Tech
+  'RENDER': 'AI', 'FET': 'AI', 'AGIX': 'AI', 'WLD': 'AI', 'OCEAN': 'AI', 'RNDR': 'AI',
+  // GameFi
+  'GALA': 'GAMEFI', 'AXS': 'GAMEFI', 'MANA': 'GAMEFI', 'SAND': 'GAMEFI',
+  // Others
+  'TON': 'OTHER', 'FIL': 'OTHER', 'HBAR': 'OTHER', 'VET': 'OTHER', 'ICP': 'OTHER'
 };
 
 function getSector(symbol) {
@@ -74,7 +86,7 @@ function getSector(symbol) {
   return SECTOR_MAP[base] || 'OTHER';
 }
 
-// NEW: Session filter - avoid low liquidity periods
+// NEW: Session filter - avoid low liquidity periods (DISABLED by default in v4.1)
 function isTradingAllowed() {
   if (!AVOID_ASIA_SESSION) return true;
   
@@ -82,13 +94,12 @@ function isTradingAllowed() {
   const now = new Date();
   const utcHour = now.getUTCHours();
   
-  // Asia session: 00:00 - 08:00 UTC (roughly)
-  // London session: 08:00 - 16:00 UTC
-  // NY session: 14:00 - 22:00 UTC
-  // Best liquidity: 08:00 - 22:00 UTC (London + NY overlap)
+  // Asia session: 02:00 - 05:00 UTC (most illiquid period)
+  // Allow trading outside this narrow window
+  // Note: This filter is now more permissive to allow signals
   
-  if (utcHour >= 0 && utcHour < 7) {
-    console.log(`[SESSION] Asia session detected (${utcHour}:00 UTC) - trading restricted`);
+  if (utcHour >= 2 && utcHour < 5) {
+    console.log(`[SESSION] Ultra low liquidity (${utcHour}:00 UTC) - trading restricted`);
     return false;
   }
   
@@ -1205,24 +1216,30 @@ function detectMarketRegime(candles, adx, closes) {
   const isBearish = adx ? adx.bearishTrend : false;
   const isBullish = adx ? adx.bullishTrend : false;
   
-  // NEW: Use EMA slope for additional trend confirmation
+  // IMPROVED v4.1: More permissive regime detection
+  // Use EMA slope but with lower threshold
   const emaSlope = closes ? calculateEMASlope(closes, 50) : null;
-  const hasValidTrend = emaSlope !== null && Math.abs(emaSlope) > 0.0005; // 0.05% slope threshold
+  const hasValidTrend = emaSlope !== null && Math.abs(emaSlope) > 0.0002; // REDUCED: 0.02% (was 0.05%)
   
-  // IMPROVED: Higher ADX threshold (25 instead of 20) for more reliable trend detection
-  // IMPROVED: Require both ADX and EMA slope alignment
-  
-  // Strict Downtrend detection
-  if (trendStrength > 25 && isBearish && hasValidTrend) {
+  // DOWNTREND: Strong bearish signals
+  if (trendStrength > 20 && isBearish && hasValidTrend) {
     return 'DOWNTREND';
-  } else if (trendStrength > 25 && isBullish && hasValidTrend && atrPercentile < 70) {
+  } 
+  // TRENDING: Strong bullish signals
+  else if (trendStrength > 20 && isBullish && hasValidTrend && atrPercentile < 75) {
     return 'TRENDING';
-  } else if (trendStrength < 20 && atrPercentile < 40 && (!hasValidTrend || Math.abs(emaSlope) < 0.001)) {
+  }
+  // RANGING: Low volatility, no clear trend
+  else if (atrPercentile < 45) {
     return 'RANGING';
-  } else if (atrPercentile > 85) {
+  }
+  // HIGH_VOLATILITY: Extreme volatility
+  else if (atrPercentile > 80) {
     return 'HIGH_VOLATILITY';
-  } else {
-    return 'TRANSITION';
+  }
+  // Default to TRANSITION but treat as RANGING for scoring purposes
+  else {
+    return 'RANGING'; // Changed from TRANSITION to RANGING for more signals
   }
 }
 
@@ -1930,10 +1947,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     volumeScore += 25;
   }
 
-  // Order Flow Delta (0-30) - IMPROVED: Stronger directional requirement
+  // Order Flow Delta (0-30) - IMPROVED: More permissive for MEXC data
   const direction = signalType === 'BUY' ? 1 : signalType === 'SELL_ALERT' ? -1 : 0;
   if (direction !== 0 && deltaRatio !== null) {
-    const aligned = direction === 1 ? deltaRatio > 0.1 : deltaRatio < -0.1; // IMPROVED: 0.1 threshold
+    const aligned = direction === 1 ? deltaRatio > 0.05 : deltaRatio < -0.05; // REDUCED: 0.05 threshold (was 0.1)
     if (aligned) {
       volumeScore += 30;
       reasons.push('📊 Order Flow Aligned');
@@ -2004,21 +2021,21 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const regime = detectMarketRegime(closedCandles15m, adx15m, closes15m);
   reasons.push(`🌐 Regime: ${regime}`);
 
-  // === SIMPLIFIED REGIME FILTERS v4.0 ===
-  let MIN_QUALITY_SCORE = 75;
+  // === SIMPLIFIED REGIME FILTERS v4.1 - MORE PERMISSIVE ===
+  let MIN_QUALITY_SCORE = 65; // REDUCED from 75
 
   if (regime === 'DOWNTREND') {
     console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
     return null;
   } else if (regime === 'TRANSITION') {
-    console.log(`[REJECT] ${symbol}: TRANSITION regime - completely disabled.`);
-    return null;
+    // Allow TRANSITION but with higher threshold
+    MIN_QUALITY_SCORE = 70;
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 85; // REDUCED from 88 for better signal frequency
+    MIN_QUALITY_SCORE = 70; // REDUCED from 85
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 90; // REDUCED from 92
+    MIN_QUALITY_SCORE = 80; // REDUCED from 90
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 75; // RANGING is our best regime
+    MIN_QUALITY_SCORE = 65; // RANGING is our best regime
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
@@ -2114,24 +2131,24 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (signalType === 'SELL_ALERT') return null;
 
-  // === BTC CONTEXT FILTER (GLOBAL) ===
-  // btcContext is now passed as the last argument
+  // === BTC CONTEXT FILTER (GLOBAL) - MORE PERMISSIVE v4.1 ===
   if (btcContext) {
     if (btcContext.status === 'RED') {
-      // Extreme Filter during BTC corrections
-      if (score < 96) {
-        console.log(`[REJECT] ${symbol}: BTC RED requires score 96, got ${score}`);
+      // REDUCED: Score threshold from 96 to 85 for RED
+      if (score < 85) {
+        console.log(`[REJECT] ${symbol}: BTC RED requires score 85, got ${score}`);
         return null;
       }
       reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
     } else if (btcContext.status === 'AMBER') {
-      // Moderate Filter
-      if (score < 85) {
-        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 85, got ${score}`);
+      // REDUCED: Score threshold from 85 to 75 for AMBER
+      if (score < 75) {
+        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 75, got ${score}`);
         return null;
       }
       reasons.push('⚠️ Precaución Macro (BTC Ambar)');
     }
+    // GREEN: Allow all scores (no additional filtering)
   }
 
   // === MSS DETECTION ===
@@ -2185,15 +2202,15 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
-  // IMPROVED: Stronger directional volume requirement
-  // For BUY: need positive delta (>0.1 = buying pressure)
-  // For SELL: need negative delta (<-0.1 = selling pressure)
-  if (signalType === 'BUY' && deltaRatio !== null && deltaRatio < 0.1) {
-    console.log(`[REJECT] ${symbol}: BUY requires delta > 0.1, got ${deltaRatio.toFixed(3)}`);
+  // IMPROVED v4.1: More permissive delta ratio
+  // Allow signals if delta is available but not strictly required
+  // Only reject if delta is clearly against the signal direction
+  if (signalType === 'BUY' && deltaRatio !== null && deltaRatio < -0.15) {
+    console.log(`[REJECT] ${symbol}: Strong selling pressure, delta ${deltaRatio.toFixed(3)} < -0.15`);
     return null;
   }
-  if (signalType === 'SELL_ALERT' && deltaRatio !== null && deltaRatio > -0.1) {
-    console.log(`[REJECT] ${symbol}: SELL requires delta < -0.1, got ${deltaRatio.toFixed(3)}`);
+  if (signalType === 'SELL_ALERT' && deltaRatio !== null && deltaRatio > 0.15) {
+    console.log(`[REJECT] ${symbol}: Strong buying pressure, delta ${deltaRatio.toFixed(3)} > 0.15`);
     return null;
   }
 
@@ -2265,8 +2282,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
-  // Minimum strong categories
-  const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
+  // Minimum strong categories - REDUCED v4.1
+  const requiredStrong = (regime === 'HIGH_VOLATILITY') ? 2 : 1; // Reduced from 3/2 to 2/1
   if (strongCategories < requiredStrong) {
     console.log(`[REJECT] ${symbol}: Strong Categories ${strongCategories} < ${requiredStrong}`);
     return null;
