@@ -143,21 +143,30 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ## 9. Historial de Versiones (Changelog)
 
-### v4.1 - "Admin Pro" (12/02/2026)
-- ✅ **Panel de Control**: Implementados comandos administrativos en Telegram.
-- ✅ **Scan Manual**: Posibilidad de disparar análisis vía comando `/scan`.
-- ✅ **Gestión de Cooldowns**: Comandos para ver y resetear bloqueos.
+### v4.3 - Filtro Rebalanceado (Actual)
+- **Rehabilitado Régimen TRANSITION**: Permite alertas en condiciones de ADX medio/bajo con alta confluencia (Score > 82).
+- **Relajación Macro RSI**: El límite de RSI 1H para compras sube de 65 a **75** (permite operar pullbacks en tendencias fuertes).
+- **Ajuste BTC Context**: Umbrales AMBER/RED reducidos para permitir señales de calidad durante lateralizaciones de BTC.
+- **Optimización de Volumen**: Ratio mínimo bajado a **1.1x** para capturar movimientos institucionales incipientes.
 
-### v4.0 - "Clean Slate" (11/02/2026)
-- ✅ **Sistema de Caché**: Reduce llamadas API en 80%
-- ✅ **Scoring Simplificado**: Pesos fijos, sin bonuses inflacionarios
-- ✅ **Filtros de Volumen**: Mínimo 1.5x + delta direccional
-- ✅ **Filtro de Sesión**: Evitar Asia session (00:00-07:00 UTC)
-- ✅ **Protección de Correlación**: Máximo 1 señal por sector
-- ✅ **Mejor Regime Detection**: ADX threshold 25 + EMA slope
-- ✅ **MAX_SYMBOLS**: Reducido a 50 (calidad sobre cantidad)
-- ✅ **Cooldown**: Aumentado a 4 horas
-- ✅ **Fix Bugs**: Typos y variables undefined corregidos
+### v4.2 - Menú Telegram
+- Implementación de comandos nativos en Telegram con autocompletado nativo (/setup).
+
+### v4.1 - Admin Pro Bot
+- Nuevos comandos administrativos: `/scan`, `/cooldowns`, `/reset_cooldowns`, `/settings`, `/limpiar`.
+- Mejoras en el reporte de rendimiento y gestión de bloqueos.
+
+### v4.0 - Clean Slate (Reinicio Estratégico)
+- Nueva arquitectura de scoring modular (0-100).
+- Detección de regímenes de mercado (Trending, Ranging, Transition).
+- Integración de Smart Money Concepts (OB, FVG, MSS, Sweep).
+- Filtros de protección de sesión y correlación de sectores.
+- Filtros de Volumen: Mínimo 1.5x + delta direccional
+- Filtro de Sesión: Evitar Asia session (00:00-07:00 UTC)
+- Protección de Correlación: Máximo 1 señal por sector
+- Mejor Regime Detection: ADX threshold 25 + EMA slope
+- MAX_SYMBOLS: Reducido a 50 (calidad sobre cantidad)
+- Cooldown: Aumentado a 4 horas
 
 ### v3.0 - "Shield & Sniper" (11/02/2026)
 - ✅ Capado de bonuses MSS/Sweep

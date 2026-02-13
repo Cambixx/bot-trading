@@ -1994,7 +1994,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
 
     // Macro exhaustion filter for BUY
-    if (signalType === 'BUY' && rsi1h > 65) {
+    if (signalType === 'BUY' && rsi1h > 75) {
       console.log(`[REJECT] ${symbol}: 1H RSI (${rsi1h.toFixed(1)}) too high for BUY`);
       return null;
     }
@@ -2011,10 +2011,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
     return null;
   } else if (regime === 'TRANSITION') {
-    console.log(`[REJECT] ${symbol}: TRANSITION regime - completely disabled.`);
-    return null;
+    MIN_QUALITY_SCORE = 82; // RE-ENABLED: High threshold for stability
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 85; // REDUCED from 88 for better signal frequency
+    MIN_QUALITY_SCORE = 85;
   } else if (regime === 'HIGH_VOLATILITY') {
     MIN_QUALITY_SCORE = 90; // REDUCED from 92
   } else if (regime === 'RANGING') {
@@ -2119,15 +2118,15 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (btcContext) {
     if (btcContext.status === 'RED') {
       // Extreme Filter during BTC corrections
-      if (score < 96) {
-        console.log(`[REJECT] ${symbol}: BTC RED requires score 96, got ${score}`);
+      if (score < 88) {
+        console.log(`[REJECT] ${symbol}: BTC RED requires score 88, got ${score}`);
         return null;
       }
       reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
     } else if (btcContext.status === 'AMBER') {
       // Moderate Filter
-      if (score < 85) {
-        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 85, got ${score}`);
+      if (score < 78) {
+        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 78, got ${score}`);
         return null;
       }
       reasons.push('⚠️ Precaución Macro (BTC Ambar)');
@@ -2178,10 +2177,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // === IMPROVED VOLUME FILTERS v4.0 ===
-  // Minimum volume threshold: 1.2x (balance between strictness and signal frequency)
-  if (volumeRatio < 1.2) {
-    console.log(`[REJECT] ${symbol}: Volume ratio too low (${volumeRatio.toFixed(2)} < 1.2)`);
+  // Minimum volume threshold: 1.1x (balance between strictness and signal frequency)
+  if (volumeRatio < 1.1) {
+    console.log(`[REJECT] ${symbol}: Volume ratio too low (${volumeRatio.toFixed(2)} < 1.1)`);
     return null;
   }
 
@@ -2239,9 +2237,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       return null;
     }
 
-    // Require structure
-    if (!mss && !sweep) {
-      console.log(`[REJECT] ${symbol} (RANGING): Sin MSS ni Sweep`);
+    // Require structure (Unless exceptionally high score)
+    if (!mss && !sweep && score < 85) {
+      console.log(`[REJECT] ${symbol} (RANGING): Sin MSS ni Sweep y score ${score} < 85`);
       return null;
     }
   }
