@@ -2038,13 +2038,20 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const sniperRsiOk = (signalType === 'BUY' && rsi1h <= 63); // Toughened to 63 from 65
 
   // --- AGGRESSIVE MODE FILTERS (FLEXIBILITY) ---
-  const aggressiveTrendOk = sniperTrendOk || trend4h === 'NEUTRAL';
-  const aggressiveRsiOk = rsi1h <= 78;
+  // Allow trend if it's compatible with signal or if no signal yet (to allow MSS/Sweep detection)
+  const isTrendPotentialBuy = trend4h === 'BULLISH' || trend4h === 'NEUTRAL';
+  const isTrendPotentialSell = trend4h === 'BEARISH' || trend4h === 'NEUTRAL';
+
+  const aggressiveTrendOk = signalType === 'BUY' ? isTrendPotentialBuy :
+    signalType === 'SELL_ALERT' ? isTrendPotentialSell :
+      trend4h !== 'DOWNTREND'; // Allow reaching MSS/Sweep if not a heavy downtrend
 
   if (!aggressiveTrendOk) {
-    console.log(`[REJECT] ${symbol}: Aggressive Trend check failed (4H: ${trend4h})`);
+    console.log(`[REJECT] ${symbol}: Aggressive Trend check failed (4H: ${trend4h}, Signal: ${signalType})`);
     return null;
   }
+
+  const aggressiveRsiOk = rsi1h <= 78;
 
   if (signalType === 'BUY' && !aggressiveRsiOk) {
     console.log(`[REJECT] ${symbol}: 1H RSI (${rsi1h.toFixed(1)}) too high even for Aggressive`);
