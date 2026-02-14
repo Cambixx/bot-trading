@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading "Élite" (v4.0 - "Clean Slate")
+# 🦅 Documentación del Algoritmo de Trading "Expert Edition" (v4.5)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -16,41 +16,26 @@ El bot opera como un ecosistema serverless interconectado:
 
 ---
 
-## 2. Novedades v4.0 - "Clean Slate"
+## 2. Novedades v4.5 - "Expert Edition"
 
-### 🚀 Mejoras de Performance
-- **Caché de Candles**: Reduce llamadas API en un 80% durante volatilidad
-- **Batch Processing**: Procesamiento optimizado de símbolos
-- **Reducción de MAX_SYMBOLS**: 100 → 50 (calidad sobre cantidad)
+### 🛡️ Capa de Validación Experta
+- **Order Flow Validation**: No basta con que el precio suba. El bot analiza el **Delta de Volumen** y el **OBI (Order Book Imbalance)**.
+- **Regla de Oro**: Si el precio sube pero el flujo de órdenes es negativo (venta neta), la señal se descarta automáticamente como "Fakeout".
 
-### 🎯 Scoring System Simplificado
-- **Pesos Fijos**: Eliminado sistema dinámico complejo
-- **Sin Bonuses Inflacionarios**: MSS/Sweep añaden +5pts fijos (no multiplicadores)
-- **Mayor Transparencia**: Scores más fáciles de interpretar y debuggear
+### 💎 Sniper 2.0 (Máxima Seguridad)
+- **Alineación MTF Total**: Requiere confirmación de tendencia en **15m, 1h Y 4h** simultáneamente.
+- **Volumen Institucional**: Umbral de volumen aumentado a **1.5x** (antes 1.2x).
+- **RSI Estricto**: Entrada solo si RSI 1H < 63 (antes 65) para evitar compras en techos.
 
-### 📊 Filtros de Volumen Mejorados
-- **Mínimo 1.5x**: Volumen debe ser 1.5x la media (antes 1.0x)
-- **Delta Direccional**: BUY requiere delta > 0.1, SELL requiere delta < -0.1
-- **Protección Anti-Trampa**: Rechazo si alto volumen pero presión vendedora
-
-### 🕐 Filtro de Sesión Horaria
-- **Evitar Asia Session**: 00:00-07:00 UTC (baja liquidez)
-- **Mejor Ejecución**: Operar durante London/NY overlap (08:00-22:00 UTC)
-
-### 🏭 Protección de Correlación
-- **Diversificación por Sector**: Máximo 1 señal por sector (L1, DeFi, AI, etc.)
-- **Mapa de Sectores**: Clasificación automática de 20+ criptomonedas
-
-### 🎚️ Regime Detection Mejorado
-- **ADX Threshold**: Aumentado a 25 (antes 20) para mayor confiabilidad
-- **EMA Slope**: Confirmación adicional de tendencia
-- **Menos Falsos Positivos**: Mejor distinción entre TRENDING/RANGING
+### 💰 Gestión de Riesgo Adaptativa
+- **Sugerencia de Size**: Cada alerta incluye una recomendación de % de capital (0.5% - 3.5%) basada en la calidad de la señal y la volatilidad.
+- **Circuitos de Régimen**: En mercados volátiles, el bot sube automáticamente la exigencia de Score mínimo (+4 puntos).
 
 ---
 
-## 3. Sistema de Scoring v4.0
+## 3. Sistema de Scoring v4.5
 
-El puntaje final (0-100) usa pesos fijos para máxima transparencia:
+El puntaje final (0-100) usa pesos fijos pero incorpora una validación binaria final (Pasa/No Pasa).
 
 | Categoría | Peso | Descripción |
 |-----------|------|-------------|
@@ -60,23 +45,27 @@ El puntaje final (0-100) usa pesos fijos para máxima transparencia:
 | **Volume** | 15% | Volume ratio, Delta, OBI |
 | **Patterns** | 5% | Candlestick patterns, divergences |
 
-### Bonuses (Fijos):
-- MSS confirmado: +5 pts
-- Sweep confirmado: +5 pts
-- Confluencia excepcional (4+ categorías >60): +5 pts
-- Alta confluencia (3+ categorías >60): +3 pts
+### Modos de Operación
+
+#### 💎 MODO SNIPER
+- **Requisitos**: Score ≥ 88 + Trend 4H a favor + Alineación MTF Total + Volumen > 1.5x.
+- **Filosofía**: "Solo disparar cuando el blanco está inmóvil y perfecto".
+
+#### ⚡ MODO AGRESIVO
+- **Requisitos**: Score ≥ 75 + Validación Experta (OBI/Delta) OK.
+- **Flexibilidad**: Permite entrar con Trend 4H "Neutral" y RSI hasta 78.
 
 ---
 
 ## 4. Regímenes de Mercado
 
-| Régimen | Threshold | Estrategia |
-|---------|-----------|------------|
-| **RANGING** | Score ≥ 75 | Mean reversion, comprar en soporte |
-| **TRENDING** | Score ≥ 85 | Solo pullbacks a EMA21/50 |
-| **HIGH_VOLATILITY** | Score ≥ 90 | Ultra estricto, estructura obligatoria |
-| **DOWNTREND** | BLOQUEADO | No operar contra tendencia bajista |
-| **TRANSITION** | BLOQUEADO | 0% WR histórico |
+| Régimen | Threshold | Estrategia | Size Sugerido |
+|---------|-----------|------------|---------------|
+| **RANGING** | Score ≥ 75 | Mean reversion, comprar en soporte | ~2.0% |
+| **TRENDING** | Score ≥ 85 | Solo pullbacks a EMA21/50 | ~2.5% |
+| **HIGH_VOLATILITY** | Score ≥ 90 | Ultra estricto, estructura obligatoria | ~0.5% - 1.0% |
+| **DOWNTREND** | BLOQUEADO | No operar contra tendencia bajista | 0% |
+| **TRANSITION** | Score ≥ 82 | Alta selectividad | ~1.5% |
 
 ---
 
@@ -90,9 +79,9 @@ El puntaje final (0-100) usa pesos fijos para máxima transparencia:
 | **HIGH_VOL** | 1.2x | 2.0x | 1.6:1 |
 
 ### Protecciones
-- **Stale Exit**: Cierre automático a las 12h si no hay movimiento favorable
-- **Cooldown**: 4 horas entre señales del mismo par
-- **Breakeven**: Trigger a 0.8:1 R:R para proteger capital
+- **Stale Exit**: Cierre automático a las 12h si no hay movimiento favorable.
+- **Cooldown**: 4 horas entre señales del mismo par.
+- **Breakeven**: Trigger a 0.8:1 R:R para proteger capital.
 
 ---
 
@@ -105,6 +94,7 @@ ALERT_COOLDOWN_MIN=240            # 4 horas (antes 2h)
 AVOID_ASIA_SESSION=true           # Evitar sesión Asia
 MIN_QUOTE_VOL_24H=3000000         # Mínimo volumen 24h
 SIGNAL_SCORE_THRESHOLD=65         # Threshold base
+TELEGRAM_CHAT_ID=...              # ID del Canal/Grupo Privado
 ```
 
 ### Mapa de Sectores (Sectores Clasificados)
@@ -117,17 +107,7 @@ SIGNAL_SCORE_THRESHOLD=65         # Threshold base
 
 ---
 
-## 7. Parámetros de Escaneo
-
-- **MAX_SYMBOLS**: 50 monedas analizadas por ciclo (v4.0)
-- **MIN_QUOTE_VOL_24H**: 3,000,000 USDT (filtro de liquidez)
-- **MAX_ATR_PCT**: 8% (evita shitcoins hiper-volátiles)
-- **Intervalo**: Cada 15 minutos
-- **Cache TTL**: 5 minutos para candles
-
----
-
-## 8. Comandos de Telegram (Panel de Control) 🤖
+## 7. Comandos de Telegram (Panel de Control) 🤖
 
 El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para el ADMIN):
 
@@ -141,41 +121,24 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ---
 
-## 9. Historial de Versiones (Changelog)
+## 8. Historial de Versiones (Changelog)
 
-### v4.3 - Filtro Rebalanceado (Actual)
-- **Rehabilitado Régimen TRANSITION**: Permite alertas en condiciones de ADX medio/bajo con alta confluencia (Score > 82).
-- **Relajación Macro RSI**: El límite de RSI 1H para compras sube de 65 a **75** (permite operar pullbacks en tendencias fuertes).
-- **Ajuste BTC Context**: Umbrales AMBER/RED reducidos para permitir señales de calidad durante lateralizaciones de BTC.
-- **Optimización de Volumen**: Ratio mínimo bajado a **1.1x** para capturar movimientos institucionales incipientes.
+### v4.5 - Expert Edition (Actual)
+- **Validación Binaria**: Capa de validación OBI/Delta (Pasa/No Pasa).
+- **Sniper 2.0**: Alineación MTF Total (15m+1h+4h) obligatoria.
+- **Size Recomendado**: Algoritmo de sugerencia de lotaje en alertas.
+- **Bugfix**: Corrección de filtrado prematuro en tendencias alcistas.
 
-### v4.2 - Menú Telegram
-- Implementación de comandos nativos en Telegram con autocompletado nativo (/setup).
-
-### v4.1 - Admin Pro Bot
-- Nuevos comandos administrativos: `/scan`, `/cooldowns`, `/reset_cooldowns`, `/settings`, `/limpiar`.
-- Mejoras en el reporte de rendimiento y gestión de bloqueos.
+### v4.3 - Filtro Rebalanceado
+- Rehabilitado Régimen TRANSITION.
+- Relajación Macro RSI (hasta 75 en agresivo).
+- Ajuste BTC Context (Amber/Red menos restrictivos).
 
 ### v4.0 - Clean Slate (Reinicio Estratégico)
 - Nueva arquitectura de scoring modular (0-100).
-- Detección de regímenes de mercado (Trending, Ranging, Transition).
-- Integración de Smart Money Concepts (OB, FVG, MSS, Sweep).
-- Filtros de protección de sesión y correlación de sectores.
-- Filtros de Volumen: Mínimo 1.5x + delta direccional
-- Filtro de Sesión: Evitar Asia session (00:00-07:00 UTC)
-- Protección de Correlación: Máximo 1 señal por sector
-- Mejor Regime Detection: ADX threshold 25 + EMA slope
-- MAX_SYMBOLS: Reducido a 50 (calidad sobre cantidad)
-- Cooldown: Aumentado a 4 horas
-
-### v3.0 - "Shield & Sniper" (11/02/2026)
-- ✅ Capado de bonuses MSS/Sweep
-- ✅ Filtro BB% superior
-- ✅ MACD obligatorio en RANGING
-- ✅ Bloqueo de régimen TRANSITION
-- ✅ TP realista en RANGING (2.0 ATR)
-- ✅ Estrategia Stale Exit
+- Detección de regímenes de mercado.
+- Integración de Smart Money Concepts.
 
 ---
 
-**Documentación actualizada a v4.1 - 12 Febrero 2026**
+**Documentación actualizada a v4.5 - 14 Febrero 2026**
