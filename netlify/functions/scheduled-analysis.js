@@ -1982,23 +1982,28 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const quoteVol24h = ticker24h ? Number(ticker24h.quoteVolume) : null;
   if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return null;
 
-  // Apply 4H Trend Filter
-  if (USE_MULTI_TF) {
-    if (trend4h === 'BULLISH' && signalType === 'SELL_ALERT') {
-      console.log(`[REJECT] ${symbol}: Bearish signal against Bullish 4H Trend`);
-      return null;
-    }
-    if (trend4h === 'BEARISH' && signalType === 'BUY') {
-      console.log(`[REJECT] ${symbol}: Bullish signal against Bearish 4H Trend`);
-      return null;
-    }
+  // --- SNIPER MODE FILTERS (MAX SECURITY) ---
+  const sniperTrendOk = (signalType === 'BUY' && trend4h === 'BULLISH') || (signalType === 'SELL_ALERT' && trend4h === 'BEARISH');
+  const sniperRsiOk = (signalType === 'BUY' && rsi1h <= 65);
 
-    // Macro exhaustion filter for BUY
-    if (signalType === 'BUY' && rsi1h > 75) {
-      console.log(`[REJECT] ${symbol}: 1H RSI (${rsi1h.toFixed(1)}) too high for BUY`);
-      return null;
-    }
+  // --- AGGRESSIVE MODE FILTERS (FLEXIBILITY) ---
+  // Allow Neutral trend if 15m is strong, and higher RSI cap
+  const aggressiveTrendOk = sniperTrendOk || trend4h === 'NEUTRAL';
+  const aggressiveRsiOk = rsi1h <= 78;
+
+  if (!aggressiveTrendOk) {
+    console.log(`[REJECT] ${symbol}: Aggressive Trend check failed (4H: ${trend4h})`);
+    return null;
   }
+
+  if (signalType === 'BUY' && !aggressiveRsiOk) {
+    console.log(`[REJECT] ${symbol}: 1H RSI (${rsi1h.toFixed(1)}) too high even for Aggressive`);
+    return null;
+  }
+
+  // Determine Mode based on Trend and RSI
+  const isSniperQuality = sniperTrendOk && sniperRsiOk;
+  reasons.push(isSniperQuality ? '💎 MODO SNIPER' : '⚡ MODO AGRESIVO');
 
   // Detect Market Regime - IMPROVED: Pass closes for EMA slope
   const regime = detectMarketRegime(closedCandles15m, adx15m, closes15m);
@@ -2177,9 +2182,12 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
-  // Minimum volume threshold: 1.1x (balance between strictness and signal frequency)
-  if (volumeRatio < 1.1) {
-    console.log(`[REJECT] ${symbol}: Volume ratio too low (${volumeRatio.toFixed(2)} < 1.1)`);
+  // Volume checks per mode
+  const sniperVolOk = volumeRatio >= 1.2;
+  const aggressiveVolOk = volumeRatio >= 1.0;
+
+  if (!aggressiveVolOk) {
+    console.log(`[REJECT] ${symbol}: Volume ratio too low even for Aggressive (${volumeRatio.toFixed(2)})`);
     return null;
   }
 
@@ -2198,7 +2206,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // Final Score Clamping
   score = Math.min(100, Math.max(0, score));
 
-  // === SIMPLIFIED REGIME FILTERS v4.0 ===
+  // --- FINAL MODE DETERMINATION ---
+  // A signal remains "SNIPER" only if IT PASSED ALL sniper filters
+  const isSniperTrendRsi = reasons.includes('💎 MODO SNIPER');
+  const isSniperVol = volumeRatio >= 1.2;
+  const isSniperScore = score >= (regime === 'TRENDING' ? 88 : 80); // Strict score for sniper
+
+  const finalMode = (isSniperTrendRsi && isSniperVol && isSniperScore) ? 'SNIPER' : 'AGGRESSIVE';
+
+  // Update internal tag
+  reasons.forEach((r, i) => {
+    if (r === '💎 MODO SNIPER' || r === '⚡ MODO AGRESIVO') reasons.splice(i, 1);
+  });
+  reasons.unshift(finalMode === 'SNIPER' ? '💎 SEGURIDAD SNIPER' : '⚡ MODO AGRESIVO');
 
   // HIGH_VOLATILITY: Ultra strict
   if (regime === 'HIGH_VOLATILITY') {
@@ -2342,6 +2362,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
           (regime === 'TRENDING' ? 2.5 : regime === 'HIGH_VOLATILITY' ? 1.2 : regime === 'TRANSITION' ? 1.8 : 2.0)).toFixed(2))
       },
       reasons,
+      mode: finalMode,
       btcContext // Include context in result
     };
   }
@@ -2382,8 +2403,9 @@ async function sendTelegramNotification(signals, stats = null) {
     else if (sig.type === 'SELL_ALERT') { icon = '🔴'; typeEmoji = '📤 VENTA'; }
     else { typeEmoji = '👁️ VIGILAR'; }
 
-    // Symbol and Type
-    message += `${icon} *${esc(sig.symbol)}* \\| ${esc(typeEmoji)}\n`;
+    // Symbol and Mode
+    const modeLabel = sig.mode === 'SNIPER' ? '💎 SNIPER' : '⚡ AGRESIVO';
+    message += `${icon} *${esc(sig.symbol)}* \\| ${esc(typeEmoji)} \\| ${esc(modeLabel)}\n`;
 
     // Price & Levels
     if (Number.isFinite(sig.price)) {
