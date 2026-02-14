@@ -1835,17 +1835,33 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     reasons.push(`⚡ RSI Sobrevendido (${rsi15m.toFixed(1)})`);
     signalType = 'BUY';
   } else if (rsi15m > 70) {
-    momentumScore += 35;
-    reasons.push(`⚠️ RSI Sobrecomprado (${rsi15m.toFixed(1)})`);
-    signalType = 'SELL_ALERT';
+    // v4.6 FIX: Bull Run Blindness
+    if (trend4h === 'BULLISH') {
+      if (rsi15m > 85) {
+        momentumScore += 35;
+        reasons.push(`⚠️ RSI Extremo (>85)`);
+        signalType = 'SELL_ALERT';
+      } else {
+        momentumScore += 25; // Treat as strong momentum
+        reasons.push(`🚀 Momentum Fuerte (RSI > 70)`);
+        // Do NOT force SELL_ALERT in uptrend
+      }
+    } else {
+      momentumScore += 35;
+      reasons.push(`⚠️ RSI Sobrecomprado (${rsi15m.toFixed(1)})`);
+      signalType = 'SELL_ALERT';
+    }
   } else if (rsi15m < 40 && rsi1h < 45) {
     momentumScore += 20;
     reasons.push(`📊 RSI zona de compra (${rsi15m.toFixed(1)})`);
     if (!signalType) signalType = 'BUY';
   } else if (rsi15m > 60 && rsi1h > 55) {
-    momentumScore += 20;
-    reasons.push(`📊 RSI zona de venta (${rsi15m.toFixed(1)})`);
-    if (!signalType) signalType = 'SELL_ALERT';
+    // v4.6 FIX: Don't force sell based on zone if bullish
+    if (trend4h !== 'BULLISH') {
+      momentumScore += 20;
+      reasons.push(`📊 RSI zona de venta (${rsi15m.toFixed(1)})`);
+      if (!signalType) signalType = 'SELL_ALERT';
+    }
   }
 
   // Stochastic RSI (0-35)
@@ -1855,9 +1871,12 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       reasons.push('🎯 StochRSI Cross Up');
       if (!signalType) signalType = 'BUY';
     } else if (stoch15m.overbought && stoch15m.k < stoch15m.d) {
-      momentumScore += 35;
-      reasons.push('🎯 StochRSI Cross Down');
-      if (!signalType) signalType = 'SELL_ALERT';
+      // v4.6 FIX: Ignore stoch sell in strong uptrend unless confirmed by structure
+      if (trend4h !== 'BULLISH') {
+        momentumScore += 35;
+        reasons.push('🎯 StochRSI Cross Down');
+        if (!signalType) signalType = 'SELL_ALERT';
+      }
     }
   }
 
@@ -1955,9 +1974,15 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     reasons.push('🏀 BB Inferior');
     if (!signalType) signalType = 'BUY';
   } else if (bbPercent > 0.9) {
-    structureScore += 25;
-    reasons.push('🎈 BB Superior');
-    if (!signalType) signalType = 'SELL_ALERT';
+    // v4.6 FIX: Upper BB in uptrend is breakout, not sell
+    if (trend4h !== 'BULLISH') {
+      structureScore += 25;
+      reasons.push('🎈 BB Superior');
+      if (!signalType) signalType = 'SELL_ALERT';
+    } else {
+      reasons.push('🚀 BB Breakout Potential');
+      // Do not force sell
+    }
   }
 
   // Swing Structure Bands (0-15)
