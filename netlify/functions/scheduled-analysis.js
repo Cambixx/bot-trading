@@ -1692,6 +1692,52 @@ function calculateConfluence(analysis15m, analysis1h) {
 
 // ==================== SIGNAL GENERATION ====================
 
+/**
+ * expert Validation Layer - v4.5
+ * Validates signal using order flow (OBI/Delta) alignment.
+ */
+function validateSignalExpert(symbol, type, volRatio, delta, obMetrics) {
+  if (delta === null) return { passed: true, confidence: 0.7 }; // No delta, proceed with caution
+
+  const isBuy = type === 'BUY';
+  const deltaAligned = isBuy ? delta > 0.05 : delta < -0.05;
+
+  if (!deltaAligned) {
+    return { passed: false, reason: `Delta flow anti-aliñado (${delta.toFixed(2)})` };
+  }
+
+  // OBI Alignment if available
+  if (obMetrics && Math.abs(obMetrics.obi) > 0.1) {
+    const obiAligned = isBuy ? obMetrics.obi > 0 : obMetrics.obi < 0;
+    if (!obiAligned) {
+      return { passed: false, reason: `Desequilibrio de Libro (OBI) en contra (${obMetrics.obi.toFixed(2)})` };
+    }
+  }
+
+  const confidence = Math.min(0.95, 0.7 + (volRatio > 1.5 ? 0.15 : 0) + (Math.abs(delta) > 0.3 ? 0.1 : 0));
+  return { passed: true, confidence };
+}
+
+/**
+ * Calculates a recommended position size as % of equity.
+ */
+function calculateRecommendedSize(score, atrPct, regime) {
+  let size = 1.0; // Base 1%
+  if (score >= 90) size += 1.0;
+  if (score >= 95) size += 0.5;
+
+  // Volatility adjustment
+  if (atrPct > 2.5) size *= 0.6;
+  else if (atrPct > 1.5) size *= 0.8;
+
+  // Regime adjustment
+  if (regime === 'HIGH_VOLATILITY') size *= 0.5;
+  if (regime === 'TRANSITION') size *= 0.7;
+  if (regime === 'RANGING') size *= 1.2; // Ranging is lower risk generally
+
+  return Math.max(0.5, Math.min(size, 3.5)).toFixed(1); // Cap between 0.5% and 3.5%
+}
+
 function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext = null) {
   if (!candles15m || candles15m.length < 201) return null;
 
@@ -1857,6 +1903,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       trendScore += 20;
       reasons.push('✅ Confluencia 1H');
     }
+    // Added for Sniper 2.0 check
+    if (stAligned1h && stAligned4h) {
+      reasons.push('🌐 MTF_ALIGNED_TOTAL');
+    }
   }
 
   // ADX Strength (0-20)
@@ -1983,11 +2033,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return null;
 
   // --- SNIPER MODE FILTERS (MAX SECURITY) ---
+  const mtfAlignedTotal = reasons.includes('🌐 MTF_ALIGNED_TOTAL');
   const sniperTrendOk = (signalType === 'BUY' && trend4h === 'BULLISH') || (signalType === 'SELL_ALERT' && trend4h === 'BEARISH');
-  const sniperRsiOk = (signalType === 'BUY' && rsi1h <= 65);
+  const sniperRsiOk = (signalType === 'BUY' && rsi1h <= 63); // Toughened to 63 from 65
 
   // --- AGGRESSIVE MODE FILTERS (FLEXIBILITY) ---
-  // Allow Neutral trend if 15m is strong, and higher RSI cap
   const aggressiveTrendOk = sniperTrendOk || trend4h === 'NEUTRAL';
   const aggressiveRsiOk = rsi1h <= 78;
 
@@ -2001,8 +2051,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
+  // --- EXPERT VALIDATION LAYER (OBI/DELTA) ---
+  const expertVal = validateSignalExpert(symbol, signalType, volumeRatio, deltaRatio, obMetrics);
+  if (!expertVal.passed) {
+    console.log(`[REJECT] ${symbol}: Expert Validation failed: ${expertVal.reason}`);
+    return null;
+  }
+  reasons.push(`🛡️ Validado v4.5 (Conf: ${(expertVal.confidence * 100).toFixed(0)}%)`);
+
   // Determine Mode based on Trend and RSI
-  const isSniperQuality = sniperTrendOk && sniperRsiOk;
+  // Sniper 2.0 requirements: MTF Total alignment + Volume 1.5x + Score 88+
+  const isSniperQuality = mtfAlignedTotal && sniperRsiOk && volumeRatio >= 1.5;
   reasons.push(isSniperQuality ? '💎 MODO SNIPER' : '⚡ MODO AGRESIVO');
 
   // Detect Market Regime - IMPROVED: Pass closes for EMA slope
@@ -2209,8 +2268,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // --- FINAL MODE DETERMINATION ---
   // A signal remains "SNIPER" only if IT PASSED ALL sniper filters
   const isSniperTrendRsi = reasons.includes('💎 MODO SNIPER');
-  const isSniperVol = volumeRatio >= 1.2;
-  const isSniperScore = score >= (regime === 'TRENDING' ? 88 : 80); // Strict score for sniper
+  const isSniperVol = volumeRatio >= 1.5; // Upgraded from 1.2
+  const isSniperScore = score >= 88;
 
   const finalMode = (isSniperTrendRsi && isSniperVol && isSniperScore) ? 'SNIPER' : 'AGGRESSIVE';
 
@@ -2363,6 +2422,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       },
       reasons,
       mode: finalMode,
+      recommendedSize: calculateRecommendedSize(score, atrPercent15m, regime),
       btcContext // Include context in result
     };
   }
@@ -2438,6 +2498,7 @@ async function sendTelegramNotification(signals, stats = null) {
     // Regime & Score
     const regimeIcon = sig.regime === 'TRENDING' ? '📈' : (sig.regime === 'RANGING' ? '↔️' : '⚠️');
     message += `${regimeIcon} Regime: ${esc(sig.regime)} \\| 🎯 Score: *${esc(sig.score)}*/100\n`;
+    message += `💰 *Size Sugerido: ${esc(sig.recommendedSize)}%*\n`;
 
     if (sig.btcContext && sig.btcContext.status !== 'GREEN') {
       const btcIcon = sig.btcContext.status === 'RED' ? '🔴' : '🟡';
