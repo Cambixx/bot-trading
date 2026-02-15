@@ -1886,8 +1886,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     reasons.push('📈 MACD Alcista');
     if (!signalType) signalType = 'BUY';
   } else if (!macd15m?.bullish) {
-    reasons.push('📉 MACD Bajista');
-    if (!signalType) signalType = 'SELL_ALERT';
+    // v4.6 FIX: Ignore MACD Sell in strong uptrend (it's just a pullback)
+    if (trend4h !== 'BULLISH') {
+      reasons.push('📉 MACD Bajista');
+      if (!signalType) signalType = 'SELL_ALERT';
+    }
   }
 
   categoryScores.momentum = Math.min(100, momentumScore);
@@ -1903,7 +1906,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   } else if (superTrend15m?.bearish) {
     trendScore += 40;
     reasons.push('🔴 SuperTrend Bajista');
-    if (!signalType || signalType === 'SELL_ALERT') signalType = 'SELL_ALERT';
+    // v4.6 FIX: SuperTrend Bearish in 4H Bullish = Pullback Opportunity, NOT Sell
+    if (trend4h !== 'BULLISH') {
+      if (!signalType || signalType === 'SELL_ALERT') signalType = 'SELL_ALERT';
+    }
   }
 
   if (superTrend15m?.flipped) {
@@ -1918,6 +1924,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     if (stAligned1h && stAligned4h) {
       trendScore += 40;
       reasons.push('✅ Confluencia Total (3-TF)');
+      // v4.6 FIX: If total confluence, FORCE BUY signal if undef
+      if (!signalType && trend4h === 'BULLISH') signalType = 'BUY';
     } else if (stAligned1h) {
       trendScore += 20;
       reasons.push('✅ Confluencia 1H');
@@ -1960,11 +1968,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (nearbyBearishOB && (signalType === 'SELL_ALERT' || !signalType)) {
     structureScore += 60;
     reasons.unshift('🏦 Order Block Bajista');
-    if (!signalType) signalType = 'SELL_ALERT';
+    // v4.6 FIX: Hitting bearish OB in uptrend is expected resistance, not auto-sell
+    if (trend4h !== 'BULLISH') {
+      if (!signalType) signalType = 'SELL_ALERT';
+    }
   } else if (nearbyBearishFVG && (signalType === 'SELL_ALERT' || !signalType)) {
     structureScore += 40;
     reasons.unshift('🏦 FVG Bajista');
-    if (!signalType) signalType = 'SELL_ALERT';
+    // v4.6 FIX: Hitting bearish FVG in uptrend is expected resistance, not auto-sell
+    if (trend4h !== 'BULLISH') {
+      if (!signalType) signalType = 'SELL_ALERT';
+    }
   }
 
   // Bollinger Bands (0-25)
