@@ -123,11 +123,15 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ## 8. Historial de Versiones (Changelog)
 
-### v4.5 - Expert Edition (Actual)
+### v4.7 - Bull Run Unlock (Actual)
+- **Filtro de Sobreextensión Inteligente**: Permite RSI > 70 y BB Breakouts si la tendencia 4H es ALCISTA.
+- **Volumen Adaptativo**: Umbral agresivo reducido a 0.8x para capturar movimientos tempranos.
+- **Trend Awareness**: Indicadores bajistas (MACD, SuperTrend) son ignorados o tratados como "pullback opportunity" en tendencias alcistas fuertes.
+
+### v4.5 - Expert Edition
 - **Validación Binaria**: Capa de validación OBI/Delta (Pasa/No Pasa).
 - **Sniper 2.0**: Alineación MTF Total (15m+1h+4h) obligatoria.
 - **Size Recomendado**: Algoritmo de sugerencia de lotaje en alertas.
-- **Bugfix**: Corrección de filtrado prematuro en tendencias alcistas.
 
 ### v4.3 - Filtro Rebalanceado
 - Rehabilitado Régimen TRANSITION.
@@ -141,4 +145,4 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ---
 
-**Documentación actualizada a v4.5 - 14 Febrero 2026**
+**Documentación actualizada a v4.7 - 16 Febrero 2026**

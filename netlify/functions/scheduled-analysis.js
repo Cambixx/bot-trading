@@ -2172,8 +2172,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (signalType === 'BUY') {
     // 1. RSI/BB Overextension
-    if (rsi15m > 70 || bbPercent > 0.88) {
-      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)})`);
+    // v4.6 FIX: Allow overextension if trend is BULLISH (Breakout/Momentum)
+    const isBreakout = trend4h === 'BULLISH' && rsi15m < 85;
+
+    if ((rsi15m > 70 || bbPercent > 0.88) && !isBreakout) {
+      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)}) - Trend: ${trend4h}`);
       return null;
     }
 
@@ -2184,14 +2187,16 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
 
     // 3. Distance to EMA9 - Chase filter
-    if (distToEma9 > 2.0) {
+    if (distToEma9 > 2.0 && !isBreakout) {
+      // Allow chasing a bit more in breakouts
       console.log(`[REJECT] ${symbol}: Chase Filter - Dist to EMA9 too high (${distToEma9.toFixed(2)}%)`);
       return null;
     }
 
     // === NEW: TRENDING REGIME PULLBACK FILTER ===
     // In TRENDING regime, only buy pullbacks (near EMA21 or EMA50)
-    if (regime === 'TRENDING') {
+    // v4.6 FIX: Disable pullback requirement for strong breakouts
+    if (regime === 'TRENDING' && !isBreakout) {
       const nearEMA21 = Math.abs(distToEma21) < 0.8;  // Within 0.8% of EMA21
       const nearEMA50 = Math.abs(distToEma50) < 1.5;  // Within 1.5% of EMA50
       const priceAboveEMA21 = distToEma21 > 0;        // Price above EMA21 (uptrend)
@@ -2235,8 +2240,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
     } else if (btcContext.status === 'AMBER') {
       // Moderate Filter
-      if (score < 78) {
-        console.log(`[REJECT] ${symbol}: BTC AMBER requires score 78, got ${score}`);
+      // v4.6 FIX: Relax BTC AMBER requirement if coin has strong momentum
+      const requiredScore = (trend4h === 'BULLISH' && volumeRatio > 1.2) ? 70 : 78;
+      if (score < requiredScore) {
+        console.log(`[REJECT] ${symbol}: BTC AMBER requires score ${requiredScore}, got ${score}`);
         return null;
       }
       reasons.push('⚠️ Precaución Macro (BTC Ambar)');
@@ -2289,7 +2296,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Volume checks per mode
   const sniperVolOk = volumeRatio >= 1.2;
-  const aggressiveVolOk = volumeRatio >= 1.0;
+  const aggressiveVolOk = volumeRatio >= 0.8; // v4.6 FIX: Lowered from 1.0 to 0.8
 
   if (!aggressiveVolOk) {
     console.log(`[REJECT] ${symbol}: Volume ratio too low even for Aggressive (${volumeRatio.toFixed(2)})`);
