@@ -2296,11 +2296,21 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Volume checks per mode
   const sniperVolOk = volumeRatio >= 1.2;
-  const aggressiveVolOk = volumeRatio >= 0.8; // v4.6 FIX: Lowered from 1.0 to 0.8
+  const aggressiveVolOk = volumeRatio >= 0.8;
+  // v4.8 FIX: "Sunday Mode" / Low Volatility Handling
+  // Instead of hard reject < 0.8, we apply a penalty. 
+  // But we keep a hard floor at 0.3 to avoid "dead" coins.
+
+  if (volumeRatio < 0.3) { // Absolute floor
+    console.log(`[REJECT] ${symbol}: Volume DEAD (${volumeRatio.toFixed(2)})`);
+    return null;
+  }
 
   if (!aggressiveVolOk) {
-    console.log(`[REJECT] ${symbol}: Volume ratio too low even for Aggressive (${volumeRatio.toFixed(2)})`);
-    return null;
+    // Low Volume Penalty: Requires higher quality in other areas to pass
+    score -= 10;
+    reasons.push(`⚠️ Low Vol Penalty (-10)`);
+    // We do NOT return null here anymore. We let the Score decide.
   }
 
   // Directional volume check: volume must flow in signal direction

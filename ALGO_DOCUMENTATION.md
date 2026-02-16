@@ -123,26 +123,23 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ## 8. Historial de Versiones (Changelog)
 
-### v4.7 - Bull Run Unlock (Actual)
+### v4.8 - "Sunday Mode" (Low Volatility Fix)
+- **Eliminación de Bloqueo por Volumen Bajo**: Se reemplaza el rechazo duro (< 0.8) por una **Penalización de Score** (-10 puntos).
+- **Suelo de Liquidez**: Se mantiene un rechazo absoluto solo si el volumen es "Nulo" (< 0.3x del promedio).
+- **Filosofía**: *"Si la configuración técnica es perfecta (Score > 90), vale la pena entrar aunque el volumen sea bajo (Score final ~80)."*
+
+### v4.7 - Bull Run Unlock
 - **Filtro de Sobreextensión Inteligente**: Permite RSI > 70 y BB Breakouts si la tendencia 4H es ALCISTA.
-- **Volumen Adaptativo**: Umbral agresivo reducido a 0.8x para capturar movimientos tempranos.
-- **Trend Awareness**: Indicadores bajistas (MACD, SuperTrend) son ignorados o tratados como "pullback opportunity" en tendencias alcistas fuertes.
+- **Trend Awareness**: Indicadores bajistas ignorados en tendencias alcistas fuertes.
 
 ### v4.5 - Expert Edition
 - **Validación Binaria**: Capa de validación OBI/Delta (Pasa/No Pasa).
 - **Sniper 2.0**: Alineación MTF Total (15m+1h+4h) obligatoria.
-- **Size Recomendado**: Algoritmo de sugerencia de lotaje en alertas.
 
 ### v4.3 - Filtro Rebalanceado
 - Rehabilitado Régimen TRANSITION.
-- Relajación Macro RSI (hasta 75 en agresivo).
-- Ajuste BTC Context (Amber/Red menos restrictivos).
-
-### v4.0 - Clean Slate (Reinicio Estratégico)
-- Nueva arquitectura de scoring modular (0-100).
-- Detección de regímenes de mercado.
-- Integración de Smart Money Concepts.
+- Relajación Macro RSI.
 
 ---
 
-**Documentación actualizada a v4.7 - 16 Febrero 2026**
+**Documentación actualizada a v4.8 - 16 Febrero 2026**
