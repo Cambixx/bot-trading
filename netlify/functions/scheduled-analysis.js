@@ -2404,7 +2404,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // Final score check
   if (score < MIN_QUALITY_SCORE) {
-    console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE}`);
+    console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE} | SOTT: ${sottValue.toFixed(2)} (${sottSignal.toFixed(2)})`);
     return null;
   }
 
@@ -2671,7 +2671,7 @@ export async function runAnalysis(context) {
   if (!canProceed) return { success: false, error: 'Locked' };
 
   try {
-    console.log('--- DAY TRADE Analysis Started v4.0 ---');
+    console.log('--- DAY TRADE Analysis Started v5.1 ---');
     const runId = `RUN-${Date.now().toString().slice(-6)}`;
     console.log('Execution ID:', runId);
 
