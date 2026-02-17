@@ -1301,22 +1301,18 @@ function detectMarketStructureShift(candles, lookback = 50) {
   // Find Swing Points (Highs and Lows)
   const swings = [];
 
-  for (let i = 2; i < relevantCandles.length - 2; i++) {
+  for (let i = 1; i < relevantCandles.length - 1; i++) {
     const current = relevantCandles[i];
     const prev = relevantCandles[i - 1];
-    const prev2 = relevantCandles[i - 2];
     const next = relevantCandles[i + 1];
-    const next2 = relevantCandles[i + 2];
 
-    // Swing High
-    if (current.high > prev.high && current.high > prev2.high &&
-      current.high > next.high && current.high > next2.high) {
+    // Swing High (v4.9 Sensitivity: 3-bar fractal)
+    if (current.high > prev.high && current.high > next.high) {
       swings.push({ type: 'HIGH', price: current.high, time: current.time, index: i });
     }
 
-    // Swing Low
-    if (current.low < prev.low && current.low < prev2.low &&
-      current.low < next.low && current.low < next2.low) {
+    // Swing Low (v4.9 Sensitivity: 3-bar fractal)
+    if (current.low < prev.low && current.low < next.low) {
       swings.push({ type: 'LOW', price: current.low, time: current.time, index: i });
     }
   }
@@ -1324,23 +1320,21 @@ function detectMarketStructureShift(candles, lookback = 50) {
   if (swings.length < 2) return null;
 
   const lastCandle = relevantCandles[relevantCandles.length - 1];
-  const prevCandle = relevantCandles[relevantCandles.length - 2];
 
   // Check for Bullish MSS (Break of last Swing High)
-  // Needs to happen recently (last 3 candles)
+  // v4.9: Increased window to 5 candles for better detection of recent shifts
   const lastSwingHigh = swings.filter(s => s.type === 'HIGH').pop();
 
   if (lastSwingHigh) {
-    // Check if price broke above the last swing high RECENTLY
     const brokenIndex = relevantCandles.findIndex((c, idx) => idx > lastSwingHigh.index && c.close > lastSwingHigh.price);
 
-    if (brokenIndex !== -1 && brokenIndex >= relevantCandles.length - 3) {
+    if (brokenIndex !== -1 && brokenIndex >= relevantCandles.length - 5) {
       const breakCandle = relevantCandles[brokenIndex];
       const bodySize = Math.abs(breakCandle.close - breakCandle.open);
       const totalSize = breakCandle.high - breakCandle.low;
 
-      // Validation: Break must be impulsive (large body)
-      if (bodySize > totalSize * 0.5) {
+      // v4.9: Relaxed break validation (40% body vs 50%)
+      if (bodySize > totalSize * 0.4) {
         return {
           type: 'BULLISH_MSS',
           price: lastSwingHigh.price,
@@ -1356,7 +1350,7 @@ function detectMarketStructureShift(candles, lookback = 50) {
   if (lastSwingLow) {
     const brokenIndex = relevantCandles.findIndex((c, idx) => idx > lastSwingLow.index && c.close < lastSwingLow.price);
 
-    if (brokenIndex !== -1 && brokenIndex >= relevantCandles.length - 3) {
+    if (brokenIndex !== -1 && brokenIndex >= relevantCandles.length - 5) {
       const breakCandle = relevantCandles[brokenIndex];
       return {
         type: 'BEARISH_MSS',

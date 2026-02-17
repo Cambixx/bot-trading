@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading "Expert Edition" (v5.0)
+# 🦅 Documentación del Algoritmo de Trading "Expert Edition" (v5.1)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -123,11 +123,16 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ## 8. Historial de Versiones (Changelog)
 
+### v5.1 - Structure Sensitivity Boost
+- **MSS Ultra-Sensible**: Se ha reducido el requisito de detección de Swing Points de 5 a 3 velas (Fractal mode).
+- **Ventana de Break Ampliada**: El bot ahora detecta cambios de estructura ocurridos en las últimas 5 velas (antes 3).
+- **Cuerpo Impulsivo Relajado**: Se reduce el requisito de cuerpo de vela del 50% al 40% para validar un "Break of Structure".
+- **Objetivo**: Capturar giros de mercado más rápidos en regímenes de DOWNTREND Pullback.
+
 ### v5.0 - Signs of the Times (Trend Conviction)
 - **Integración SOTT**: Implementación del framework "Signs of the Times" (LucF) para medir la convicción de la tendencia.
 - **Bonus de Confirmación**: +20 puntos al Score de Tendencia si el SOTT está alineado con la señal.
 - **Filtro de Debilidad**: Advertencia automática (⚠️ SOTT Weakness) si el SOTT baja de -0.2 en una tendencia alcista macro, detectando posibles "Fakeouts" o retrocesos profundos.
-
 
 ### v4.9 - "Smart Downtrend" (Pullback Unlock)
 - **Modo Pullback Inteligente**: Se permite operar en régimen `DOWNTREND` (15m) **SI Y SOLO SI** la tendencia 4H es `BULLISH`.
@@ -153,4 +158,4 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ---
 
-**Documentación actualizada a v5.0 - 17 Febrero 2026**
+**Documentación actualizada a v5.1 - 17 Febrero 2026**
