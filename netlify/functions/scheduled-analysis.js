@@ -1823,8 +1823,15 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     trend: 0,
     structure: 0,
     volume: 0,
+    structure: 0,
+    volume: 0,
     patterns: 0
   };
+
+  // v5.0 NEW: Signs of the Times (SOTT)
+  const sott = calculateSOTT(closedCandles15m, 20);
+  const sottValue = sott.value;
+  const sottSignal = sott.signal;
 
   // === CATEGORY 1: MOMENTUM (0-100) ===
   let momentumScore = 0;
@@ -1942,6 +1949,25 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     const trendDir = adx15m.bullishTrend ? 'Alcista' : 'Bajista';
     reasons.push(`💨 ADX ${trendDir}`);
   }
+
+  // v5.0 NEW: SOTT Trend Confirmation (0-20)
+  // If SOTT is positive and aligned with signal, add bonus
+  if (sottSignal > 0 && (signalType === 'BUY' || !signalType)) {
+    trendScore += 20;
+    reasons.push(`🌊 SOTT Bullish (${sottValue.toFixed(2)})`);
+  } else if (sottSignal < 0 && (signalType === 'SELL_ALERT' || !signalType)) {
+    trendScore += 20;
+    reasons.push(`🌊 SOTT Bearish (${sottValue.toFixed(2)})`);
+  }
+
+  // v5.0 NEW: SOTT Divergence Warning (Deep Pullback Filter)
+  if (trend4h === 'BULLISH' && sottSignal < -0.2) {
+    if (signalType === 'BUY') {
+      reasons.unshift('⚠️ SOTT Weakness (< -0.2)');
+      // We don't block hard, but we flag it. Score needs to be high to overcome.
+    }
+  }
+
 
   categoryScores.trend = Math.min(100, trendScore);
 
@@ -2891,6 +2917,100 @@ const scheduledHandler = async (event, context) => {
     body: JSON.stringify(result)
   };
 };
+
+/**
+ * Calculates 'Signs of the Times' (SOTT) Indicator
+ * Based on LucF's methodology: Weighted sum of bullish/bearish bar properties.
+ * returns { value: number, signal: number }
+ * Range: -1.0 to +1.0
+ */
+function calculateSOTT(candles, signalLength = 20) {
+  if (!candles || candles.length < signalLength + 2) return { value: 0, signal: 0 };
+
+  const sottValues = [];
+
+  // Start from index 1 (need previous candle)
+  for (let i = 1; i < candles.length; i++) {
+    const curr = candles[i];
+    const prev = candles[i - 1];
+
+    const c = Number(curr.close);
+    const o = Number(curr.open);
+    const h = Number(curr.high);
+    const l = Number(curr.low);
+    const v = Number(curr.volume);
+
+    const pc = Number(prev.close);
+    const po = Number(prev.open);
+    const ph = Number(prev.high);
+    const pl = Number(prev.low);
+    const pv = Number(prev.volume);
+
+    let bull = 0;
+    let bear = 0;
+    let maxWeight = 0;
+
+    const isUp = c > o;
+    const bodyCurrent = Math.abs(c - o);
+    const wicksCurrent = (h - l) - bodyCurrent;
+
+    // 1. Close > Open (Weight 1)
+    maxWeight += 1;
+    if (isUp) bull++; else bear++;
+
+    // 2. Rising Close (Weight 1)
+    maxWeight += 1;
+    if (c > pc) bull++; else if (c < pc) bear++;
+
+    // 3. Rising High (Weight 1)
+    maxWeight += 1;
+    if (h > ph) bull++; else if (h < ph) bear++;
+
+    // 4. Rising Low (Weight 1)
+    maxWeight += 1;
+    if (l > pl) bull++; else if (l < pl) bear++;
+
+    // 5. Volume Increase (Weight 2)
+    maxWeight += 2;
+    if (v > pv) {
+      if (isUp) bull += 2; else bear += 2;
+    }
+
+    // 6. Strong Body (Body > Wicks) (Weight 1)
+    maxWeight += 1;
+    if (bodyCurrent > wicksCurrent) {
+      if (isUp) bull++; else bear++;
+    }
+
+    // 7. Gap (Weight 2)
+    maxWeight += 2;
+    if (l > ph) bull += 2; // Gap Up
+    else if (h < pl) bear += 2; // Gap Down
+
+    // Calculate normalized value for this bar (-1 to 1)
+    // Formula: (Bull - Bear) / MaxWeight
+    // If MaxWeight is 0 (unlikely), default to 0
+    const val = maxWeight > 0 ? (bull - bear) / maxWeight : 0;
+    sottValues.push(val);
+  }
+
+  // Current Value (last one)
+  const currentSOTT = sottValues[sottValues.length - 1];
+
+  // Calculate Signal (SMA of SOTT)
+  let sum = 0;
+  let count = 0;
+  // Use available data up to signalLength
+  const startIdx = Math.max(0, sottValues.length - signalLength);
+  for (let i = startIdx; i < sottValues.length; i++) {
+    sum += sottValues[i];
+    count++;
+  }
+  const signal = count > 0 ? sum / count : 0;
+
+  return { value: currentSOTT, signal };
+}
+
 
 export const handler = schedule("*/15 * * * *", scheduledHandler);
 

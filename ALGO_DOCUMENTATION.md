@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading "Expert Edition" (v4.5)
+# 🦅 Documentación del Algoritmo de Trading "Expert Edition" (v5.0)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -40,7 +40,7 @@ El puntaje final (0-100) usa pesos fijos pero incorpora una validación binaria 
 | Categoría | Peso | Descripción |
 |-----------|------|-------------|
 | **Momentum** | 25% | RSI, StochRSI, MACD |
-| **Trend** | 30% | SuperTrend, EMA alignment, ADX |
+| **Trend** | 30% | SuperTrend, EMA alignment, ADX, **SOTT (Signs of the Times)** |
 | **Structure** | 25% | Order Blocks, FVGs, Bollinger Bands |
 | **Volume** | 15% | Volume ratio, Delta, OBI |
 | **Patterns** | 5% | Candlestick patterns, divergences |
@@ -123,6 +123,12 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ## 8. Historial de Versiones (Changelog)
 
+### v5.0 - Signs of the Times (Trend Conviction)
+- **Integración SOTT**: Implementación del framework "Signs of the Times" (LucF) para medir la convicción de la tendencia.
+- **Bonus de Confirmación**: +20 puntos al Score de Tendencia si el SOTT está alineado con la señal.
+- **Filtro de Debilidad**: Advertencia automática (⚠️ SOTT Weakness) si el SOTT baja de -0.2 en una tendencia alcista macro, detectando posibles "Fakeouts" o retrocesos profundos.
+
+
 ### v4.9 - "Smart Downtrend" (Pullback Unlock)
 - **Modo Pullback Inteligente**: Se permite operar en régimen `DOWNTREND` (15m) **SI Y SOLO SI** la tendencia 4H es `BULLISH`.
 - **Validación Estructural**: Para estos setups de "Buy the Dip", se exige **MSS (Market Structure Shift)** o **Sweep de Liquidez** obligatorio.
@@ -147,4 +153,4 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ---
 
-**Documentación actualizada a v4.9 - 17 Febrero 2026**
+**Documentación actualizada a v5.0 - 17 Febrero 2026**
