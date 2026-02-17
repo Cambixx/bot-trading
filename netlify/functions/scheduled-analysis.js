@@ -2114,6 +2114,32 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const regime = detectMarketRegime(closedCandles15m, adx15m, closes15m);
   reasons.push(`🌐 Regime: ${regime}`);
 
+  // === MSS DETECTION (HOISTED) ===
+  const mss = detectMarketStructureShift(closedCandles15m);
+
+  // SIMPLIFIED v4.0: Small fixed bonus for MSS
+  if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
+    // score += 10; // MOVED: Score added later to avoid premature boost
+    reasons.unshift('🔄 MSS (+10)');
+    if (!signalType) signalType = 'BUY';
+  } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
+    if (!signalType) signalType = 'SELL_ALERT';
+  }
+
+  // === LIQUIDITY SWEEP DETECTION (HOISTED) ===
+  const sweep = detectLiquiditySweep(closedCandles15m);
+  let sweepConfirmed = false;
+
+  if (sweep && sweep.type === 'BULLISH_SWEEP' && (signalType === 'BUY' || !signalType)) {
+    sweepConfirmed = (mss || volumeRatio > 1.5);
+    reasons.unshift(sweepConfirmed ? '🧹 Sweep ✓' : '🧹 Sweep (⚠️)');
+    if (!signalType) signalType = 'BUY';
+  } else if (sweep && sweep.type === 'BEARISH_SWEEP' && (signalType === 'SELL_ALERT' || !signalType)) {
+    sweepConfirmed = (mss || volumeRatio > 1.5);
+    reasons.unshift(sweepConfirmed ? '🧹 Sweep ✓' : '🧹 Sweep (⚠️)');
+    if (!signalType) signalType = 'SELL_ALERT';
+  }
+
   // === SIMPLIFIED REGIME FILTERS v4.0 ===
   let MIN_QUALITY_SCORE = 75;
 
@@ -2262,49 +2288,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
   }
 
-  // === MSS DETECTION ===
-  const mss = detectMarketStructureShift(closedCandles15m);
-
-  // SIMPLIFIED v4.0: Small fixed bonus for MSS (no percentage caps)
-  // MSS is a confirmation factor, not a score multiplier
-  if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
-    score += 10; // Fixed bonus — enough to help reach threshold without inflating
-    reasons.unshift('🔄 MSS Confirm (+10)');
-    if (!signalType) signalType = 'BUY';
-  } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
-    score += 10;
-    if (!signalType) signalType = 'SELL_ALERT';
-  }
-
-  // === LIQUIDITY SWEEP DETECTION ===
-  const sweep = detectLiquiditySweep(closedCandles15m);
-
-  // SIMPLIFIED v4.0: Small fixed bonus for confirmed Sweep only
-  let sweepConfirmed = false;
-
-  if (sweep && sweep.type === 'BULLISH_SWEEP' && (signalType === 'BUY' || !signalType)) {
-    // Require MSS or strong volume for confirmation
-    sweepConfirmed = (mss || volumeRatio > 1.5);
-
-    if (sweepConfirmed) {
-      score += 10; // Fixed bonus for confirmed sweeps
-      reasons.unshift('🧹 Liquidity Sweep ✓');
-    } else {
-      reasons.unshift('🧹 Liquidity Sweep (⚠️ débil)');
-    }
-
-    if (!signalType) signalType = 'BUY';
-
-  } else if (sweep && sweep.type === 'BEARISH_SWEEP' && (signalType === 'SELL_ALERT' || !signalType)) {
-    sweepConfirmed = (mss || volumeRatio > 1.5);
-
-    if (sweepConfirmed) {
-      score += 10;
-    }
-
-    reasons.unshift(sweepConfirmed ? '🧹 Liquidity Sweep ✓' : '🧹 Liquidity Sweep (⚠️ débil)');
-    if (!signalType) signalType = 'SELL_ALERT';
-  }
+  // [MOVED UP] MSS & Sweep detection moved before Regime checks
 
   // Volume checks per mode
   const sniperVolOk = volumeRatio >= 1.2;
