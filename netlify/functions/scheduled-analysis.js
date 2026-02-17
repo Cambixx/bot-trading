@@ -2118,8 +2118,20 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   let MIN_QUALITY_SCORE = 75;
 
   if (regime === 'DOWNTREND') {
-    console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
-    return null;
+    // v4.9 FIX: Smart Downtrend (Pullback in Bull Market)
+    // If 15m is DOWNTREND but 4H is BULLISH, this is a buying opportunity (Dip Buy)
+    if (trend4h === 'BULLISH') {
+      reasons.push('📉 DOWNTREND (Pullback Opportunity)');
+      // Require strict structure to confirm bottom is in
+      if (!mss && !sweep) {
+        console.log(`[REJECT] ${symbol}: DOWNTREND Pullback requires structure (MSS/Sweep)`);
+        return null;
+      }
+      MIN_QUALITY_SCORE = 85; // High bar for "catching a falling knife"
+    } else {
+      console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
+      return null;
+    }
   } else if (regime === 'TRANSITION') {
     MIN_QUALITY_SCORE = 82; // RE-ENABLED: High threshold for stability
   } else if (regime === 'TRENDING') {

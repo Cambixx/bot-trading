@@ -123,6 +123,11 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ## 8. Historial de Versiones (Changelog)
 
+### v4.9 - "Smart Downtrend" (Pullback Unlock)
+- **Modo Pullback Inteligente**: Se permite operar en régimen `DOWNTREND` (15m) **SI Y SOLO SI** la tendencia 4H es `BULLISH`.
+- **Validación Estructural**: Para estos setups de "Buy the Dip", se exige **MSS (Market Structure Shift)** o **Sweep de Liquidez** obligatorio.
+- **Score Exigente**: Score mínimo de 85 para confirmar calidad en retrocesos.
+
 ### v4.8 - "Sunday Mode" (Low Volatility Fix)
 - **Eliminación de Bloqueo por Volumen Bajo**: Se reemplaza el rechazo duro (< 0.8) por una **Penalización de Score** (-10 puntos).
 - **Suelo de Liquidez**: Se mantiene un rechazo absoluto solo si el volumen es "Nulo" (< 0.3x del promedio).
@@ -142,4 +147,4 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 
 ---
 
-**Documentación actualizada a v4.8 - 16 Febrero 2026**
+**Documentación actualizada a v4.9 - 17 Febrero 2026**
