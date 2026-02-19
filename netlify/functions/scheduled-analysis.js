@@ -1817,8 +1817,6 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     trend: 0,
     structure: 0,
     volume: 0,
-    structure: 0,
-    volume: 0,
     patterns: 0
   };
 
@@ -2160,6 +2158,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     if (!signalType) signalType = 'SELL_ALERT';
   }
 
+  // v5.1 SOTT Unlock: Reduce requirements if conviction is extreme
+  let requirementsReduction = 0;
+  if (sottValue > 0.8 && sottSignal > 0.3) requirementsReduction = 10;
+  else if (sottSignal > 0.2) requirementsReduction = 5;
+
   // === SIMPLIFIED REGIME FILTERS v4.0 ===
   let MIN_QUALITY_SCORE = 75;
 
@@ -2173,19 +2176,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         console.log(`[REJECT] ${symbol}: DOWNTREND Pullback requires structure (MSS/Sweep)`);
         return null;
       }
-      MIN_QUALITY_SCORE = 85; // High bar for "catching a falling knife"
+      MIN_QUALITY_SCORE = 85 - requirementsReduction;
     } else {
       console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 82; // RE-ENABLED: High threshold for stability
+    MIN_QUALITY_SCORE = 82 - requirementsReduction;
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 85;
+    MIN_QUALITY_SCORE = 85 - requirementsReduction;
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 90; // REDUCED from 92
+    MIN_QUALITY_SCORE = 90 - requirementsReduction;
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 75; // RANGING is our best regime
+    MIN_QUALITY_SCORE = 75 - requirementsReduction;
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
@@ -2205,6 +2208,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     categoryScores.volume * weights.volume +
     categoryScores.patterns * weights.patterns
   );
+
+  // v5.1 SOTT Quality Bonus (applied to final score)
+  if (sottValue > 0.5) score += 5;
+  if (sottSignal > 0.2) score += 5;
 
   // Count strong categories (>60%) - simplified confluence check
   const strongCategories = Object.values(categoryScores).filter(s => s >= 60).length;
@@ -2230,11 +2237,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (signalType === 'BUY') {
     // 1. RSI/BB Overextension
-    // v4.6 FIX: Allow overextension if trend is BULLISH (Breakout/Momentum)
-    const isBreakout = trend4h === 'BULLISH' && rsi15m < 85;
+    // v4.6 FIX: Allow overextension if trend is BULLISH or SOTT signal is very strong
+    const isBreakout = (trend4h === 'BULLISH' || sottSignal > 0.4) && rsi15m < 85;
 
     if ((rsi15m > 70 || bbPercent > 0.88) && !isBreakout) {
-      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)}) - Trend: ${trend4h}`);
+      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)}) - Trend: ${trend4h}, SOTT Sig: ${sottSignal.toFixed(2)}`);
       return null;
     }
 
