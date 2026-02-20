@@ -2182,7 +2182,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   else if (sottSignal > 0.2) requirementsReduction = 5;
 
   // === SIMPLIFIED REGIME FILTERS v4.0 ===
-  let MIN_QUALITY_SCORE = 75;
+  let MIN_QUALITY_SCORE = 65;  // Reducido de 75
 
   if (regime === 'DOWNTREND') {
     // 🚀 ESTRATEGIA MILLONARIA: Smart Downtrend Pro
@@ -2203,27 +2203,32 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       MIN_QUALITY_SCORE = 80 - requirementsReduction; // Reducido de 85
     } 
     // Condición 2: Mercado bajista pero con señales de reversión fuerte
-    else if (rsi1h < 25 && volumeRatio > 2.5 && sottSignal > -0.1) {
+    else if (rsi1h < 30 && volumeRatio > 1.8 && sottSignal > -0.2) {  // Relajado
       reasons.push('🎯 DOWNTREND (Oversold Bounce)');
-      MIN_QUALITY_SCORE = 78 - requirementsReduction;
+      MIN_QUALITY_SCORE = 70 - requirementsReduction;  // Más bajo
     }
     // Condición 3: Si BTC está GREEN y el coin tiene momentum
-    else if (btcContext.status === 'GREEN' && categoryScores.momentum > 80) {
+    else if (btcContext.status === 'GREEN' && categoryScores.momentum > 70) {  // Relajado
       reasons.push('🟢 DOWNTREND (BTC Green Momentum)');
-      MIN_QUALITY_SCORE = 75 - requirementsReduction;
+      MIN_QUALITY_SCORE = 65 - requirementsReduction;  // Más bajo
+    }
+    // Condición 4: Volumen muy alto aunque otros indicadores sean débiles
+    else if (volumeRatio > 3.0 && rsi1h < 35) {
+      reasons.push('📈 DOWNTREND (High Volume Opportunity)');
+      MIN_QUALITY_SCORE = 65 - requirementsReduction;
     }
     else {
       console.log(`[REJECT] ${symbol}: DOWNTREND regime - No bounce conditions met`);
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 75 - requirementsReduction; // Reducido de 82
+    MIN_QUALITY_SCORE = 65 - requirementsReduction; // Reducido de 75
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 78 - requirementsReduction; // Reducido de 85
+    MIN_QUALITY_SCORE = 70 - requirementsReduction; // Reducido de 78
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 82 - requirementsReduction; // Reducido de 90
+    MIN_QUALITY_SCORE = 68 - requirementsReduction; // Reducido de 82
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 68 - requirementsReduction; // Reducido de 75
+    MIN_QUALITY_SCORE = 60 - requirementsReduction; // Reducido de 68
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
