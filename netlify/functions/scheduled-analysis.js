@@ -1713,23 +1713,41 @@ function validateSignalExpert(symbol, type, volRatio, delta, obMetrics) {
 }
 
 /**
- * Calculates a recommended position size as % of equity.
+ * 🚀 ESTRATEGIA MILLONARIA: Dynamic Position Sizing Pro
+ * Size más agresivo para señales de alta calidad con gestión de riesgo inteligente
  */
-function calculateRecommendedSize(score, atrPct, regime) {
-  let size = 1.0; // Base 1%
-  if (score >= 90) size += 1.0;
-  if (score >= 95) size += 0.5;
+function calculateRecommendedSize(score, atrPct, regime, hasMSS = false, hasSweep = false, volumeRatio = 1.0) {
+  let size = 1.5; // Base aumentada a 1.5%
+  
+  // 📈 Bonus por calidad de señal (más agresivo)
+  if (score >= 85) size += 1.0;
+  if (score >= 90) size += 1.5;
+  if (score >= 95) size += 2.0;
+  
+  // 🏆 Bonus por estructura de mercado (confirmación fuerte)
+  if (hasMSS) size += 0.8;
+  if (hasSweep) size += 1.2;
+  if (volumeRatio > 2.0) size += 0.5;
+  if (volumeRatio > 3.0) size += 1.0;
 
-  // Volatility adjustment
-  if (atrPct > 2.5) size *= 0.6;
-  else if (atrPct > 1.5) size *= 0.8;
+  // 📉 Ajuste por volatilidad (más inteligente)
+  if (atrPct > 3.0) size *= 0.5;
+  else if (atrPct > 2.0) size *= 0.7;
+  else if (atrPct > 1.0) size *= 0.9;
+  else size *= 1.1; // Bonus por baja volatilidad
 
-  // Regime adjustment
-  if (regime === 'HIGH_VOLATILITY') size *= 0.5;
-  if (regime === 'TRANSITION') size *= 0.7;
-  if (regime === 'RANGING') size *= 1.2; // Ranging is lower risk generally
+  // 🎯 Ajuste por régimen (optimizado)
+  if (regime === 'HIGH_VOLATILITY') size *= 0.6;
+  else if (regime === 'TRANSITION') size *= 0.8;
+  else if (regime === 'RANGING') size *= 1.3;
+  else if (regime === 'TRENDING') size *= 1.5; // Máximo tamaño en tendencias
+  else if (regime === 'DOWNTREND') size *= 0.7; // Más conservador en bajistas
 
-  return Math.max(0.5, Math.min(size, 3.5)).toFixed(1); // Cap between 0.5% and 3.5%
+  // 🛡️ Límites de seguridad con ampliación para señales premium
+  const minSize = 0.8; // Mínimo aumentado
+  const maxSize = score >= 90 ? 6.0 : 4.5; // Hasta 6% para señales excelentes
+  
+  return Math.max(minSize, Math.min(size, maxSize)).toFixed(1);
 }
 
 function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext = null) {
@@ -2167,28 +2185,45 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   let MIN_QUALITY_SCORE = 75;
 
   if (regime === 'DOWNTREND') {
-    // v4.9 FIX: Smart Downtrend (Pullback in Bull Market)
-    // If 15m is DOWNTREND but 4H is BULLISH, this is a buying opportunity (Dip Buy)
+    // 🚀 ESTRATEGIA MILLONARIA: Smart Downtrend Pro
+    // Aprovechar rebotes incluso en mercados bajistas con condiciones específicas
+    
+    // Condición 1: Si 4H es BULLISH -> Pullback clásico
     if (trend4h === 'BULLISH') {
       reasons.push('📉 DOWNTREND (Pullback Opportunity)');
-      // Require strict structure to confirm bottom is in
+      // Relajar requisitos de estructura para capturar más oportunidades
       if (!mss && !sweep) {
-        console.log(`[REJECT] ${symbol}: DOWNTREND Pullback requires structure (MSS/Sweep)`);
-        return null;
+        // Pero requerir RSI muy oversold o volumen extremo
+        if (rsi1h > 30 && volumeRatio < 2.0) {
+          console.log(`[REJECT] ${symbol}: DOWNTREND Pullback requires oversold conditions`);
+          return null;
+        }
+        reasons.push('⚠️ Structure relaxed (Oversold/High Vol)');
       }
-      MIN_QUALITY_SCORE = 85 - requirementsReduction;
-    } else {
-      console.log(`[REJECT] ${symbol}: DOWNTREND regime - Safe mode enabled.`);
+      MIN_QUALITY_SCORE = 80 - requirementsReduction; // Reducido de 85
+    } 
+    // Condición 2: Mercado bajista pero con señales de reversión fuerte
+    else if (rsi1h < 25 && volumeRatio > 2.5 && sottSignal > -0.1) {
+      reasons.push('🎯 DOWNTREND (Oversold Bounce)');
+      MIN_QUALITY_SCORE = 78 - requirementsReduction;
+    }
+    // Condición 3: Si BTC está GREEN y el coin tiene momentum
+    else if (btcContext.status === 'GREEN' && categoryScores.momentum > 80) {
+      reasons.push('🟢 DOWNTREND (BTC Green Momentum)');
+      MIN_QUALITY_SCORE = 75 - requirementsReduction;
+    }
+    else {
+      console.log(`[REJECT] ${symbol}: DOWNTREND regime - No bounce conditions met`);
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 82 - requirementsReduction;
+    MIN_QUALITY_SCORE = 75 - requirementsReduction; // Reducido de 82
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 85 - requirementsReduction;
+    MIN_QUALITY_SCORE = 78 - requirementsReduction; // Reducido de 85
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 90 - requirementsReduction;
+    MIN_QUALITY_SCORE = 82 - requirementsReduction; // Reducido de 90
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 75 - requirementsReduction;
+    MIN_QUALITY_SCORE = 68 - requirementsReduction; // Reducido de 75
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
@@ -2473,29 +2508,35 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       // HIGH_VOLATILITY (23% WR): Very tight targets - quick in/out
       tp: signalType === 'BUY'
         ? currentPrice * (1 + (atrPercent15m / 100) * (
-          regime === 'TRENDING' ? 4.0 :
-            regime === 'HIGH_VOLATILITY' ? 2.0 :
-              regime === 'TRANSITION' ? 2.5 :
-                2.0  // RANGING — AUDIT v3.0: Reduced from 3.0 (4 BE showed 3.0 is too aggressive)
+          // 🚀 OPTIMIZACIÓN MILLONARIA: Take Profit Agresivo
+          regime === 'TRENDING' ? 4.5 :       // Aumentado de 4.0 (mejor R:R)
+            regime === 'HIGH_VOLATILITY' ? 2.5 : // Aumentado de 2.0
+              regime === 'TRANSITION' ? 3.2 :    // Aumentado de 2.5
+                regime === 'DOWNTREND' ? 3.8 :  // TP más ambicioso en rebotes
+                  3.0  // RANGING — Aumentado de 2.0
         ))
         : currentPrice * (1 - (atrPercent15m / 100) * (
-          regime === 'TRENDING' ? 4.0 :
-            regime === 'HIGH_VOLATILITY' ? 2.0 :
-              regime === 'TRANSITION' ? 2.5 :
-                2.0  // RANGING — AUDIT v3.0: Reduced from 3.0
+          regime === 'TRENDING' ? 4.5 :
+            regime === 'HIGH_VOLATILITY' ? 2.5 :
+              regime === 'TRANSITION' ? 3.2 :
+                regime === 'DOWNTREND' ? 3.8 :
+                  3.0  // RANGING
         )),
       sl: signalType === 'BUY'
         ? currentPrice * (1 - (atrPercent15m / 100) * (
-          regime === 'TRENDING' ? 2.5 :
-            regime === 'HIGH_VOLATILITY' ? 1.2 :
-              regime === 'TRANSITION' ? 1.8 :
-                2.0  // RANGING
+          // 🚀 OPTIMIZACIÓN MILLONARIA: Stop Loss Inteligente
+          regime === 'TRENDING' ? 2.2 :       // Reducido de 2.5 (mejor R:R)
+            regime === 'HIGH_VOLATILITY' ? 1.0 : // Reducido de 1.2
+              regime === 'TRANSITION' ? 1.6 :    // Reducido de 1.8
+                regime === 'DOWNTREND' ? 1.8 :  // SL más ajustado en bajistas
+                  1.8  // RANGING — Reducido de 2.0
         ))
         : currentPrice * (1 + (atrPercent15m / 100) * (
-          regime === 'TRENDING' ? 2.5 :
-            regime === 'HIGH_VOLATILITY' ? 1.2 :
-              regime === 'TRANSITION' ? 1.8 :
-                2.0  // RANGING
+          regime === 'TRENDING' ? 2.2 :
+            regime === 'HIGH_VOLATILITY' ? 1.0 :
+              regime === 'TRANSITION' ? 1.6 :
+                regime === 'DOWNTREND' ? 1.8 :
+                  1.8  // RANGING
         )),
       // Enhanced metrics for post-analysis
       entryMetrics: {

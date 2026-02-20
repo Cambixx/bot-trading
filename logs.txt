@@ -1,999 +1,3 @@
-Feb 18, 09:45:10 PM: b90ef82d INFO   2026-02-18T20:45:10.524Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 09:45:10 PM: b90ef82d INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 09:45:10 PM: b90ef82d INFO   Execution ID: RUN-510985
-Feb 18, 09:45:10 PM: b90ef82d INFO   Loaded 0 cooldown entries
-Feb 18, 09:45:10 PM: b90ef82d INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 09:45:10 PM: b90ef82d INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 18, 09:45:10 PM: b90ef82d INFO   [RUN-510985] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] ATOMUSDT: Score 33 < 85 | SOTT: 0.67 (-0.10)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] HYPEUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 09:45:10 PM: b90ef82d INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] LTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] GOLD(XAUT)USDT: Score 35 < 82 | SOTT: 0.44 (0.02)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] BCHUSDT: Score 43 < 82 | SOTT: 0.56 (-0.08)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.28)
-Feb 18, 09:45:10 PM: b90ef82d INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 09:45:10 PM: b90ef82d INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 18, 09:45:18 PM: b90ef82d Duration: 8386.39 ms	Memory Usage: 132 MB	Init Duration: 224.16 ms
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   2026-02-18T21:01:22.858Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   Execution ID: RUN-483259
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   Loaded 0 cooldown entries
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [RUN-483259] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] ATOMUSDT: Score 48 < 85 | SOTT: -0.78 (-0.14)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] TAOUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] GOLD(XAUT)USDT: Score 38 < 82 | SOTT: -0.22 (0.04)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] BCHUSDT: Score 13 < 82 | SOTT: -0.44 (-0.07)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.30)
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:01:22 PM: 0c6fe83b INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 18, 10:01:33 PM: 0c6fe83b Duration: 10777.99 ms	Memory Usage: 137 MB	Init Duration: 207.94 ms
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   2026-02-18T21:15:31.786Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   Execution ID: RUN-332239
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   Loaded 0 cooldown entries
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [RUN-332239] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] ATOMUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] BCHUSDT: Score 23 < 82 | SOTT: -0.67 (-0.07)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.26)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] GOLD(PAXG)USDT: Score 35 < 82 | SOTT: -0.44 (-0.04)
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:15:31 PM: 36d8cab1 INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 18, 10:15:39 PM: 36d8cab1 Duration: 8202.04 ms	Memory Usage: 134 MB	Init Duration: 230.22 ms
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   2026-02-18T21:30:54.318Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   Execution ID: RUN-254748
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   Loaded 0 cooldown entries
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [RUN-254748] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] ATOMUSDT: Score 38 < 85 | SOTT: -0.56 (-0.23)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] TAOUSDT: Score 46 < 85 | SOTT: 0.56 (-0.13)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] HYPEUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] LTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] BCHUSDT: Volume DEAD (0.21)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.25)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.15)
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:30:53 PM: 2ed1f81a INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 18, 10:31:02 PM: 2ed1f81a Duration: 8272.23 ms	Memory Usage: 132 MB	Init Duration: 258.22 ms
-Feb 18, 10:45:14 PM: 72995154 INFO   2026-02-18T21:45:14.968Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 10:45:14 PM: 72995154 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 10:45:14 PM: 72995154 INFO   Execution ID: RUN-115386
-Feb 18, 10:45:14 PM: 72995154 INFO   Loaded 0 cooldown entries
-Feb 18, 10:45:14 PM: 72995154 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 10:45:14 PM: 72995154 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 18, 10:45:14 PM: 72995154 INFO   [RUN-115386] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] ATOMUSDT: Volume DEAD (0.28)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] LTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] BCHUSDT: Score 26 < 82 | SOTT: 0.67 (-0.06)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] GOLD(XAUT)USDT: Score 29 < 82 | SOTT: -0.56 (-0.06)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] GOLD(PAXG)USDT: Score 29 < 82 | SOTT: -0.78 (-0.08)
-Feb 18, 10:45:14 PM: 72995154 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 10:45:14 PM: 72995154 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 18, 10:45:23 PM: 72995154 Duration: 8218.51 ms	Memory Usage: 141 MB	Init Duration: 233.78 ms
-Feb 18, 11:00:58 PM: d1b99792 INFO   2026-02-18T22:00:59.244Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 11:00:58 PM: d1b99792 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 11:00:58 PM: d1b99792 INFO   Execution ID: RUN-059619
-Feb 18, 11:00:58 PM: d1b99792 INFO   Loaded 0 cooldown entries
-Feb 18, 11:00:58 PM: d1b99792 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 11:00:58 PM: d1b99792 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [RUN-059619] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] HYPEUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] BNBUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] BCHUSDT: Score 28 < 82 | SOTT: -0.56 (-0.08)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 32 < 85
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] GOLD(PAXG)USDT: Score 42 < 82 | SOTT: -0.78 (-0.12)
-Feb 18, 11:00:58 PM: d1b99792 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:00:58 PM: d1b99792 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 18, 11:01:09 PM: d1b99792 Duration: 10072.28 ms	Memory Usage: 142 MB	Init Duration: 211.82 ms
-Feb 18, 11:15:19 PM: a8a71e1a INFO   2026-02-18T22:15:19.785Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 11:15:19 PM: a8a71e1a INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 11:15:19 PM: a8a71e1a INFO   Execution ID: RUN-920218
-Feb 18, 11:15:19 PM: a8a71e1a INFO   Loaded 0 cooldown entries
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 11:15:19 PM: a8a71e1a INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [RUN-920218] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] HYPEUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] BCHUSDT: Score 31 < 82 | SOTT: -0.44 (-0.13)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 29 < 85
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] GOLD(PAXG)USDT: Score 32 < 82 | SOTT: 0.22 (-0.08)
-Feb 18, 11:15:19 PM: a8a71e1a INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:15:19 PM: a8a71e1a INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 18, 11:15:27 PM: a8a71e1a Duration: 7861.70 ms	Memory Usage: 133 MB	Init Duration: 214.62 ms
-Feb 18, 11:30:07 PM: 89daaf26 INFO   2026-02-18T22:30:08.368Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 11:30:07 PM: 89daaf26 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 11:30:07 PM: 89daaf26 INFO   Execution ID: RUN-808753
-Feb 18, 11:30:07 PM: 89daaf26 INFO   Loaded 0 cooldown entries
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 11:30:07 PM: 89daaf26 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [RUN-808753] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] BCHUSDT: Score 43 < 82 | SOTT: 0.78 (-0.11)
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.09)
-Feb 18, 11:30:07 PM: 89daaf26 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:30:07 PM: 89daaf26 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 18, 11:30:16 PM: 89daaf26 Duration: 8132.93 ms	Memory Usage: 138 MB	Init Duration: 221.90 ms
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   2026-02-18T22:45:06.378Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   Execution ID: RUN-706788
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   Loaded 0 cooldown entries
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [RUN-706788] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] HYPEUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] BCHUSDT: Score 28 < 82 | SOTT: 0.56 (-0.12)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.27)
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] GOLD(PAXG)USDT (RANGING): Sin MSS ni Sweep y score 55 < 85
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 18, 11:45:05 PM: 3a6a3a16 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 18, 11:45:15 PM: 3a6a3a16 Duration: 8871.87 ms	Memory Usage: 132 MB	Init Duration: 212.92 ms
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   2026-02-18T23:00:14.402Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   Execution ID: RUN-614806
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   Loaded 0 cooldown entries
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [RUN-614806] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] BCHUSDT: Score 28 < 82 | SOTT: 0.67 (-0.08)
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 39 < 85
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.28)
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:00:13 AM: f2ddc2b0 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:00:22 AM: f2ddc2b0 Duration: 8533.25 ms	Memory Usage: 130 MB	Init Duration: 208.68 ms
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   2026-02-18T23:15:34.915Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   Execution ID: RUN-535304
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   Loaded 0 cooldown entries
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [RUN-535304] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] BCHUSDT: Score 25 < 82 | SOTT: 0.00 (-0.06)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] GOLD(XAUT)USDT: Score 53 < 75 | SOTT: -0.67 (-0.17)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] GOLD(PAXG)USDT: Score 55 < 75 | SOTT: -0.44 (-0.11)
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:34 AM: d8eb67a8 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:15:43 AM: d8eb67a8 Duration: 8637.78 ms	Memory Usage: 142 MB	Init Duration: 217.94 ms
-Feb 19, 12:30:41 AM: 4150b984 INFO   2026-02-18T23:30:41.645Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:30:41 AM: 4150b984 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:30:41 AM: 4150b984 INFO   Execution ID: RUN-442047
-Feb 19, 12:30:41 AM: 4150b984 INFO   Loaded 0 cooldown entries
-Feb 19, 12:30:41 AM: 4150b984 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:30:41 AM: 4150b984 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [RUN-442047] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] PEPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] BCHUSDT: Score 28 < 82 | SOTT: -0.22 (-0.03)
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 39 < 85
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] GOLD(PAXG)USDT (RANGING): Sin MSS ni Sweep y score 47 < 85
-Feb 19, 12:30:41 AM: 4150b984 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:41 AM: 4150b984 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:30:51 AM: 4150b984 Duration: 10007.72 ms	Memory Usage: 141 MB	Init Duration: 238.49 ms
-Feb 19, 12:45:26 AM: 10a77226 INFO   2026-02-18T23:45:27.199Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:45:26 AM: 10a77226 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:45:26 AM: 10a77226 INFO   Execution ID: RUN-327576
-Feb 19, 12:45:26 AM: 10a77226 INFO   Loaded 0 cooldown entries
-Feb 19, 12:45:26 AM: 10a77226 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:45:26 AM: 10a77226 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:45:26 AM: 10a77226 INFO   [RUN-327576] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] UNIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] ETHUSDT: Score 38 < 82 | SOTT: 0.78 (0.06)
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] SUIUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] XRPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] ADAUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] DOGEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:26 AM: 10a77226 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] LTCUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] BCHUSDT: Score 28 < 82 | SOTT: -0.33 (-0.02)
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 46 < 85
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] GOLD(PAXG)USDT (RANGING): Sin MSS ni Sweep y score 39 < 85
-Feb 19, 12:45:26 AM: 10a77226 INFO   [REJECT] TRXUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:26 AM: 10a77226 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:45:35 AM: 10a77226 Duration: 8204.55 ms	Memory Usage: 140 MB	Init Duration: 226.78 ms
-Feb 19, 01:03:24 AM: 9c0c9418 INFO   2026-02-19T00:03:24.983Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:03:24 AM: 9c0c9418 INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
-Feb 19, 01:03:24 AM: 9c0c9418 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 01:03:24 AM: 9c0c9418 Duration: 4.83 ms	Memory Usage: 77 MB	Init Duration: 238.56 ms
-Feb 19, 01:15:14 AM: e9c18993 INFO   2026-02-19T00:15:14.977Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:15:14 AM: e9c18993 INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
-Feb 19, 01:15:14 AM: e9c18993 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 01:15:14 AM: e9c18993 Duration: 4.77 ms	Memory Usage: 77 MB	Init Duration: 228.71 ms
-Feb 19, 01:30:35 AM: 0e32ac0b INFO   2026-02-19T00:30:36.290Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:30:35 AM: 0e32ac0b INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
-Feb 19, 01:30:35 AM: 0e32ac0b INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 01:30:36 AM: 0e32ac0b Duration: 4.04 ms	Memory Usage: 77 MB	Init Duration: 201.07 ms
-Feb 19, 01:45:14 AM: 712208cc INFO   2026-02-19T00:45:14.841Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:45:14 AM: 712208cc INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
-Feb 19, 01:45:14 AM: 712208cc INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 01:45:14 AM: 712208cc Duration: 4.31 ms	Memory Usage: 77 MB	Init Duration: 207.41 ms
-Feb 19, 02:01:29 AM: b0f89492 INFO   2026-02-19T01:01:29.704Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 02:01:29 AM: b0f89492 INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
-Feb 19, 02:01:29 AM: b0f89492 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 02:01:29 AM: b0f89492 Duration: 4.52 ms	Memory Usage: 77 MB	Init Duration: 229.39 ms
-Feb 19, 02:15:35 AM: 09873bf6 INFO   2026-02-19T01:15:35.561Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 02:15:35 AM: 09873bf6 INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
-Feb 19, 02:15:35 AM: 09873bf6 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 02:15:35 AM: 09873bf6 Duration: 4.95 ms	Memory Usage: 77 MB	Init Duration: 276.01 ms
-Feb 19, 02:30:53 AM: e2829f0e INFO   2026-02-19T01:30:54.032Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 02:30:53 AM: e2829f0e INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
-Feb 19, 02:30:53 AM: e2829f0e INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 02:30:54 AM: e2829f0e Duration: 4.68 ms	Memory Usage: 77 MB	Init Duration: 218.13 ms
-Feb 19, 02:45:18 AM: 50cdcec1 INFO   2026-02-19T01:45:19.332Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 02:45:18 AM: 50cdcec1 INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
-Feb 19, 02:45:18 AM: 50cdcec1 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 02:45:19 AM: 50cdcec1 Duration: 5.17 ms	Memory Usage: 77 MB	Init Duration: 228.99 ms
-Feb 19, 03:00:38 AM: ef4ea736 INFO   2026-02-19T02:00:38.918Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 03:00:38 AM: ef4ea736 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
-Feb 19, 03:00:38 AM: ef4ea736 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 03:00:38 AM: ef4ea736 Duration: 4.77 ms	Memory Usage: 77 MB	Init Duration: 205.42 ms
-Feb 19, 03:15:09 AM: 41649034 INFO   2026-02-19T02:15:09.694Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 03:15:09 AM: 41649034 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
-Feb 19, 03:15:09 AM: 41649034 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 03:15:09 AM: 41649034 Duration: 4.83 ms	Memory Usage: 77 MB	Init Duration: 223.33 ms
-Feb 19, 03:30:49 AM: db0c40c4 INFO   2026-02-19T02:30:50.183Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 03:30:49 AM: db0c40c4 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
-Feb 19, 03:30:49 AM: db0c40c4 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 03:30:50 AM: db0c40c4 Duration: 4.98 ms	Memory Usage: 77 MB	Init Duration: 256.28 ms
-Feb 19, 03:45:20 AM: 5ae57bb9 INFO   2026-02-19T02:45:20.982Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 03:45:20 AM: 5ae57bb9 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
-Feb 19, 03:45:20 AM: 5ae57bb9 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 03:45:20 AM: 5ae57bb9 Duration: 4.47 ms	Memory Usage: 77 MB	Init Duration: 217.45 ms
-Feb 19, 04:01:58 AM: 9f0d543e INFO   2026-02-19T03:01:58.726Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 04:01:58 AM: 9f0d543e INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
-Feb 19, 04:01:58 AM: 9f0d543e INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 04:01:58 AM: 9f0d543e Duration: 4.73 ms	Memory Usage: 77 MB	Init Duration: 224.04 ms
-Feb 19, 04:15:36 AM: ced92658 INFO   2026-02-19T03:15:37.160Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 04:15:36 AM: ced92658 INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
-Feb 19, 04:15:36 AM: ced92658 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 04:15:37 AM: ced92658 Duration: 4.87 ms	Memory Usage: 77 MB	Init Duration: 271.20 ms
-Feb 19, 04:30:33 AM: 85a5d734 INFO   2026-02-19T03:30:34.159Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 04:30:33 AM: 85a5d734 INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
-Feb 19, 04:30:33 AM: 85a5d734 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 04:30:34 AM: 85a5d734 Duration: 4.43 ms	Memory Usage: 77 MB	Init Duration: 225.32 ms
-Feb 19, 04:45:23 AM: 7a541716 INFO   2026-02-19T03:45:23.650Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 04:45:23 AM: 7a541716 INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
-Feb 19, 04:45:23 AM: 7a541716 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 04:45:23 AM: 7a541716 Duration: 4.38 ms	Memory Usage: 77 MB	Init Duration: 238.70 ms
-Feb 19, 05:01:54 AM: ee240f00 INFO   2026-02-19T04:01:54.457Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 05:01:54 AM: ee240f00 INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
-Feb 19, 05:01:54 AM: ee240f00 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 05:01:54 AM: ee240f00 Duration: 4.31 ms	Memory Usage: 77 MB	Init Duration: 232.35 ms
-Feb 19, 05:15:14 AM: b2c3e1a8 INFO   2026-02-19T04:15:15.229Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 05:15:14 AM: b2c3e1a8 INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
-Feb 19, 05:15:14 AM: b2c3e1a8 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 05:15:15 AM: b2c3e1a8 Duration: 4.56 ms	Memory Usage: 77 MB	Init Duration: 220.95 ms
-Feb 19, 05:30:36 AM: f3ad4d0f INFO   2026-02-19T04:30:37.139Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 05:30:36 AM: f3ad4d0f INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
-Feb 19, 05:30:36 AM: f3ad4d0f INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 05:30:37 AM: f3ad4d0f Duration: 4.21 ms	Memory Usage: 77 MB	Init Duration: 207.40 ms
-Feb 19, 05:45:33 AM: dc46a5a7 INFO   2026-02-19T04:45:33.986Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 05:45:33 AM: dc46a5a7 INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
-Feb 19, 05:45:33 AM: dc46a5a7 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 05:45:34 AM: dc46a5a7 Duration: 4.83 ms	Memory Usage: 77 MB	Init Duration: 278.58 ms
-Feb 19, 06:00:14 AM: 3c4dc5a6 INFO   2026-02-19T05:00:14.688Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 06:00:14 AM: 3c4dc5a6 INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
-Feb 19, 06:00:14 AM: 3c4dc5a6 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 06:00:14 AM: 3c4dc5a6 Duration: 4.50 ms	Memory Usage: 77 MB	Init Duration: 206.15 ms
-Feb 19, 06:15:33 AM: 4d7ab2b6 INFO   2026-02-19T05:15:33.463Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 06:15:33 AM: 4d7ab2b6 INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
-Feb 19, 06:15:33 AM: 4d7ab2b6 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 06:15:33 AM: 4d7ab2b6 Duration: 4.28 ms	Memory Usage: 77 MB	Init Duration: 220.90 ms
-Feb 19, 06:30:36 AM: d0a911d3 INFO   2026-02-19T05:30:36.879Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 06:30:36 AM: d0a911d3 INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
-Feb 19, 06:30:36 AM: d0a911d3 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 06:30:36 AM: d0a911d3 Duration: 4.34 ms	Memory Usage: 77 MB	Init Duration: 232.97 ms
-Feb 19, 06:45:06 AM: 309c167c INFO   2026-02-19T05:45:06.901Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 06:45:06 AM: 309c167c INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
-Feb 19, 06:45:06 AM: 309c167c INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 06:45:06 AM: 309c167c Duration: 4.43 ms	Memory Usage: 77 MB	Init Duration: 222.24 ms
-Feb 19, 07:01:33 AM: 51327913 INFO   2026-02-19T06:01:33.724Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 07:01:33 AM: 51327913 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
-Feb 19, 07:01:33 AM: 51327913 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 07:01:33 AM: 51327913 Duration: 4.45 ms	Memory Usage: 77 MB	Init Duration: 254.67 ms
-Feb 19, 07:15:12 AM: e184aba0 INFO   2026-02-19T06:15:13.315Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 07:15:12 AM: e184aba0 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
-Feb 19, 07:15:12 AM: e184aba0 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 07:15:13 AM: e184aba0 Duration: 4.74 ms	Memory Usage: 77 MB	Init Duration: 234.62 ms
-Feb 19, 07:30:23 AM: 61723343 INFO   2026-02-19T06:30:23.582Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 07:30:23 AM: 61723343 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
-Feb 19, 07:30:23 AM: 61723343 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 07:30:23 AM: 61723343 Duration: 4.39 ms	Memory Usage: 77 MB	Init Duration: 222.81 ms
-Feb 19, 07:45:38 AM: b0810929 INFO   2026-02-19T06:45:39.099Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 07:45:38 AM: b0810929 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
-Feb 19, 07:45:38 AM: b0810929 INFO   [SESSION] Trading paused - Low liquidity session
-Feb 19, 07:45:39 AM: b0810929 Duration: 4.17 ms	Memory Usage: 77 MB	Init Duration: 203.44 ms
-Feb 19, 08:01:04 AM: 4bcb714e INFO   2026-02-19T07:01:04.780Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 08:01:04 AM: 4bcb714e INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 08:01:04 AM: 4bcb714e INFO   Execution ID: RUN-465149
-Feb 19, 08:01:04 AM: 4bcb714e INFO   Loaded 0 cooldown entries
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 08:01:04 AM: 4bcb714e INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [RUN-465149] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] SOLUSDT: Overextended RSI(61.3) or BB(0.97) - Trend: NEUTRAL
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] UNIUSDT: Score 25 < 82 | SOTT: 0.22 (-0.02)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] SUIUSDT: Score 53 < 82 | SOTT: 0.00 (0.09)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] XRPUSDT: Score 46 < 82 | SOTT: 0.44 (-0.02)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] DOGEUSDT: Volume DEAD (0.25)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] ADAUSDT: Overextended RSI(59.3) or BB(0.99) - Trend: NEUTRAL
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] BTCUSDT: Overextended RSI(63.6) or BB(0.97) - Trend: NEUTRAL
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] BNBUSDT: Overextended RSI(64.2) or BB(1.00) - Trend: NEUTRAL
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] HBARUSDT: Score 29 < 82 | SOTT: 0.22 (-0.02)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] BCHUSDT (RANGING): BB% too high (1.07)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] GOLD(XAUT)USDT: Score 66 < 85 | SOTT: 0.78 (0.29)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   [REJECT] GOLD(PAXG)USDT: Score 66 < 85 | SOTT: 0.78 (0.28)
-Feb 19, 08:01:04 AM: 4bcb714e INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 08:01:12 AM: 4bcb714e Duration: 7662.86 ms	Memory Usage: 140 MB	Init Duration: 229.03 ms
-Feb 19, 08:15:32 AM: 1964c84f INFO   2026-02-19T07:15:33.352Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 08:15:32 AM: 1964c84f INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 08:15:32 AM: 1964c84f INFO   Execution ID: RUN-333747
-Feb 19, 08:15:32 AM: 1964c84f INFO   Loaded 0 cooldown entries
-Feb 19, 08:15:32 AM: 1964c84f INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 08:15:32 AM: 1964c84f INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 08:15:32 AM: 1964c84f INFO   [RUN-333747] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] SOLUSDT: Overextended RSI(63.6) or BB(1.01) - Trend: NEUTRAL
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] UNIUSDT: Score 22 < 82 | SOTT: 0.56 (-0.02)
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] SUIUSDT: Score 53 < 82 | SOTT: -0.67 (0.03)
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] XRPUSDT: Score 46 < 82 | SOTT: -0.22 (-0.02)
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] DOGEUSDT: Score 37 < 82 | SOTT: -0.67 (-0.02)
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] ADAUSDT (RANGING): BB% too high (0.85)
-Feb 19, 08:15:32 AM: 1964c84f INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] BTCUSDT: Overextended RSI(63.1) or BB(0.90) - Trend: NEUTRAL
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] BCHUSDT: Score 60 < 82 | SOTT: 0.67 (0.09)
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] GOLD(XAUT)USDT: Score 62 < 85 | SOTT: 0.44 (0.33)
-Feb 19, 08:15:32 AM: 1964c84f INFO   [REJECT] GOLD(PAXG)USDT: Score 63 < 85 | SOTT: 0.44 (0.28)
-Feb 19, 08:15:32 AM: 1964c84f INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 08:15:42 AM: 1964c84f Duration: 9405.95 ms	Memory Usage: 138 MB	Init Duration: 224.96 ms
-Feb 19, 08:30:28 AM: 131381aa INFO   2026-02-19T07:30:29.180Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 08:30:28 AM: 131381aa INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 08:30:28 AM: 131381aa INFO   Execution ID: RUN-229586
-Feb 19, 08:30:28 AM: 131381aa INFO   Loaded 0 cooldown entries
-Feb 19, 08:30:28 AM: 131381aa INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 08:30:28 AM: 131381aa INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 08:30:28 AM: 131381aa INFO   [RUN-229586] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] INJUSDT (TRENDING): No structure or pullback (dist21: 1.48%)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] ATOMUSDT (RANGING): Sin MSS ni Sweep y score 53 < 85
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] SOLUSDT: Overextended RSI(61.6) or BB(0.90) - Trend: NEUTRAL
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] UNIUSDT: Score 32 < 82 | SOTT: -0.44 (-0.01)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] SUIUSDT: Score 43 < 82 | SOTT: 0.22 (0.05)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] XRPUSDT: Score 56 < 82 | SOTT: 0.78 (-0.02)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] PEPEUSDT: Score 53 < 82 | SOTT: 0.67 (0.02)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] DOGEUSDT: Score 43 < 82 | SOTT: 0.44 (0.04)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] ADAUSDT: Overextended RSI(60.3) or BB(0.98) - Trend: NEUTRAL
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] HYPEUSDT (RANGING): BB% too high (0.87)
-Feb 19, 08:30:28 AM: 131381aa INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] BTCUSDT: Overextended RSI(65.7) or BB(0.96) - Trend: NEUTRAL
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] BNBUSDT: Score 43 < 85 | SOTT: -0.44 (0.09)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] HBARUSDT: Score 43 < 82 | SOTT: 0.56 (0.05)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] BCHUSDT: Score 25 < 82 | SOTT: 0.44 (0.15)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] GOLD(XAUT)USDT: Score 52 < 85 | SOTT: -0.44 (0.34)
-Feb 19, 08:30:28 AM: 131381aa INFO   [REJECT] GOLD(PAXG)USDT: Score 62 < 85 | SOTT: -0.44 (0.28)
-Feb 19, 08:30:28 AM: 131381aa INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 08:30:37 AM: 131381aa Duration: 8834.50 ms	Memory Usage: 131 MB	Init Duration: 214.06 ms
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   2026-02-19T07:45:32.845Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   Execution ID: RUN-133205
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   Loaded 0 cooldown entries
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [RUN-133205] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] ATOMUSDT (RANGING): Sin MSS ni Sweep y score 72 < 85
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] SOLUSDT: Score 51 < 82 | SOTT: -0.67 (0.07)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] UNIUSDT: Score 56 < 82 | SOTT: -0.44 (-0.01)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] XRPUSDT: Score 66 < 82 | SOTT: -0.22 (-0.01)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] PEPEUSDT: Score 60 < 82 | SOTT: 0.67 (0.08)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] DOGEUSDT: Score 56 < 82 | SOTT: 0.67 (0.11)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] ADAUSDT (RANGING): BB% too high (0.80)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] BTCUSDT: Overextended RSI(64.0) or BB(0.88) - Trend: NEUTRAL
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] BCHUSDT: Score 35 < 82 | SOTT: -0.11 (0.17)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   [REJECT] GOLD(XAUT)USDT: Score 72 < 85 | SOTT: 0.67 (0.35)
-Feb 19, 08:45:32 AM: 8fb9ac65 INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 08:45:40 AM: 8fb9ac65 Duration: 7715.14 ms	Memory Usage: 138 MB	Init Duration: 213.25 ms
-Feb 19, 09:02:01 AM: bf9e8399 INFO   2026-02-19T08:02:01.504Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 09:02:01 AM: bf9e8399 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 09:02:01 AM: bf9e8399 INFO   Execution ID: RUN-121915
-Feb 19, 09:02:01 AM: bf9e8399 INFO   Loaded 0 cooldown entries
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 09:02:01 AM: bf9e8399 INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [RUN-121915] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] SOLUSDT: Score 28 < 82 | SOTT: 0.33 (0.07)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] UNIUSDT (RANGING): BB% too high (0.78)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] XRPUSDT: Score 46 < 82 | SOTT: 0.00 (-0.02)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] PEPEUSDT: Score 46 < 82 | SOTT: 0.33 (0.08)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] DOGEUSDT: Score 43 < 82 | SOTT: -0.44 (0.07)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] ADAUSDT (RANGING): BB% too high (0.83)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] BTCUSDT: Score 62 < 82 | SOTT: 0.22 (0.07)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] BNBUSDT: Score 38 < 85 | SOTT: -0.56 (0.05)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] BCHUSDT: Score 40 < 82 | SOTT: -0.56 (0.13)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   [REJECT] GOLD(XAUT)USDT: Score 43 < 85 | SOTT: -0.56 (0.34)
-Feb 19, 09:02:01 AM: bf9e8399 INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 09:02:10 AM: bf9e8399 Duration: 8938.69 ms	Memory Usage: 138 MB	Init Duration: 214.96 ms
-Feb 19, 09:15:13 AM: 3d267755 INFO   2026-02-19T08:15:13.740Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 09:15:13 AM: 3d267755 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 09:15:13 AM: 3d267755 INFO   Execution ID: RUN-914172
-Feb 19, 09:15:13 AM: 3d267755 INFO   Loaded 0 cooldown entries
-Feb 19, 09:15:13 AM: 3d267755 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 09:15:13 AM: 3d267755 INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 09:15:13 AM: 3d267755 INFO   [RUN-914172] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] INJUSDT: Score 54 < 85 | SOTT: -0.78 (-0.01)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] ATOMUSDT (RANGING): Sin MSS ni Sweep y score 53 < 85
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] SOLUSDT: Score 41 < 82 | SOTT: -0.11 (0.08)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] UNIUSDT (RANGING): Sin MSS ni Sweep y score 50 < 85
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] ETHUSDT: Score 63 < 85 | SOTT: -0.78 (0.06)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] SUIUSDT: Score 64 < 82 | SOTT: -0.78 (0.01)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] XRPUSDT: Score 56 < 82 | SOTT: -0.78 (-0.05)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] PEPEUSDT: Score 53 < 82 | SOTT: -0.56 (0.08)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] DOGEUSDT: Score 43 < 82 | SOTT: -0.78 (0.06)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] ADAUSDT: Score 66 < 75 | SOTT: -0.78 (0.07)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] BTCUSDT: Score 63 < 82 | SOTT: -0.78 (0.03)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] BCHUSDT: Score 50 < 82 | SOTT: -0.78 (0.10)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] GOLD(XAUT)USDT: Score 46 < 85 | SOTT: -0.44 (0.32)
-Feb 19, 09:15:13 AM: 3d267755 INFO   [REJECT] GOLD(PAXG)USDT: Score 46 < 85 | SOTT: -0.44 (0.23)
-Feb 19, 09:15:13 AM: 3d267755 INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 09:15:21 AM: 3d267755 Duration: 7891.65 ms	Memory Usage: 130 MB	Init Duration: 275.40 ms
-Feb 19, 09:30:38 AM: b0b7985e INFO   2026-02-19T08:30:38.534Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 09:30:38 AM: b0b7985e INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 09:30:38 AM: b0b7985e INFO   Execution ID: RUN-838948
-Feb 19, 09:30:38 AM: b0b7985e INFO   Loaded 0 cooldown entries
-Feb 19, 09:30:38 AM: b0b7985e INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 09:30:38 AM: b0b7985e INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 09:30:38 AM: b0b7985e INFO   [RUN-838948] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] INJUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] UNIUSDT (RANGING): Sin MSS ni Sweep y score 37 < 85
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] SOLUSDT: Score 60 < 82 | SOTT: -0.78 (0.01)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] XRPUSDT: Score 37 < 82 | SOTT: -0.56 (-0.09)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] SUIUSDT: Score 46 < 82 | SOTT: -0.56 (-0.05)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] PEPEUSDT: Score 56 < 82 | SOTT: -0.78 (0.02)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] ADAUSDT: Score 66 < 75 | SOTT: -0.44 (0.02)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] HBARUSDT: Score 43 < 82 | SOTT: -0.56 (-0.05)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] LTCUSDT: Score 41 < 82 | SOTT: -0.78 (-0.08)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] BCHUSDT: Score 32 < 82 | SOTT: -0.56 (0.04)
-Feb 19, 09:30:38 AM: b0b7985e INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.28)
-Feb 19, 09:30:38 AM: b0b7985e INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 09:30:46 AM: b0b7985e Duration: 7992.35 ms	Memory Usage: 139 MB	Init Duration: 233.28 ms
-Feb 19, 09:45:12 AM: a39ececd INFO   2026-02-19T08:45:13.272Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 09:45:12 AM: a39ececd INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 09:45:12 AM: a39ececd INFO   Execution ID: RUN-713652
-Feb 19, 09:45:12 AM: a39ececd INFO   Loaded 0 cooldown entries
-Feb 19, 09:45:12 AM: a39ececd INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 09:45:12 AM: a39ececd INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 09:45:12 AM: a39ececd INFO   [RUN-713652] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] SUIUSDT: Score 47 < 82 | SOTT: -0.78 (-0.07)
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] XRPUSDT: Score 47 < 82 | SOTT: -0.78 (-0.12)
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] DOGEUSDT: Score 50 < 82 | SOTT: -0.78 (-0.02)
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] PEPEUSDT: Score 46 < 82 | SOTT: -0.67 (-0.01)
-Feb 19, 09:45:12 AM: a39ececd INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] HBARUSDT: Score 34 < 82 | SOTT: -0.78 (-0.09)
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] LTCUSDT: Score 58 < 82 | SOTT: -0.78 (-0.11)
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] BCHUSDT: Score 48 < 82 | SOTT: -0.78 (0.04)
-Feb 19, 09:45:12 AM: a39ececd INFO   [REJECT] GOLD(XAUT)USDT: Score 49 < 85 | SOTT: 0.78 (0.31)
-Feb 19, 09:45:12 AM: a39ececd INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 09:45:21 AM: a39ececd Duration: 8186.77 ms	Memory Usage: 139 MB	Init Duration: 220.56 ms
-Feb 19, 10:00:53 AM: c670290c INFO   2026-02-19T09:00:53.878Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 10:00:53 AM: c670290c INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 10:00:53 AM: c670290c INFO   Execution ID: RUN-654274
-Feb 19, 10:00:53 AM: c670290c INFO   Loaded 0 cooldown entries
-Feb 19, 10:00:53 AM: c670290c INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 10:00:53 AM: c670290c INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 10:00:53 AM: c670290c INFO   [RUN-654274] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] SUIUSDT: Score 44 < 82 | SOTT: -0.44 (-0.09)
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] DOGEUSDT: Score 37 < 82 | SOTT: 0.22 (-0.05)
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] PEPEUSDT: Score 34 < 82 | SOTT: -0.22 (0.01)
-Feb 19, 10:00:53 AM: c670290c INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] LTCUSDT: Score 62 < 82 | SOTT: -0.67 (-0.16)
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] BCHUSDT: Score 41 < 82 | SOTT: -0.67 (-0.02)
-Feb 19, 10:00:53 AM: c670290c INFO   [REJECT] GOLD(PAXG)USDT: Score 49 < 85 | SOTT: -0.22 (0.23)
-Feb 19, 10:00:53 AM: c670290c INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 10:01:02 AM: c670290c Duration: 8658.76 ms	Memory Usage: 140 MB	Init Duration: 205.70 ms
-Feb 19, 10:15:07 AM: 93ca889d INFO   2026-02-19T09:15:07.845Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 10:15:07 AM: 93ca889d INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 10:15:07 AM: 93ca889d INFO   Execution ID: RUN-508258
-Feb 19, 10:15:07 AM: 93ca889d INFO   Loaded 0 cooldown entries
-Feb 19, 10:15:07 AM: 93ca889d INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 10:15:07 AM: 93ca889d INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 10:15:07 AM: 93ca889d INFO   [RUN-508258] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] INJUSDT: Score 30 < 85 | SOTT: 0.44 (0.02)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] ATOMUSDT: Score 35 < 82 | SOTT: -0.78 (-0.09)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] SUIUSDT: Score 54 < 82 | SOTT: 0.56 (-0.10)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] DOGEUSDT: Score 34 < 82 | SOTT: 0.44 (-0.07)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] ADAUSDT: Score 64 < 82 | SOTT: -0.44 (-0.05)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] LTCUSDT: Score 58 < 82 | SOTT: 0.56 (-0.15)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] BCHUSDT: Score 23 < 82 | SOTT: -0.11 (-0.04)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] GOLD(XAUT)USDT: Score 52 < 85 | SOTT: -0.11 (0.23)
-Feb 19, 10:15:07 AM: 93ca889d INFO   [REJECT] GOLD(PAXG)USDT: Score 52 < 85 | SOTT: 0.22 (0.21)
-Feb 19, 10:15:07 AM: 93ca889d INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 10:15:15 AM: 93ca889d Duration: 8163.59 ms	Memory Usage: 135 MB	Init Duration: 214.99 ms
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   2026-02-19T09:31:01.631Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   Execution ID: RUN-462050
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   Loaded 0 cooldown entries
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [RUN-462050] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [REJECT] SUIUSDT: Score 13 < 82 | SOTT: 0.56 (-0.05)
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [REJECT] TAOUSDT: Score 45 < 82 | SOTT: -0.22 (-0.08)
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [REJECT] HYPEUSDT: Score 43 < 85 | SOTT: 0.44 (0.09)
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [REJECT] BCHUSDT: Score 23 < 82 | SOTT: 0.44 (-0.00)
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [REJECT] GOLD(XAUT)USDT: Score 53 < 85 | SOTT: -0.56 (0.22)
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   [REJECT] GOLD(PAXG)USDT: Score 53 < 85 | SOTT: -0.56 (0.21)
-Feb 19, 10:31:01 AM: 5830a8d4 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 10:31:10 AM: 5830a8d4 Duration: 9389.77 ms	Memory Usage: 140 MB	Init Duration: 207.28 ms
-Feb 19, 10:45:09 AM: e178a339 INFO   2026-02-19T09:45:09.770Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 10:45:09 AM: e178a339 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 10:45:09 AM: e178a339 INFO   Execution ID: RUN-310171
-Feb 19, 10:45:09 AM: e178a339 INFO   Loaded 0 cooldown entries
-Feb 19, 10:45:09 AM: e178a339 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 10:45:09 AM: e178a339 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 10:45:09 AM: e178a339 INFO   [RUN-310171] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] INJUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] ATOMUSDT: Score 29 < 82 | SOTT: 0.33 (-0.08)
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] TAOUSDT: Score 53 < 82 | SOTT: -0.44 (-0.09)
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] UNIUSDT: Score 37 < 82 | SOTT: -0.33 (-0.04)
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] PEPEUSDT: Score 25 < 82 | SOTT: -0.33 (-0.02)
-Feb 19, 10:45:09 AM: e178a339 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] BCHUSDT: Score 33 < 82 | SOTT: -0.67 (-0.07)
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] GOLD(XAUT)USDT: Score 52 < 85 | SOTT: 0.00 (0.23)
-Feb 19, 10:45:09 AM: e178a339 INFO   [REJECT] GOLD(PAXG)USDT: Score 48 < 85 | SOTT: 0.00 (0.19)
-Feb 19, 10:45:09 AM: e178a339 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 10:45:17 AM: e178a339 Duration: 8074.38 ms	Memory Usage: 134 MB	Init Duration: 225.51 ms
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   2026-02-19T10:01:40.403Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   Execution ID: RUN-300800
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   Loaded 0 cooldown entries
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [RUN-300800] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] INJUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] SOLUSDT: Score 38 < 82 | SOTT: -0.78 (-0.02)
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] LTCUSDT: Score 43 < 82 | SOTT: -0.78 (-0.16)
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] BCHUSDT (HighVol): score=62, structure=true, btcRisk=GREEN, volRatio=8.63
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] GOLD(XAUT)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   [REJECT] GOLD(PAXG)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:01:39 AM: 5e3beb1b INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 11:01:48 AM: 5e3beb1b Duration: 8648.73 ms	Memory Usage: 134 MB	Init Duration: 227.69 ms
-Feb 19, 11:15:14 AM: c712e600 INFO   2026-02-19T10:15:14.653Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 11:15:14 AM: c712e600 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 11:15:14 AM: c712e600 INFO   Execution ID: RUN-115064
-Feb 19, 11:15:14 AM: c712e600 INFO   Loaded 0 cooldown entries
-Feb 19, 11:15:14 AM: c712e600 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 11:15:14 AM: c712e600 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 11:15:14 AM: c712e600 INFO   [RUN-115064] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] INJUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] ATOMUSDT: Score 29 < 82 | SOTT: 0.00 (-0.10)
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] TAOUSDT: Score 68 < 82 | SOTT: -0.44 (-0.15)
-Feb 19, 11:15:14 AM: c712e600 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] LTCUSDT: Score 50 < 82 | SOTT: -0.67 (-0.16)
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] GOLD(XAUT)USDT: Score 58 < 85 | SOTT: -0.78 (0.12)
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] GOLD(PAXG)USDT: Score 51 < 85 | SOTT: -0.78 (0.10)
-Feb 19, 11:15:14 AM: c712e600 INFO   [REJECT] MXUSDT (HighVol): score=40, structure=true, btcRisk=GREEN, volRatio=0.34
-Feb 19, 11:15:14 AM: c712e600 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 11:15:22 AM: c712e600 Duration: 8020.44 ms	Memory Usage: 142 MB	Init Duration: 226.78 ms
-Feb 19, 11:30:11 AM: e877d7ff INFO   2026-02-19T10:30:11.702Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 11:30:11 AM: e877d7ff INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 11:30:11 AM: e877d7ff INFO   Execution ID: RUN-012147
-Feb 19, 11:30:11 AM: e877d7ff INFO   Loaded 0 cooldown entries
-Feb 19, 11:30:11 AM: e877d7ff INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 11:30:11 AM: e877d7ff INFO   Smart Selection: Top 34 coins selected based on Opportunity Score.
-Feb 19, 11:30:11 AM: e877d7ff INFO   [RUN-012147] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] ATOMUSDT: Score 47 < 82 | SOTT: -0.33 (-0.09)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] DOTUSDT: Score 53 < 82 | SOTT: -0.11 (-0.11)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] PEPEUSDT: Score 44 < 82 | SOTT: 0.44 (0.06)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] LTCUSDT: Score 47 < 82 | SOTT: 0.56 (-0.09)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] GOLD(XAUT)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] GOLD(PAXG)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] TRXUSDT: Overextended RSI(68.9) or BB(1.33) - Trend: NEUTRAL
-Feb 19, 11:30:11 AM: e877d7ff INFO   [REJECT] MXUSDT: Volume DEAD (0.28)
-Feb 19, 11:30:11 AM: e877d7ff INFO   Analysis complete: 34 coins, 0 signals, 0 errors
-Feb 19, 11:30:20 AM: e877d7ff Duration: 8855.15 ms	Memory Usage: 143 MB	Init Duration: 224.12 ms
-Feb 19, 11:45:32 AM: 15d27363 INFO   2026-02-19T10:45:33.229Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 11:45:32 AM: 15d27363 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 11:45:32 AM: 15d27363 INFO   Execution ID: RUN-933632
-Feb 19, 11:45:32 AM: 15d27363 INFO   Loaded 0 cooldown entries
-Feb 19, 11:45:32 AM: 15d27363 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 11:45:32 AM: 15d27363 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 11:45:32 AM: 15d27363 INFO   [RUN-933632] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] INJUSDT: Score 33 < 82 | SOTT: 0.44 (-0.01)
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] DOGEUSDT: Score 49 < 82 | SOTT: 0.44 (0.04)
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] PEPEUSDT: Overextended RSI(54.9) or BB(0.90) - Trend: NEUTRAL
-Feb 19, 11:45:32 AM: 15d27363 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] LTCUSDT: Score 50 < 82 | SOTT: -0.22 (-0.12)
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] GOLD(XAUT)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] GOLD(PAXG)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] TRXUSDT: Overextended RSI(70.0) or BB(1.18) - Trend: NEUTRAL
-Feb 19, 11:45:32 AM: 15d27363 INFO   [REJECT] MXUSDT (HighVol): score=50, structure=true, btcRisk=GREEN, volRatio=0.99
-Feb 19, 11:45:32 AM: 15d27363 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 11:45:41 AM: 15d27363 Duration: 8416.94 ms	Memory Usage: 141 MB	Init Duration: 221.58 ms
-Feb 19, 12:01:55 PM: 2cdf704f INFO   2026-02-19T11:01:56.345Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:01:55 PM: 2cdf704f INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:01:55 PM: 2cdf704f INFO   Execution ID: RUN-916756
-Feb 19, 12:01:55 PM: 2cdf704f INFO   Loaded 0 cooldown entries
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:01:55 PM: 2cdf704f INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [RUN-916756] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] INJUSDT: Score 34 < 82 | SOTT: 0.44 (0.00)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] UNIUSDT: Score 58 < 82 | SOTT: -0.78 (-0.03)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] XRPUSDT: Score 31 < 82 | SOTT: -0.67 (-0.07)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] DOGEUSDT: Score 43 < 82 | SOTT: -0.44 (0.03)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] PEPEUSDT: Score 44 < 82 | SOTT: -0.44 (0.02)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] HYPEUSDT: Score 47 < 82 | SOTT: -0.78 (-0.03)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] LTCUSDT: Score 53 < 82 | SOTT: -0.56 (-0.18)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] GOLD(XAUT)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] GOLD(PAXG)USDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 12:01:55 PM: 2cdf704f INFO   [REJECT] MXUSDT (HighVol): score=40, structure=false, btcRisk=GREEN, volRatio=0.44
-Feb 19, 12:01:55 PM: 2cdf704f INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:02:04 PM: 2cdf704f Duration: 8521.26 ms	Memory Usage: 146 MB	Init Duration: 234.61 ms
-Feb 19, 12:15:06 PM: 248ccc25 INFO   2026-02-19T11:15:06.961Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:15:06 PM: 248ccc25 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:15:06 PM: 248ccc25 INFO   Execution ID: RUN-707364
-Feb 19, 12:15:06 PM: 248ccc25 INFO   Loaded 0 cooldown entries
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:15:06 PM: 248ccc25 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [RUN-707364] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] ATOMUSDT: Score 29 < 82 | SOTT: -0.22 (-0.14)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] TAOUSDT: Score 43 < 85 | SOTT: 0.22 (-0.12)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] DOGEUSDT: Score 46 < 82 | SOTT: -0.44 (-0.02)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] PEPEUSDT: Score 28 < 82 | SOTT: 0.22 (-0.01)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] HYPEUSDT: Score 64 < 82 | SOTT: -0.67 (-0.09)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] LTCUSDT: Score 37 < 82 | SOTT: 0.33 (-0.15)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] GOLD(XAUT)USDT: Score 38 < 82 | SOTT: 0.67 (0.12)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] GOLD(PAXG)USDT: Score 45 < 82 | SOTT: 0.67 (0.08)
-Feb 19, 12:15:06 PM: 248ccc25 INFO   [REJECT] MXUSDT (HighVol): score=40, structure=false, btcRisk=GREEN, volRatio=0.74
-Feb 19, 12:15:06 PM: 248ccc25 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:15:15 PM: 248ccc25 Duration: 8467.55 ms	Memory Usage: 139 MB	Init Duration: 214.04 ms
-Feb 19, 12:30:15 PM: 977db3ec INFO   2026-02-19T11:30:16.026Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:30:15 PM: 977db3ec INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:30:15 PM: 977db3ec INFO   Execution ID: RUN-616413
-Feb 19, 12:30:15 PM: 977db3ec INFO   Loaded 0 cooldown entries
-Feb 19, 12:30:15 PM: 977db3ec INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:30:15 PM: 977db3ec INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:30:15 PM: 977db3ec INFO   [RUN-616413] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] INJUSDT: Score 30 < 82 | SOTT: 0.00 (-0.02)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] ATOMUSDT: Score 32 < 82 | SOTT: 0.67 (-0.10)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] DOGEUSDT: Score 49 < 82 | SOTT: 0.56 (-0.03)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] PEPEUSDT: Volume DEAD (0.23)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] ETHUSDT: Score 57 < 82 | SOTT: -0.33 (-0.14)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] HYPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] LTCUSDT: Score 43 < 82 | SOTT: -0.11 (-0.16)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=55, structure=false, btcRisk=GREEN, volRatio=1.37
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=59, structure=false, btcRisk=GREEN, volRatio=1.67
-Feb 19, 12:30:15 PM: 977db3ec INFO   [REJECT] MXUSDT: Score 60 < 82 | SOTT: -0.56 (-0.08)
-Feb 19, 12:30:15 PM: 977db3ec INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:30:24 PM: 977db3ec Duration: 8687.41 ms	Memory Usage: 142 MB	Init Duration: 216.33 ms
-Feb 19, 12:45:19 PM: 8378e54c INFO   2026-02-19T11:45:20.097Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 12:45:19 PM: 8378e54c INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 12:45:19 PM: 8378e54c INFO   Execution ID: RUN-520491
-Feb 19, 12:45:19 PM: 8378e54c INFO   Loaded 0 cooldown entries
-Feb 19, 12:45:19 PM: 8378e54c INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 12:45:19 PM: 8378e54c INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 12:45:19 PM: 8378e54c INFO   [RUN-520491] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] OPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] ATOMUSDT: Score 50 < 82 | SOTT: 0.22 (-0.05)
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] DOGEUSDT: Score 46 < 82 | SOTT: -0.44 (-0.06)
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] ETHUSDT: Score 56 < 82 | SOTT: -0.56 (-0.17)
-Feb 19, 12:45:19 PM: 8378e54c INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] HYPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] LTCUSDT: Score 40 < 82 | SOTT: -0.67 (-0.16)
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] BNBUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=38, structure=false, btcRisk=GREEN, volRatio=0.66
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] GOLD(PAXG)USDT: Score 38 < 82 | SOTT: -0.22 (-0.03)
-Feb 19, 12:45:19 PM: 8378e54c INFO   [REJECT] TRXUSDT: Score 56 < 82 | SOTT: -0.67 (0.02)
-Feb 19, 12:45:19 PM: 8378e54c INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 12:45:28 PM: 8378e54c Duration: 8723.30 ms	Memory Usage: 144 MB	Init Duration: 226.05 ms
-Feb 19, 01:00:39 PM: 65979b5c INFO   2026-02-19T12:00:39.814Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:00:39 PM: 65979b5c INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 01:00:39 PM: 65979b5c INFO   Execution ID: RUN-440244
-Feb 19, 01:00:39 PM: 65979b5c INFO   Loaded 0 cooldown entries
-Feb 19, 01:00:39 PM: 65979b5c INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 01:00:39 PM: 65979b5c INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 01:00:39 PM: 65979b5c INFO   [RUN-440244] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] INJUSDT: Score 30 < 82 | SOTT: -0.44 (0.02)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] ATOMUSDT: Score 40 < 82 | SOTT: 0.00 (-0.06)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] TAOUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] XRPUSDT: Score 58 < 82 | SOTT: -0.67 (-0.19)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] DOGEUSDT: Score 54 < 82 | SOTT: -0.67 (-0.09)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] PEPEUSDT: Score 25 < 82 | SOTT: 0.22 (-0.02)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] ADAUSDT: Score 59 < 82 | SOTT: -0.78 (-0.19)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] SOLUSDT: Score 53 < 82 | SOTT: -0.67 (-0.17)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] BTCUSDT: Score 58 < 75 | SOTT: -0.78 (-0.09)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] HYPEUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] LTCUSDT: Score 58 < 82 | SOTT: -0.56 (-0.21)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] BCHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=38, structure=false, btcRisk=GREEN, volRatio=0.68
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] GOLD(PAXG)USDT: Score 38 < 82 | SOTT: 0.00 (-0.07)
-Feb 19, 01:00:39 PM: 65979b5c INFO   [REJECT] TRXUSDT: Score 56 < 82 | SOTT: -0.44 (-0.03)
-Feb 19, 01:00:39 PM: 65979b5c INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 01:00:48 PM: 65979b5c Duration: 8628.63 ms	Memory Usage: 130 MB	Init Duration: 273.03 ms
-Feb 19, 01:15:22 PM: c9075268 INFO   2026-02-19T12:15:23.280Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:15:22 PM: c9075268 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 01:15:22 PM: c9075268 INFO   Execution ID: RUN-323646
-Feb 19, 01:15:22 PM: c9075268 INFO   Loaded 0 cooldown entries
-Feb 19, 01:15:22 PM: c9075268 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 01:15:22 PM: c9075268 INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 01:15:22 PM: c9075268 INFO   [RUN-323646] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] ADAUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] DOGEUSDT: Score 47 < 82 | SOTT: -0.44 (-0.08)
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] SOLUSDT: Score 57 < 82 | SOTT: -0.67 (-0.22)
-Feb 19, 01:15:22 PM: c9075268 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] BTCUSDT: Score 60 < 82 | SOTT: 0.00 (-0.06)
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] LTCUSDT: Score 44 < 82 | SOTT: -0.44 (-0.23)
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] BNBUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] BCHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=38, structure=false, btcRisk=GREEN, volRatio=0.68
-Feb 19, 01:15:22 PM: c9075268 INFO   [REJECT] GOLD(PAXG)USDT: Score 54 < 82 | SOTT: 0.67 (-0.06)
-Feb 19, 01:15:22 PM: c9075268 INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 01:15:31 PM: c9075268 Duration: 7837.25 ms	Memory Usage: 141 MB	Init Duration: 214.24 ms
-Feb 19, 01:30:41 PM: 073e180b INFO   2026-02-19T12:30:42.100Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:30:41 PM: 073e180b INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 01:30:41 PM: 073e180b INFO   Execution ID: RUN-242501
-Feb 19, 01:30:41 PM: 073e180b INFO   Loaded 0 cooldown entries
-Feb 19, 01:30:41 PM: 073e180b INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 01:30:41 PM: 073e180b INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 01:30:41 PM: 073e180b INFO   [RUN-242501] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] ADAUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] DOGEUSDT: Score 37 < 82 | SOTT: 0.22 (-0.09)
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] PEPEUSDT: Score 28 < 82 | SOTT: 0.11 (-0.05)
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:30:41 PM: 073e180b INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] LTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] BCHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] GOLD(XAUT)USDT: Score 48 < 82 | SOTT: 0.78 (0.02)
-Feb 19, 01:30:41 PM: 073e180b INFO   [REJECT] GOLD(PAXG)USDT: Score 41 < 82 | SOTT: 0.56 (-0.01)
-Feb 19, 01:30:41 PM: 073e180b INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 01:30:49 PM: 073e180b Duration: 7753.31 ms	Memory Usage: 134 MB	Init Duration: 214.74 ms
-Feb 19, 01:45:07 PM: 3d58134d INFO   2026-02-19T12:45:07.519Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 01:45:07 PM: 3d58134d INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 01:45:07 PM: 3d58134d INFO   Execution ID: RUN-107929
-Feb 19, 01:45:07 PM: 3d58134d INFO   Loaded 0 cooldown entries
-Feb 19, 01:45:07 PM: 3d58134d INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 01:45:07 PM: 3d58134d INFO   Smart Selection: Top 33 coins selected based on Opportunity Score.
-Feb 19, 01:45:07 PM: 3d58134d INFO   [RUN-107929] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] INJUSDT: Score 42 < 82 | SOTT: 0.67 (-0.02)
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] TRUMPUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] XRPUSDT: Score 37 < 82 | SOTT: -0.78 (-0.22)
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] ADAUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] DOGEUSDT: Score 40 < 82 | SOTT: -0.22 (-0.14)
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] PEPEUSDT: Score 41 < 82 | SOTT: 0.67 (-0.05)
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:45:07 PM: 3d58134d INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] LTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] BCHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] GOLD(XAUT)USDT: Score 48 < 82 | SOTT: -0.33 (-0.03)
-Feb 19, 01:45:07 PM: 3d58134d INFO   [REJECT] GOLD(PAXG)USDT: Score 48 < 82 | SOTT: -0.56 (-0.02)
-Feb 19, 01:45:07 PM: 3d58134d INFO   Analysis complete: 33 coins, 0 signals, 0 errors
-Feb 19, 01:45:15 PM: 3d58134d Duration: 8123.72 ms	Memory Usage: 134 MB	Init Duration: 224.10 ms
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   2026-02-19T13:01:17.380Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   --- DAY TRADE Analysis Started v5.1 ---
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   Execution ID: RUN-077775
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   Loaded 0 cooldown entries
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   Smart Selection: Top 32 coins selected based on Opportunity Score.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [RUN-077775] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] XRPUSDT: Score 37 < 82 | SOTT: -0.67 (-0.25)
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] ADAUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] DOGEUSDT: Score 37 < 82 | SOTT: -0.56 (-0.14)
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] PEPEUSDT: Score 25 < 82 | SOTT: -0.11 (-0.07)
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] ETHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] LTCUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [CACHE] Hit for BTCUSDT-4h-100
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] BTCUSDT: Score 52 < 82 | SOTT: -0.33 (-0.09)
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] BCHUSDT: DOWNTREND regime - Safe mode enabled.
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   [REJECT] GOLD(XAUT)USDT: Score 38 < 82 | SOTT: -0.44 (-0.02)
-Feb 19, 02:01:16 PM: 0e5d9ac7 INFO   Analysis complete: 32 coins, 0 signals, 0 errors
-Feb 19, 02:01:24 PM: 0e5d9ac7 Duration: 7422.05 ms	Memory Usage: 133 MB	Init Duration: 206.66 ms
 Feb 19, 02:15:03 PM: a5ea4d48 INFO   2026-02-19T13:15:03.940Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
 Feb 19, 02:15:03 PM: a5ea4d48 INFO   --- DAY TRADE Analysis Started v5.1 ---
 Feb 19, 02:15:03 PM: a5ea4d48 INFO   Execution ID: RUN-904425
@@ -1752,3 +756,971 @@ Feb 19, 09:30:39 PM: b4e11c77 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.16)
 Feb 19, 09:30:39 PM: b4e11c77 INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.23)
 Feb 19, 09:30:39 PM: b4e11c77 INFO   Analysis complete: 34 coins, 0 signals, 0 errors
 Feb 19, 09:30:49 PM: b4e11c77 Duration: 9631.25 ms	Memory Usage: 140 MB	Init Duration: 232.60 ms
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   2026-02-19T20:45:30.279Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   Execution ID: RUN-930653
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   Loaded 0 cooldown entries
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   Smart Selection: Top 34 coins selected based on Opportunity Score.
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [RUN-930653] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] INJUSDT: Score 40 < 82 | SOTT: 0.56 (0.03)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] ETHUSDT: Score 53 < 82 | SOTT: 0.78 (0.08)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] UNIUSDT: Volume DEAD (0.25)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] SUIUSDT: Score 71 < 82 | SOTT: 0.67 (0.03)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] BCHUSDT: Score 38 < 85 | SOTT: -0.56 (-0.00)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] XRPUSDT: Score 43 < 82 | SOTT: 0.44 (0.10)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] ASTERUSDT: Volume DEAD (0.17)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] LTCUSDT: Score 48 < 82 | SOTT: 0.67 (0.02)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] SOLUSDT: Score 49 < 82 | SOTT: -0.22 (0.11)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] DOGEUSDT: Score 63 < 82 | SOTT: 0.67 (0.07)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] ADAUSDT: Score 25 < 82 | SOTT: -0.44 (-0.01)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] PEPEUSDT: Score 45 < 82 | SOTT: 0.67 (-0.06)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] BTCUSDT: Score 45 < 82 | SOTT: 0.67 (0.06)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] TRXUSDT: Volume DEAD (0.29)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] GOLD(XAUT)USDT: Score 61 < 82 | SOTT: 0.78 (-0.04)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   [REJECT] GOLD(PAXG)USDT: Score 45 < 82 | SOTT: 0.78 (-0.01)
+Feb 19, 09:45:29 PM: 0feb4dd2 INFO   Analysis complete: 34 coins, 0 signals, 0 errors
+Feb 19, 09:45:38 PM: 0feb4dd2 Duration: 8472.32 ms	Memory Usage: 131 MB	Init Duration: 209.65 ms
+Feb 19, 10:00:26 PM: 0f82c401 INFO   2026-02-19T21:00:26.860Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 10:00:26 PM: 0f82c401 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 10:00:26 PM: 0f82c401 INFO   Execution ID: RUN-827232
+Feb 19, 10:00:26 PM: 0f82c401 INFO   Loaded 0 cooldown entries
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 10:00:26 PM: 0f82c401 INFO   Smart Selection: Top 34 coins selected based on Opportunity Score.
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [RUN-827232] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] INJUSDT: Score 38 < 82 | SOTT: 0.44 (0.08)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] UNIUSDT: Score 58 < 82 | SOTT: 0.78 (-0.02)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] SUIUSDT: Score 51 < 82 | SOTT: 0.56 (0.08)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] BCHUSDT: Score 48 < 85 | SOTT: -0.44 (-0.04)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] XRPUSDT: Score 48 < 82 | SOTT: 0.67 (0.14)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] ASTERUSDT: Score 61 < 85 | SOTT: 0.78 (0.16)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] LTCUSDT: Score 61 < 82 | SOTT: 0.67 (0.07)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] SOLUSDT: Score 47 < 82 | SOTT: 0.44 (0.14)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] DOGEUSDT: Score 43 < 82 | SOTT: 0.44 (0.10)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] ADAUSDT: Score 36 < 82 | SOTT: 0.67 (0.04)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] PEPEUSDT: Overextended RSI(57.3) or BB(0.88) - Trend: NEUTRAL, SOTT Sig: 0.02
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] BNBUSDT: Overextended RSI(62.0) or BB(0.93) - Trend: NEUTRAL, SOTT Sig: 0.12
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] TRXUSDT: Volume DEAD (0.15)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): BB% too high (0.83)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   [REJECT] GOLD(PAXG)USDT: Score 61 < 82 | SOTT: 0.78 (0.05)
+Feb 19, 10:00:26 PM: 0f82c401 INFO   Analysis complete: 34 coins, 0 signals, 0 errors
+Feb 19, 10:00:35 PM: 0f82c401 Duration: 8349.19 ms	Memory Usage: 134 MB	Init Duration: 219.89 ms
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   2026-02-19T21:15:07.073Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   Execution ID: RUN-707457
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   Loaded 0 cooldown entries
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [RUN-707457] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] UNIUSDT: Score 65 < 82 | SOTT: 0.67 (0.04)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] SUIUSDT (RANGING): BB% too high (0.80)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] BCHUSDT: Score 66 < 85 | SOTT: 0.67 (0.01)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] XRPUSDT: Score 43 < 82 | SOTT: -0.22 (0.17)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] ASTERUSDT: Volume DEAD (0.23)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] LTCUSDT: Score 43 < 82 | SOTT: -0.56 (0.07)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] SOLUSDT: Score 37 < 82 | SOTT: -0.44 (0.15)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] DOGEUSDT: Volume DEAD (0.24)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] ADAUSDT: Volume DEAD (0.24)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] PEPEUSDT: Overextended RSI(59.4) or BB(0.93) - Trend: NEUTRAL, SOTT Sig: 0.07
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] BTCUSDT: Score 37 < 82 | SOTT: -0.33 (0.11)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] TRXUSDT: Score 62 < 80 | SOTT: 0.67 (0.21)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): BB% too high (0.76)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   [REJECT] GOLD(PAXG)USDT: Score 46 < 75 | SOTT: -0.22 (0.08)
+Feb 19, 10:15:06 PM: 9e6a7815 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 19, 10:15:15 PM: 9e6a7815 Duration: 8945.70 ms	Memory Usage: 142 MB	Init Duration: 209.53 ms
+Feb 19, 10:30:21 PM: 5294aafa INFO   2026-02-19T21:30:21.583Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 10:30:21 PM: 5294aafa INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 10:30:21 PM: 5294aafa INFO   Execution ID: RUN-622012
+Feb 19, 10:30:21 PM: 5294aafa INFO   Loaded 0 cooldown entries
+Feb 19, 10:30:21 PM: 5294aafa INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 10:30:21 PM: 5294aafa INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 19, 10:30:21 PM: 5294aafa INFO   [RUN-622012] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] INJUSDT: Volume DEAD (0.29)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] UNIUSDT: Score 46 < 82 | SOTT: 0.33 (0.04)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] SUIUSDT (RANGING): BB% too high (0.86)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] BCHUSDT: Score 38 < 85 | SOTT: 0.00 (-0.02)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] XRPUSDT: Score 43 < 82 | SOTT: 0.33 (0.16)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] ASTERUSDT: Volume DEAD (0.18)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] LTCUSDT: Score 43 < 82 | SOTT: 0.33 (0.07)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] SOLUSDT: Score 37 < 82 | SOTT: -0.44 (0.14)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] DOGEUSDT: Score 48 < 82 | SOTT: 0.78 (0.14)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] ADAUSDT: Score 49 < 82 | SOTT: 0.78 (0.11)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] PEPEUSDT: Overextended RSI(61.2) or BB(0.95) - Trend: NEUTRAL, SOTT Sig: 0.08
+Feb 19, 10:30:21 PM: 5294aafa INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] BTCUSDT: Score 37 < 82 | SOTT: -0.44 (0.08)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] TRXUSDT: Score 62 < 80 | SOTT: 0.56 (0.21)
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 56 < 85
+Feb 19, 10:30:21 PM: 5294aafa INFO   [REJECT] GOLD(PAXG)USDT (RANGING): Sin MSS ni Sweep y score 46 < 85
+Feb 19, 10:30:21 PM: 5294aafa INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 19, 10:30:29 PM: 5294aafa Duration: 8245.05 ms	Memory Usage: 140 MB	Init Duration: 239.56 ms
+Feb 19, 10:45:24 PM: eee03928 INFO   2026-02-19T21:45:24.893Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 10:45:24 PM: eee03928 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 10:45:24 PM: eee03928 INFO   Execution ID: RUN-525368
+Feb 19, 10:45:24 PM: eee03928 INFO   Loaded 0 cooldown entries
+Feb 19, 10:45:24 PM: eee03928 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 10:45:24 PM: eee03928 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 19, 10:45:24 PM: eee03928 INFO   [RUN-525368] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] INJUSDT: Volume DEAD (0.12)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] UNIUSDT: Score 50 < 82 | SOTT: -0.67 (-0.02)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] SUIUSDT (RANGING): BB% too high (0.85)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] BCHUSDT: Score 38 < 85 | SOTT: -0.56 (-0.09)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] XRPUSDT: Score 46 < 82 | SOTT: -0.33 (0.12)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] ASTERUSDT: Score 53 < 80 | SOTT: 0.78 (0.21)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] LTCUSDT: Score 45 < 82 | SOTT: -0.33 (0.02)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] SOLUSDT: Score 42 < 82 | SOTT: 0.67 (0.16)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] DOGEUSDT: Score 53 < 82 | SOTT: -0.33 (0.08)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] ADAUSDT: Score 31 < 82 | SOTT: -0.11 (0.08)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] PEPEUSDT: Score 43 < 82 | SOTT: -0.22 (0.06)
+Feb 19, 10:45:24 PM: eee03928 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] BTCUSDT: Score 40 < 82 | SOTT: -0.56 (0.02)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] TRXUSDT: Score 52 < 85 | SOTT: -0.67 (0.14)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): BB% too high (0.76)
+Feb 19, 10:45:24 PM: eee03928 INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.26)
+Feb 19, 10:45:24 PM: eee03928 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 19, 10:45:33 PM: eee03928 Duration: 8387.20 ms	Memory Usage: 136 MB	Init Duration: 207.96 ms
+Feb 19, 11:00:36 PM: 9cfef699 INFO   2026-02-19T22:00:36.530Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 11:00:36 PM: 9cfef699 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 11:00:36 PM: 9cfef699 INFO   Execution ID: RUN-436960
+Feb 19, 11:00:36 PM: 9cfef699 INFO   Loaded 0 cooldown entries
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 11:00:36 PM: 9cfef699 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [RUN-436960] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] INJUSDT: Volume DEAD (0.15)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] ETHUSDT: Score 43 < 82 | SOTT: 0.22 (0.13)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] UNIUSDT: Score 37 < 82 | SOTT: -0.56 (-0.02)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] SUIUSDT (RANGING): Sin MSS ni Sweep y score 43 < 85
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] BCHUSDT: Score 53 < 85 | SOTT: 0.78 (-0.04)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] XRPUSDT: Score 43 < 75 | SOTT: -0.67 (0.10)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] ASTERUSDT: Score 46 < 85 | SOTT: -0.33 (0.19)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] LTCUSDT: Score 45 < 82 | SOTT: -0.56 (0.03)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] SOLUSDT: Score 40 < 82 | SOTT: -0.22 (0.11)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] DOGEUSDT: Volume DEAD (0.13)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] ADAUSDT: Score 31 < 82 | SOTT: -0.78 (0.06)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] PEPEUSDT: Score 43 < 82 | SOTT: -0.44 (0.07)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] TRXUSDT: Score 38 < 85 | SOTT: 0.33 (0.17)
+Feb 19, 11:00:36 PM: 9cfef699 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 46 < 85
+Feb 19, 11:00:36 PM: 9cfef699 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 19, 11:00:45 PM: 9cfef699 Duration: 9304.96 ms	Memory Usage: 137 MB	Init Duration: 242.27 ms
+Feb 19, 11:15:28 PM: 28151465 INFO   2026-02-19T22:15:29.347Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 11:15:28 PM: 28151465 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 11:15:28 PM: 28151465 INFO   Execution ID: RUN-329717
+Feb 19, 11:15:28 PM: 28151465 INFO   Loaded 0 cooldown entries
+Feb 19, 11:15:28 PM: 28151465 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 11:15:28 PM: 28151465 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 19, 11:15:28 PM: 28151465 INFO   [RUN-329717] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] INJUSDT: Score 32 < 82 | SOTT: -0.78 (-0.02)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] ETHUSDT (RANGING): Sin MSS ni Sweep y score 46 < 85
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] UNIUSDT (RANGING): Sin MSS ni Sweep y score 37 < 85
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] SUIUSDT: Overextended RSI(61.6) or BB(0.97) - Trend: NEUTRAL, SOTT Sig: 0.04
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] BCHUSDT: Score 71 < 85 | SOTT: 0.78 (-0.02)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] XRPUSDT: Score 56 < 75 | SOTT: 0.22 (0.07)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] LTCUSDT: Score 60 < 82 | SOTT: 0.78 (0.04)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] SOLUSDT: Score 50 < 82 | SOTT: 0.44 (0.09)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] DOGEUSDT: Score 51 < 82 | SOTT: 0.78 (0.07)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] ADAUSDT (RANGING): Sin MSS ni Sweep y score 34 < 85
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] PEPEUSDT: Score 48 < 82 | SOTT: 0.56 (0.07)
+Feb 19, 11:15:28 PM: 28151465 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] TRXUSDT: Score 49 < 85 | SOTT: -0.44 (0.13)
+Feb 19, 11:15:28 PM: 28151465 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.26)
+Feb 19, 11:15:28 PM: 28151465 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 19, 11:15:37 PM: 28151465 Duration: 8220.59 ms	Memory Usage: 140 MB	Init Duration: 234.90 ms
+Feb 19, 11:30:39 PM: fe7ace46 INFO   2026-02-19T22:30:40.207Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 11:30:39 PM: fe7ace46 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 11:30:39 PM: fe7ace46 INFO   Execution ID: RUN-240590
+Feb 19, 11:30:39 PM: fe7ace46 INFO   Loaded 0 cooldown entries
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 11:30:39 PM: fe7ace46 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [RUN-240590] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] INJUSDT: Volume DEAD (0.21)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] ETHUSDT: Score 46 < 75 | SOTT: -0.78 (0.03)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] UNIUSDT: Volume DEAD (0.29)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] SUIUSDT: Score 43 < 75 | SOTT: -0.33 (0.04)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] BCHUSDT: Score 46 < 85 | SOTT: -0.33 (-0.03)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] LTCUSDT (RANGING): Sin MSS ni Sweep y score 50 < 85
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] SOLUSDT: Score 50 < 82 | SOTT: -0.56 (0.08)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] DOGEUSDT (RANGING): Sin MSS ni Sweep y score 43 < 85
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] PEPEUSDT: Volume DEAD (0.18)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] BNBUSDT: Score 42 < 82 | SOTT: -0.56 (-0.01)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] TRXUSDT: Score 35 < 85 | SOTT: 0.33 (0.12)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.25)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.08)
+Feb 19, 11:30:39 PM: fe7ace46 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 19, 11:30:49 PM: fe7ace46 Duration: 9051.64 ms	Memory Usage: 134 MB	Init Duration: 222.64 ms
+Feb 19, 11:45:40 PM: cd5450fd INFO   2026-02-19T22:45:40.763Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 19, 11:45:40 PM: cd5450fd INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 19, 11:45:40 PM: cd5450fd INFO   Execution ID: RUN-141161
+Feb 19, 11:45:40 PM: cd5450fd INFO   Loaded 0 cooldown entries
+Feb 19, 11:45:40 PM: cd5450fd INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 19, 11:45:40 PM: cd5450fd INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 19, 11:45:40 PM: cd5450fd INFO   [RUN-141161] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] ASTERUSDT (TRENDING): No structure or pullback (dist21: 1.07%)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] ETHUSDT: Score 43 < 75 | SOTT: 0.22 (0.06)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] SUIUSDT: Score 43 < 82 | SOTT: -0.67 (0.03)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] BCHUSDT: Score 53 < 85 | SOTT: 0.22 (-0.03)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] SOLUSDT: Score 50 < 82 | SOTT: 0.00 (0.10)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] DOGEUSDT (RANGING): Sin MSS ni Sweep y score 43 < 85
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] PEPEUSDT: Score 46 < 82 | SOTT: -0.67 (0.04)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] TRXUSDT: Score 38 < 85 | SOTT: 0.11 (0.13)
+Feb 19, 11:45:40 PM: cd5450fd INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 58 < 85
+Feb 19, 11:45:40 PM: cd5450fd INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 19, 11:45:49 PM: cd5450fd Duration: 8744.29 ms	Memory Usage: 139 MB	Init Duration: 201.73 ms
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   2026-02-19T23:00:43.145Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   Execution ID: RUN-043520
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   Loaded 0 cooldown entries
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [RUN-043520] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [REJECT] INJUSDT: Volume DEAD (0.13)
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [REJECT] SUIUSDT: Overextended RSI(58.6) or BB(0.89) - Trend: NEUTRAL, SOTT Sig: 0.08
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [REJECT] BCHUSDT: Score 56 < 85 | SOTT: 0.44 (0.03)
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [REJECT] DOGEUSDT (RANGING): Sin MSS ni Sweep y score 53 < 85
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [REJECT] TRXUSDT: Score 38 < 85 | SOTT: 0.00 (0.16)
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.12)
+Feb 20, 12:00:42 AM: b84bf5b8 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 20, 12:00:51 AM: b84bf5b8 Duration: 8213.04 ms	Memory Usage: 139 MB	Init Duration: 215.16 ms
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   2026-02-19T23:15:03.844Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   Execution ID: RUN-904247
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   Loaded 0 cooldown entries
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [RUN-904247] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] TAOUSDT: Score 43 < 82 | SOTT: 0.00 (0.04)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] TONUSDT: Aggressive Trend check failed (4H: BEARISH, Signal: BUY)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] ASTERUSDT (TRENDING): No structure or pullback (dist21: 1.19%)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] ETHUSDT (RANGING): Sin MSS ni Sweep y score 51 < 85
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] SUIUSDT: Overextended RSI(60.5) or BB(0.96) - Trend: NEUTRAL, SOTT Sig: 0.07
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] BCHUSDT: Score 38 < 85 | SOTT: -0.56 (-0.03)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] SOLUSDT: Score 40 < 82 | SOTT: -0.22 (0.12)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] DOGEUSDT (RANGING): Sin MSS ni Sweep y score 46 < 85
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] TRXUSDT: Score 63 < 85 | SOTT: 0.56 (0.14)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] GOLD(XAUT)USDT: Score 66 < 75 | SOTT: -0.44 (0.12)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   [REJECT] GOLD(PAXG)USDT: Score 66 < 75 | SOTT: -0.44 (0.20)
+Feb 20, 12:15:03 AM: 5a1efea1 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 20, 12:15:13 AM: 5a1efea1 Duration: 10014.20 ms	Memory Usage: 136 MB	Init Duration: 211.17 ms
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   2026-02-19T23:31:00.347Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   Execution ID: RUN-860709
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   Loaded 0 cooldown entries
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   Smart Selection: Top 34 coins selected based on Opportunity Score.
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [RUN-860709] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] INJUSDT: Score 29 < 82 | SOTT: 0.78 (-0.09)
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] ASTERUSDT (TRENDING): No structure or pullback (dist21: 1.17%)
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] ETHUSDT (RANGING): BB% too high (0.86)
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] UNIUSDT (RANGING): BB% too high (0.85)
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] SUIUSDT: Overextended RSI(64.5) or BB(1.10) - Trend: NEUTRAL, SOTT Sig: 0.07
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] BCHUSDT: Score 53 < 85 | SOTT: 0.78 (-0.03)
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] LTCUSDT (RANGING): BB% too high (0.80)
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] DOGEUSDT: Overextended RSI(57.5) or BB(0.91) - Trend: NEUTRAL, SOTT Sig: 0.12
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] TRXUSDT: Score 44 < 85 | SOTT: 0.56 (0.14)
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 60 < 85
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   [REJECT] GOLD(PAXG)USDT (RANGING): Sin MSS ni Sweep y score 71 < 85
+Feb 20, 12:30:59 AM: 9e2bdbc6 INFO   Analysis complete: 34 coins, 0 signals, 0 errors
+Feb 20, 12:31:09 AM: 9e2bdbc6 Duration: 8853.33 ms	Memory Usage: 141 MB	Init Duration: 205.14 ms
+Feb 20, 12:45:26 AM: 683b55e6 INFO   2026-02-19T23:45:27.314Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:45:26 AM: 683b55e6 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:45:26 AM: 683b55e6 INFO   Execution ID: RUN-727759
+Feb 20, 12:45:26 AM: 683b55e6 INFO   Loaded 0 cooldown entries
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:45:26 AM: 683b55e6 INFO   Smart Selection: Top 34 coins selected based on Opportunity Score.
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [RUN-727759] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] OPUSDT: Score 46 < 82 | SOTT: -0.11 (0.04)
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] ASTERUSDT (TRENDING): No structure or pullback (dist21: 1.17%)
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] ETHUSDT (RANGING): BB% too high (0.84)
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] UNIUSDT: Overextended RSI(60.1) or BB(1.12) - Trend: NEUTRAL, SOTT Sig: 0.01
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] SUIUSDT: Overextended RSI(66.7) or BB(1.09) - Trend: NEUTRAL, SOTT Sig: 0.08
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] BCHUSDT: Score 38 < 85 | SOTT: -0.33 (-0.07)
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] LTCUSDT: Overextended RSI(57.0) or BB(0.90) - Trend: NEUTRAL, SOTT Sig: 0.01
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] DOGEUSDT: Overextended RSI(58.0) or BB(0.92) - Trend: NEUTRAL, SOTT Sig: 0.12
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] PEPEUSDT: Score 58 < 82 | SOTT: 0.56 (0.07)
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] TRXUSDT: Score 49 < 85 | SOTT: -0.67 (0.12)
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] GOLD(XAUT)USDT (RANGING): Sin MSS ni Sweep y score 66 < 85
+Feb 20, 12:45:26 AM: 683b55e6 INFO   [REJECT] GOLD(PAXG)USDT (RANGING): Sin MSS ni Sweep y score 61 < 85
+Feb 20, 12:45:26 AM: 683b55e6 INFO   Analysis complete: 34 coins, 0 signals, 0 errors
+Feb 20, 12:45:37 AM: 683b55e6 Duration: 9777.14 ms	Memory Usage: 136 MB	Init Duration: 236.78 ms
+Feb 20, 01:03:23 AM: c4193259 INFO   2026-02-20T00:03:24.396Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:03:23 AM: c4193259 INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
+Feb 20, 01:03:23 AM: c4193259 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 01:03:24 AM: c4193259 Duration: 4.61 ms	Memory Usage: 77 MB	Init Duration: 218.89 ms
+Feb 20, 01:15:03 AM: c5d90749 INFO   2026-02-20T00:15:04.344Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:15:03 AM: c5d90749 INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
+Feb 20, 01:15:03 AM: c5d90749 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 01:15:04 AM: c5d90749 Duration: 4.69 ms	Memory Usage: 77 MB	Init Duration: 241.05 ms
+Feb 20, 01:30:32 AM: dd35635d INFO   2026-02-20T00:30:32.700Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:30:32 AM: dd35635d INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
+Feb 20, 01:30:32 AM: dd35635d INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 01:30:32 AM: dd35635d Duration: 4.18 ms	Memory Usage: 77 MB	Init Duration: 209.04 ms
+Feb 20, 01:45:20 AM: 6ad23faf INFO   2026-02-20T00:45:20.771Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:45:20 AM: 6ad23faf INFO   [SESSION] Asia session detected (0:00 UTC) - trading restricted
+Feb 20, 01:45:20 AM: 6ad23faf INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 01:45:20 AM: 6ad23faf Duration: 4.57 ms	Memory Usage: 77 MB	Init Duration: 237.80 ms
+Feb 20, 02:00:56 AM: c5b775b7 INFO   2026-02-20T01:00:57.301Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 02:00:56 AM: c5b775b7 INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
+Feb 20, 02:00:56 AM: c5b775b7 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 02:00:57 AM: c5b775b7 Duration: 4.58 ms	Memory Usage: 77 MB	Init Duration: 217.05 ms
+Feb 20, 02:15:24 AM: 2357f227 INFO   2026-02-20T01:15:24.483Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 02:15:24 AM: 2357f227 INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
+Feb 20, 02:15:24 AM: 2357f227 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 02:15:24 AM: 2357f227 Duration: 4.76 ms	Memory Usage: 77 MB	Init Duration: 222.78 ms
+Feb 20, 02:30:38 AM: 47801cce INFO   2026-02-20T01:30:38.849Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 02:30:38 AM: 47801cce INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
+Feb 20, 02:30:38 AM: 47801cce INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 02:30:38 AM: 47801cce Duration: 4.59 ms	Memory Usage: 77 MB	Init Duration: 222.01 ms
+Feb 20, 02:45:04 AM: 58c1802e INFO   2026-02-20T01:45:05.403Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 02:45:04 AM: 58c1802e INFO   [SESSION] Asia session detected (1:00 UTC) - trading restricted
+Feb 20, 02:45:04 AM: 58c1802e INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 02:45:05 AM: 58c1802e Duration: 4.36 ms	Memory Usage: 77 MB	Init Duration: 211.57 ms
+Feb 20, 03:00:24 AM: 4b2678b7 INFO   2026-02-20T02:00:24.499Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 03:00:24 AM: 4b2678b7 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
+Feb 20, 03:00:24 AM: 4b2678b7 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 03:00:24 AM: 4b2678b7 Duration: 7.78 ms	Memory Usage: 77 MB	Init Duration: 268.94 ms
+Feb 20, 03:15:24 AM: eef50758 INFO   2026-02-20T02:15:24.740Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 03:15:24 AM: eef50758 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
+Feb 20, 03:15:24 AM: eef50758 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 03:15:24 AM: eef50758 Duration: 4.42 ms	Memory Usage: 77 MB	Init Duration: 231.10 ms
+Feb 20, 03:30:08 AM: 6ec10ae9 INFO   2026-02-20T02:30:08.525Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 03:30:08 AM: 6ec10ae9 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
+Feb 20, 03:30:08 AM: 6ec10ae9 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 03:30:08 AM: 6ec10ae9 Duration: 4.15 ms	Memory Usage: 77 MB	Init Duration: 231.70 ms
+Feb 20, 03:45:19 AM: 801aec51 INFO   2026-02-20T02:45:19.984Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 03:45:19 AM: 801aec51 INFO   [SESSION] Asia session detected (2:00 UTC) - trading restricted
+Feb 20, 03:45:19 AM: 801aec51 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 03:45:19 AM: 801aec51 Duration: 4.68 ms	Memory Usage: 77 MB	Init Duration: 233.84 ms
+Feb 20, 04:01:31 AM: 433b0a93 INFO   2026-02-20T03:01:31.950Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 04:01:31 AM: 433b0a93 INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
+Feb 20, 04:01:31 AM: 433b0a93 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 04:01:31 AM: 433b0a93 Duration: 4.00 ms	Memory Usage: 77 MB	Init Duration: 222.43 ms
+Feb 20, 04:15:24 AM: 46c07ed3 INFO   2026-02-20T03:15:24.497Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 04:15:24 AM: 46c07ed3 INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
+Feb 20, 04:15:24 AM: 46c07ed3 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 04:15:24 AM: 46c07ed3 Duration: 4.26 ms	Memory Usage: 77 MB	Init Duration: 207.73 ms
+Feb 20, 04:30:13 AM: 80ead3dc INFO   2026-02-20T03:30:14.076Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 04:30:13 AM: 80ead3dc INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
+Feb 20, 04:30:13 AM: 80ead3dc INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 04:30:14 AM: 80ead3dc Duration: 4.44 ms	Memory Usage: 77 MB	Init Duration: 221.67 ms
+Feb 20, 04:45:09 AM: 6f55e6b0 INFO   2026-02-20T03:45:10.283Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 04:45:09 AM: 6f55e6b0 INFO   [SESSION] Asia session detected (3:00 UTC) - trading restricted
+Feb 20, 04:45:09 AM: 6f55e6b0 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 04:45:10 AM: 6f55e6b0 Duration: 4.28 ms	Memory Usage: 77 MB	Init Duration: 225.00 ms
+Feb 20, 05:00:10 AM: 8d8df71e INFO   2026-02-20T04:00:10.963Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 05:00:10 AM: 8d8df71e INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
+Feb 20, 05:00:10 AM: 8d8df71e INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 05:00:10 AM: 8d8df71e Duration: 4.60 ms	Memory Usage: 77 MB	Init Duration: 234.10 ms
+Feb 20, 05:15:09 AM: 9920c187 INFO   2026-02-20T04:15:09.612Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 05:15:09 AM: 9920c187 INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
+Feb 20, 05:15:09 AM: 9920c187 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 05:15:09 AM: 9920c187 Duration: 4.64 ms	Memory Usage: 77 MB	Init Duration: 244.02 ms
+Feb 20, 05:30:21 AM: fa420574 INFO   2026-02-20T04:30:21.650Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 05:30:21 AM: fa420574 INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
+Feb 20, 05:30:21 AM: fa420574 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 05:30:21 AM: fa420574 Duration: 4.41 ms	Memory Usage: 77 MB	Init Duration: 216.90 ms
+Feb 20, 05:45:27 AM: 4915cb37 INFO   2026-02-20T04:45:27.678Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 05:45:27 AM: 4915cb37 INFO   [SESSION] Asia session detected (4:00 UTC) - trading restricted
+Feb 20, 05:45:27 AM: 4915cb37 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 05:45:27 AM: 4915cb37 Duration: 4.00 ms	Memory Usage: 77 MB	Init Duration: 201.98 ms
+Feb 20, 06:01:11 AM: 5b444900 INFO   2026-02-20T05:01:12.077Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 06:01:11 AM: 5b444900 INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
+Feb 20, 06:01:11 AM: 5b444900 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 06:01:12 AM: 5b444900 Duration: 5.59 ms	Memory Usage: 77 MB	Init Duration: 220.55 ms
+Feb 20, 06:15:10 AM: 4edb1e52 INFO   2026-02-20T05:15:10.629Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 06:15:10 AM: 4edb1e52 INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
+Feb 20, 06:15:10 AM: 4edb1e52 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 06:15:10 AM: 4edb1e52 Duration: 4.38 ms	Memory Usage: 77 MB	Init Duration: 226.76 ms
+Feb 20, 06:30:18 AM: a7ac9c2e INFO   2026-02-20T05:30:18.712Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 06:30:18 AM: a7ac9c2e INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
+Feb 20, 06:30:18 AM: a7ac9c2e INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 06:30:18 AM: a7ac9c2e Duration: 4.92 ms	Memory Usage: 77 MB	Init Duration: 213.84 ms
+Feb 20, 06:45:11 AM: affb55e0 INFO   2026-02-20T05:45:12.130Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 06:45:11 AM: affb55e0 INFO   [SESSION] Asia session detected (5:00 UTC) - trading restricted
+Feb 20, 06:45:11 AM: affb55e0 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 06:45:12 AM: affb55e0 Duration: 4.11 ms	Memory Usage: 77 MB	Init Duration: 218.31 ms
+Feb 20, 07:01:22 AM: 6f745109 INFO   2026-02-20T06:01:23.026Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 07:01:22 AM: 6f745109 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
+Feb 20, 07:01:22 AM: 6f745109 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 07:01:23 AM: 6f745109 Duration: 4.65 ms	Memory Usage: 77 MB	Init Duration: 245.21 ms
+Feb 20, 07:15:34 AM: 6f7fdd28 INFO   2026-02-20T06:15:34.957Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 07:15:34 AM: 6f7fdd28 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
+Feb 20, 07:15:34 AM: 6f7fdd28 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 07:15:34 AM: 6f7fdd28 Duration: 4.24 ms	Memory Usage: 77 MB	Init Duration: 224.86 ms
+Feb 20, 07:30:58 AM: 0226fa30 INFO   2026-02-20T06:30:58.640Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 07:30:58 AM: 0226fa30 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
+Feb 20, 07:30:58 AM: 0226fa30 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 07:30:58 AM: 0226fa30 Duration: 4.38 ms	Memory Usage: 77 MB	Init Duration: 210.38 ms
+Feb 20, 07:45:09 AM: 34442b34 INFO   2026-02-20T06:45:10.152Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 07:45:09 AM: 34442b34 INFO   [SESSION] Asia session detected (6:00 UTC) - trading restricted
+Feb 20, 07:45:09 AM: 34442b34 INFO   [SESSION] Trading paused - Low liquidity session
+Feb 20, 07:45:10 AM: 34442b34 Duration: 4.32 ms	Memory Usage: 77 MB	Init Duration: 210.63 ms
+Feb 20, 08:01:44 AM: f4d68422 INFO   2026-02-20T07:01:45.238Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 08:01:44 AM: f4d68422 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 08:01:44 AM: f4d68422 INFO   Execution ID: RUN-905635
+Feb 20, 08:01:44 AM: f4d68422 INFO   Loaded 0 cooldown entries
+Feb 20, 08:01:44 AM: f4d68422 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.7
+Feb 20, 08:01:44 AM: f4d68422 INFO   Smart Selection: Top 36 coins selected based on Opportunity Score.
+Feb 20, 08:01:44 AM: f4d68422 INFO   [RUN-905635] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] OPUSDT: TRENDING but not in uptrend (EMA21: 0.71%, EMA50: -1.43%)
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 52
+Feb 20, 08:01:44 AM: f4d68422 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 61
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 38
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] ADAUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 55
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:01:44 AM: f4d68422 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 70, got 66
+Feb 20, 08:01:44 AM: f4d68422 INFO   Analysis complete: 36 coins, 0 signals, 0 errors
+Feb 20, 08:01:54 AM: f4d68422 Duration: 9227.12 ms	Memory Usage: 140 MB	Init Duration: 210.92 ms
+Feb 20, 08:15:19 AM: fb3b5976 INFO   2026-02-20T07:15:19.698Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 08:15:19 AM: fb3b5976 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 08:15:19 AM: fb3b5976 INFO   Execution ID: RUN-720123
+Feb 20, 08:15:19 AM: fb3b5976 INFO   Loaded 0 cooldown entries
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.7
+Feb 20, 08:15:19 AM: fb3b5976 INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [RUN-720123] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] OPUSDT: TRENDING but not in uptrend (EMA21: 0.37%, EMA50: -1.66%)
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] TAOUSDT: BTC AMBER requires score 78, got 52
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 38
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] ADAUSDT: BTC AMBER requires score 78, got 54
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] BNBUSDT: BTC AMBER requires score 78, got 51
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 56
+Feb 20, 08:15:19 AM: fb3b5976 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:15:19 AM: fb3b5976 INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 20, 08:15:28 AM: fb3b5976 Duration: 9254.28 ms	Memory Usage: 141 MB	Init Duration: 204.74 ms
+Feb 20, 08:30:28 AM: 69edf12e INFO   2026-02-20T07:30:28.900Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 08:30:28 AM: 69edf12e INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 08:30:28 AM: 69edf12e INFO   Execution ID: RUN-629386
+Feb 20, 08:30:28 AM: 69edf12e INFO   Loaded 0 cooldown entries
+Feb 20, 08:30:28 AM: 69edf12e INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.7
+Feb 20, 08:30:28 AM: 69edf12e INFO   Smart Selection: Top 35 coins selected based on Opportunity Score.
+Feb 20, 08:30:28 AM: 69edf12e INFO   [RUN-629386] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 48
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 37
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 08:30:28 AM: 69edf12e INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 43
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] ADAUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] TRXUSDT: BTC AMBER requires score 70, got 54
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 70, got 59
+Feb 20, 08:30:28 AM: 69edf12e INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 56
+Feb 20, 08:30:28 AM: 69edf12e INFO   Analysis complete: 35 coins, 0 signals, 0 errors
+Feb 20, 08:30:36 AM: 69edf12e Duration: 8055.05 ms	Memory Usage: 138 MB	Init Duration: 210.94 ms
+Feb 20, 08:45:37 AM: 3f343668 INFO   2026-02-20T07:45:37.863Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 08:45:37 AM: 3f343668 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 08:45:37 AM: 3f343668 INFO   Execution ID: RUN-538309
+Feb 20, 08:45:37 AM: 3f343668 INFO   Loaded 0 cooldown entries
+Feb 20, 08:45:37 AM: 3f343668 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.7
+Feb 20, 08:45:37 AM: 3f343668 INFO   Smart Selection: Top 37 coins selected based on Opportunity Score.
+Feb 20, 08:45:37 AM: 3f343668 INFO   [RUN-538309] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] INJUSDT: BTC AMBER requires score 70, got 60
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 34
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] SOLUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 08:45:37 AM: 3f343668 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 64
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 38
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] ADAUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 56
+Feb 20, 08:45:37 AM: 3f343668 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 56
+Feb 20, 08:45:37 AM: 3f343668 INFO   Analysis complete: 37 coins, 0 signals, 0 errors
+Feb 20, 08:45:46 AM: 3f343668 Duration: 8622.13 ms	Memory Usage: 142 MB	Init Duration: 226.37 ms
+Feb 20, 09:01:45 AM: db3ca70c INFO   2026-02-20T08:01:45.535Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 09:01:45 AM: db3ca70c INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 09:01:45 AM: db3ca70c INFO   Execution ID: RUN-505912
+Feb 20, 09:01:45 AM: db3ca70c INFO   Loaded 0 cooldown entries
+Feb 20, 09:01:45 AM: db3ca70c INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.1
+Feb 20, 09:01:45 AM: db3ca70c INFO   Smart Selection: Top 38 coins selected based on Opportunity Score.
+Feb 20, 09:01:45 AM: db3ca70c INFO   [RUN-505912] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] INJUSDT: BTC AMBER requires score 70, got 60
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 34
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] SOLUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 55
+Feb 20, 09:01:45 AM: db3ca70c INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 45
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 35
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 56
+Feb 20, 09:01:45 AM: db3ca70c INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 70, got 60
+Feb 20, 09:01:45 AM: db3ca70c INFO   Analysis complete: 38 coins, 0 signals, 0 errors
+Feb 20, 09:01:54 AM: db3ca70c Duration: 8898.68 ms	Memory Usage: 144 MB	Init Duration: 204.37 ms
+Feb 20, 09:15:08 AM: f43b0af8 INFO   2026-02-20T08:15:08.489Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 09:15:08 AM: f43b0af8 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 09:15:08 AM: f43b0af8 INFO   Execution ID: RUN-308874
+Feb 20, 09:15:08 AM: f43b0af8 INFO   Loaded 0 cooldown entries
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.1
+Feb 20, 09:15:08 AM: f43b0af8 INFO   Smart Selection: Top 39 coins selected based on Opportunity Score.
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [RUN-308874] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] INJUSDT: BTC AMBER requires score 70, got 60
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 61
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] AVAXUSDT: Dist to EMA21 too high (1.99%)
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 34
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] SOLUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 48
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] UNIUSDT: BTC AMBER requires score 78, got 42
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 38
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 70, got 59
+Feb 20, 09:15:08 AM: f43b0af8 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 70, got 53
+Feb 20, 09:15:08 AM: f43b0af8 INFO   Analysis complete: 39 coins, 0 signals, 0 errors
+Feb 20, 09:15:17 AM: f43b0af8 Duration: 8591.88 ms	Memory Usage: 139 MB	Init Duration: 211.87 ms
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   2026-02-20T08:30:42.391Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   Execution ID: RUN-242793
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   Loaded 0 cooldown entries
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.1
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [RUN-242793] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 65
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] AVAXUSDT: Dist to EMA21 too high (1.94%)
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 38
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] SOLUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] UNIUSDT: Overextended RSI(61.9) or BB(1.01) - Trend: NEUTRAL, SOTT Sig: -0.04
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 38
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] NEARUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 52
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 53
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 56
+Feb 20, 09:30:42 AM: 367b1cb7 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 09:30:51 AM: 367b1cb7 Duration: 9610.14 ms	Memory Usage: 142 MB	Init Duration: 210.23 ms
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   2026-02-20T08:45:17.558Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   Execution ID: RUN-117953
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   Loaded 0 cooldown entries
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.1
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [RUN-117953] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] INJUSDT: BTC AMBER requires score 78, got 61
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 61
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 34
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 39
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 60
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] UNIUSDT: BTC AMBER requires score 78, got 45
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] NEARUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] SHIBUSDT: Overextended RSI(64.8) or BB(0.93) - Trend: NEUTRAL, SOTT Sig: 0.00
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 70, got 54
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 63
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 65
+Feb 20, 09:45:17 AM: 0cd06c15 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 09:45:27 AM: 0cd06c15 Duration: 9576.21 ms	Memory Usage: 149 MB	Init Duration: 203.70 ms
+Feb 20, 10:01:55 AM: 93141804 INFO   2026-02-20T09:01:55.920Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 10:01:55 AM: 93141804 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 10:01:55 AM: 93141804 INFO   Execution ID: RUN-116329
+Feb 20, 10:01:55 AM: 93141804 INFO   Loaded 0 cooldown entries
+Feb 20, 10:01:55 AM: 93141804 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.9
+Feb 20, 10:01:55 AM: 93141804 INFO   Smart Selection: Top 41 coins selected based on Opportunity Score.
+Feb 20, 10:01:55 AM: 93141804 INFO   [RUN-116329] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] INJUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 51
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] AVAXUSDT: BTC AMBER requires score 78, got 44
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] TAOUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 39
+Feb 20, 10:01:55 AM: 93141804 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 70, got 59
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 70, got 53
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 63
+Feb 20, 10:01:55 AM: 93141804 INFO   [REJECT] GOLD(PAXG)USDT: Score 73 < 77 | SOTT: 0.78 (0.27)
+Feb 20, 10:01:55 AM: 93141804 INFO   Analysis complete: 41 coins, 0 signals, 0 errors
+Feb 20, 10:02:05 AM: 93141804 Duration: 9291.92 ms	Memory Usage: 148 MB	Init Duration: 210.97 ms
+Feb 20, 10:15:26 AM: ecc7f925 INFO   2026-02-20T09:15:26.987Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 10:15:26 AM: ecc7f925 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 10:15:26 AM: ecc7f925 INFO   Execution ID: RUN-927386
+Feb 20, 10:15:26 AM: ecc7f925 INFO   Loaded 0 cooldown entries
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.9
+Feb 20, 10:15:26 AM: ecc7f925 INFO   Smart Selection: Top 42 coins selected based on Opportunity Score.
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [RUN-927386] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] INJUSDT: BTC AMBER requires score 70, got 60
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 59
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] AVAXUSDT: Dist to EMA21 too high (2.08%)
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] TAOUSDT: BTC AMBER requires score 78, got 60
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 61
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] ETHUSDT: Overextended RSI(62.4) or BB(0.90) - Trend: NEUTRAL, SOTT Sig: 0.09
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 51
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 61
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] UNIUSDT: Overextended RSI(63.3) or BB(0.99) - Trend: NEUTRAL, SOTT Sig: 0.01
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] PEPEUSDT: Overextended RSI(57.0) or BB(0.98) - Trend: NEUTRAL, SOTT Sig: 0.04
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] XRPUSDT: Overextended RSI(63.5) or BB(1.00) - Trend: NEUTRAL, SOTT Sig: 0.00
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] ADAUSDT: Overextended RSI(66.6) or BB(1.10) - Trend: NEUTRAL, SOTT Sig: -0.01
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 48
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=74, structure=true, btcRisk=AMBER, volRatio=1.67
+Feb 20, 10:15:26 AM: ecc7f925 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 70, got 64
+Feb 20, 10:15:26 AM: ecc7f925 INFO   Analysis complete: 42 coins, 0 signals, 0 errors
+Feb 20, 10:15:36 AM: ecc7f925 Duration: 9743.58 ms	Memory Usage: 152 MB	Init Duration: 216.73 ms
+Feb 20, 10:30:24 AM: ce51efee INFO   2026-02-20T09:30:25.007Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 10:30:24 AM: ce51efee INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 10:30:24 AM: ce51efee INFO   Execution ID: RUN-825437
+Feb 20, 10:30:24 AM: ce51efee INFO   Loaded 0 cooldown entries
+Feb 20, 10:30:24 AM: ce51efee INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.9
+Feb 20, 10:30:24 AM: ce51efee INFO   Smart Selection: Top 42 coins selected based on Opportunity Score.
+Feb 20, 10:30:24 AM: ce51efee INFO   [RUN-825437] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 51
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] AVAXUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] TAOUSDT: Overextended RSI(63.0) or BB(1.11) - Trend: NEUTRAL, SOTT Sig: -0.02
+Feb 20, 10:30:24 AM: ce51efee INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 45
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] DOGEUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] TONUSDT: Overextended RSI(61.8) or BB(1.05) - Trend: NEUTRAL, SOTT Sig: 0.07
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] UNIUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] PEPEUSDT: Overextended RSI(57.0) or BB(0.95) - Trend: NEUTRAL, SOTT Sig: 0.07
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 55
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] ADAUSDT: Overextended RSI(64.0) or BB(0.98) - Trend: NEUTRAL, SOTT Sig: 0.03
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] TRXUSDT: BTC AMBER requires score 70, got 53
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 70, got 60
+Feb 20, 10:30:24 AM: ce51efee INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=74, structure=true, btcRisk=AMBER, volRatio=2.21
+Feb 20, 10:30:24 AM: ce51efee INFO   Analysis complete: 42 coins, 0 signals, 0 errors
+Feb 20, 10:30:34 AM: ce51efee Duration: 9891.84 ms	Memory Usage: 141 MB	Init Duration: 214.14 ms
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   2026-02-20T09:45:28.415Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   Execution ID: RUN-728835
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   Loaded 0 cooldown entries
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=66.9
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   Smart Selection: Top 43 coins selected based on Opportunity Score.
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [RUN-728835] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 55
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] AVAXUSDT: BTC AMBER requires score 78, got 67
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] BCHUSDT: BTC AMBER requires score 70, got 49
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] DOGEUSDT: Overextended RSI(58.7) or BB(0.90) - Trend: NEUTRAL, SOTT Sig: -0.09
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] TONUSDT: Overextended RSI(60.0) or BB(0.92) - Trend: NEUTRAL, SOTT Sig: 0.03
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] UNIUSDT: BTC AMBER requires score 78, got 45
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 49
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] NEARUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] ADAUSDT: Overextended RSI(63.1) or BB(0.91) - Trend: NEUTRAL, SOTT Sig: -0.01
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 78, got 42
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 70, got 66
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 55
+Feb 20, 10:45:28 AM: a39c8ce2 INFO   Analysis complete: 43 coins, 0 signals, 0 errors
+Feb 20, 10:45:38 AM: a39c8ce2 Duration: 9910.76 ms	Memory Usage: 146 MB	Init Duration: 214.85 ms
+Feb 20, 11:01:19 AM: 011b56aa INFO   2026-02-20T10:01:19.697Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 11:01:19 AM: 011b56aa INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 11:01:19 AM: 011b56aa INFO   Execution ID: RUN-680104
+Feb 20, 11:01:19 AM: 011b56aa INFO   Loaded 0 cooldown entries
+Feb 20, 11:01:19 AM: 011b56aa INFO   [BTC-SEM] 🟡 AMBER: RSI1H=71.7
+Feb 20, 11:01:19 AM: 011b56aa INFO   Smart Selection: Top 42 coins selected based on Opportunity Score.
+Feb 20, 11:01:19 AM: 011b56aa INFO   [RUN-680104] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 61
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] TAOUSDT: Overextended RSI(63.5) or BB(0.98) - Trend: NEUTRAL, SOTT Sig: 0.02
+Feb 20, 11:01:19 AM: 011b56aa INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] BCHUSDT: BTC AMBER requires score 78, got 51
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] DOGEUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 55
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] TONUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] HBARUSDT: BTC AMBER requires score 70, got 58
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] TRXUSDT: BTC AMBER requires score 70, got 58
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 70, got 60
+Feb 20, 11:01:19 AM: 011b56aa INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 55
+Feb 20, 11:01:19 AM: 011b56aa INFO   Analysis complete: 42 coins, 0 signals, 0 errors
+Feb 20, 11:01:30 AM: 011b56aa Duration: 10472.57 ms	Memory Usage: 148 MB	Init Duration: 209.66 ms
+Feb 20, 11:15:11 AM: ff86f379 INFO   2026-02-20T10:15:12.010Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 11:15:11 AM: ff86f379 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 11:15:11 AM: ff86f379 INFO   Execution ID: RUN-512423
+Feb 20, 11:15:11 AM: ff86f379 INFO   Loaded 0 cooldown entries
+Feb 20, 11:15:11 AM: ff86f379 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=71.7
+Feb 20, 11:15:11 AM: ff86f379 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 11:15:11 AM: ff86f379 INFO   [RUN-512423] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] INJUSDT: BTC AMBER requires score 78, got 69
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] AVAXUSDT: 1H RSI (78.9) too high even for Aggressive
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 11:15:11 AM: ff86f379 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] DOGEUSDT: BTC AMBER requires score 78, got 50
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 58
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 64
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 70, got 65
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 70, got 60
+Feb 20, 11:15:11 AM: ff86f379 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 55
+Feb 20, 11:15:11 AM: ff86f379 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 11:15:23 AM: ff86f379 Duration: 11500.47 ms	Memory Usage: 141 MB	Init Duration: 217.17 ms
+Feb 20, 11:30:10 AM: 3711fa34 INFO   2026-02-20T10:30:11.392Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 11:30:10 AM: 3711fa34 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 11:30:10 AM: 3711fa34 INFO   Execution ID: RUN-411838
+Feb 20, 11:30:10 AM: 3711fa34 INFO   Loaded 0 cooldown entries
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=71.7
+Feb 20, 11:30:10 AM: 3711fa34 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [RUN-411838] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 45
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] AVAXUSDT: 1H RSI (78.9) too high even for Aggressive
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] DOGEUSDT: Overextended RSI(59.8) or BB(0.89) - Trend: NEUTRAL, SOTT Sig: -0.09
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] XRPUSDT: Overextended RSI(60.9) or BB(0.98) - Trend: NEUTRAL, SOTT Sig: 0.08
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] TRXUSDT: Score 77 < 82 | SOTT: 0.56 (0.02)
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 45
+Feb 20, 11:30:10 AM: 3711fa34 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 48
+Feb 20, 11:30:10 AM: 3711fa34 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 11:30:22 AM: 3711fa34 Duration: 10837.60 ms	Memory Usage: 143 MB	Init Duration: 260.96 ms
+Feb 20, 11:45:26 AM: e66d6113 INFO   2026-02-20T10:45:27.361Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 11:45:26 AM: e66d6113 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 11:45:26 AM: e66d6113 INFO   Execution ID: RUN-327793
+Feb 20, 11:45:26 AM: e66d6113 INFO   Loaded 0 cooldown entries
+Feb 20, 11:45:26 AM: e66d6113 INFO   [BTC-SEM] 🟡 AMBER: RSI1H=71.7
+Feb 20, 11:45:26 AM: e66d6113 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 11:45:26 AM: e66d6113 INFO   [RUN-327793] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] INJUSDT: BTC AMBER requires score 70, got 64
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] OPUSDT: BTC AMBER requires score 78, got 38
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] AVAXUSDT: 1H RSI (78.9) too high even for Aggressive
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] ASTERUSDT: BTC AMBER requires score 78, got 56
+Feb 20, 11:45:26 AM: e66d6113 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] DOGEUSDT: BTC AMBER requires score 78, got 47
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] ETHUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] PEPEUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] XRPUSDT: BTC AMBER requires score 78, got 53
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] TRXUSDT: BTC AMBER requires score 70, got 66
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] GOLD(XAUT)USDT: BTC AMBER requires score 78, got 53
+Feb 20, 11:45:26 AM: e66d6113 INFO   [REJECT] GOLD(PAXG)USDT: BTC AMBER requires score 78, got 58
+Feb 20, 11:45:26 AM: e66d6113 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 11:45:38 AM: e66d6113 Duration: 10825.44 ms	Memory Usage: 147 MB	Init Duration: 228.30 ms
+Feb 20, 12:00:42 PM: 52feae6d INFO   2026-02-20T11:00:42.639Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:00:42 PM: 52feae6d INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:00:42 PM: 52feae6d INFO   Execution ID: RUN-243010
+Feb 20, 12:00:42 PM: 52feae6d INFO   Loaded 0 cooldown entries
+Feb 20, 12:00:42 PM: 52feae6d INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:00:42 PM: 52feae6d INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 12:00:42 PM: 52feae6d INFO   [RUN-243010] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] INJUSDT: Score 53 < 82 | SOTT: 0.00 (0.01)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] OPUSDT: Score 25 < 82 | SOTT: -0.44 (-0.08)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] SUIUSDT: Score 63 < 82 | SOTT: -0.56 (0.14)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] SOLUSDT: Score 66 < 85 | SOTT: -0.78 (0.02)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] ASTERUSDT (RANGING): Sin MSS ni Sweep y score 56 < 85
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] LTCUSDT: Score 59 < 80 | SOTT: -0.56 (0.21)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] TAOUSDT (HighVol): score=69, structure=true, btcRisk=GREEN, volRatio=2.12
+Feb 20, 12:00:42 PM: 52feae6d INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] DOGEUSDT: Score 50 < 82 | SOTT: -0.67 (-0.14)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] PEPEUSDT: Score 53 < 75 | SOTT: -0.78 (-0.02)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] XRPUSDT: Score 47 < 82 | SOTT: -0.78 (-0.02)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] TRXUSDT: Score 44 < 82 | SOTT: 0.22 (0.03)
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=43, structure=false, btcRisk=GREEN, volRatio=0.66
+Feb 20, 12:00:42 PM: 52feae6d INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=63, structure=true, btcRisk=GREEN, volRatio=7.57
+Feb 20, 12:00:42 PM: 52feae6d INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 12:00:53 PM: 52feae6d Duration: 11342.66 ms	Memory Usage: 144 MB	Init Duration: 210.70 ms
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   2026-02-20T11:15:03.760Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   Execution ID: RUN-104180
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   Loaded 0 cooldown entries
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [RUN-104180] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] INJUSDT: Score 60 < 82 | SOTT: 0.78 (0.05)
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] OPUSDT: Score 28 < 82 | SOTT: 0.44 (-0.04)
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] AVAXUSDT (HighVol): score=27, structure=true, btcRisk=GREEN, volRatio=0.56
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] ASTERUSDT (RANGING): Sin MSS ni Sweep y score 66 < 85
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] BCHUSDT: Score 35 < 85 | SOTT: -0.56 (-0.12)
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] DOGEUSDT: Score 50 < 82 | SOTT: -0.56 (-0.15)
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] TRXUSDT: Score 43 < 82 | SOTT: -0.67 (0.01)
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.29)
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=38, structure=true, btcRisk=GREEN, volRatio=0.46
+Feb 20, 12:15:03 PM: fb0db5a6 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 12:15:13 PM: fb0db5a6 Duration: 9982.19 ms	Memory Usage: 146 MB	Init Duration: 233.71 ms
+Feb 20, 12:30:15 PM: 342beed6 INFO   2026-02-20T11:30:16.257Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:30:15 PM: 342beed6 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:30:15 PM: 342beed6 INFO   Execution ID: RUN-016669
+Feb 20, 12:30:15 PM: 342beed6 INFO   Loaded 0 cooldown entries
+Feb 20, 12:30:15 PM: 342beed6 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:30:15 PM: 342beed6 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 12:30:15 PM: 342beed6 INFO   [RUN-016669] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:30:15 PM: 342beed6 INFO   [REJECT] OPUSDT: Score 59 < 82 | SOTT: -0.67 (-0.08)
+Feb 20, 12:30:15 PM: 342beed6 INFO   [REJECT] AVAXUSDT (HighVol): score=30, structure=true, btcRisk=GREEN, volRatio=0.39
+Feb 20, 12:30:15 PM: 342beed6 INFO   [REJECT] ASTERUSDT (RANGING): Sin MSS ni Sweep y score 48 < 85
+Feb 20, 12:30:15 PM: 342beed6 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:30:15 PM: 342beed6 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
+Feb 20, 12:30:15 PM: 342beed6 INFO   [REJECT] TRXUSDT: Score 43 < 85 | SOTT: 0.00 (0.04)
+Feb 20, 12:30:15 PM: 342beed6 INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=35, structure=false, btcRisk=GREEN, volRatio=0.41
+Feb 20, 12:30:15 PM: 342beed6 INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.24)
+Feb 20, 12:30:15 PM: 342beed6 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 12:30:26 PM: 342beed6 Duration: 10513.65 ms	Memory Usage: 149 MB	Init Duration: 218.83 ms
+Feb 20, 12:45:03 PM: be329cc7 INFO   2026-02-20T11:45:04.062Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 12:45:03 PM: be329cc7 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 12:45:03 PM: be329cc7 INFO   Execution ID: RUN-904483
+Feb 20, 12:45:03 PM: be329cc7 INFO   Loaded 0 cooldown entries
+Feb 20, 12:45:03 PM: be329cc7 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 12:45:03 PM: be329cc7 INFO   Smart Selection: Top 40 coins selected based on Opportunity Score.
+Feb 20, 12:45:03 PM: be329cc7 INFO   [RUN-904483] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] OPUSDT: Score 29 < 82 | SOTT: -0.33 (-0.14)
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] AVAXUSDT (HighVol): score=39, structure=true, btcRisk=GREEN, volRatio=0.67
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] ASTERUSDT: Score 42 < 75 | SOTT: -0.78 (-0.01)
+Feb 20, 12:45:03 PM: be329cc7 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] ADAUSDT (HighVol): score=63, structure=false, btcRisk=GREEN, volRatio=1.64
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] BCHUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] TRXUSDT: Score 45 < 85 | SOTT: 0.00 (0.02)
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=35, structure=false, btcRisk=GREEN, volRatio=0.47
+Feb 20, 12:45:03 PM: be329cc7 INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=38, structure=false, btcRisk=GREEN, volRatio=0.53
+Feb 20, 12:45:03 PM: be329cc7 INFO   Analysis complete: 40 coins, 0 signals, 0 errors
+Feb 20, 12:45:15 PM: be329cc7 Duration: 11612.14 ms	Memory Usage: 147 MB	Init Duration: 219.66 ms
+Feb 20, 01:00:14 PM: ea3a9602 INFO   2026-02-20T12:00:15.016Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:00:14 PM: ea3a9602 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 01:00:14 PM: ea3a9602 INFO   Execution ID: RUN-815569
+Feb 20, 01:00:14 PM: ea3a9602 INFO   Loaded 0 cooldown entries
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 01:00:14 PM: ea3a9602 INFO   Smart Selection: Top 41 coins selected based on Opportunity Score.
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [RUN-815569] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] OPUSDT: Score 43 < 82 | SOTT: 0.33 (-0.15)
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] TRUMPUSDT: Dist to EMA21 too high (1.93%)
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] AVAXUSDT (HighVol): score=36, structure=true, btcRisk=GREEN, volRatio=0.57
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] SOLUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] ASTERUSDT: Score 49 < 75 | SOTT: -0.44 (-0.04)
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] BCHUSDT: Score 43 < 85 | SOTT: -0.67 (-0.17)
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] XRPUSDT: Score 53 < 75 | SOTT: 0.00 (-0.12)
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] TRXUSDT: Score 43 < 85 | SOTT: 0.33 (-0.00)
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=38, structure=true, btcRisk=GREEN, volRatio=0.51
+Feb 20, 01:00:14 PM: ea3a9602 INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=38, structure=false, btcRisk=GREEN, volRatio=0.62
+Feb 20, 01:00:14 PM: ea3a9602 INFO   Analysis complete: 41 coins, 0 signals, 0 errors
+Feb 20, 01:00:24 PM: ea3a9602 Duration: 10013.63 ms	Memory Usage: 145 MB	Init Duration: 232.81 ms
+Feb 20, 01:15:05 PM: 3c8517eb INFO   2026-02-20T12:15:06.202Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:15:05 PM: 3c8517eb INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 01:15:05 PM: 3c8517eb INFO   Execution ID: RUN-706690
+Feb 20, 01:15:05 PM: 3c8517eb INFO   Loaded 0 cooldown entries
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 01:15:05 PM: 3c8517eb INFO   Smart Selection: Top 41 coins selected based on Opportunity Score.
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [RUN-706690] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] INJUSDT: Score 48 < 82 | SOTT: -0.44 (0.04)
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] OPUSDT: Score 52 < 82 | SOTT: -0.78 (-0.18)
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] TRUMPUSDT (HighVol): score=48, structure=false, btcRisk=GREEN, volRatio=0.83
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] AVAXUSDT: Volume DEAD (0.15)
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] ASTERUSDT (RANGING): Sin MSS ni Sweep y score 35 < 85
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] BCHUSDT: Score 43 < 85 | SOTT: -0.44 (-0.15)
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] PEPEUSDT: Score 25 < 82 | SOTT: -0.33 (-0.04)
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] XRPUSDT (RANGING): Sin MSS ni Sweep y score 55 < 85
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] TRXUSDT: Score 43 < 85 | SOTT: -0.67 (-0.01)
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=38, structure=true, btcRisk=GREEN, volRatio=0.73
+Feb 20, 01:15:05 PM: 3c8517eb INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=48, structure=false, btcRisk=GREEN, volRatio=1.02
+Feb 20, 01:15:05 PM: 3c8517eb INFO   Analysis complete: 41 coins, 0 signals, 0 errors
+Feb 20, 01:15:16 PM: 3c8517eb Duration: 10003.65 ms	Memory Usage: 150 MB	Init Duration: 236.74 ms
+Feb 20, 01:31:12 PM: 348b3588 INFO   2026-02-20T12:31:13.003Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:31:12 PM: 348b3588 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 01:31:12 PM: 348b3588 INFO   Execution ID: RUN-673407
+Feb 20, 01:31:12 PM: 348b3588 INFO   Loaded 0 cooldown entries
+Feb 20, 01:31:12 PM: 348b3588 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 01:31:12 PM: 348b3588 INFO   Smart Selection: Top 41 coins selected based on Opportunity Score.
+Feb 20, 01:31:12 PM: 348b3588 INFO   [RUN-673407] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] OPUSDT: Score 49 < 82 | SOTT: -0.67 (-0.18)
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] TRUMPUSDT (HighVol): score=41, structure=false, btcRisk=GREEN, volRatio=0.33
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] AVAXUSDT: Volume DEAD (0.18)
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] ASTERUSDT: Score 53 < 82 | SOTT: -0.44 (0.01)
+Feb 20, 01:31:12 PM: 348b3588 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] BTCUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] BCHUSDT: Score 50 < 85 | SOTT: -0.56 (-0.18)
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] PEPEUSDT: Score 58 < 82 | SOTT: -0.56 (-0.08)
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] XRPUSDT (RANGING): Sin MSS ni Sweep y score 54 < 85
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] TRXUSDT: Score 43 < 85 | SOTT: 0.22 (0.04)
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=49, structure=true, btcRisk=GREEN, volRatio=1.47
+Feb 20, 01:31:12 PM: 348b3588 INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=29, structure=true, btcRisk=GREEN, volRatio=0.39
+Feb 20, 01:31:12 PM: 348b3588 INFO   Analysis complete: 41 coins, 0 signals, 0 errors
+Feb 20, 01:31:23 PM: 348b3588 Duration: 10229.13 ms	Memory Usage: 148 MB	Init Duration: 213.14 ms
+Feb 20, 01:45:34 PM: 406730bd INFO   2026-02-20T12:45:34.942Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 01:45:34 PM: 406730bd INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 01:45:34 PM: 406730bd INFO   Execution ID: RUN-535363
+Feb 20, 01:45:34 PM: 406730bd INFO   Loaded 0 cooldown entries
+Feb 20, 01:45:34 PM: 406730bd INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 01:45:34 PM: 406730bd INFO   Smart Selection: Top 41 coins selected based on Opportunity Score.
+Feb 20, 01:45:34 PM: 406730bd INFO   [RUN-535363] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] INJUSDT: Score 53 < 82 | SOTT: -0.67 (0.04)
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] TRUMPUSDT: Volume DEAD (0.30)
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] AVAXUSDT: DOWNTREND Pullback requires structure (MSS/Sweep)
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] SUIUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] ASTERUSDT: Score 45 < 82 | SOTT: -0.22 (0.03)
+Feb 20, 01:45:34 PM: 406730bd INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] BCHUSDT: Score 49 < 85 | SOTT: 0.00 (-0.15)
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] PEPEUSDT: Score 40 < 82 | SOTT: 0.22 (-0.05)
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] XRPUSDT: Score 46 < 82 | SOTT: -0.22 (-0.11)
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] TRXUSDT: Score 43 < 85 | SOTT: -0.67 (0.00)
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] GOLD(XAUT)USDT (HighVol): score=54, structure=true, btcRisk=GREEN, volRatio=1.48
+Feb 20, 01:45:34 PM: 406730bd INFO   [REJECT] GOLD(PAXG)USDT (HighVol): score=53, structure=true, btcRisk=GREEN, volRatio=1.02
+Feb 20, 01:45:34 PM: 406730bd INFO   Analysis complete: 41 coins, 0 signals, 0 errors
+Feb 20, 01:45:45 PM: 406730bd Duration: 10863.07 ms	Memory Usage: 150 MB	Init Duration: 246.63 ms
+Feb 20, 02:01:34 PM: a1433d00 INFO   2026-02-20T13:01:35.173Z	undefined	INFO	--- DAY TRADE Analysis Module Loaded ---
+Feb 20, 02:01:34 PM: a1433d00 INFO   --- DAY TRADE Analysis Started v5.1 ---
+Feb 20, 02:01:34 PM: a1433d00 INFO   Execution ID: RUN-495562
+Feb 20, 02:01:34 PM: a1433d00 INFO   Loaded 0 cooldown entries
+Feb 20, 02:01:34 PM: a1433d00 INFO   [BTC-SEM] 🟢 GREEN: Trend Healthy
+Feb 20, 02:01:34 PM: a1433d00 INFO   Smart Selection: Top 41 coins selected based on Opportunity Score.
+Feb 20, 02:01:34 PM: a1433d00 INFO   [RUN-495562] Performance Stats: { open: 0, wins: 0, losses: 0, winRate: 0 }
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] INJUSDT: Score 46 < 82 | SOTT: -0.44 (0.01)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] OPUSDT: DOWNTREND regime - Safe mode enabled.
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] TRUMPUSDT: Score 41 < 82 | SOTT: -0.67 (0.04)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] AVAXUSDT: Score 45 < 85 | SOTT: 0.67 (-0.02)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] ASTERUSDT: Score 48 < 82 | SOTT: 0.33 (0.04)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [CACHE] Hit for BTCUSDT-4h-100
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] BCHUSDT: Score 53 < 85 | SOTT: -0.78 (-0.16)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] PEPEUSDT: Score 50 < 82 | SOTT: 0.44 (0.01)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] XRPUSDT: Score 57 < 82 | SOTT: -0.44 (-0.12)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] TRXUSDT: Volume DEAD (0.23)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] GOLD(XAUT)USDT: Volume DEAD (0.26)
+Feb 20, 02:01:34 PM: a1433d00 INFO   [REJECT] GOLD(PAXG)USDT: Volume DEAD (0.23)
+Feb 20, 02:01:34 PM: a1433d00 INFO   Analysis complete: 41 coins, 0 signals, 0 errors
+Feb 20, 02:01:45 PM: a1433d00 Duration: 9890.79 ms	Memory Usage: 147 MB	Init Duration: 249.54 ms
