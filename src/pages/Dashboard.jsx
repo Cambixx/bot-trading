@@ -5,6 +5,7 @@ import CryptoSelector from '../components/CryptoSelector';
 import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
 import ExecutiveDashboard from '../components/ExecutiveDashboard';
+import NewsSection from '../components/NewsSection';
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
 
 const containerVariants = {
@@ -158,7 +159,10 @@ function Dashboard({
                 )}
             </motion.section>
 
-
+            {/* 3. Market Intelligence (News) */}
+            <motion.div variants={itemVariants}>
+                <NewsSection />
+            </motion.div>
 
             {/* Crypto Prices Dashboard */}
             <motion.section variants={itemVariants} className="dashboard-section">

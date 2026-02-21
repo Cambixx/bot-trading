@@ -158,6 +158,16 @@ h6 {
   font-size: 1rem;
 }
 
+/*
+### 7. Crypto News Section
+- [MODIFY] `src/services/macroService.js`: Increase `CACHE_TTL.NEWS` to 4 hours (14400000ms) and add a `forceRefresh` parameter to `getMarketNews`.
+- [NEW] `src/components/NewsSection.jsx` & `NewsSection.css`: Create a brutalist component to display 5-10 news articles with a manual refresh button.
+- [MODIFY] `src/pages/Dashboard.jsx`: Integrate the `NewsSection` below the Signals section.
+
+## Need User Review
+- Placement of the News section in the dashboard layout.
+- Selection of NewsAPI as the primary source (already integrated in backend).
+*/
 /* Brutalist "Glass" Card (Overriding the name but keeping class) */
 .glass-card {
   background: var(--color-bg-primary);

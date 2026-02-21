@@ -11,7 +11,7 @@ const CACHE_KEYS = {
 
 const CACHE_TTL = {
     MACRO: 60 * 60 * 1000, // 1 hour (Alpha Vantage is strict)
-    NEWS: 30 * 60 * 1000   // 30 minutes
+    NEWS: 4 * 60 * 60 * 1000 // 4 hours
 };
 
 class MacroService {
@@ -80,10 +80,13 @@ class MacroService {
 
     /**
      * Get Crypto News Analysis
+     * @param {boolean} forceRefresh - If true, bypass cache
      */
-    async getMarketNews() {
-        const cached = this._getFromCache(CACHE_KEYS.NEWS, CACHE_TTL.NEWS);
-        if (cached) return cached;
+    async getMarketNews(forceRefresh = false) {
+        if (!forceRefresh) {
+            const cached = this._getFromCache(CACHE_KEYS.NEWS, CACHE_TTL.NEWS);
+            if (cached) return cached;
+        }
 
         try {
             // Call internal proxy

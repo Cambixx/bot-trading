@@ -1,0 +1,104 @@
+.news-section {
+    margin-bottom: var(--spacing-2xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: var(--spacing-xl);
+}
+
+.news-card {
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.news-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0px 0px var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.news-card:hover .news-title {
+    color: var(--color-primary);
+}
+
+.news-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-tertiary);
+}
+
+.news-source {
+    background: var(--color-bg-tertiary);
+    padding: 2px 6px;
+    border: 1px solid var(--color-border-light);
+}
+
+.news-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.news-summary {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-transform: none;
+    /* Keep natural case for readability but brutalist headers */
+}
+
+.news-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.news-empty {
+    padding: 3rem;
+    text-align: center;
+    border: 2px dashed var(--color-border-light);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .news-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .news-title {
+        font-size: 1.1rem;
+    }
+}
