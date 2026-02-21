@@ -27,10 +27,8 @@ function CryptoCard({ crypto }) {
 
     return (
         <motion.div
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            className={`crypto-card glass-card ${opportunityInfo.level.toLowerCase()}-signal`}
+            className={`crypto-card ${opportunityInfo.level.toLowerCase()}-signal`}
         >
-            <div className="crypto-card-glow" />
 
             <div className="crypto-header">
                 <div className="crypto-symbol-info">
@@ -40,14 +38,12 @@ function CryptoCard({ crypto }) {
                     <div>
                         <span className="crypto-name">{symbol.replace('USDC', '').replace('USDT', '')}</span>
                         <div className={`crypto-change ${isPositive ? 'positive' : 'negative'}`}>
-                            {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                             <span>{isPositive ? '+' : ''}{priceChangePercent?.toFixed(2)}%</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="opportunity-badge-mini">
-                    {opportunityInfo.icon}
                     <span>{opportunityInfo.level}</span>
                 </div>
             </div>
@@ -59,16 +55,6 @@ function CryptoCard({ crypto }) {
                 </div>
 
                 <div className="score-viz">
-                    <svg className="score-ring" viewBox="0 0 36 36">
-                        <path className="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <motion.path
-                            initial={{ strokeDasharray: "0, 100" }}
-                            animate={{ strokeDasharray: `${score}, 100` }}
-                            transition={{ duration: 1, delay: 0.5 }}
-                            className={`ring-fill ${opportunityInfo.color}`}
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                    </svg>
                     <div className="score-text">
                         <span className="score-num">{score}</span>
                         <span className="score-label">SCORE</span>

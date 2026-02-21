@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brutalist Trading Signal Card</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#47f425",
+                        "background-light": "#f6f8f5",
+                        "background-dark": "#000000",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', monospace;
+            text-transform: uppercase;
+        }
+        .brutalist-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 1);
+        }
+        .brutalist-shadow-primary {
+            box-shadow: 4px 4px 0px 0px rgba(71, 244, 37, 1);
+        }
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .3; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-slate-100 min-h-screen flex flex-col items-center justify-start antialiased">
+<!-- Main Container -->
+<div class="w-full max-w-[430px] min-h-screen flex flex-col bg-background-dark border-x-2 border-slate-100 relative">
+<!-- Header Navigation -->
+<div class="flex items-center justify-between p-6 border-b-2 border-slate-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<h1 class="text-xl font-bold tracking-tighter">SIGNAL_OS_V1.0</h1>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-3 bg-primary rounded-full pulse-dot"></div>
+<span class="text-primary text-xs font-bold tracking-widest">ACTIVE</span>
+</div>
+</div>
+<!-- Signal Core Info -->
+<div class="p-6 space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-slate-400 text-xs mb-1">MARKET_INSTRUMENT</p>
+<h2 class="text-4xl font-bold tracking-tighter leading-none">BTCUSDT</h2>
+</div>
+<div class="text-right">
+<p class="text-slate-400 text-xs mb-1">CONFIDENCE</p>
+<p class="text-2xl font-bold">78%</p>
+</div>
+</div>
+<div class="bg-primary text-black p-3 flex items-center justify-between border-2 border-slate-100">
+<span class="font-bold text-2xl italic tracking-tighter">SIGNAL: LONG</span>
+<span class="material-symbols-outlined font-bold">trending_up</span>
+</div>
+</div>
+<!-- Chart Placeholder -->
+<div class="px-6 mb-6">
+<div class="w-full aspect-[16/9] border-2 border-slate-100 relative overflow-hidden bg-slate-900">
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<img alt="Crypto trading chart with green candles" class="w-full h-full object-cover grayscale contrast-125 opacity-60" data-alt="Technical trading chart with bullish candles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLWZW1eCtVmNZfzD3UnPnqmZfSxVjbOjEKpLFyvAPqbHHeJE2QUKpVRXIpFsDchMQG-i-1v-6fC7_1faj3VlhvrM-futbJd9EkOGxH0FX_MuTx5WraTTUzI1Z_gUoDNtv0FWs0KJZbXtzetuoTdrPimrP3H4D4S7psOF3cijerPUUD_N4BxcXOG5D3pyRX0xww_Gd9YETsVtGSmgpNwAIFhKmQZRRx_r0hOraNLnzny4vhzdo8bwIDii9sJcM4agronHNP2mPrrHvV"/>
+</div>
+<div class="absolute top-2 left-2 bg-black/80 border border-slate-100 px-2 py-1 text-[10px]">LIVE_FEED_01</div>
+</div>
+</div>
+<!-- Action Plan Grid -->
+<div class="px-6 mb-6">
+<h3 class="text-xs font-bold mb-2 tracking-[0.2em] text-slate-400">ACTION_PLAN</h3>
+<div class="grid grid-cols-2 border-t-2 border-l-2 border-slate-100">
+<div class="p-4 border-r-2 border-b-2 border-slate-100">
+<p class="text-[10px] text-slate-400">ENTRY_ZONE</p>
+<p class="text-lg font-bold">64,200.00</p>
+</div>
+<div class="p-4 border-r-2 border-b-2 border-slate-100">
+<p class="text-[10px] text-slate-400 text-red-500">STOP_LOSS</p>
+<p class="text-lg font-bold">62,500.00 <span class="text-xs font-normal text-red-500">(2.6%)</span></p>
+</div>
+<div class="p-4 border-r-2 border-b-2 border-slate-100">
+<p class="text-[10px] text-slate-400">TARGET_P1</p>
+<p class="text-lg font-bold text-primary">68,400.00</p>
+</div>
+<div class="p-4 border-r-2 border-b-2 border-slate-100">
+<p class="text-[10px] text-slate-400">TARGET_P2</p>
+<p class="text-lg font-bold text-primary">72,100.00</p>
+</div>
+<div class="col-span-2 p-4 border-r-2 border-b-2 border-slate-100">
+<p class="text-[10px] text-slate-400">TARGET_P3_MAX</p>
+<p class="text-lg font-bold text-primary">75,000.00+</p>
+</div>
+</div>
+</div>
+<!-- Execution Specs Grid -->
+<div class="px-6 mb-6">
+<h3 class="text-xs font-bold mb-2 tracking-[0.2em] text-slate-400">EXECUTION_SPECS</h3>
+<div class="grid grid-cols-3 border-t-2 border-l-2 border-slate-100">
+<div class="p-3 border-r-2 border-b-2 border-slate-100">
+<p class="text-[9px] text-slate-400">R/R_RATIO</p>
+<p class="text-md font-bold">1:3.2</p>
+</div>
+<div class="p-3 border-r-2 border-b-2 border-slate-100">
+<p class="text-[9px] text-slate-400">ALLOCATION</p>
+<p class="text-md font-bold">5.00%</p>
+</div>
+<div class="p-3 border-r-2 border-b-2 border-slate-100">
+<p class="text-[9px] text-slate-400">LEVERAGE</p>
+<p class="text-md font-bold">10X</p>
+</div>
+</div>
+</div>
+<!-- Confluence Section -->
+<div class="px-6 mb-10">
+<h3 class="text-xs font-bold mb-3 tracking-[0.2em] text-slate-400">CONFLUENCE</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<div class="size-5 border-2 border-slate-100 flex items-center justify-center">
+<div class="size-2 bg-primary"></div>
+</div>
+<span class="text-sm font-medium">RSI_BULLISH_DIVERGENCE</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-5 border-2 border-slate-100 flex items-center justify-center">
+<div class="size-2 bg-primary"></div>
+</div>
+<span class="text-sm font-medium">MACD_GOLDEN_CROSS_4H</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-5 border-2 border-slate-100 flex items-center justify-center">
+<div class="size-2 bg-primary"></div>
+</div>
+<span class="text-sm font-medium">VWAP_ORDER_BLOCK_SUPPORT</span>
+</div>
+</div>
+</div>
+<!-- Floating Action Button -->
+<div class="mt-auto p-6 border-t-2 border-slate-100 bg-background-dark sticky bottom-0">
+<button class="w-full bg-primary text-black py-5 font-bold text-xl brutalist-shadow border-2 border-slate-100 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3">
+<span class="material-symbols-outlined font-bold">bolt</span>
+                EXECUTE_TRADE
+            </button>
+</div>
+<!-- Bottom Navigation -->
+<div class="flex border-t-2 border-slate-100 bg-black">
+<a class="flex-1 py-4 flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px]">SIGNALS</span>
+</a>
+<a class="flex-1 py-4 flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-[10px]">WALLETS</span>
+</a>
+<a class="flex-1 py-4 flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="text-[10px]">MARKETS</span>
+</a>
+<a class="flex-1 py-4 flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px]">SYSTEM</span>
+</a>
+</div>
+</div>
+</body></html>

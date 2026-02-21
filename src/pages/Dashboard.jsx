@@ -5,7 +5,6 @@ import CryptoSelector from '../components/CryptoSelector';
 import CryptoCard from '../components/CryptoCard';
 import SignalCard from '../components/SignalCard';
 import ExecutiveDashboard from '../components/ExecutiveDashboard';
-import ToolsHub from '../components/ToolsHub';
 import SkeletonLoader, { SkeletonSignalCard } from '../components/SkeletonLoader';
 
 const containerVariants = {
@@ -36,16 +35,10 @@ function Dashboard({
     handleSymbolsChange,
     cryptoData,
     signals,
-    mlSignals,
     loading,
     handleSimulateBuy
 }) {
-    const [showAdvanced, setShowAdvanced] = useState(false);
     const [showAllSignals, setShowAllSignals] = useState(false);
-
-    // Lifted State for Executive Dashboard
-    const [nexusData, setNexusData] = useState(null);
-    const [oracleData, setOracleData] = useState(null);
 
     const sortedSignals = useMemo(() => {
         if (!signals || signals.length === 0) return [];
@@ -96,8 +89,8 @@ function Dashboard({
             {/* 0. Executive Command Center */}
             <motion.div variants={itemVariants}>
                 <ExecutiveDashboard
-                    nexusData={nexusData}
-                    oracleData={oracleData}
+                    nexusData={null}
+                    oracleData={null}
                     topOpportunity={topOpportunity}
                     topSignal={topSignal}
                     btcVol={cryptoData['BTCUSDC'] || cryptoData['BTCUSDT']}
@@ -165,44 +158,7 @@ function Dashboard({
                 )}
             </motion.section>
 
-            <motion.div variants={itemVariants}>
-                <div className="glass-card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem' }}>Herramientas avanzadas</h3>
-                        <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
-                            Macro, Nexus, Doctor, Hunter, Backtest y ML
-                        </div>
-                    </div>
-                    <button
-                        className="btn-primary"
-                        onClick={() => setShowAdvanced(v => !v)}
-                        style={{ padding: '0.6rem 0.9rem' }}
-                    >
-                        {showAdvanced ? 'Ocultar' : 'Mostrar'}
-                    </button>
-                </div>
-            </motion.div>
 
-            <AnimatePresence>
-                {showAdvanced && (
-                    <motion.div
-                        key="advanced-section"
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        variants={containerVariants}
-                        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-                    >
-                        <ToolsHub
-                            symbols={symbols}
-                            mlSignals={mlSignals}
-                            loading={loading}
-                            setOracleData={setOracleData}
-                            setNexusData={setNexusData}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
             {/* Crypto Prices Dashboard */}
             <motion.section variants={itemVariants} className="dashboard-section">

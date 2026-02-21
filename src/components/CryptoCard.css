@@ -1,29 +1,28 @@
+/* CryptoCard.css (Brutalist) */
 .crypto-card {
     padding: var(--spacing-lg);
     position: relative;
     overflow: hidden;
-    background: var(--color-bg-glass);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
+    background: var(--color-bg-primary);
+    /* Pure Black */
+    border: 2px solid var(--color-border);
+    border-radius: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    /* Solid 4px white shadow */
+    transition: all var(--transition-fast);
+}
+
+.crypto-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px 0px var(--color-border);
 }
 
 .crypto-card-glow {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at top left, var(--color-primary-glow), transparent 70%);
-    opacity: 0;
-    transition: opacity var(--transition-base);
-    pointer-events: none;
-}
-
-.crypto-card:hover .crypto-card-glow {
-    opacity: 0.5;
+    display: none;
+    /* No soft gradients */
 }
 
 .crypto-header {
@@ -39,39 +38,41 @@
 }
 
 .symbol-icon-wrapper {
-    width: 40px;
-    height: 40px;
-    background: var(--color-bg-tertiary);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary-light);
-    border: 1px solid var(--color-border);
+    display: none;
+    /* Hide soft Lucide icons to look more raw */
 }
 
 .crypto-name {
-    font-size: 1.125rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--color-text-primary);
     display: block;
-    line-height: 1.2;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -0.05em;
+    margin-bottom: 0.25rem;
 }
 
 .crypto-change {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.875rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border: 1px solid var(--color-border);
 }
 
 .crypto-change.positive {
-    color: var(--color-success);
+    background: var(--color-success);
+    color: var(--color-bg-primary);
+    border-color: var(--color-success);
 }
 
 .crypto-change.negative {
-    color: var(--color-danger);
+    background: var(--color-danger);
+    color: var(--color-bg-primary);
+    border-color: var(--color-danger);
 }
 
 .opportunity-badge-mini {
@@ -79,12 +80,14 @@
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--color-text-secondary);
+    border-radius: 0;
     font-size: 0.625rem;
     font-weight: 800;
     letter-spacing: 0.05em;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-primary);
+    text-transform: uppercase;
 }
 
 .crypto-main {
@@ -92,9 +95,9 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing-md);
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border-light);
+    background: transparent;
+    border: 2px dashed var(--color-border);
+    border-radius: 0;
 }
 
 .price-display {
@@ -105,16 +108,17 @@
 .price-label {
     font-size: 0.625rem;
     font-weight: 700;
-    color: var(--color-text-muted);
+    color: var(--color-text-tertiary);
     letter-spacing: 0.05em;
     margin-bottom: 2px;
 }
 
 .price-value {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.05em;
     color: var(--color-text-primary);
+    line-height: 1;
 }
 
 .score-viz {
@@ -124,44 +128,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2px solid var(--color-border);
+    border-radius: 0;
 }
 
 .score-ring {
-    width: 100%;
-    height: 100%;
-}
-
-.ring-bg {
-    fill: none;
-    stroke: var(--color-bg-tertiary);
-    stroke-width: 3;
-}
-
-.ring-fill {
-    fill: none;
-    stroke-width: 3;
-    stroke-linecap: round;
-    transform: rotate(-90deg);
-    transform-origin: 50% 50%;
-}
-
-.ring-fill.success {
-    stroke: var(--color-success);
-    filter: drop-shadow(0 0 4px var(--color-success-glow));
-}
-
-.ring-fill.warning {
-    stroke: var(--color-warning);
-    filter: drop-shadow(0 0 4px var(--color-warning-glow));
-}
-
-.ring-fill.info {
-    stroke: var(--color-info);
-    filter: drop-shadow(0 0 4px var(--color-info-glow));
+    display: none;
+    /* Strip out vector SVGs for a raw numbers look */
 }
 
 .score-text {
-    position: absolute;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -169,7 +146,7 @@
 }
 
 .score-num {
-    font-size: 0.875rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: var(--color-text-primary);
     line-height: 1;
@@ -177,13 +154,15 @@
 
 .score-label {
     font-size: 0.5rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--color-text-muted);
 }
 
 .crypto-footer {
     display: flex;
     align-items: center;
+    border-top: 2px solid var(--color-border);
+    padding-top: var(--spacing-sm);
 }
 
 .opportunity-status {
@@ -191,38 +170,42 @@
     align-items: center;
     gap: var(--spacing-sm);
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 .status-dot-mini {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 0;
+    border: 1px solid var(--color-bg-primary);
 }
 
 .opportunity-status.success {
-    color: var(--color-success-light);
+    color: var(--color-success);
 }
 
 .opportunity-status.success .status-dot-mini {
     background: var(--color-success);
-    box-shadow: 0 0 8px var(--color-success);
+    box-shadow: 2px 2px 0 0 var(--color-success);
 }
 
 .opportunity-status.warning {
-    color: var(--color-warning-light);
+    color: var(--color-warning);
 }
 
 .opportunity-status.warning .status-dot-mini {
     background: var(--color-warning);
+    box-shadow: 2px 2px 0 0 var(--color-warning);
 }
 
 .opportunity-status.info {
-    color: var(--color-info-light);
+    color: var(--color-info);
 }
 
 .opportunity-status.info .status-dot-mini {
     background: var(--color-info);
+    box-shadow: 2px 2px 0 0 var(--color-info);
 }
 
 @media (max-width: 640px) {

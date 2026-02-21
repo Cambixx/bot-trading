@@ -43,83 +43,99 @@ function SignalCard({ signal, onSimulateBuy }) {
 
     return (
         <motion.div
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
             className={`signal-card-premium ${isSell ? 'sell' : 'buy'}`}
         >
-            <div className="card-accent-bar" />
-
             <div className="signal-header-premium">
                 <div className="symbol-meta">
+                    <span className="text-slate-400">MARKET_INSTRUMENT</span>
                     <div className="symbol-badge-box">
-                        <Zap size={14} className="zap-icon" />
                         <span className="symbol-name">{signal.symbol.replace('USDC', '').replace('USDT', '')}</span>
                     </div>
-                    <div className={`trade-type-badge ${isSell ? 'sell' : 'buy'}`}>
-                        {isSell ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
-                        <span>{isSell ? 'SHORT' : 'LONG'}</span>
-                    </div>
                 </div>
 
-                <div className={`confidence-badge-premium ${confidenceColor[signal.confidence]}`}>
-                    <Sparkles size={12} />
-                    <span>{confidenceLabel[signal.confidence]}</span>
+                <div className="confidence-box">
+                    <div className="lbl">CONFIDENCE</div>
+                    <div className="val">{signal.score}%</div>
                 </div>
             </div>
 
-            <div className="signal-main-premium">
-                <div className="price-stack">
-                    <span className="stack-label">{isSell ? 'SELL AT' : 'BUY AT'}</span>
-                    <span className="stack-value">${formatPrice(signal.price)}</span>
-                </div>
-
-                <div className="score-viz-small">
-                    <div className="score-ring-mini" style={{ '--score': signal.score }}>
-                        <span className="score-val">{signal.score}</span>
-                    </div>
-                </div>
+            <div className={isSell ? "signal-sell-box" : "signal-buy-box"}>
+                <span>SIGNAL: {isSell ? 'SHORT' : 'LONG'}</span>
+                {isSell ? <TrendingDown size={24} strokeWidth={3} color="#000" /> : <TrendingUp size={24} strokeWidth={3} color="#000" />}
             </div>
+
+            <div className="brutalist-section-title">ACTION_PLAN</div>
 
             <div className="levels-grid-premium">
-                <div className="level-box tp">
-                    <div className="level-header">
-                        <Target size={14} />
-                        <span>TAKE PROFIT</span>
-                    </div>
-                    <div className="level-values">
-                        <div className="tp-val">
-                            <span className="val-label">TP1</span>
-                            <span className="val-num">${formatPrice(signal.levels.takeProfit1)}</span>
-                        </div>
-                        {signal.levels.takeProfit2 != null && (
-                            <div className="tp-val">
-                                <span className="val-label">TP2</span>
-                                <span className="val-num">${formatPrice(signal.levels.takeProfit2)}</span>
-                            </div>
-                        )}
-                    </div>
+                <div className="level-box">
+                    <span className="level-header">ENTRY_ZONE</span>
+                    <span className="level-value-main">${formatPrice(signal.price)}</span>
                 </div>
 
-                <div className="level-box sl">
-                    <div className="level-header">
-                        <Shield size={14} />
-                        <span>STOP LOSS</span>
+                <div className="level-box">
+                    <span className="level-header danger">STOP_LOSS</span>
+                    <span className="level-value-main danger">${formatPrice(signal.levels.stopLoss)}</span>
+                </div>
+
+                <div className="level-box">
+                    <span className="level-header">TARGET_P1</span>
+                    <span className="level-value-main success">${formatPrice(signal.levels.takeProfit1)}</span>
+                </div>
+
+                {signal.levels.takeProfit2 != null ? (
+                    <div className="level-box">
+                        <span className="level-header">TARGET_P2</span>
+                        <span className="level-value-main success">${formatPrice(signal.levels.takeProfit2)}</span>
                     </div>
-                    <span className="sl-val">${formatPrice(signal.levels.stopLoss)}</span>
+                ) : (
+                    <div className="level-box">
+                        <span className="level-header">TARGET_P2</span>
+                        <span className="level-value-main text-slate-500">-</span>
+                    </div>
+                )}
+            </div>
+
+            <div className="brutalist-section-title">EXECUTION_SPECS</div>
+            <div className="metrics-grid-brutalist">
+                <div className="metric-box">
+                    <p className="metric-box-label">R/R_RATIO</p>
+                    <p className="metric-box-val">{signal.riskReward || '1:2'}</p>
+                </div>
+                <div className="metric-box">
+                    <p className="metric-box-label">ALLOCATION</p>
+                    <p className="metric-box-val">${positionValue || 10}</p>
+                </div>
+                <div className="metric-box">
+                    <p className="metric-box-label">LEVERAGE</p>
+                    <p className="metric-box-val">10X</p>
                 </div>
             </div>
 
             <div className="signal-content-premium">
-                {/* Indicators Row */}
-                <div className="indicators-row-premium">
-                    <div className="ind-pill">RSI: {signal.indicators.rsi}</div>
-                    <div className="ind-pill">ADX: {signal.indicators.adx || '-'}</div>
-                    <div className="ind-pill">RR: {signal.riskReward}</div>
-                    <div className="ind-pill">OBI: {signal.execution?.obi != null ? signal.execution.obi : '-'}</div>
-                    <div className="ind-pill">Spread: {signal.execution?.spreadBps != null ? `${signal.execution.spreadBps}bps` : '-'}</div>
-                    <div className="ind-pill">Depth: {signal.execution?.depthNotionalTopN != null ? `$${formatCompact(signal.execution.depthNotionalTopN)}` : '-'}</div>
-                    <div className="ind-pill">CVD20: {signal.indicators.cvd20 != null ? formatCompact(signal.indicators.cvd20) : '-'}</div>
-                    <div className="ind-pill">Pos: {quantity != null ? formatCompact(quantity) : '-'} </div>
-                    <div className="ind-pill">Risk@SL: {riskAtSL != null ? `$${formatCompact(riskAtSL)}` : '-'}</div>
+                <div className="brutalist-section-title" style={{ marginTop: 0, padding: 0 }}>CONFLUENCE</div>
+                <div className="confluence-list">
+                    <div className="cf-item">
+                        <div className="cf-check"><div className="cf-check-inner"></div></div>
+                        <span className="cf-text">RSI: {signal.indicators.rsi}</span>
+                    </div>
+                    {signal.indicators.adx && (
+                        <div className="cf-item">
+                            <div className="cf-check"><div className="cf-check-inner"></div></div>
+                            <span className="cf-text">ADX: {signal.indicators.adx}</span>
+                        </div>
+                    )}
+                    {signal.indicators.cvd20 != null && (
+                        <div className="cf-item">
+                            <div className="cf-check"><div className="cf-check-inner"></div></div>
+                            <span className="cf-text">CVD20: {formatCompact(signal.indicators.cvd20)}</span>
+                        </div>
+                    )}
+                    {signal.execution?.obi != null && (
+                        <div className="cf-item">
+                            <div className="cf-check"><div className="cf-check-inner"></div></div>
+                            <span className="cf-text">OBI: {signal.execution.obi}</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* AI Insights if available */}
@@ -135,21 +151,14 @@ function SignalCard({ signal, onSimulateBuy }) {
             </div>
 
             <div className="signal-footer-premium">
-                <div className="time-stamp">
-                    <Clock size={12} />
-                    <span>{format(new Date(signal.timestamp), 'HH:mm')}</span>
-                </div>
-
                 {onSimulateBuy && (
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                    <button
                         className={`btn-execute-premium ${isSell ? 'sell' : 'buy'}`}
                         onClick={() => onSimulateBuy(signal)}
                     >
-                        <span>SIMULATE</span>
-                        <ArrowRight size={14} />
-                    </motion.button>
+                        <Zap size={20} strokeWidth={3} />
+                        EXECUTE_TRADE
+                    </button>
                 )}
             </div>
         </motion.div>

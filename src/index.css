@@ -1,58 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Mono:wght@400;600;700&display=swap');
 
 :root {
-  /* Colors - Ultra-Premium Dark Theme */
-  --color-bg-primary: #05070a;
-  --color-bg-secondary: #0c0f17;
-  --color-bg-tertiary: #161b2a;
-  --color-bg-glass: rgba(12, 15, 23, 0.7);
-  --color-bg-glass-heavy: rgba(12, 15, 23, 0.9);
+  /* Colors - Brutalist Theme */
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #111111;
+  --color-bg-glass: #000000;
+  --color-bg-glass-heavy: #000000;
 
-  /* Accent Colors - More Vibrant & Sophisticated */
-  --color-primary: #4f46e5;
-  --color-primary-light: #818cf8;
-  --color-primary-dark: #3730a3;
-  --color-primary-glow: rgba(79, 70, 229, 0.4);
+  /* Accent Colors - High Contrast Neons */
+  --color-primary: #00ff41;
+  /* Hacker Green */
+  --color-primary-light: #4dff79;
+  --color-primary-dark: #009927;
+  --color-primary-glow: transparent;
 
-  --color-success: #10b981;
-  --color-success-light: #34d399;
-  --color-success-dark: #065f46;
-  --color-success-glow: rgba(16, 185, 129, 0.3);
-  --color-success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --color-success: #00ff00;
+  --color-success-light: #55ff55;
+  --color-success-dark: #00aa00;
+  --color-success-glow: transparent;
+  --color-success-gradient: #00ff00;
 
-  --color-danger: #ef4444;
-  --color-danger-light: #f87171;
-  --color-danger-dark: #991b1b;
-  --color-danger-glow: rgba(239, 68, 68, 0.3);
-  --color-danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --color-danger: #ff003c;
+  /* Cyberpunk Red */
+  --color-danger-light: #ff4d79;
+  --color-danger-dark: #b3002a;
+  --color-danger-glow: transparent;
+  --color-danger-gradient: #ff003c;
 
-  --color-warning: #f59e0b;
-  --color-warning-light: #fbbf24;
-  --color-warning-glow: rgba(245, 158, 11, 0.3);
+  --color-warning: #fdee00;
+  /* Toxic Yellow */
+  --color-warning-light: #fdf34d;
+  --color-warning-glow: transparent;
 
-  --color-info: #0ea5e9;
-  --color-info-light: #38bdf8;
-  --color-info-glow: rgba(14, 165, 233, 0.3);
+  --color-info: #00f0ff;
+  /* Bright Cyan */
+  --color-info-light: #4df4ff;
+  --color-info-glow: transparent;
 
   /* Text Colors */
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-tertiary: #64748b;
-  --color-text-muted: #475569;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-text-tertiary: #999999;
+  --color-text-muted: #666666;
 
-  /* Border & Shadow */
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-light: rgba(255, 255, 255, 0.04);
-  --color-border-primary: rgba(79, 70, 229, 0.3);
+  /* Brutalist Borders & Shadows */
+  --color-border: #bcbcbc;
+  --color-border-light: #444444;
+  --color-border-primary: var(--color-primary);
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.8);
+  /* Hard Shadows instead of soft blurs */
+  --shadow-sm: 2px 2px 0px 0px rgba(188, 188, 188, 1);
+  --shadow-md: 4px 4px 0px 0px rgba(188, 188, 188, 1);
+  --shadow-lg: 8px 8px 0px 0px rgba(188, 188, 188, 1);
 
-  /* Glow Effects */
-  --glow-primary: 0 0 15px var(--color-primary-glow);
-  --glow-success: 0 0 15px var(--color-success-glow);
-  --glow-danger: 0 0 15px var(--color-danger-glow);
+  /* Hover Shadows (Colored) */
+  --shadow-glow-primary: 4px 4px 0px 0px var(--color-primary);
+  --shadow-glow-success: 4px 4px 0px 0px var(--color-success);
+  --shadow-glow-danger: 4px 4px 0px 0px var(--color-danger);
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -62,26 +67,27 @@
   --spacing-xl: 2rem;
   --spacing-2xl: 3.5rem;
 
-  /* Border Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-full: 9999px;
+  /* Border Radius - ZERO for Brutalism */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-full: 0px;
 
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 450ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions - Snappy */
+  --transition-fast: 50ms ease-in-out;
+  --transition-base: 100ms ease-in-out;
+  --transition-slow: 200ms ease-in-out;
 
   /* Typography */
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Space Mono', 'IBM Plex Mono', monospace;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: none;
+  /* Raw pixels look */
+  -moz-osx-font-smoothing: auto;
 
-  line-height: 1.5;
+  line-height: 1.4;
   font-weight: 400;
   color: var(--color-text-primary);
   background: var(--color-bg-primary);
@@ -96,11 +102,14 @@
 body {
   min-height: 100vh;
   background: var(--color-bg-primary);
-  background-image:
-    radial-gradient(circle at 10% 10%, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 90%, rgba(14, 165, 233, 0.05) 0%, transparent 40%);
+  /* Brutalist dot grid instead of soft radial gradients */
+  background-image: radial-gradient(var(--color-border-light) 1px, transparent 0);
+  background-size: 20px 20px;
+  background-position: -19px -19px;
   background-attachment: fixed;
   overflow-x: hidden;
+  text-transform: uppercase;
+  /* Highly stylized choice for brutalism */
 }
 
 #root {
@@ -116,16 +125,21 @@ h4,
 h5,
 h6 {
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.1;
   color: var(--color-text-primary);
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
 }
 
 h1 {
-  font-size: 2.5rem;
+  font-size: 3rem;
+  border-bottom: 4px solid white;
+  display: inline-block;
+  margin-bottom: 1rem;
 }
 
 h2 {
-  font-size: 2rem;
+  font-size: 2.25rem;
 }
 
 h3 {
@@ -144,101 +158,122 @@ h6 {
   font-size: 1rem;
 }
 
-/* Glass Morphism Card */
+/* Brutalist "Glass" Card (Overriding the name but keeping class) */
 .glass-card {
-  background: var(--color-bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border);
+  border-radius: 0;
   box-shadow: var(--shadow-md);
-  transition: all var(--transition-base);
+  transition: all var(--transition-fast);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .glass-card:hover {
-  border-color: var(--color-border-light);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow-primary);
+  transform: translate(-2px, -2px);
 }
 
 /* Buttons */
 button {
   font-family: inherit;
   font-size: 0.875rem;
-  font-weight: 600;
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--radius-md);
-  border: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0;
+  border: 2px solid white;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all var(--transition-fast);
   outline: none;
+  background: black;
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
 }
 
 .btn-primary {
   background: var(--color-primary);
-  color: white;
-  box-shadow: var(--shadow-sm);
+  color: black;
+  border-color: var(--color-primary);
 }
 
 .btn-primary:hover {
-  background: var(--color-primary-light);
+  background: var(--color-bg-primary);
+  color: var(--color-primary);
   box-shadow: var(--shadow-glow-primary);
-  transform: translateY(-1px);
 }
 
 .btn-success {
-  background: var(--color-success-gradient);
-  color: white;
-  box-shadow: var(--shadow-sm);
+  background: var(--color-success);
+  color: black;
+  border-color: var(--color-success);
 }
 
 .btn-success:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-success);
   box-shadow: var(--shadow-glow-success);
-  transform: translateY(-1px);
 }
 
 .btn-danger {
   background: var(--color-danger);
   color: white;
-  box-shadow: var(--shadow-sm);
+  border-color: var(--color-danger);
 }
 
 .btn-danger:hover {
-  background: var(--color-danger-light);
+  background: var(--color-bg-primary);
+  color: var(--color-danger);
   box-shadow: var(--shadow-glow-danger);
-  transform: translateY(-1px);
 }
 
 /* Badges */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0;
+  border: 1px solid white;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
+  box-shadow: 2px 2px 0px 0px white;
 }
 
 .badge-success {
   background: var(--color-success);
-  color: white;
+  color: black;
+  border-color: var(--color-success);
+  box-shadow: 2px 2px 0px 0px var(--color-success);
 }
 
 .badge-danger {
   background: var(--color-danger);
   color: white;
+  border-color: var(--color-danger);
+  box-shadow: 2px 2px 0px 0px var(--color-danger);
 }
 
 .badge-warning {
   background: var(--color-warning);
-  color: white;
+  color: black;
+  border-color: var(--color-warning);
+  box-shadow: 2px 2px 0px 0px var(--color-warning);
 }
 
 .badge-info {
   background: var(--color-info);
-  color: white;
+  color: black;
+  border-color: var(--color-info);
+  box-shadow: 2px 2px 0px 0px var(--color-info);
 }
 
 /* Pulse Animation */

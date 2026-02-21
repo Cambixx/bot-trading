@@ -96,12 +96,12 @@
   border-radius: var(--radius-full);
   font-size: 0.875rem;
   font-weight: 700;
-  color: white;
+  color: #000000;
 }
 
 .signals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: var(--spacing-xl);
 }
 
@@ -151,19 +151,12 @@
 }
 
 /* Responsive Design - Laptop */
-@media (max-width: 1200px) {
-  .signals-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Responsive Design - Tablet */
 @media (max-width: 1024px) {
-
-  .dashboard-grid,
-  .signals-grid {
+  .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* signals-grid will follow its minmax(380px, 1fr) auto-fill */
 }
 
 /* Responsive Design - Tablets */

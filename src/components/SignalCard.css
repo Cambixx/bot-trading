@@ -1,620 +1,343 @@
+/* SignalCard.css (Brutalist) */
 .signal-card-premium {
     position: relative;
-    background: var(--color-bg-glass);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-lg);
+    background: var(--color-bg-primary);
+    /* Pure Black */
+    border-left: 2px solid var(--color-border);
+    border-right: 2px solid var(--color-border);
+    border-top: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
+    border-radius: 0;
+    padding: 0;
+    /* Removing padding to allow full-width headers */
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
     overflow: hidden;
+    /* Force consistent shadow */
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.signal-card-premium:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px 0px var(--color-border);
 }
 
 .card-accent-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-}
-
-.signal-card-premium.buy .card-accent-bar {
-    background: var(--color-success);
-    box-shadow: 2px 0 10px var(--color-success-glow);
-}
-
-.signal-card-premium.sell .card-accent-bar {
-    background: var(--color-danger);
-    box-shadow: 2px 0 10px var(--color-danger-glow);
+    display: none;
+    /* Removing the soft left glow bar */
 }
 
 .signal-header-premium {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    gap: 1rem;
 }
 
 .symbol-meta {
     display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
+    flex-direction: column;
+    min-width: 0;
+    /* Allow shrinking */
+}
+
+.symbol-meta .text-slate-400 {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
 }
 
 .symbol-badge-box {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    background: var(--color-bg-tertiary);
-    border-radius: 8px;
-    border: 1px solid var(--color-border);
+    background: transparent;
+    border: none;
+    padding: 0;
 }
 
 .symbol-name {
-    font-size: 1.125rem;
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
     font-weight: 800;
+    line-height: 1;
     color: var(--color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: -0.05em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .zap-icon {
-    color: var(--color-warning);
+    display: none;
+    /* Removing soft icons */
 }
 
-.trade-type-badge {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
+/* Redesigning confidence as text block */
+.confidence-box {
+    text-align: right;
 }
 
-.trade-type-badge.buy {
-    color: var(--color-success-light);
+.confidence-box .lbl {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
 }
 
-.trade-type-badge.sell {
-    color: var(--color-danger-light);
-}
-
-.confidence-badge-premium {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: var(--radius-sm);
-    font-size: 0.7rem;
+.confidence-box .val {
+    font-size: 1.5rem;
     font-weight: 700;
-}
-
-.confidence-badge-premium.success {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--color-success-light);
-}
-
-.confidence-badge-premium.warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--color-warning-light);
-}
-
-.confidence-badge-premium.info {
-    background: rgba(14, 165, 233, 0.1);
-    color: var(--color-info-light);
-}
-
-.signal-main-premium {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.price-stack {
-    display: flex;
-    flex-direction: column;
-}
-
-.stack-label {
-    font-size: 0.625rem;
-    font-weight: 700;
-    color: var(--color-text-muted);
-    letter-spacing: 0.05em;
-}
-
-.stack-value {
-    font-size: 1.75rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
     color: var(--color-text-primary);
 }
 
-.score-viz-small {
-    width: 48px;
-    height: 48px;
-}
-
-.score-ring-mini {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: conic-gradient(var(--color-primary) calc(var(--score) * 1%), var(--color-bg-tertiary) 0);
+/* Replacing trade-type-badge with the solid bright box */
+.signal-buy-box {
+    background: #00ff41;
+    /* Hacker Green for LONG */
+    color: #000;
+    padding: 0.75rem 1.5rem;
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    border: 2px solid var(--color-bg-primary);
-}
-
-.score-ring-mini::after {
-    content: '';
-    position: absolute;
-    width: 36px;
-    height: 36px;
-    background: var(--color-bg-secondary);
-    border-radius: 50%;
-}
-
-.score-val {
-    position: relative;
-    z-index: 1;
-    font-size: 0.875rem;
-    font-weight: 800;
-}
-
-.confluence-tracker-modern {
-    display: flex;
     justify-content: space-between;
-    gap: 8px;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid var(--color-border-light);
-}
-
-.confluence-item-modern {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
-}
-
-.conf-icon-box {
-    width: 20px;
-    height: 20px;
-    background: var(--color-bg-tertiary);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary-light);
-    flex-shrink: 0;
-}
-
-.conf-data {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-}
-
-.conf-bar-modern {
-    width: 100%;
-    height: 3px;
-    background: var(--color-bg-tertiary);
-    border-radius: 1.5px;
-    overflow: hidden;
-}
-
-.conf-bar-fill-modern {
-    height: 100%;
-    background: var(--color-primary);
-    box-shadow: 0 0 6px var(--color-primary-glow);
-}
-
-.conf-label-modern {
-    font-size: 0.45rem;
+    border: 2px solid var(--color-border);
+    border-left: none;
+    border-right: none;
     font-weight: 800;
-    color: var(--color-text-muted);
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 1.5rem;
+    font-style: italic;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
 }
 
-.stack-value-wrapper {
+.signal-sell-box {
+    background: var(--color-danger);
+    /* Neon Red for SHORT */
+    color: #000;
+    padding: 0.75rem 1.5rem;
     display: flex;
     align-items: center;
-    gap: 8px;
-    cursor: pointer;
+    justify-content: space-between;
+    border: 2px solid var(--color-border);
+    border-left: none;
+    border-right: none;
+    font-weight: 800;
+    font-size: 1.5rem;
+    font-style: italic;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
 }
 
-.copy-hint {
-    opacity: 0;
-    color: var(--color-primary-light);
-    transition: opacity 0.2s ease;
+.signal-main-premium {
+    display: none;
+    /* Merged into ACTION_PLAN grid */
 }
 
-.price-stack:hover .copy-hint {
-    opacity: 0.6;
+.brutalist-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.2em;
+    color: var(--color-text-tertiary);
+    padding: 0 1.5rem;
+    margin-top: 1.5rem;
 }
 
+/* ACTION PLAN GRID */
 .levels-grid-premium {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    border-top: 2px solid var(--color-border);
+    border-left: 2px solid var(--color-border);
+    margin: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .level-box {
-    padding: var(--spacing-md);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
+    padding: 1rem;
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    border-right: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
+}
+
+/* For elements spanning 2 columns */
+.level-box-full {
+    grid-column: span 2;
+    padding: 1rem;
+    background: transparent;
+    border-right: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
 }
 
 .level-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.625rem;
+    display: block;
+    /* Removing flex with icons */
+    font-size: 0.65rem;
     font-weight: 700;
-    color: var(--color-text-muted);
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
 }
 
-.level-values {
-    display: flex;
-    justify-content: space-between;
+.level-header.danger {
+    color: var(--color-danger);
 }
 
-.tp-val {
-    display: flex;
-    flex-direction: column;
-}
-
-.val-label {
-    font-size: 0.5rem;
-    color: var(--color-text-muted);
-}
-
-.val-num-wrapper,
-.sl-val-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-}
-
-.copy-hint-mini {
-    opacity: 0;
-    color: var(--color-primary-light);
-    transition: opacity 0.2s ease;
-}
-
-.tp-val:hover .copy-hint-mini,
-.sl-val-wrapper:hover .copy-hint-mini {
-    opacity: 0.8;
-}
-
-.val-num {
-    font-size: 0.8125rem;
+.level-value-main {
+    font-size: 1.125rem;
     font-weight: 700;
-    color: var(--color-success-light);
+    color: var(--color-text-primary);
 }
 
-.sl-val {
-    font-size: 0.8125rem;
+.level-value-main.success {
+    color: var(--color-success);
+}
+
+/* Execution Specs */
+.metrics-grid-brutalist {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    border-top: 2px solid var(--color-border);
+    border-left: 2px solid var(--color-border);
+    margin: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.metrics-grid-brutalist .metric-box {
+    padding: 0.75rem;
+    border-right: 2px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.metric-box-label {
+    font-size: 0.55rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0;
+}
+
+.metric-box-val {
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--color-danger-light);
 }
 
+/* Confluence List */
 .signal-content-premium {
+    padding: 0 1.5rem 2rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 1rem;
 }
 
 .indicators-row-premium {
+    display: none;
+    /* Replaced by specific grid */
+}
+
+.confluence-list {
     display: flex;
-    gap: var(--spacing-sm);
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-.ind-pill {
-    padding: 4px 8px;
-    background: var(--color-bg-tertiary);
-    border-radius: 6px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-}
-
-.ai-insight-box {
-    padding: var(--spacing-md);
-    background: rgba(79, 70, 229, 0.05);
-    border-radius: var(--radius-md);
-    border-left: 2px solid var(--color-primary);
-}
-
-.ai-insight-header {
+.cf-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    gap: 0.75rem;
 }
 
-.ai-tag {
-    font-size: 0.5rem;
-    font-weight: 800;
-    color: var(--color-primary-light);
-    letter-spacing: 0.05em;
+.cf-check {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.ai-sentiment-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-}
-
-.ai-sentiment-dot.bullish {
+.cf-check-inner {
+    width: 8px;
+    height: 8px;
     background: var(--color-success);
 }
 
-.ai-sentiment-dot.bearish {
-    background: var(--color-danger);
+.cf-text {
+    font-size: 0.875rem;
+    font-weight: 700;
 }
 
-.ai-text {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    line-height: 1.4;
-    margin: 0;
+.ai-insight-box {
+    padding: 1rem;
+    background: transparent;
+    border: 2px dashed var(--color-border);
+    border-radius: 0;
 }
 
+.ai-insight-header {
+    margin-bottom: 0.5rem;
+}
+
+.ai-tag {
+    font-size: 0.65rem;
+    color: var(--color-text-primary);
+    background: var(--color-text-primary);
+    color: var(--color-bg-primary);
+    padding: 0.1rem 0.4rem;
+    display: inline-block;
+}
+
+/* Execute Button Footer */
 .signal-footer-premium {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-top: auto;
+    border-top: 2px solid var(--color-border);
+    padding: 1.5rem;
+    background: var(--color-bg-primary);
 }
 
 .time-stamp {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.65rem;
-    color: var(--color-text-muted);
+    display: none;
+    /* Move to header implicitly or remove if cluttering */
 }
 
 .btn-execute-premium {
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: var(--radius-md);
-    font-size: 0.7rem;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border-radius: 0;
+    font-size: 1.25rem;
     font-weight: 800;
-    color: white;
+    color: var(--color-bg-primary);
     cursor: pointer;
+    border: 2px solid var(--color-border);
+    box-shadow: 4px 4px 0px 0px var(--color-border);
+    transition: all 0.1s ease;
+    text-transform: uppercase;
+    background: var(--color-text-primary);
+    /* Default white if not buy/sell specifically handled */
 }
 
 .btn-execute-premium.buy {
-    background: var(--color-primary);
-    box-shadow: 0 4px 10px var(--color-primary-glow);
+    background: var(--color-success);
 }
 
 .btn-execute-premium.sell {
-    background: var(--color-danger-dark);
+    background: var(--color-danger);
 }
 
-/* Risk Calculator Modern */
-.risk-calc-box {
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--color-border-light);
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.calc-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.calc-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: var(--color-text-muted);
-}
-
-.quick-risk-btns {
-    display: flex;
-    gap: 4px;
-}
-
-.q-btn {
-    padding: 2px 6px;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    font-size: 0.6rem;
-    font-weight: 700;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.q-btn:hover {
-    background: var(--color-bg-glass);
-    border-color: var(--color-primary-light);
-}
-
-.q-btn.active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: white;
-}
-
-.calc-input-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.risk-input-group {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    padding: 2px 6px;
-    width: 80px;
-}
-
-.risk-input {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 700;
-    width: 100%;
-}
-
-.calc-results-mini {
-    display: flex;
-    gap: 16px;
-    flex: 1;
-    justify-content: flex-end;
-}
-
-.res-item {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.res-item .lbl {
-    font-size: 0.5rem;
-    color: var(--color-text-muted);
-    font-weight: 700;
-}
-
-.res-item .val {
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: white;
-    font-family: 'Space Mono', monospace;
+.btn-execute-premium:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
 }
 
 @media (max-width: 640px) {
-    .stack-value {
-        font-size: 1.35rem;
-    }
-}
-
-/* SNIPER Mode Risk Calculator Enhancements */
-.risk-calc-box.sniper-mode {
-    background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(79, 70, 229, 0.3);
-}
-
-.capped-badge {
-    font-size: 0.5rem;
-    padding: 2px 4px;
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--color-danger-light);
-    border-radius: 3px;
-    margin-left: 6px;
-}
-
-.cur-icon {
-    color: var(--color-warning);
-}
-
-.capital-input {
-    width: 60px;
-}
-
-.risk-input-group {
-    width: 90px;
-}
-
-.calc-results-sniper {
-    display: flex;
-    gap: 12px;
-    flex: 1;
-    justify-content: flex-end;
-}
-
-.res-item.primary .val {
-    color: var(--color-primary-light);
-    font-size: 0.9rem;
-}
-
-.res-item.risk-highlight {
-    padding: 2px 6px;
-    background: rgba(239, 68, 68, 0.15);
-    border-radius: 4px;
-}
-
-.res-item.risk-highlight .lbl {
-    color: var(--color-danger-light);
-}
-
-.res-item.risk-highlight .val {
-    color: var(--color-danger-light);
-}
-
-.sl-info-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
-    font-size: 0.6rem;
-    color: var(--color-text-muted);
-}
-
-.direction-tag {
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-weight: 800;
-    font-size: 0.5rem;
-    letter-spacing: 0.03em;
-}
-
-.direction-tag.long {
-    background: rgba(16, 185, 129, 0.2);
-    color: var(--color-success-light);
-}
-
-.direction-tag.short {
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--color-danger-light);
-}
-
-/* High Volume Alert Animation */
-.ind-pill.high-vol-alert {
-    animation: pulse-vol 1.5s infinite;
-}
-
-@keyframes pulse-vol {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
-    }
-
-    50% {
-        box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.3);
+    .metrics-grid-brutalist {
+        grid-template-columns: 1fr 1fr;
     }
 }

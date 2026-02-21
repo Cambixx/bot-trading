@@ -22,7 +22,6 @@ import LoginPage from './pages/LoginPage';
 import binanceService from './services/binanceService';
 import { performTechnicalAnalysis } from './services/technicalAnalysis';
 import { analyzeMultipleSymbols } from './services/signalGenerator';
-import { calculateMLMovingAverage } from './services/mlMovingAverage';
 import { enrichSignalWithAI } from './services/aiAnalysis';
 import { usePaperTrading } from './hooks/usePaperTrading';
 import { useSignalHistory } from './hooks/useSignalHistory';
@@ -146,7 +145,6 @@ function AppContent() {
   const [selectedChartSymbol, setSelectedChartSymbol] = useState(null);
   const [cryptoData, setCryptoData] = useState({});
   const [signals, setSignals] = useState([]);
-  const [mlSignals, setMlSignals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -245,50 +243,6 @@ function AppContent() {
 
       const orderBooks = await binanceService.getMultipleOrderBooks(symbols, 20);
 
-      // 4.1 Generar señales ML (LuxAlgo)
-      const calculatedMlSignals = [];
-      for (const symbol of symbols) {
-        if (candleData[symbol]?.data && candleData[symbol].data.length >= 30) {
-          const closes = candleData[symbol].data.map(c => c.close);
-          const mlResult = calculateMLMovingAverage(closes, { window: 30, forecast: 2 });
-          if (mlResult) {
-            calculatedMlSignals.push({
-              symbol,
-              ...mlResult,
-              timestamp: new Date().toISOString()
-            });
-          }
-        }
-      }
-      setMlSignals(calculatedMlSignals);
-
-      // 4.2 Notificar nuevas señales ML por Telegram
-      if (calculatedMlSignals.length > 0 && mlSignals.length > 0) {
-        const newMlSignals = calculatedMlSignals.filter(newSig =>
-          !mlSignals.some(oldSig => oldSig.symbol === newSig.symbol && oldSig.signal === newSig.signal)
-        );
-
-        if (newMlSignals.length > 0) {
-          const telegramPayload = newMlSignals.map(s => {
-            const signalCode = typeof s.signal === 'string' ? s.signal : 'UNKNOWN';
-            const directionLabel = signalCode === 'UPPER_EXTREMITY'
-              ? 'SHORT 🔴'
-              : signalCode === 'LOWER_EXTREMITY'
-                ? 'LONG 🟢'
-                : 'WATCH';
-            const signalLabel = signalCode.replace(/_/g, ' ');
-
-            return {
-              symbol: s.symbol,
-              price: s.price,
-              score: 99, // High score to show Green icon
-              reasons: [`🤖 ML Alert: ${directionLabel} (${signalLabel})`],
-              levels: { entry: s.price }
-            };
-          });
-          sendToTelegram(telegramPayload);
-        }
-      }
 
       // 5. Generar señales
       let generatedSignals = analyzeMultipleSymbols(candleData, multiTimeframeAnalysis, tradingMode, orderBooks);
@@ -333,7 +287,7 @@ function AppContent() {
             // 1. RSI (Oscilador)
             if (ind.rsi < 30) longScore += 30;      // Sobreventa -> Long
             else if (ind.rsi < 45) longScore += 15;
-            
+
             if (ind.rsi > 70) shortScore += 30;     // Sobrecompra -> Short
             else if (ind.rsi > 55) shortScore += 15;
 
@@ -483,7 +437,7 @@ function AppContent() {
       fetchDataAndAnalyze();
     }, REFRESH_INTERVAL);
     return () => clearInterval(interval);
-  }, [symbols, signals, mlSignals, notificationsEnabled]);
+  }, [symbols, signals, notificationsEnabled]);
 
   // Status Bar Component (to be passed to Layout or rendered here if Layout accepts it)
   // For now, we'll render it inside the Layout via a prop or context? 
@@ -554,7 +508,6 @@ function AppContent() {
                     handleSymbolsChange={handleSymbolsChange}
                     cryptoData={cryptoData}
                     signals={signals}
-                    mlSignals={mlSignals}
                     loading={loading}
                     handleSimulateBuy={handleSimulateBuy}
                     onTestSignal={handleTestSignal}
