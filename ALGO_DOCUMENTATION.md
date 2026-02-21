@@ -1,6 +1,22 @@
-# 🦅 Documentación del Algoritmo de Trading "Expert Edition" (v5.1)
+# 🦅 Documentación del Algoritmo de Trading "Millionaire Strategy Edition" (v5.2)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
+
+---
+
+## 🚀 NOVEDAD v5.2 - "Millionaire Strategy"
+
+### 💎 Estrategia Millonaria Implementada
+- **Smart Downtrend Pro**: 4 condiciones de rebote en mercados bajistas
+- **Dynamic Position Sizing Pro**: Tamaños de posición adaptativos (0.8% - 6.0%)
+- **Risk/Reward Optimizado**: Mejores ratios SL/TP por régimen
+- **Umbrales Ultra-Agresivos**: Scores mínimos reducidos para capturar más oportunidades
+
+### 🎯 Características Principales:
+- **4 Condiciones Downtrend**: Pullback clásico, Oversold bounce, BTC momentum, High volume
+- **Size Inteligente**: Hasta 6% de capital para señales premium con gestión de riesgo
+- **Ratios Mejorados**: TRENDING 2.04:1 (antes 1.6:1), RANGING 1.67:1 (antes 1.0:1)
+- **Flexibilidad Máxima**: Umbrales adaptados a mercados difíciles
 
 ---
 
@@ -61,11 +77,11 @@ El puntaje final (0-100) usa pesos fijos pero incorpora una validación binaria 
 
 | Régimen | Threshold | Estrategia | Size Sugerido |
 |---------|-----------|------------|---------------|
-| **RANGING** | Score ≥ 75 | Mean reversion, comprar en soporte | ~2.0% |
-| **TRENDING** | Score ≥ 85 | Solo pullbacks a EMA21/50 | ~2.5% |
-| **HIGH_VOLATILITY** | Score ≥ 90 | Ultra estricto, estructura obligatoria | ~0.5% - 1.0% |
-| **DOWNTREND** | BLOQUEADO | No operar contra tendencia bajista | 0% |
-| **TRANSITION** | Score ≥ 82 | Alta selectividad | ~1.5% |
+| **RANGING** | Score ≥ 60 | Mean reversion, comprar en soporte | 1.0% - 4.0% |
+| **TRENDING** | Score ≥ 70 | Solo pullbacks a EMA21/50 | 1.5% - 6.0% |
+| **HIGH_VOLATILITY** | Score ≥ 68 | Estructura obligatoria | 0.8% - 3.5% |
+| **DOWNTREND** | Score ≥ 65 | Smart Downtrend Pro (4 condiciones) | 0.8% - 3.0% |
+| **TRANSITION** | Score ≥ 65 | Alta selectividad | 1.0% - 4.0% |
 
 ---
 
@@ -74,9 +90,11 @@ El puntaje final (0-100) usa pesos fijos pero incorpora una validación binaria 
 ### SL/TP Adaptativo por Régimen
 | Régimen | SL (ATR) | TP (ATR) | Ratio |
 |---------|----------|----------|-------|
-| **TRENDING** | 2.5x | 4.0x | 1.6:1 |
-| **RANGING** | 2.0x | 2.0x | 1.0:1 |
-| **HIGH_VOL** | 1.2x | 2.0x | 1.6:1 |
+| **TRENDING** | 2.2x | 4.5x | 2.04:1 |
+| **RANGING** | 1.8x | 3.0x | 1.67:1 |
+| **HIGH_VOL** | 1.0x | 2.5x | 2.5:1 |
+| **DOWNTREND** | 1.8x | 3.8x | 2.11:1 |
+| **TRANSITION** | 1.6x | 3.2x | 2.0:1 |
 
 ### Protecciones
 - **Stale Exit**: Cierre automático a las 12h si no hay movimiento favorable.
@@ -122,6 +140,12 @@ El bot de Telegram ahora permite gestionar el scanner en tiempo real (solo para 
 ---
 
 ## 8. Historial de Versiones (Changelog)
+
+### v5.2 - Millionaire Strategy Optimization
+- **Smart Downtrend Pro**: 4 condiciones de rebote (Pullback clásico, Oversold bounce, BTC momentum, High volume)
+- **Dynamic Position Sizing**: Tamaños de 0.8% - 6.0% basados en calidad de señal
+- **Umbrales Ultra-Agresivos**: Scores reducidos (TRENDING: 70, HIGH_VOL: 68, RANGING: 60)
+- **Risk/Reword Optimizado**: Mejores ratios SL/TP en todos los regímenes
 
 ### v5.1 - Structure Sensitivity Boost
 - **MSS Ultra-Sensible**: Se ha reducido el requisito de detección de Swing Points de 5 a 3 velas (Fractal mode).

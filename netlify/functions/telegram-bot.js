@@ -19,11 +19,11 @@ async function generateReportMessage(context) {
         const esc = (val) => {
             if (val === undefined || val === null) return '';
             let s = String(val);
-            return s.replace(/([_\*\[\]\(\)~`>#+\-=|{}.!])/g, '\\$1');
+            return s.replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
         };
 
         if (history.length === 0) {
-            return `📊 *INFORME DE RENDIMIENTO*\n\nℹ️ No hay operaciones en el historial todavía\.`;
+            return `📊 *INFORME DE RENDIMIENTO*\n\nℹ️ No hay operaciones en el historial todavía\\.`;
         }
 
         const open = history.filter(h => h.status === 'OPEN');
@@ -42,7 +42,7 @@ async function generateReportMessage(context) {
 
         if (open.length > 0) {
             msg += `🔔 *OPERACIONES ABIERTAS:*\n`;
-            open.forEach(op => msg += `• ${esc(op.symbol)} \(Score: ${esc(op.score)}\)\n`);
+            open.forEach(op => msg += `• ${esc(op.symbol)} \\(Score: ${esc(op.score)}\\)\n`);
             msg += `\n`;
         }
 
@@ -55,20 +55,42 @@ async function generateReportMessage(context) {
         }
         return msg;
     } catch (e) {
-        return `⚠️ Error: ${String(e.message).replace(/([_\*\[\]\(\)~`>#+\-=|{}.!])/g, '\\$1')}`;
+        return `⚠️ Error: ${String(e.message).replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1')}`;
     }
 }
 
 async function sendTelegramMessage(chatId, text) {
-    return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: chatId,
-            text: text,
-            parse_mode: 'MarkdownV2'
-        })
-    });
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'MarkdownV2'
+            })
+        });
+        const data = await response.json();
+        if (!data.ok) {
+            console.error('Telegram API Error:', JSON.stringify(data));
+            // Try sending without Markdown if it fails (fallback)
+            if (data.description && data.description.includes('can\'t parse entities')) {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: text.replace(/[\\_*[\]()~`>#+\-=|{}.!]/g, ''),
+                        parse_mode: 'None'
+                    })
+                });
+            }
+        }
+        return data;
+    } catch (e) {
+        console.error('Fetch Error:', e);
+        return { ok: false, error: e.message };
+    }
 }
 
 async function registerBotCommands() {
@@ -94,7 +116,7 @@ async function registerBotCommands() {
     }
 }
 
-export const handler = async (event) => {
+export const handler = async (event, netlifyContext) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Not Allowed' };
 
     try {
@@ -105,9 +127,15 @@ export const handler = async (event) => {
         const authorizedChatId = String(TELEGRAM_CHAT_ID || '');
         const text = (payload.message.text || '').toLowerCase().trim();
         const isAdmin = chatId === authorizedChatId && authorizedChatId !== '';
-        const context = { siteID: process.env.SITE_ID, token: process.env.NETLIFY_AUTH_TOKEN };
 
-        const esc = (val) => String(val).replace(/([_\*\[\]\(\)~`>#+\-=|{}.!])/g, '\\$1');
+        // Merge Netlify context with manually provided env vars for Blobs storage
+        const context = {
+            ...(netlifyContext || {}),
+            siteID: process.env.SITE_ID || process.env.NETLIFY_SITE_ID,
+            token: process.env.NETLIFY_AUTH_TOKEN
+        };
+
+        const esc = (val) => String(val).replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
 
         if (text === 'id') {
             await sendTelegramMessage(chatId, `🆔 Tu ID de chat es: \`${chatId}\``);
@@ -115,28 +143,28 @@ export const handler = async (event) => {
         }
 
         if (!isAdmin) {
-            await sendTelegramMessage(chatId, `⚠️ No autorizado\. Tu ID: ${chatId}\n\nConfigura TELEGRAM_CHAT_ID=${chatId} en Netlify\.`);
+            await sendTelegramMessage(chatId, `⚠️ No autorizado\\. Tu ID: ${chatId}\n\nConfigura TELEGRAM\\_CHAT\\_ID=${chatId} en Netlify\\.`);
             return { statusCode: 200, body: 'OK' };
         }
 
         // --- COMANDOS ADMIN ---
         if (text === '/start' || text === 'help' || text === '/help' || text === '/') {
-            let help = `🚀 *Comandos Sniper Bot v4\.2*\n\n`;
-            help += `📊 /informe \- Ver resumen de rendimiento\n`;
-            help += `🔍 /scan \- Forzar análisis del scanner ahora\n`;
-            help += `🧊 /cooldowns \- Ver monedas bloqueadas\n`;
-            help += `🔥 /reset\_cooldowns \- Limpiar todos los bloqueos\n`;
-            help += `⚙️ /settings \- Ver configuración actual\n`;
-            help += `🧹 /limpiar \- Borrar historial de señales\n`;
-            help += `🛠️ /setup \- Configurar menú de Telegram`;
+            let help = `🚀 *Comandos Sniper Bot v4\\.2*\n\n`;
+            help += `📊 /informe \\- Ver resumen de rendimiento\n`;
+            help += `🔍 /scan \\- Forzar análisis del scanner ahora\n`;
+            help += `🧊 /cooldowns \\- Ver monedas bloqueadas\n`;
+            help += `🔥 /reset\\_cooldowns \\- Limpiar todos los bloqueos\n`;
+            help += `⚙️ /settings \\- Ver configuración actual\n`;
+            help += `🧹 /limpiar \\- Borrar historial de señales\n`;
+            help += `🛠️ /setup \\- Configurar menú de Telegram`;
             await sendTelegramMessage(chatId, help);
 
         } else if (text === '/setup') {
             const ok = await registerBotCommands();
             if (ok) {
-                await sendTelegramMessage(chatId, `✅ *Menú de comandos configurado*\. Reinicia tu app de Telegram si no ves la lista al escribir \/\.`);
+                await sendTelegramMessage(chatId, `✅ *Menú de comandos configurado*\\. Reinicia tu app de Telegram si no ves la lista al escribir \\/\\.`);
             } else {
-                await sendTelegramMessage(chatId, `❌ Error al configurar el menú de comandos\.`);
+                await sendTelegramMessage(chatId, `❌ Error al configurar el menú de comandos\\.`);
             }
 
         } else if (text === '/informe' || text === 'informe') {
@@ -179,15 +207,15 @@ export const handler = async (event) => {
 
         } else if (text === '/settings' || text === 'settings') {
             let conf = `⚙️ *Configuración Activa:*\n\n`;
-            conf += `• MAX\_SYMBOLS: ${process.env.MAX_SYMBOLS || 50}\n`;
-            conf += `• COOLDOWN: ${process.env.ALERT_COOLDOWN_MIN || 240} min\n`;
-            conf += `• AVOID\_ASIA: ${process.env.AVOID_ASIA_SESSION || 'true'}\n`;
-            conf += `• MIN\_VOL\_24H: ${process.env.MIN_QUOTE_VOL_24H || '3M'}\n`;
-            conf += `• BTC\_SEMAPHORE: ACTIVO`;
+            conf += `• MAX\\_SYMBOLS: ${esc(process.env.MAX_SYMBOLS || 50)}\n`;
+            conf += `• COOLDOWN: ${esc(process.env.ALERT_COOLDOWN_MIN || 240)} min\n`;
+            conf += `• AVOID\\_ASIA: ${esc(process.env.AVOID_ASIA_SESSION || 'true')}\n`;
+            conf += `• MIN\\_VOL\\_24H: ${esc(process.env.MIN_QUOTE_VOL_24H || '3M')}\n`;
+            conf += `• BTC\\_SEMAPHORE: ACTIVO`;
             await sendTelegramMessage(chatId, conf);
 
         } else {
-            await sendTelegramMessage(chatId, `❓ Comando no reconocido\. Escribe /help para ver la lista\.`);
+            await sendTelegramMessage(chatId, `❓ Comando no reconocido\\. Escribe /help para ver la lista\\.`);
         }
 
         return { statusCode: 200, body: JSON.stringify({ success: true }) };
