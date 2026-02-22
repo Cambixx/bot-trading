@@ -6,33 +6,41 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v5.1 (Active)
-**Date:** Feb 20, 2026
-**Theme:** "MODO AGRESIVO" (Aggressive Mode for earlier pivot detection)
+## Current Version: v5.2 (Active)
+**Date:** Feb 22, 2026
+**Theme:** "REVERT & REFINE" (Return to quality over quantity)
 
 ### Core Logic & Parameters:
-- **TRANSITION Score Threshold:** Lowered from 75 to 65.
-- **DOWNTREND Score Threshold:** Lowered for specific oversold bounce criteria.
-- **Ranging Structure:** Allowed 'MODO AGRESIVO' fallback when standard '💎 MODO SNIPER' (score > 88, Vol > 1.5x, etc.) isn't fully met but momentum exists.
+- **Break-Even Logic:** [REMOVED] Per user request. Trades now only close at TP (WIN) or SL (LOSS).
+- **Entry Filter Thresholds:** [RESTORED/TIGHTENED]
+  - TRANSITION: Increased from 65 to **72**.
+  - TRENDING: Increased from 70 to **75**.
+  - RANGING: Increased from 60 to **68**.
+- **Downtrend Logic:** [TEHIGHTENED] Disabled secondary bounce fallbacks. Requires score > 82 and extreme confluence for oversold bounces.
 
 ### Hypothesis / Goal:
-The algorithm was missing valid trades because the filters were too restrictive, demanding perfect "Sniper" conditions. By relaxing the score threshold in Transition regimes, the system can catch earlier breakouts and structural shifts, tagging them as `⚡ MODO AGRESIVO`.
+The v5.1 Aggressive Mode resulted in a win rate of ~17.6%. Many trades were entering on weak structure breakouts in the TRANSITION regime which frequently failed. v5.2 aims to restore the win rate to > 65% by prioritizing high-conviction signals and removing the "protection" of break-evens that often cut winning trades short prematurely.
 
-### Results so far (as of Feb 21, 2026):
-- Captured `ASTERUSDT` (Score 65, TRANSITION) -> Closed as **WIN** (Target Reached).
-- Captured `GOLD(XAUT)USDT` (Score 69, TRANSITION) -> Currently **OPEN**.
-- Captured `PEPEUSDT` (Score 65, TRANSITION) -> Currently **OPEN**.
+### Verdict (v5.1 Audit):
+**FAILURE.** Aggressive mode was too lax for the current market volatility in TRANSITION regimes. Reverted to stricter filters.
 
-### Next Actions / Verdict:
-**LEAVE RUNNING.** The relaxed thresholds correctly identified early momentum shifts. We need to wait for a larger sample size (at least 15-20 aggressive trades) to analyze if `MODO AGRESIVO` introduces too many false positives during fakeouts before adjusting code again.
+---
+
+## Past Versions (Audit History)
+
+### v5.1 (Aggressive Mode)
+- **Status:** Retired (Feb 22, 2026)
+- **Performance:** 17.6% WR (3W / 8L / 5BE)
+- **Issue:** TRANSITION regime entries were too loose (Threshold 65).
 
 ---
 
 ## 🛑 Lessons Learned (Avoiding Past Mistakes)
 *Add key takeaways here as they are discovered.*
 
-1. **Over-tuning on small data:** Adjusting filters after 1 win and 2 open trades is a mistake. Let a strategy play out so we get statistically significant data to optimize.
-2. **Strictness vs. Frequency:** Too strict (v5.0 Sniper) = High Win Rate but almost no trades. Too loose = Many bad trades. `MODO AGRESIVO` is currently the balancing test.
+1. **Over-tuning on small data:** Adjusting filters after 1 win and 2 open trades is a mistake. However, waiting too long when a clear failure pattern (17% WR) emerges is also risky.
+2. **TRANSITION Fragility:** Aggressive modes (Threshold < 70) in Transition regimes are prone to fake breakouts. Quality beats frequency in these zones.
+3. **Break-Even Paradox:** While BE protects capital, it often exits trades right before the real move starts. High-quality entries shouldn't need a 0.8:1 BE trigger to be profitable.
 
 ---
 

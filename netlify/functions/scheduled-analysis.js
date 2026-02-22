@@ -316,28 +316,12 @@ async function updateSignalHistory(tickers, context) {
           // Update Max Favorable Excursion
           if (currentPrice > item.maxFavorable) item.maxFavorable = currentPrice;
 
-          // Check for Break Even Trigger (0.8:1 R:R reached - more conservative)
-          // Risk = Entry - SL. If price moves Entry + (Risk * 0.8), set BE.
-          // This protects capital earlier - key for improving win rate
-          const risk = entryPrice - item.sl;
-          const beTrigger = entryPrice + (risk * 0.8); // 0.8:1 instead of 1:1
-          if (!item.breakeven && currentPrice >= beTrigger) {
-            item.breakeven = true;
-            updated = true;
-          }
+          // AUDIT v5.2: Break-even logic removed per user request
 
           if (currentPrice >= item.tp) { item.status = 'CLOSED'; item.outcome = 'WIN'; updated = true; }
           else if (currentPrice <= item.sl) {
-            // If we hit SL but had moved to BE, it's a BE outcome (simulated)
-            // Or if price hit entry after being at BE
             item.status = 'CLOSED';
-            item.outcome = item.breakeven ? 'BREAK_EVEN' : 'LOSS';
-            updated = true;
-          }
-          // Virtual BE hit (price returned to entry after 1:1)
-          else if (item.breakeven && currentPrice <= entryPrice) {
-            item.status = 'CLOSED';
-            item.outcome = 'BREAK_EVEN';
+            item.outcome = 'LOSS';
             updated = true;
           }
 
@@ -345,22 +329,12 @@ async function updateSignalHistory(tickers, context) {
           // SELL LOGIC
           if (currentPrice < item.maxFavorable) item.maxFavorable = currentPrice;
 
-          const risk = item.sl - entryPrice;
-          const beTrigger = entryPrice - (risk * 0.8); // 0.8:1 instead of 1:1
-          if (!item.breakeven && currentPrice <= beTrigger) {
-            item.breakeven = true;
-            updated = true;
-          }
+          // AUDIT v5.2: Break-even logic removed per user request
 
           if (currentPrice <= item.tp) { item.status = 'CLOSED'; item.outcome = 'WIN'; updated = true; }
           else if (currentPrice >= item.sl) {
             item.status = 'CLOSED';
-            item.outcome = item.breakeven ? 'BREAK_EVEN' : 'LOSS';
-            updated = true;
-          }
-          else if (item.breakeven && currentPrice >= entryPrice) {
-            item.status = 'CLOSED';
-            item.outcome = 'BREAK_EVEN';
+            item.outcome = 'LOSS';
             updated = true;
           }
         }
@@ -1718,12 +1692,12 @@ function validateSignalExpert(symbol, type, volRatio, delta, obMetrics) {
  */
 function calculateRecommendedSize(score, atrPct, regime, hasMSS = false, hasSweep = false, volumeRatio = 1.0) {
   let size = 1.5; // Base aumentada a 1.5%
-  
+
   // 📈 Bonus por calidad de señal (más agresivo)
   if (score >= 85) size += 1.0;
   if (score >= 90) size += 1.5;
   if (score >= 95) size += 2.0;
-  
+
   // 🏆 Bonus por estructura de mercado (confirmación fuerte)
   if (hasMSS) size += 0.8;
   if (hasSweep) size += 1.2;
@@ -1746,7 +1720,7 @@ function calculateRecommendedSize(score, atrPct, regime, hasMSS = false, hasSwee
   // 🛡️ Límites de seguridad con ampliación para señales premium
   const minSize = 0.8; // Mínimo aumentado
   const maxSize = score >= 90 ? 6.0 : 4.5; // Hasta 6% para señales excelentes
-  
+
   return Math.max(minSize, Math.min(size, maxSize)).toFixed(1);
 }
 
@@ -2181,54 +2155,31 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (sottValue > 0.8 && sottSignal > 0.3) requirementsReduction = 10;
   else if (sottSignal > 0.2) requirementsReduction = 5;
 
-  // === SIMPLIFIED REGIME FILTERS v4.0 ===
-  let MIN_QUALITY_SCORE = 65;  // Reducido de 75
+  // === REGIME FILTERS v5.2 REFINED (REVERTED AGGRESSIVE MODE) ===
+  let MIN_QUALITY_SCORE = 72;
 
   if (regime === 'DOWNTREND') {
-    // 🚀 ESTRATEGIA MILLONARIA: Smart Downtrend Pro
-    // Aprovechar rebotes incluso en mercados bajistas con condiciones específicas
-    
-    // Condición 1: Si 4H es BULLISH -> Pullback clásico
+    // 🚀 v5.2: Toughened Downtrend - Require extreme confluence
     if (trend4h === 'BULLISH') {
       reasons.push('📉 DOWNTREND (Pullback Opportunity)');
-      // Relajar requisitos de estructura para capturar más oportunidades
-      if (!mss && !sweep) {
-        // Pero requerir RSI muy oversold o volumen extremo
-        if (rsi1h > 30 && volumeRatio < 2.0) {
-          console.log(`[REJECT] ${symbol}: DOWNTREND Pullback requires oversold conditions`);
-          return null;
-        }
-        reasons.push('⚠️ Structure relaxed (Oversold/High Vol)');
-      }
-      MIN_QUALITY_SCORE = 80 - requirementsReduction; // Reducido de 85
-    } 
-    // Condición 2: Mercado bajista pero con señales de reversión fuerte
-    else if (rsi1h < 30 && volumeRatio > 1.8 && sottSignal > -0.2) {  // Relajado
-      reasons.push('🎯 DOWNTREND (Oversold Bounce)');
-      MIN_QUALITY_SCORE = 70 - requirementsReduction;  // Más bajo
+      MIN_QUALITY_SCORE = 82 - requirementsReduction;
     }
-    // Condición 3: Si BTC está GREEN y el coin tiene momentum
-    else if (btcContext.status === 'GREEN' && categoryScores.momentum > 70) {  // Relajado
-      reasons.push('🟢 DOWNTREND (BTC Green Momentum)');
-      MIN_QUALITY_SCORE = 65 - requirementsReduction;  // Más bajo
-    }
-    // Condición 4: Volumen muy alto aunque otros indicadores sean débiles
-    else if (volumeRatio > 3.0 && rsi1h < 35) {
-      reasons.push('📈 DOWNTREND (High Volume Opportunity)');
-      MIN_QUALITY_SCORE = 65 - requirementsReduction;
+    else if (rsi1h < 25 && volumeRatio > 2.0) {  // Toughened
+      reasons.push('🎯 DOWNTREND (Extreme Oversold Bounce)');
+      MIN_QUALITY_SCORE = 85 - requirementsReduction;
     }
     else {
-      console.log(`[REJECT] ${symbol}: DOWNTREND regime - No bounce conditions met`);
+      console.log(`[REJECT] ${symbol}: DOWNTREND regime - Stricter v5.2 filters not met`);
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 65 - requirementsReduction; // Reducido de 75
+    MIN_QUALITY_SCORE = 72 - requirementsReduction;
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 70 - requirementsReduction; // Reducido de 78
+    MIN_QUALITY_SCORE = 75 - requirementsReduction;
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 68 - requirementsReduction; // Reducido de 82
+    MIN_QUALITY_SCORE = 80 - requirementsReduction;
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 60 - requirementsReduction; // Reducido de 68
+    MIN_QUALITY_SCORE = 68 - requirementsReduction;
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
