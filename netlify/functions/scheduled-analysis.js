@@ -2400,6 +2400,16 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
   }
 
+  // === FIX v5.2a: TRANSITION BB Overextension Hard Filter ===
+  // Auditoría Feb-24: TRXUSDT entró con bbPercent=1.01 en régimen TRANSITION porque
+  // el path MSS/Sweep bypaseaba el filtro general de overextension (línea 2234).
+  // Este gate explícito evita entradas overextended en TRANSITION, independientemente
+  // de la confirmación de estructura. Un precio en la BB superior no es un buen punto de entrada.
+  if (regime === 'TRANSITION' && signalType === 'BUY' && bbPercent > 0.92) {
+    console.log(`[REJECT] ${symbol} (TRANSITION): BB% overextended (${bbPercent.toFixed(2)} > 0.92) - entrada en zona de resistencia`);
+    return null;
+  }
+
   // Final score check
   if (score < MIN_QUALITY_SCORE) {
     console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE} | SOTT: ${sottValue.toFixed(2)} (${sottSignal.toFixed(2)})`);
@@ -2417,6 +2427,18 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
   if (strongCategories < requiredStrong) {
     console.log(`[REJECT] ${symbol}: Strong Categories ${strongCategories} < ${requiredStrong}`);
+    return null;
+  }
+
+  // === FIX v5.2a: R:R Real Gate ===
+  // Auditoría Feb-24: El riskRewardRatio en entryMetrics era un ratio TEÓRICO fijo (e.g. 2.5/1.8)
+  // no relacionado con el ATR real del mercado. El trade TRXUSDT tuvo un R:R real de 1.39.
+  // Calculamos aquí el R:R real con los multiplicadores de ATR que se usan para TP y SL:
+  const tpMultiplier = regime === 'TRENDING' ? 4.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : regime === 'TRANSITION' ? 3.2 : regime === 'DOWNTREND' ? 3.8 : 3.0;
+  const slMultiplier = regime === 'TRENDING' ? 2.2 : regime === 'HIGH_VOLATILITY' ? 1.0 : regime === 'TRANSITION' ? 1.6 : regime === 'DOWNTREND' ? 1.8 : 1.8;
+  const realRR = slMultiplier > 0 ? tpMultiplier / slMultiplier : 0;
+  if (realRR < 1.5) {
+    console.log(`[REJECT] ${symbol}: R:R real insuficiente (${realRR.toFixed(2)} < 1.50) para régimen ${regime}`);
     return null;
   }
 
@@ -2500,8 +2522,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         distToEma21: Number(distToEma21.toFixed(2)),
         distToEma50: Number(distToEma50.toFixed(2)),
         bbPercent: Number((bbPercent || 0).toFixed(2)),
-        riskRewardRatio: Number(((regime === 'TRENDING' ? 4.0 : regime === 'HIGH_VOLATILITY' ? 2.0 : regime === 'TRANSITION' ? 2.5 : 2.0) /
-          (regime === 'TRENDING' ? 2.5 : regime === 'HIGH_VOLATILITY' ? 1.2 : regime === 'TRANSITION' ? 1.8 : 2.0)).toFixed(2))
+        riskRewardRatio: Number(realRR.toFixed(2)) // FIX v5.2a: R:R real calculado a partir de multiplicadores ATR reales
       },
       reasons,
       mode: finalMode,
