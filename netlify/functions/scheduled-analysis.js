@@ -2168,12 +2168,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       reasons.push('🎯 DOWNTREND (Extreme Oversold Bounce)');
       MIN_QUALITY_SCORE = 85 - requirementsReduction;
     }
+    // v5.3 NEW: DOWNTREND Bounce Mode Logic
+    else if (btcContext?.rsi4h < 35 && btcContext?.status === 'GREEN' && rsi15m < 45) {
+      reasons.push('🔥 DOWNTREND (Capitulation Bounce)');
+      MIN_QUALITY_SCORE = 82 - requirementsReduction;
+    }
     else {
       console.log(`[REJECT] ${symbol}: DOWNTREND regime - Stricter v5.2 filters not met`);
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 72 - requirementsReduction;
+    MIN_QUALITY_SCORE = 70 - requirementsReduction; // v5.3: Reduced from 72 to 70
   } else if (regime === 'TRENDING') {
     MIN_QUALITY_SCORE = 75 - requirementsReduction;
   } else if (regime === 'HIGH_VOLATILITY') {
@@ -2231,8 +2236,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     // v4.6 FIX: Allow overextension if trend is BULLISH or SOTT signal is very strong
     const isBreakout = (trend4h === 'BULLISH' || sottSignal > 0.4) && rsi15m < 85;
 
-    if ((rsi15m > 70 || bbPercent > 0.88) && !isBreakout) {
-      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)}) - Trend: ${trend4h}, SOTT Sig: ${sottSignal.toFixed(2)}`);
+    // v5.3: Dynamic BB% limit for TRENDING BULLISH
+    const dynamicBbLimit = (regime === 'TRENDING' && trend4h === 'BULLISH' && sottValue > 0.5) ? 0.90 : 0.88;
+
+    if ((rsi15m > 70 || bbPercent > dynamicBbLimit) && !isBreakout) {
+      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)}) - Limit: ${dynamicBbLimit}, Trend: ${trend4h}`);
       return null;
     }
 
@@ -2696,7 +2704,7 @@ export async function runAnalysis(context) {
   if (!canProceed) return { success: false, error: 'Locked' };
 
   try {
-    console.log('--- DAY TRADE Analysis Started v5.1 ---');
+    console.log('--- DAY TRADE Analysis Started v5.3 ---');
     const runId = `RUN-${Date.now().toString().slice(-6)}`;
     console.log('Execution ID:', runId);
 
@@ -2728,13 +2736,13 @@ export async function runAnalysis(context) {
         const btcRsi1h = calculateRSI(closes1h, 14);
 
         if (btcSt4h.bearish || btcRsi4h > 75) {
-          btcContext = { status: 'RED', reason: 'BTC 4H Bearish or Overextended' };
+          btcContext = { status: 'RED', reason: 'BTC 4H Bearish or Overextended', rsi4h: btcRsi4h };
           console.log(`[BTC-SEM] 🔴 RED: ST=${btcSt4h.bearish ? 'Bear' : 'Bull'}, RSI4H=${btcRsi4h.toFixed(1)}`);
         } else if (btcSt4h.bullish && btcRsi1h > 65) {
-          btcContext = { status: 'AMBER', reason: 'BTC 1H Overbought' };
+          btcContext = { status: 'AMBER', reason: 'BTC 1H Overbought', rsi4h: btcRsi4h };
           console.log(`[BTC-SEM] 🟡 AMBER: RSI1H=${btcRsi1h.toFixed(1)}`);
         } else {
-          btcContext = { status: 'GREEN', reason: 'BTC Healthy' };
+          btcContext = { status: 'GREEN', reason: 'BTC Healthy', rsi4h: btcRsi4h };
           console.log(`[BTC-SEM] 🟢 GREEN: Trend Healthy`);
         }
       }

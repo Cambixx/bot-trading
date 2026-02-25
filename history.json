@@ -1,53 +1,52 @@
 [
     {
-        "id": "1771780521055-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "price": 0.2901,
-        "tp": 0.291536664967669,
-        "sl": 0.289381667516166,
+        "id": "1771937122277-XLMUSDT",
+        "symbol": "XLMUSDT",
+        "price": 0.1489,
+        "tp": 0.150916615175405,
+        "sl": 0.147891692412298,
         "type": "BUY",
-        "time": 1771780521056,
+        "time": 1771937122277,
         "status": "CLOSED",
-        "score": 77,
+        "score": 75,
         "regime": "TRANSITION",
         "hasMSS": true,
-        "hasSweep": true,
+        "hasSweep": false,
         "btcRisk": "GREEN",
         "entryMetrics": {
-            "distToEma9": 0.15,
-            "distToEma21": 0.26,
-            "distToEma50": 0.4,
-            "bbPercent": 1.01,
-            "riskRewardRatio": 1.39
+            "distToEma9": -0.24,
+            "distToEma21": -0.34,
+            "distToEma50": -0.72,
+            "bbPercent": 0.08,
+            "riskRewardRatio": 2
         },
         "categoryScores": {
-            "momentum": 55,
+            "momentum": 30,
             "trend": 100,
-            "structure": 60,
+            "structure": 85,
             "volume": 70,
-            "patterns": 0
+            "patterns": 50
         },
-        "volumeRatio": 2.23,
+        "volumeRatio": 2.17,
         "strongCategories": 3,
         "reasons": [
             "⚡ MODO AGRESIVO",
-            "🔄 MSS (+10)",
+            "🕯️ Hammer",
             "🏦 Order Block Alcista",
-            "🚀 Momentum Fuerte (RSI \u003E 70)",
             "📈 MACD Alcista",
             "🟢 SuperTrend Alcista",
             "✅ Confluencia Total (3-TF)",
             "🌐 MTF_ALIGNED_TOTAL",
-            "💨 ADX Alcista",
-            "🌊 SOTT Bullish (0.78)",
-            "🚀 BB Breakout Potential",
+            "💨 ADX Bajista",
+            "🌊 SOTT Bullish (-0.56)",
+            "🏀 BB Inferior",
             "📊 Vol x2.2",
             "📚 OBI Favorable",
             "🛡️ Validado v4.5 (Conf: 70%)",
             "🌐 Regime: TRANSITION",
             "🎯 Alta Confluencia"
         ],
-        "maxFavorable": 0.2901,
-        "outcome": "LOSS"
+        "maxFavorable": 0.151,
+        "outcome": "WIN"
     }
 ]

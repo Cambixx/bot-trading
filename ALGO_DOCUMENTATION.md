@@ -97,7 +97,7 @@ El orden de evaluación para cada señal es:
 ```
 1. Sesión Asia (00-07 UTC)      → REJECT si AVOID_ASIA_SESSION=true
 2. Volume DEAD (ratio < 0.3)    → REJECT siempre
-3. RSI > 70 o BB% > 0.88       → REJECT (excepto isBreakout = Trend4H BULLISH + SOTT > 0.4)
+3. RSI > 70 o BB% > 0.88-0.90   → REJECT (excepto isBreakout o Trending Bullish SOTT>0.5)
 4. Dist EMA21 > 1.8%            → REJECT (precio demasiado lejos para comprar)
 5. Dist EMA9 > 2.0% (!breakout) → REJECT (chasing filter)
 6. BTC-SEM RED y score < 88     → REJECT
@@ -107,10 +107,11 @@ El orden de evaluación para cada señal es:
 10. TRENDING: sin pullback ni estructura → REJECT
 11. RANGING: BB% > 0.75 (BUY) o sin MSS/Sweep (score < 85) → REJECT
 12. TRANSITION: BB% > 0.92 (BUY) → REJECT [FIX v5.2a]
-13. Score < MIN_QUALITY_SCORE por régimen → REJECT
-14. Score < 80 sin confirmación visual → REJECT
-15. Strong Categories < mínimo por régimen → REJECT
-16. R:R real < 1.5 → REJECT [FIX v5.2a]
+13. DOWNTREND: Capitulation Bounce requerimientos especiales [v5.3]
+14. Score < MIN_QUALITY_SCORE por régimen → REJECT
+15. Score < 80 sin confirmación visual → REJECT
+16. Strong Categories < mínimo por régimen → REJECT
+17. R:R real < 1.5 → REJECT [FIX v5.2a]
 ```
 
 ---
@@ -146,6 +147,11 @@ Solo disponibles para el ADMIN configurado:
 ---
 
 ## 9. Historial de Versiones (Changelog)
+
+### v5.3 — Performance Tuning (Feb 25, 2026)
+- **TRANSITION Threshold:** Reducido a **70** (desde 72).
+- **DOWNTREND Bounce Logic:** Permitir rebotes si BTC RSI4H < 35 y BTC-SEM es GREEN.
+- **Dynamic BB%:** Límite de overextension sube a **0.90** en TRENDING BULLISH si SOTT > 0.5.
 
 ### v5.2a — Surgical Fixes (Feb 24, 2026)
 - **FIX #1 — BB% Hard Filter TRANSITION:** Añadido gate explícito: `bbPercent > 0.92 en TRANSITION → REJECT`. Path de MSS/Sweep bypaseaba el filtro general de overextension. Causa raíz del LOSS en TRXUSDT (bbPercent=1.01).

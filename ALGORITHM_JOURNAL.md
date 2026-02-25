@@ -6,18 +6,23 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v5.2a (Active)
-**Date:** Feb 24, 2026
-**Theme:** "SURGICAL FIXES" (Dos bugs de filtrado corregidos post-auditoría)
+## Current Version: v5.3 (Active)
+**Date:** Feb 25, 2026
+**Theme:** "PERFORMANCE TUNING" (Post-Auditoría de Frecuencia)
 
 ### Core Logic & Parameters:
-- **Break-Even Logic:** [REMOVED] Per user request. Trades now only close at TP (WIN) or SL (LOSS).
-- **Entry Filter Thresholds:** [UNCHANGED desde v5.2]
-  - TRANSITION: **72**
-  - TRENDING: **75**
-  - RANGING: **68**
-- **FIX #1 — BB% Hard Filter en TRANSITION:** [NUEVO] Si `bbPercent > 0.92` en régimen TRANSITION y señal BUY → REJECT. El path MSS/Sweep en TRANSITION bypaseaba el check general de overextension. TRXUSDT (Feb 22) entró con BB%=1.01, precio en la BB superior (resistencia).
-- **FIX #2 — R:R Real Gate:** [NUEVO] El R:R en `entryMetrics` era un ratio teórico fijo. Ahora se calcula con los multiplicadores ATR reales (TP_mult / SL_mult). Se rechaza cualquier señal con R:R real < 1.5. El trade TRXUSDT tenía R:R real = 1.39.
+- **TRANSITION Threshold:** **70** (Reducido de 72).
+- **DOWNTREND Bounce Mode:** [NUEVO] Bypass de régimen DOWNTREND si BTC RSI4H < 35 (Capitulación) + BTC-SEM GREEN + RSI15m < 45. Score requerido: 82.
+- **Dynamic BB% in TRENDING:** [MUEVO] Límite de overextension sube a **0.90** (de 0.88) si `SOTT > 0.5` en tendencia alcista 4H.
+
+### Hypothesis / Goal:
+v5.3 busca resolver la "sequía de señales" observada en v5.2a. Al relajar el umbral de TRANSITION y permitir rebotes en capitulación, se espera capturar 1-2 trades diarios adicionales.
+
+---
+
+## Past Versions (Audit History)
+
+### v5.2a (SURGICAL FIXES)
 
 ### Hypothesis / Goal:
 v5.2a mantiene todos los umbrales de score de v5.2 (que funcionaron correctamente filtrando el mercado bajista del 23-Feb). Los dos fixes quirúrgicos eliminan la causa raíz del único trade perdedor documentado. Se espera que el WR mejore con señales de mayor calidad geométrica.
