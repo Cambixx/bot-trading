@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v5.2a)
+# 🦅 Documentación del Algoritmo de Trading (v5.4)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -57,10 +57,10 @@ El puntaje final (0–100) utiliza pesos fijos y una validación binaria final (
 | **RANGING** | 68 | Mean reversion — comprar en soporte, vender en resistencia | 1.0% – 4.0% |
 | **TRENDING** | 75 | Solo pullbacks a EMA21/50 — no perseguir rupturas | 1.5% – 6.0% |
 | **HIGH_VOLATILITY** | 80 | Estructura obligatoria (MSS o Sweep) — size reducido | 0.8% – 3.5% |
-| **TRANSITION** | 72 | Alta selectividad — BB% < 0.92 obligatorio (FIX v5.2a) | 1.0% – 4.0% |
+| **TRANSITION** | 75 | Alta selectividad — Revertido a 75 tras auditoría v5.3 (FIX v5.4) | 1.0% – 4.0% |
 | **DOWNTREND** | 82 | Solo bounce con score > 82 y confluencia extrema | 0.5% – 2.0% |
 
-> **Nota v5.2a:** El umbral de TRANSITION se mantiene en 72 (restaurado en v5.2). Se añadió BB% Hard Filter (>0.92 → REJECT) para evitar entradas overextended en la banda superior de Bollinger.
+> **Nota v5.4:** El umbral de TRANSITION sube a 75 para filtrar falsas rupturas detectadas en la auditoría de v5.3. Se mantiene el BB% Hard Filter (>0.92 → REJECT).
 
 ---
 
@@ -148,8 +148,12 @@ Solo disponibles para el ADMIN configurado:
 
 ## 9. Historial de Versiones (Changelog)
 
+### v5.4 — Quality over Frequency (Feb 28, 2026)
+- **TRANSITION Threshold:** Revertido a **75** (desde 70).
+- **Justificación:** Los trades con score < 75 en este régimen mostraron un 0% WR (Trampas de liquidez).
+
 ### v5.3 — Performance Tuning (Feb 25, 2026)
-- **TRANSITION Threshold:** Reducido a **70** (desde 72).
+- **TRANSITION Threshold:** Reducido a **70** (desde 72). FALLIDO — Demasiado laxo.
 - **DOWNTREND Bounce Logic:** Permitir rebotes si BTC RSI4H < 35 y BTC-SEM es GREEN.
 - **Dynamic BB%:** Límite de overextension sube a **0.90** en TRENDING BULLISH si SOTT > 0.5.
 
@@ -192,4 +196,4 @@ Solo disponibles para el ADMIN configurado:
 
 ---
 
-**Documentación actualizada a v5.2a — 24 Febrero 2026**
+**Documentación actualizada a v5.4 — 28 Febrero 2026**

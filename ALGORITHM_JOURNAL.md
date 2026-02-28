@@ -6,23 +6,26 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v5.3 (Active)
-**Date:** Feb 25, 2026
-**Theme:** "PERFORMANCE TUNING" (Post-Auditoría de Frecuencia)
+## Current Version: v5.4 (Active)
+**Date:** Feb 28, 2026
+**Theme:** "QUALITY OVER FREQUENCY" (Surgical Adjustment)
 
 ### Core Logic & Parameters:
-- **TRANSITION Threshold:** **70** (Reducido de 72).
-- **DOWNTREND Bounce Mode:** [NUEVO] Bypass de régimen DOWNTREND si BTC RSI4H < 35 (Capitulación) + BTC-SEM GREEN + RSI15m < 45. Score requerido: 82.
-- **Dynamic BB% in TRENDING:** [MUEVO] Límite de overextension sube a **0.90** (de 0.88) si `SOTT > 0.5` en tendencia alcista 4H.
+- **TRANSITION Threshold:** **75** (Revertido de 70).
+- **DOWNTREND Bounce Mode:** [Mantener] Bypass de régimen DOWNTREND si BTC RSI4H < 35 (Capitulación) + BTC-SEM GREEN + RSI15m < 45. Score requerido: 82.
+- **Dynamic BB% in TRENDING:** [Mantener] Límite de overextension sube a **0.90** si `SOTT > 0.5` en tendencia alcista 4H.
 
 ### Hypothesis / Goal:
-v5.3 busca resolver la "sequía de señales" observada en v5.2a. Al relajar el umbral de TRANSITION y permitir rebotes en capitulación, se espera capturar 1-2 trades diarios adicionales.
+v5.4 revierte la relajación de umbrales en TRANSITION tras la auditoría del 28-Feb. Se observó un 0% WR en trades de TRANSITION con scores entre 71-74 (Trampas de liquidez). Al subir el umbral a 75, se eliminan estas señales de baja calidad sin afectar al trade ganador documentado (XLMUSDT, Score 75).
 
 ---
 
 ## Past Versions (Audit History)
 
-### v5.2a (SURGICAL FIXES)
+### v5.3 (PERFORMANCE TUNING — Post-Auditoría de Frecuencia)
+- **Status:** Superseded by v5.4 (Feb 28, 2026)
+- **Performance:** 40% WR (2W / 3L) - Muestra pequeña pero con patrón de fallo claro en TRANSITION.
+- **Issue:** El umbral de 70 en TRANSITION permitió la entrada de "Fake Breakouts" (DOT, ONDO, SHIB) que no tenían suficiente inercia.
 
 ### Hypothesis / Goal:
 v5.2a mantiene todos los umbrales de score de v5.2 (que funcionaron correctamente filtrando el mercado bajista del 23-Feb). Los dos fixes quirúrgicos eliminan la causa raíz del único trade perdedor documentado. Se espera que el WR mejore con señales de mayor calidad geométrica.

@@ -2178,7 +2178,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 70 - requirementsReduction; // v5.3: Reduced from 72 to 70
+    MIN_QUALITY_SCORE = 75 - requirementsReduction; // v5.4: Reverted from 70 to 75 due to fake breakout patterns in v5.3
   } else if (regime === 'TRENDING') {
     MIN_QUALITY_SCORE = 75 - requirementsReduction;
   } else if (regime === 'HIGH_VOLATILITY') {
