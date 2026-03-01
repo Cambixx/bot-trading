@@ -11,7 +11,10 @@ Antes de iniciar el chat de auditoría, asegúrate de tener **descargados y actu
 | Archivo | Criticidad | Propósito |
 |---------|-----------|-----------|
 | `history.json` | 🔴 CRÍTICO | Resultados reales de cada operación (WIN/LOSS/OPEN/STALE_EXIT) con métricas de entrada |
-| `logs.txt` | 🔴 CRÍTICO | Registro de decisiones del servidor: qué se rechazó y por qué, qué pasó con BTC-SEM, cuántas señales se generaron |
+| `shadow_trades.json` | 🔴 CRÍTICO | Registro de operaciones fantasma y near-misses (NUEVO v6.0) |
+| `autopsies.json` | 🔴 CRÍTICO | Diagnóstico detallado de trades cerrados con duración y excursiones máximas (NUEVO v6.0) |
+| `signal_memory.json` | 🟡 RECOMENDADO | Historial de momentum y puntajes por símbolo (NUEVO v6.0) |
+| `logs.txt` | 🔴 CRÍTICO | Registro de decisiones del servidor: qué se rechazó y por qué |
 | `ALGORITHM_JOURNAL.md` | 🟠 IMPORTANTE | Contexto de la versión activa, hipótesis en prueba y lecciones aprendidas |
 | `ALGO_DOCUMENTATION.md` | 🟡 RECOMENDADO | Si se van a cambiar parámetros, se necesita para actualizarlo con los cambios |
 | `scheduled-analysis.js` | 🟡 RECOMENDADO | Solo si se detectan bugs o se propone cambio de código |
@@ -27,6 +30,8 @@ Hola. Quiero hacer una auditoría de rendimiento completa del algoritmo de tradi
 
 He actualizado y adjunto los siguientes archivos:
 - @history.json — Últimas operaciones con sus resultados.
+- @shadow_trades.json — Historial de operaciones fantasma (near-misses).
+- @autopsies.json — Diagnóstico de trades cerrados.
 - @logs.txt — Registro de decisiones del servidor.
 - @ALGORITHM_JOURNAL.md — Contexto, hipótesis en prueba y lecciones aprendidas.
 
@@ -38,18 +43,30 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 
 1. **Calcula el Win Rate real** de los trades en `history.json`:
    - Fórmula: WR = WINs / (WINs + LOSSes). Excluir OPEN y STALE_EXIT del denominador.
+   - Analiza el Win Rate desglosado **POR RÉGIMEN** (Trending, Ranging, Transition, etc.).
    - Muestra también: total trades cerrados, % LOSSes, % STALE_EXITs.
-   - Si hay menos de 5 trades cerrados, indícalo explícitamente — los datos no son estadísticamente significativos.
+   - Si hay menos de 5 trades cerrados, indícalo explícitamente.
 
-2. **Frecuencia de señales:** ¿Cuántos ciclos de análisis se ejecutaron en el período? ¿Cuántas señales se generaron? Calcula la tasa de conversión (señales / ciclos). Si es < 1%, puede indicar que los filtros son demasiado restrictivos.
+2. **Frecuencia de señales:** ¿Cuántas señales se generaron reales vs cuántos near-misses se guardaron en `shadow_trades.json`?
 
-3. **R:R Real promedio:** Calcula el `riskRewardRatio` promedio de los trades emitidos (campo en `entryMetrics`). Si está por debajo de 1.5, es una señal de alerta.
+3. **R:R Real promedio y Autopsias:** Utiliza `autopsies.json` para calcular:
+   - Tiempo promedio que un trade ganador (WIN) está abierto vs. un perdedor (LOSS).
+   - Máximo movimiento favorable promedio (maxFavorableMove) en los trades LOSS antes de revertirse e ir a Stop Loss.
+
+---
+
+### BLOQUE 1.5 — Análisis de Self-Learning (Shadow Trading)
+
+4. **Evalúa las oportunidades fantasma (`shadow_trades.json`):**
+   - ¿Cuál habría sido el Win Rate de los *near-misses* si se hubieran operado (considerando los WOULD_WIN y WOULD_LOSE)?
+   - ¿Qué filtro nos está costando más trades ganadores? (Filtro más costoso basado en rechazos que terminaron en WOULD_WIN).
+   - Analiza si los ajustes de Momentum (+3 / -5) están beneficiando al sistema o introduciendo ruido.
 
 ---
 
 ### BLOQUE 2 — Análisis de Patrones de Pérdida
 
-4. **Clasifica cada trade LOSS** cruzando `history.json` con `logs.txt`. Para cada LOSS, identifica la causa probable:
+5. **Clasifica cada trade LOSS** cruzando `autopsies.json`, `history.json` y `logs.txt`. Para cada LOSS, identifica la causa probable:
    - 🔴 **Falsa ruptura (Fake Breakout):** MSS confirmado pero precio revirtió rápidamente.
    - 🔴 **Entrada overextended:** bbPercent > 0.90 o RSI > 70 en el momento de entrada.
    - 🟠 **Correlación BTC:** ¿BTC-SEM era RED o AMBER cuando se entró? ¿Hubo giro bajista intraday?
@@ -58,18 +75,18 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
    - 🟡 **Sesión de baja liquidez:** ¿La señal se generó en horario Asia o pre-Londres?
    - ⚪ **Cambio de tendencia macro:** Evento externo o ruptura estructural post-entrada.
 
-5. **Clasifica los STALE_EXIT:** ¿Son trades que nunca se movieron favorablemente (entradas sin momentum real) o trades que se estancaron después de un movimiento inicial positivo?
+6. **Clasifica los STALE_EXIT:** ¿Son trades que nunca se movieron favorablemente (entradas sin momentum real) o trades que se estancaron después de un movimiento inicial positivo? Revisa el campo `favorableMovePct` en `autopsies.json`.
 
 ---
 
 ### BLOQUE 3 — Revisión del Journal
 
-6. **Revisa el `ALGORITHM_JOURNAL.md`:**
+7. **Revisa el `ALGORITHM_JOURNAL.md`:**
    - ¿Las hipótesis en "Pending Hypotheses" han sido validadas o refutadas por los datos?
    - ¿Alguna "Lesson Learned" anterior se repite como patrón en estos datos nuevos?
    - ¿El mercado actual sugiere que debemos probar alguna de las hipótesis pendientes?
 
-7. **Evalúa el contexto de mercado durante el período** basándote en los logs:
+8. **Evalúa el contexto de mercado durante el período** basándote en los logs y autopsias:
    - ¿El mercado estaba mayoritariamente en DOWNTREND, RANGING o TRENDING?
    - ¿El BTC-SEM fue predominantemente RED, AMBER o GREEN?
    - ¿Hubo sesiones de alta volatilidad o eventos extraordinarios?
@@ -78,7 +95,7 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 
 ### BLOQUE 4 — Innovación Estratégica
 
-8. **Si el WR < 40% o la frecuencia de señales es < 1%**, propón alternativas estratégicas modernas basadas en casos de éxito documentados. Considera:
+9. **Si el WR < 40% o hay una alerta clara del Shadow Trading**, propón alternativas estratégicas modernas o ajustes adaptativos. Considera:
 
    **A) Estrategias de Momentum con Filtro de Regime:**
    - Solo operar en regímenes RANGING (Mean Reversion) + TRENDING (Pullback), ignorando TRANSITION y DOWNTREND completamente.
@@ -102,13 +119,13 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 
 ### BLOQUE 5 — Veredicto y Recomendación
 
-9. **Da un veredicto claro** con una de estas opciones:
+10. **Da un veredicto claro** con una de estas opciones:
    - ✅ **MANTENER:** El algoritmo está funcionando correctamente. Solo observar.
    - 🔧 **AJUSTE QUIRÚRGICO:** 1-2 cambios específicos de parámetros o filtros. Indica exactamente qué línea del código y qué cambio.
    - 🔄 **AJUSTE MAYOR:** Cambio significativo de estrategia o de múltiples parámetros. Requiere más pruebas antes de producción.
    - ❌ **REVERTIR:** La versión actual empeora el rendimiento. Propón exactamente a qué configuración revertir.
 
-10. Si se propone cualquier cambio de código, **espera mi confirmación** antes de modificar `scheduled-analysis.js`. Analiza primero, actúa después.
+11. Si se propone cualquier cambio de código, **espera mi confirmación** antes de modificar `scheduled-analysis.js`. Analiza primero, actúa después.
 
 ---
 

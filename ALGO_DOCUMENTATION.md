@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v5.4)
+# 🦅 Documentación del Algoritmo de Trading (v6.0 Self-Learn)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,14 +8,15 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ## 1. Arquitectura del Sistema
 
-El bot opera como un ecosistema serverless interconectado:
+El bot opera como un ecosistema serverless interconectado con capacidades de auto-aprendizaje:
 
 - **Netlify Functions:**
   - `scheduled-analysis`: Ejecuta el análisis cada **15 minutos** (cron job). Core del sistema.
-  - `telegram-bot`: Gestiona comandos interactivos y alertas manuales.
+  - `auto-digest`: Ejecuta un análisis de rendimiento, autopsias y shadow trading cada día a las **09:00 UTC**.
+  - `telegram-bot`: Gestiona comandos interactivos, alertas manuales y diagnósticos bajo demanda.
 - **MEXC API**: Fuente de datos en tiempo real (Klines OHLCV y Order Book).
-- **Netlify Blobs**: Almacena `history.json`, cooldowns y run-lock.
-- **Telegram API**: Interfaz bidireccional para alertas e informes de rendimiento.
+- **Netlify Blobs**: Almacena de manera persistente `history.json`, `shadow_trades.json`, `signal_memory.json`, `autopsies.json`, cooldowns y run-lock.
+- **Telegram API**: Interfaz bidireccional para alertas e informes de rendimiento y diagnósticos.
 
 ---
 
@@ -35,6 +36,11 @@ El puntaje final (0–100) utiliza pesos fijos y una validación binaria final (
 - SOTT value > 0.5 → **+5 pts**
 - SOTT signal > 0.2 → **+5 pts**
 - 3+ categorías fuertes (>60) → **+3 pts** | 4+ → **+5 pts**
+
+### 🧠 Ajuste de Momentum (Self-Learning v6.0)
+El sistema rastrea los scores de un símbolo en los últimos ciclos (Signal Memory):
+- **Momentum Alcista Sano:** (el score sube progresivamente en ciclos consecutivos) → **+3 pts**
+- **Spike Sospechoso:** (el score salta abruptamente de 0 o muy bajo a > 70 en un ciclo) → **-5 pts**
 
 ---
 
@@ -88,6 +94,26 @@ El puntaje final (0–100) utiliza pesos fijos y una validación binaria final (
   - AMBER → Score mínimo 70-78 (dependiendo del momentum)
   - GREEN → Umbral normal por régimen
 
+  - GREEN → Umbral normal por régimen
+
+---
+
+## 5.5. Módulos de Self-Learning (v6.0)
+
+El bot no solo emite señales, sino que **aprende** monitoreando continuamente su desempeño:
+
+### 1. Shadow Trading (Paper Trading Fantasma)
+Si una señal logra un score $\geq$ 50 pero es rechazada en la fase final (por un filtro de BTC, score menor al umbral de régimen, o falta de categorías fuertes), se guarda como un *near-miss* (casi acierto). En análisis posteriores, el bot rastrea qué hubiera pasado (WOULD_WIN o WOULD_LOSE) para decirnos qué filtros nos están quitando trades ganadores.
+
+### 2. Signal Memory (Momentum Cross-Cycle)
+El algoritmo rompe la limitación de la falta de estado (statelessness). Guarda los puntajes de los activos ciclo tras ciclo. En el momento de calificar, lee este historial y aplica los **Ajustes de Momentum (+3 ó -5 puntos)** descritos en la sección de Scoring.
+
+### 3. Post-Trade Autopsy
+Al cerrar un trade (ya sea en WIN, LOSS o STALE_EXIT), el sistema guarda instantáneamente una radiografía completa: duración en horas (hoursOpen), movimiento favorable máximo (maxFavorable), score original, régimen en el que estaba vs régimen en el que cerró. 
+
+### 4. Auto-Digest
+Una Netlify function (`auto-digest.js`) corre diariamente a las 09:00 UTC. Analiza el historial, las autopsias, la memoria y el shadow trading. Envia un reporte de diagnóstico por Telegram con los WR por régimen, el costo de los filtros restrictivos y sugerencias adaptativas automáticas (ej. "Baja el score en TRENDING 3 puntos").
+
 ---
 
 ## 6. Filtros de Entrada (Pipeline Completo)
@@ -136,17 +162,24 @@ Solo disponibles para el ADMIN configurado:
 
 | Comando | Función |
 |---------|---------|
-| `/informe` | Resumen de ganancias, pérdidas y operaciones abiertas |
+| `/informe` | Resumen de rendimiento tradicional |
 | `/scan` | Fuerza ejecución inmediata del scanner |
+| `/diagnostico` | **(NUEVO v6.0)** Fuerza la recolección y envío del reporte completo de self-learning |
 | `/cooldowns` | Lista pares bloqueados y tiempo restante |
 | `/reset_cooldowns` | Elimina todos los bloqueos temporales |
-| `/settings` | Muestra configuración técnica activa |
+| `/settings` | Muestra configuración técnica activa y sub-módulos activados |
 | `/limpiar` | Borra el historial almacenado |
 | `/help` | Lista completa de comandos |
 
 ---
 
 ## 9. Historial de Versiones (Changelog)
+
+### v6.0 — The Self-Learning Upgrade (Mar 01, 2026)
+- **4 Módulos de Aprendizaje Añadidos:** Shadow Trading, Signal Memory, Post-Trade Autopsy, y Auto-Digest.
+- **Objetivo:** Superar el over-tuning observacional y la naturaleza sin memoria (statelessness) entre ciclos de 15 minutos.
+- **Telegram:** Comando `/diagnostico` añadido para análisis on-demand de métricas fantasmas.
+- **Modificación de Arquitectura:** Integración de cron separada a las 09:00 UTC para digerir datos en Netlify.
 
 ### v5.4 — Quality over Frequency (Feb 28, 2026)
 - **TRANSITION Threshold:** Revertido a **75** (desde 70).

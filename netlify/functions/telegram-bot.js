@@ -4,8 +4,11 @@ import {
     loadCooldowns,
     saveCooldowns,
     COOLDOWN_STORE_KEY,
-    HISTORY_STORE_KEY
+    HISTORY_STORE_KEY,
+    SHADOW_STORE_KEY,
+    AUTOPSY_STORE_KEY
 } from './scheduled-analysis.js';
+import { generateDigest } from './auto-digest.js';
 
 const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
@@ -97,6 +100,7 @@ async function registerBotCommands() {
     const commands = [
         { command: 'informe', description: '📈 Resumen de rendimiento' },
         { command: 'scan', description: '🔍 Ejecutar scanner ahora' },
+        { command: 'diagnostico', description: '🧠 Diagnóstico self-learning' },
         { command: 'cooldowns', description: '🧊 Ver monedas bloqueadas' },
         { command: 'settings', description: '⚙️ Ver configuración' },
         { command: 'help', description: '❓ Lista de comandos' }
@@ -149,9 +153,10 @@ export const handler = async (event, netlifyContext) => {
 
         // --- COMANDOS ADMIN ---
         if (text === '/start' || text === 'help' || text === '/help' || text === '/') {
-            let help = `🚀 *Comandos Sniper Bot v4\\.2*\n\n`;
+            let help = `🚀 *Comandos Sniper Bot v6\\.0 Self\\-Learn*\n\n`;
             help += `📊 /informe \\- Ver resumen de rendimiento\n`;
             help += `🔍 /scan \\- Forzar análisis del scanner ahora\n`;
+            help += `🧠 /diagnostico \\- Diagnóstico self\\-learning\n`;
             help += `🧊 /cooldowns \\- Ver monedas bloqueadas\n`;
             help += `🔥 /reset\\_cooldowns \\- Limpiar todos los bloqueos\n`;
             help += `⚙️ /settings \\- Ver configuración actual\n`;
@@ -172,7 +177,7 @@ export const handler = async (event, netlifyContext) => {
             await sendTelegramMessage(chatId, report);
 
         } else if (text === '/scan' || text === 'scan') {
-            await sendTelegramMessage(chatId, `🔍 *Iniciando análisis manual\.\.\.*`);
+            await sendTelegramMessage(chatId, `🔍 *Iniciando análisis manual...*`);
             const result = await runAnalysis(context);
             let resMsg = `✅ *Análisis Completo*\n\n`;
             resMsg += `• Señales: ${result.signals || 0}\n`;
@@ -187,7 +192,7 @@ export const handler = async (event, netlifyContext) => {
             const active = Object.entries(cds).filter(([_, time]) => now - time < (Number(process.env.ALERT_COOLDOWN_MIN) || 240) * 60 * 1000);
 
             if (active.length === 0) {
-                cdMsg += `✅ No hay monedas bloqueadas actualmente\.`;
+                cdMsg += `✅ No hay monedas bloqueadas actualmente.`;
             } else {
                 active.forEach(([symbol, time]) => {
                     const minsLeft = Math.round(((Number(process.env.ALERT_COOLDOWN_MIN) || 240) * 60 * 1000 - (now - time)) / 60000);
@@ -206,16 +211,29 @@ export const handler = async (event, netlifyContext) => {
             await sendTelegramMessage(chatId, `🧹 *Historial de señales borrado*`);
 
         } else if (text === '/settings' || text === 'settings') {
-            let conf = `⚙️ *Configuración Activa:*\n\n`;
+            let conf = `⚙️ *Configuración Activa v6\\.0:*\n\n`;
             conf += `• MAX\\_SYMBOLS: ${esc(process.env.MAX_SYMBOLS || 50)}\n`;
             conf += `• COOLDOWN: ${esc(process.env.ALERT_COOLDOWN_MIN || 240)} min\n`;
             conf += `• AVOID\\_ASIA: ${esc(process.env.AVOID_ASIA_SESSION || 'true')}\n`;
             conf += `• MIN\\_VOL\\_24H: ${esc(process.env.MIN_QUOTE_VOL_24H || '3M')}\n`;
-            conf += `• BTC\\_SEMAPHORE: ACTIVO`;
+            conf += `• BTC\\_SEMAPHORE: ACTIVO\n`;
+            conf += `• SELF\\_LEARNING: ACTIVO\n`;
+            conf += `• SIGNAL\\_MEMORY: ACTIVO\n`;
+            conf += `• SHADOW\\_TRADING: ACTIVO\n`;
+            conf += `• AUTO\\_DIGEST: 09:00 UTC`;
             await sendTelegramMessage(chatId, conf);
 
+        } else if (text === '/diagnostico' || text === 'diagnostico') {
+            await sendTelegramMessage(chatId, `🧠 *Generando diagnóstico self-learning...*`);
+            try {
+                const digestMsg = await generateDigest(context);
+                await sendTelegramMessage(chatId, digestMsg);
+            } catch (e) {
+                await sendTelegramMessage(chatId, `❌ Error al generar diagnóstico: ${esc(e.message)}`);
+            }
+
         } else {
-            await sendTelegramMessage(chatId, `❓ Comando no reconocido\\. Escribe /help para ver la lista\\.`);
+            await sendTelegramMessage(chatId, `❓ Comando no reconocido. Escribe /help para ver la lista.`);
         }
 
         return { statusCode: 200, body: JSON.stringify({ success: true }) };
