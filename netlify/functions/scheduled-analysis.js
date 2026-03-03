@@ -40,6 +40,7 @@ const COOLDOWN_EXPIRY_HOURS = 24;
 export const SHADOW_STORE_KEY = 'shadow-trades-v1';
 export const MEMORY_STORE_KEY = 'signal-memory-v1';
 export const AUTOPSY_STORE_KEY = 'trade-autopsies-v1';
+export const PERSISTENT_LOG_STORE_KEY = 'persistent-logs-v1';
 const ALGORITHM_VERSION = 'v6.0-SelfLearn';
 
 // const lastNotifiedAtByKey = new Map(); // Replaced by Blobs
@@ -298,7 +299,7 @@ async function recordSignalHistory(signal, context) {
   }
 }
 
-async function updateSignalHistory(tickers, context) {
+async function updateSignalHistory(tickers, context, pLog = console.log) {
   if (!tickers || !tickers.length) return { open: 0, wins: 0, losses: 0 };
 
   try {
@@ -359,7 +360,7 @@ async function updateSignalHistory(tickers, context) {
           item.outcome = 'STALE_EXIT';
           updated = true;
           recordTradeAutopsy(item, context);
-          console.log(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move only ${(favorableMove * 100).toFixed(2)}%`);
+          pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move only ${(favorableMove * 100).toFixed(2)}%`);
         }
         // Auto-expire after 48 hours
         else if (item.status === 'OPEN' && Date.now() - item.time > 48 * 3600 * 1000) {
@@ -449,7 +450,7 @@ function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcCon
   };
 }
 
-async function updateShadowTrades(tickers, context) {
+async function updateShadowTrades(tickers, context, pLog = console.log) {
   try {
     const shadows = await loadShadowTrades(context);
     if (!shadows.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
@@ -501,7 +502,7 @@ async function updateShadowTrades(tickers, context) {
         updated = true;
 
         if (shadow.outcome === 'WOULD_WIN') {
-          console.log(`[SHADOW] ❌ MISSED OPPORTUNITY: ${shadow.symbol} (score=${shadow.score}, rejected="${shadow.rejectReason}") moved +${shadow.maxFavorableMove}%`);
+          pLog(`[SHADOW] ❌ MISSED OPPORTUNITY: ${shadow.symbol} (score=${shadow.score}, rejected="${shadow.rejectReason}") moved +${shadow.maxFavorableMove}%`);
         }
       }
 
@@ -572,7 +573,7 @@ function recordSymbolScore(memory, symbol, score, regime) {
   }
 }
 
-function calculateMomentumAdjustment(memory, symbol) {
+function calculateMomentumAdjustment(memory, symbol, pLog = console.log) {
   const entries = memory[symbol];
   if (!entries || entries.length < 3) return { adjustment: 0, reason: null };
 
@@ -595,7 +596,7 @@ function calculateMomentumAdjustment(memory, symbol) {
   if (isRising && recent.length >= 3) {
     const totalGain = recent[recent.length - 1] - recent[0];
     if (totalGain >= 10) {
-      console.log(`[MEMORY] 📈 ${symbol}: Momentum rising (${recent.join('→')}) +3 bonus`);
+      pLog(`[MEMORY] 📈 ${symbol}: Momentum rising (${recent.join('→')}) +3 bonus`);
       return { adjustment: 3, reason: `📈 Momentum (${recent.join('→')})` };
     }
   }
@@ -646,6 +647,32 @@ async function recordTradeAutopsy(item, context) {
     console.log(`[AUTOPSY] ${icon} ${item.symbol}: ${item.outcome} | Score=${item.score} | Regime=${item.regime} | Hours=${hoursOpen.toFixed(1)} | MaxFav=${(favorableMove * 100).toFixed(2)}%`);
   } catch (e) {
     console.error('[AUTOPSY] Error recording:', e.message);
+  }
+}
+
+// ==================== PERSISTENT LOGGING SYSTEM ====================
+// Stores critical run events in Netlify Blobs to overcome short log retention
+// Essential for remote audits when Netlify logs are already rotated
+
+export async function loadPersistentLogs(context) {
+  try {
+    const store = getInternalStore(context);
+    const data = await store.get(PERSISTENT_LOG_STORE_KEY, { type: 'json' });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('[PLOG] Error loading:', e.message);
+    return [];
+  }
+}
+
+async function savePersistentLogs(logs, context) {
+  try {
+    const store = getInternalStore(context);
+    // Keep last 4,000 lines (approx 2 weeks of history if logging 200 lines per run @ 15m)
+    // Actually, each run logs about 10-20 lines, so 4000 lines is a lot of history.
+    await store.setJSON(PERSISTENT_LOG_STORE_KEY, logs.slice(-4000));
+  } catch (e) {
+    console.error('[PLOG] Error saving:', e.message);
   }
 }
 
@@ -2970,14 +2997,24 @@ export async function runAnalysis(context) {
   const canProceed = await acquireRunLock(context);
   if (!canProceed) return { success: false, error: 'Locked' };
 
+  const runId = `RUN-${Math.floor(Math.random() * 1000000)}`;
+  const cycleLogs = [];
+
+  // Helper to log both to console and persistent store for audit
+  const pLog = (msg) => {
+    const timestamp = new Date().toISOString().replace('T', ' ').split('.')[0];
+    const logEntry = `[${timestamp}] ${msg}`;
+    console.log(msg);
+    cycleLogs.push(logEntry);
+  };
+
   try {
-    console.log(`--- DAY TRADE Analysis Started ${ALGORITHM_VERSION} ---`);
-    const runId = `RUN-${Date.now().toString().slice(-6)}`;
-    console.log('Execution ID:', runId);
+    pLog(`--- DAY TRADE Analysis Started ${ALGORITHM_VERSION} ---`);
+    pLog(`Execution ID: ${runId}`);
 
     // Load persistent cooldowns
     const cooldowns = await loadCooldowns(context);
-    console.log(`Loaded ${Object.keys(cooldowns).length} cooldown entries`);
+    pLog(`Loaded ${Object.keys(cooldowns).length} cooldown entries`);
 
     const signals = [];
     const shadowCandidates = []; // NEW: Collect near-misses this cycle
@@ -2987,7 +3024,7 @@ export async function runAnalysis(context) {
 
     // === SELF-LEARNING: Load Signal Memory ===
     const signalMemory = await loadSignalMemory(context);
-    console.log(`[MEMORY] Loaded memory for ${Object.keys(signalMemory).length} symbols`);
+    pLog(`[MEMORY] Loaded memory for ${Object.keys(signalMemory).length} symbols`);
 
     // === BTC GLOBAL CONTEXT ANALYSIS ===
     let btcContext = { status: 'GREEN', reason: 'BTC Analysis Passed (Default)' };
@@ -3009,13 +3046,13 @@ export async function runAnalysis(context) {
 
         if (btcSt4h.bearish || btcRsi4h > 75) {
           btcContext = { status: 'RED', reason: 'BTC 4H Bearish or Overextended', rsi4h: btcRsi4h };
-          console.log(`[BTC-SEM] 🔴 RED: ST=${btcSt4h.bearish ? 'Bear' : 'Bull'}, RSI4H=${btcRsi4h.toFixed(1)}`);
+          pLog(`[BTC-SEM] 🔴 RED: ST=${btcSt4h.bearish ? 'Bear' : 'Bull'}, RSI4H=${btcRsi4h.toFixed(1)}`);
         } else if (btcSt4h.bullish && btcRsi1h > 65) {
           btcContext = { status: 'AMBER', reason: 'BTC 1H Overbought', rsi4h: btcRsi4h };
-          console.log(`[BTC-SEM] 🟡 AMBER: RSI1H=${btcRsi1h.toFixed(1)}`);
+          pLog(`[BTC-SEM] 🟡 AMBER: RSI1H=${btcRsi1h.toFixed(1)}`);
         } else {
           btcContext = { status: 'GREEN', reason: 'BTC Healthy', rsi4h: btcRsi4h };
-          console.log(`[BTC-SEM] 🟢 GREEN: Trend Healthy`);
+          pLog(`[BTC-SEM] 🟢 GREEN: Trend Healthy`);
         }
       }
     } catch (btcErr) {
@@ -3030,21 +3067,21 @@ export async function runAnalysis(context) {
       : FALLBACK_SYMBOLS;
 
     // Update Backtesting History & Stats BEFORE scanning
-    const histData = await updateSignalHistory(tickers24h, context);
+    const histData = await updateSignalHistory(tickers24h, context, pLog);
     const stats = histData?.stats || { open: 0, wins: 0, losses: 0, winRate: 0 };
     const openSymbols = histData?.openSymbols || [];
 
-    if (stats) console.log(`[${runId}] Performance Stats:`, stats);
+    if (stats) pLog(`[${runId}] Performance Stats: ${JSON.stringify(stats)}`);
 
     // === SELF-LEARNING: Update Shadow Trades ===
-    const shadowStats = await updateShadowTrades(tickers24h, context);
+    const shadowStats = await updateShadowTrades(tickers24h, context, pLog);
     if (shadowStats.total > 0) {
-      console.log(`[SHADOW] Stats: ${shadowStats.wouldWin} would-win / ${shadowStats.wouldLose} would-lose of ${shadowStats.total} resolved`);
+      pLog(`[SHADOW] Stats: ${shadowStats.wouldWin} would-win / ${shadowStats.wouldLose} would-lose of ${shadowStats.total} resolved`);
     }
 
     for (const symbol of topSymbols) {
       if (openSymbols.includes(symbol)) {
-        console.log(`[${runId}] Skipping ${symbol} - Already have an OPEN position`);
+        pLog(`[${runId}] Skipping ${symbol} - Already have an OPEN position`);
         continue;
       }
 
@@ -3052,10 +3089,9 @@ export async function runAnalysis(context) {
         continue;
       }
 
-      // NEW: Sector correlation check - skip if we already have signal from same sector
       const sector = getSector(symbol);
-      if (selectedSectors.has(sector)) {
-        console.log(`[${runId}] Skipping ${symbol} - Sector ${sector} already selected`);
+      if (sector !== 'UNKNOWN' && selectedSectors.has(sector)) {
+        pLog(`[${runId}] Skipping ${symbol} - Sector ${sector} already selected`);
         continue;
       }
 
@@ -3078,7 +3114,7 @@ export async function runAnalysis(context) {
         analyzed++;
 
         // === SELF-LEARNING: Calculate momentum adjustment ===
-        const momentumAdj = calculateMomentumAdjustment(signalMemory, symbol);
+        const momentumAdj = calculateMomentumAdjustment(signalMemory, symbol, pLog);
 
         const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, momentumAdj, shadowCandidates);
         if (signal) {
@@ -3091,7 +3127,7 @@ export async function runAnalysis(context) {
 
           await recordSignalHistory(signal, context);
           signals.push(signal);
-          console.log(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Sector: ${sector}`);
+          pLog(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Sector: ${sector}`);
 
           // Record score in memory (passed)
           recordSymbolScore(signalMemory, symbol, signal.score, signal.regime);
@@ -3105,13 +3141,13 @@ export async function runAnalysis(context) {
         await sleep(10);
 
       } catch (error) {
-        console.error(`Error analyzing ${symbol}:`, error.message);
+        pLog(`Error analyzing ${symbol}: ${error.message}`);
         errors++;
         await sleep(10);
       }
     }
 
-    console.log(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
+    pLog(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
 
     // === SELF-LEARNING: Save Signal Memory ===
     await saveSignalMemory(signalMemory, context);
@@ -3121,8 +3157,12 @@ export async function runAnalysis(context) {
       const existingShadows = await loadShadowTrades(context);
       const allShadows = [...existingShadows, ...shadowCandidates];
       await saveShadowTrades(allShadows, context);
-      console.log(`[SHADOW] Recorded ${shadowCandidates.length} near-misses this cycle`);
+      pLog(`[SHADOW] Recorded ${shadowCandidates.length} near-misses this cycle`);
     }
+
+    // === AUDIT: Save Persistent Logs ===
+    const existingLogs = await loadPersistentLogs(context);
+    await savePersistentLogs([...existingLogs, ...cycleLogs], context);
 
     let telegramResult = { success: true, sent: 0 };
     if (signals.length > 0) {
@@ -3140,11 +3180,12 @@ export async function runAnalysis(context) {
       errors,
       shadowsRecorded: shadowCandidates.length,
       shadowStats,
+      persistentLogsRecorded: cycleLogs.length,
       telegram: telegramResult,
       timestamp: new Date().toISOString()
     };
   } catch (globalErr) {
-    console.error('CRITICAL ERROR in runAnalysis:', globalErr.message);
+    pLog(`CRITICAL ERROR in runAnalysis: ${globalErr.message}`);
     await releaseRunLock(context);
     return { success: false, error: globalErr.message };
   }

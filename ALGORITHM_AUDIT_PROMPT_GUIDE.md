@@ -11,10 +11,10 @@ Antes de iniciar el chat de auditoría, asegúrate de tener **descargados y actu
 | Archivo | Criticidad | Propósito |
 |---------|-----------|-----------|
 | `history.json` | 🔴 CRÍTICO | Resultados reales de cada operación (WIN/LOSS/OPEN/STALE_EXIT) con métricas de entrada |
+| `persistent_logs.json` | 🔴 CRÍTICO | Historial ininterrumpido de mensajes del servidor (NUEVO v6.0) - Evita el borrado de logs de Netlify |
 | `shadow_trades.json` | 🔴 CRÍTICO | Registro de operaciones fantasma y near-misses (NUEVO v6.0) |
 | `autopsies.json` | 🔴 CRÍTICO | Diagnóstico detallado de trades cerrados con duración y excursiones máximas (NUEVO v6.0) |
 | `signal_memory.json` | 🟡 RECOMENDADO | Historial de momentum y puntajes por símbolo (NUEVO v6.0) |
-| `logs.txt` | 🔴 CRÍTICO | Registro de decisiones del servidor: qué se rechazó y por qué |
 | `ALGORITHM_JOURNAL.md` | 🟠 IMPORTANTE | Contexto de la versión activa, hipótesis en prueba y lecciones aprendidas |
 | `ALGO_DOCUMENTATION.md` | 🟡 RECOMENDADO | Si se van a cambiar parámetros, se necesita para actualizarlo con los cambios |
 | `scheduled-analysis.js` | 🟡 RECOMENDADO | Solo si se detectan bugs o se propone cambio de código |
@@ -30,9 +30,9 @@ Hola. Quiero hacer una auditoría de rendimiento completa del algoritmo de tradi
 
 He actualizado y adjunto los siguientes archivos:
 - @history.json — Últimas operaciones con sus resultados.
+- @persistent_logs.json — El historial persistente de logs (sustituye a logs.txt).
 - @shadow_trades.json — Historial de operaciones fantasma (near-misses).
 - @autopsies.json — Diagnóstico de trades cerrados.
-- @logs.txt — Registro de decisiones del servidor.
 - @ALGORITHM_JOURNAL.md — Contexto, hipótesis en prueba y lecciones aprendidas.
 
 Por favor realiza las siguientes tareas **antes de tocar ningún código**:
@@ -66,7 +66,7 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 
 ### BLOQUE 2 — Análisis de Patrones de Pérdida
 
-5. **Clasifica cada trade LOSS** cruzando `autopsies.json`, `history.json` y `logs.txt`. Para cada LOSS, identifica la causa probable:
+6. **Clasifica cada trade LOSS** cruzando `autopsies.json`, `history.json` y `persistent_logs.json`. Para cada LOSS, identifica la causa probable:
    - 🔴 **Falsa ruptura (Fake Breakout):** MSS confirmado pero precio revirtió rápidamente.
    - 🔴 **Entrada overextended:** bbPercent > 0.90 o RSI > 70 en el momento de entrada.
    - 🟠 **Correlación BTC:** ¿BTC-SEM era RED o AMBER cuando se entró? ¿Hubo giro bajista intraday?
