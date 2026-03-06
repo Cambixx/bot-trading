@@ -13,7 +13,8 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-console.log('--- DAY TRADE Analysis Module Loaded (Self-Learning v6.0) ---');
+const ALGORITHM_VERSION = 'v6.0.1-SelfLearn';
+console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -41,7 +42,6 @@ export const SHADOW_STORE_KEY = 'shadow-trades-v1';
 export const MEMORY_STORE_KEY = 'signal-memory-v1';
 export const AUTOPSY_STORE_KEY = 'trade-autopsies-v1';
 export const PERSISTENT_LOG_STORE_KEY = 'persistent-logs-v1';
-const ALGORITHM_VERSION = 'v6.0-SelfLearn';
 
 // const lastNotifiedAtByKey = new Map(); // Replaced by Blobs
 
@@ -2462,7 +2462,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = 75 - requirementsReduction; // v5.4: Reverted from 70 to 75 due to fake breakout patterns in v5.3
+    // v6.0.1: Keep TRANSITION as a hard floor. SOTT can improve score, but must not relax the regime gate.
+    MIN_QUALITY_SCORE = 75;
   } else if (regime === 'TRENDING') {
     MIN_QUALITY_SCORE = 75 - requirementsReduction;
   } else if (regime === 'HIGH_VOLATILITY') {
