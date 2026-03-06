@@ -1,0 +1,58 @@
+[
+    {
+        "id": "1772372752486-GOLD(XAUT)USDT",
+        "symbol": "GOLD(XAUT)USDT",
+        "outcome": "LOSS",
+        "regime": "TRENDING",
+        "btcRisk": "GREEN",
+        "score": 71,
+        "hoursOpen": 9.3,
+        "favorableMovePct": 0,
+        "hasMSS": true,
+        "hasSweep": false,
+        "entryMetrics": {
+            "distToEma9": 0.03,
+            "distToEma21": 0.2,
+            "distToEma50": 0.4,
+            "bbPercent": 0.73,
+            "riskRewardRatio": 2.05
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 70,
+            "patterns": 0
+        },
+        "volumeRatio": 1.79,
+        "closedAt": 1772406105897
+    },
+    {
+        "id": "1772658040167-XLMUSDT",
+        "symbol": "XLMUSDT",
+        "outcome": "LOSS",
+        "regime": "TRANSITION",
+        "btcRisk": "AMBER",
+        "score": 71,
+        "hoursOpen": 1.7,
+        "favorableMovePct": 0,
+        "hasMSS": false,
+        "hasSweep": true,
+        "entryMetrics": {
+            "distToEma9": 0.34,
+            "distToEma21": 1.53,
+            "distToEma50": 3.54,
+            "bbPercent": 0.77,
+            "riskRewardRatio": 2
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 70,
+            "patterns": 0
+        },
+        "volumeRatio": 2.35,
+        "closedAt": 1772664312842
+    }
+]
