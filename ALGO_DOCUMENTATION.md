@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v6.0.1 Self-Learn)
+# 🦅 Documentación del Algoritmo de Trading (v6.0.2 Self-Learn)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -15,7 +15,7 @@ El bot opera como un ecosistema serverless interconectado con capacidades de aut
   - `auto-digest`: Ejecuta un análisis de rendimiento, autopsias y shadow trading cada día a las **09:00 UTC**.
   - `telegram-bot`: Gestiona comandos interactivos, alertas manuales y diagnósticos bajo demanda.
 - **MEXC API**: Fuente de datos en tiempo real (Klines OHLCV y Order Book).
-- **Netlify Blobs**: Almacena de manera persistente `history.json`, `shadow_trades.json`, `signal_memory.json`, `autopsies.json`, cooldowns y run-lock.
+- **Netlify Blobs**: Almacena de manera persistente `history.json`, `shadow_trades.json` (activo), `shadow_trades_archive.json` (histórico), `signal_memory.json`, `autopsies.json`, cooldowns y run-lock.
 - **Telegram API**: Interfaz bidireccional para alertas e informes de rendimiento y diagnósticos.
 
 ---
@@ -56,7 +56,7 @@ El sistema rastrea los scores de un símbolo en los últimos ciclos (Signal Memo
 
 ---
 
-## 4. Regímenes de Mercado y Umbrales (v6.0.1 — activo)
+## 4. Regímenes de Mercado y Umbrales (v6.0.2 — activo)
 
 | Régimen | Score Mínimo | Estrategia | Size Sugerido |
 |---------|-------------|------------|---------------|
@@ -66,7 +66,7 @@ El sistema rastrea los scores de un símbolo en los últimos ciclos (Signal Memo
 | **TRANSITION** | 75 | Alta selectividad con **suelo duro**; SOTT ya no rebaja este umbral | 1.0% – 4.0% |
 | **DOWNTREND** | 82 | Solo bounce con score > 82 y confluencia extrema | 0.5% – 2.0% |
 
-> **Nota v6.0.1:** El umbral de `TRANSITION` se mantiene en **75 real**. Los bonus de SOTT pueden elevar el score final, pero ya no reducen el gate mínimo del régimen. Se mantiene el BB% Hard Filter (>0.92 → REJECT).
+> **Nota v6.0.2:** El umbral de `TRANSITION` se mantiene en **75 real**. Los bonus de SOTT pueden elevar el score final, pero ya no reducen el gate mínimo del régimen. Se mantiene el BB% Hard Filter (>0.92 → REJECT).
 
 ---
 
@@ -104,6 +104,9 @@ El bot no solo emite señales, sino que **aprende** monitoreando continuamente s
 
 ### 1. Shadow Trading (Paper Trading Fantasma)
 Si una señal logra un score $\geq$ 50 pero es rechazada en la fase final (por un filtro de BTC, score menor al umbral de régimen, o falta de categorías fuertes), se guarda como un *near-miss* (casi acierto). En análisis posteriores, el bot rastrea qué hubiera pasado (WOULD_WIN o WOULD_LOSE) para decirnos qué filtros nos están quitando trades ganadores.
+
+- **Shadow Activo:** mantiene una ventana reciente y ligera para evaluación operativa del runtime.
+- **Shadow Histórico (v6.0.2):** cada near-miss resuelto o expirado se archiva de forma permanente en un store separado. Esto evita perder histórico por el límite operativo del shadow activo o por la limpieza de 48h.
 
 ### 2. Signal Memory (Momentum Cross-Cycle)
 El algoritmo rompe la limitación de la falta de estado (statelessness). Guarda los puntajes de los activos ciclo tras ciclo. En el momento de calificar, lee este historial y aplica los **Ajustes de Momentum (+3 ó -5 puntos)** descritos en la sección de Scoring.
@@ -175,6 +178,11 @@ Solo disponibles para el ADMIN configurado:
 
 ## 9. Historial de Versiones (Changelog)
 
+### v6.0.2 — Shadow Archive (Mar 07, 2026)
+- **Nuevo store histórico:** se añade un archivo persistente separado para near-misses resueltos/expirados (`shadow archive`).
+- **Objetivo:** mantener el `shadow` activo liviano para operación, pero conservar histórico completo para auditoría, comparación de versiones y validación de hipótesis.
+- **Migración runtime:** cualquier near-miss resuelto existente y no archivado se copia al histórico en ciclos posteriores.
+
 ### v6.0.1 — Transition Hard Lock (Mar 06, 2026)
 - **TRANSITION Threshold:** Se convierte en **suelo duro de 75**. `requirementsReduction` / SOTT ya no pueden rebajar el umbral efectivo.
 - **Bug corregido:** La documentación indicaba 75, pero el runtime todavía permitía entradas efectivas de 70-71 en `TRANSITION`.
@@ -234,4 +242,4 @@ Solo disponibles para el ADMIN configurado:
 
 ---
 
-**Documentación actualizada a v6.0.1 — 6 Marzo 2026**
+**Documentación actualizada a v6.0.2 — 7 Marzo 2026**

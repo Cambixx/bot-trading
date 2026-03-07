@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v6.0.1-SelfLearn';
+const ALGORITHM_VERSION = 'v6.0.2-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -39,6 +39,7 @@ const COOLDOWN_EXPIRY_HOURS = 24;
 
 // ==================== SELF-LEARNING SYSTEM STORES ====================
 export const SHADOW_STORE_KEY = 'shadow-trades-v1';
+export const SHADOW_ARCHIVE_STORE_KEY = 'shadow-trades-archive-v1';
 export const MEMORY_STORE_KEY = 'signal-memory-v1';
 export const AUTOPSY_STORE_KEY = 'trade-autopsies-v1';
 export const PERSISTENT_LOG_STORE_KEY = 'persistent-logs-v1';
@@ -419,6 +420,16 @@ export async function loadShadowTrades(context) {
   }
 }
 
+export async function loadShadowTradeArchive(context) {
+  try {
+    const store = getInternalStore(context);
+    return await store.get(SHADOW_ARCHIVE_STORE_KEY, { type: 'json' }) || [];
+  } catch (e) {
+    console.error('[SHADOW_ARCHIVE] Error loading:', e.message);
+    return [];
+  }
+}
+
 async function saveShadowTrades(shadows, context) {
   try {
     const store = getInternalStore(context);
@@ -426,6 +437,40 @@ async function saveShadowTrades(shadows, context) {
   } catch (e) {
     console.error('[SHADOW] Error saving:', e.message);
   }
+}
+
+async function saveShadowTradeArchive(shadows, context) {
+  try {
+    const store = getInternalStore(context);
+    await store.setJSON(SHADOW_ARCHIVE_STORE_KEY, shadows);
+  } catch (e) {
+    console.error('[SHADOW_ARCHIVE] Error saving:', e.message);
+  }
+}
+
+async function archiveResolvedShadowTrades(shadows, context, pLog = console.log) {
+  const resolved = shadows.filter(s => s.outcome !== 'PENDING' && !s.archivedAt);
+  if (!resolved.length) return shadows;
+
+  const archive = await loadShadowTradeArchive(context);
+  const archiveIds = new Set(archive.map(s => s.id));
+  const archivedAt = Date.now();
+  const newArchiveEntries = [];
+
+  for (const shadow of resolved) {
+    shadow.archivedAt = shadow.archivedAt || archivedAt;
+    if (!archiveIds.has(shadow.id)) {
+      archiveIds.add(shadow.id);
+      newArchiveEntries.push({ ...shadow });
+    }
+  }
+
+  if (newArchiveEntries.length > 0) {
+    await saveShadowTradeArchive([...archive, ...newArchiveEntries], context);
+    pLog(`[SHADOW_ARCHIVE] Archived ${newArchiveEntries.length} resolved near-misses`);
+  }
+
+  return shadows;
 }
 
 function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcContext, entryMetrics, categoryScores) {
@@ -446,7 +491,8 @@ function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcCon
     priceAfter12h: null,
     wouldHaveTP: null,
     wouldHaveSL: null,
-    outcome: 'PENDING' // PENDING → WOULD_WIN / WOULD_LOSE / EXPIRED
+    outcome: 'PENDING', // PENDING → WOULD_WIN / WOULD_LOSE / EXPIRED
+    archivedAt: null
   };
 }
 
@@ -513,7 +559,15 @@ async function updateShadowTrades(tickers, context, pLog = console.log) {
       }
     }
 
-    if (updated) await saveShadowTrades(shadows, context);
+    const hasUnarchivedResolved = shadows.some(s => s.outcome !== 'PENDING' && !s.archivedAt);
+
+    if (updated || hasUnarchivedResolved) {
+      await archiveResolvedShadowTrades(shadows, context, pLog);
+    }
+
+    if (updated || hasUnarchivedResolved) {
+      await saveShadowTrades(shadows, context);
+    }
 
     const resolved = shadows.filter(s => s.outcome !== 'PENDING' && s.outcome !== 'EXPIRED');
     const wouldWin = resolved.filter(s => s.outcome === 'WOULD_WIN').length;

@@ -1,6 +1,6 @@
 # 📋 Guía Completa de Auditoría del Algoritmo (Performance Review)
 
-> **Uso:** Cuando haya pasado tiempo suficiente o un número significativo de operaciones (mínimo 5 trades cerrados o 2 semanas), sigue esta guía para auditar el rendimiento de `scheduled-analysis.js` de forma rigurosa y basada en datos.
+> **Uso:** Cuando haya pasado tiempo suficiente o un número significativo de operaciones (mínimo 5 trades cerrados o 2 semanas), sigue esta guía para auditar el rendimiento de `scheduled-analysis.js` de forma rigurosa, reproducible y basada en datos.
 
 ---
 
@@ -12,18 +12,183 @@ Antes de iniciar el chat de auditoría, asegúrate de tener **descargados y actu
 |---------|-----------|-----------|
 | `history.json` | 🔴 CRÍTICO | Resultados reales de cada operación (WIN/LOSS/OPEN/STALE_EXIT) con métricas de entrada |
 | `persistent_logs.json` | 🔴 CRÍTICO | Historial ininterrumpido de mensajes del servidor (NUEVO v6.0) - Evita el borrado de logs de Netlify |
-| `shadow_trades.json` | 🔴 CRÍTICO | Registro de operaciones fantasma y near-misses (NUEVO v6.0) |
+| `shadow_trades_archive.json` | 🔴 CRÍTICO | Histórico completo de near-misses resueltos/expirados. **Fuente principal** para auditoría longitudinal del self-learning |
+| `shadow_trades.json` | 🟠 IMPORTANTE | Shadow activo reciente. **No es histórico completo**; sirve como ventana operativa de corto plazo |
 | `autopsies.json` | 🔴 CRÍTICO | Diagnóstico detallado de trades cerrados con duración y excursiones máximas (NUEVO v6.0) |
 | `signal_memory.json` | 🟡 RECOMENDADO | Historial de momentum y puntajes por símbolo (NUEVO v6.0) |
 | `ALGORITHM_JOURNAL.md` | 🟠 IMPORTANTE | Contexto de la versión activa, hipótesis en prueba y lecciones aprendidas |
 | `ALGO_DOCUMENTATION.md` | 🟡 RECOMENDADO | Si se van a cambiar parámetros, se necesita para actualizarlo con los cambios |
 | `scheduled-analysis.js` | 🟡 RECOMENDADO | Solo si se detectan bugs o se propone cambio de código |
 
+### Nota importante sobre Shadow Trading
+
+- `shadow_trades_archive.json` debe usarse como base del análisis histórico del self-learning.
+- `shadow_trades.json` debe tratarse como una ventana reciente de trabajo, no como la verdad histórica completa.
+- Si `shadow_trades_archive.json` no está adjunto, el análisis debe indicarlo explícitamente como **limitación de calidad de datos** antes de sacar conclusiones fuertes sobre filtros o Win Rate fantasma.
+
 ---
 
-## 🚀 Paso 2 — Prompt de Auditoría Completo
+## 🚀 Paso 2 — Prompt Maestro Recomendado (ChatGPT / Codex)
 
-Copia y pega el siguiente prompt en el chat, con los archivos adjuntos via `@`:
+Este es el prompt que recomiendo usar por defecto en futuras auditorías. Está optimizado para:
+
+- maximizar calidad analítica y no solo producir texto bonito;
+- evitar sobreajuste con muestras pequeñas;
+- priorizar robustez, expectativa matemática, consistencia y supervivencia del sistema;
+- separar claramente datos, inferencias y decisiones;
+- impedir cambios de código sin evidencia suficiente.
+
+Copia y pega este prompt en el chat, con los archivos adjuntos vía `@`:
+
+```text
+Quiero una auditoría cuantitativa y estratégica completa de mi algoritmo de señales de trading.
+
+Objetivo principal:
+No quiero optimización cosmética ni ideas “interesantes”. Quiero decisiones que aumenten la calidad real del sistema: robustez, expectancy, control de drawdown, calidad de entrada, adaptabilidad al régimen y capacidad de escalar hacia un sistema de nivel mundial.
+
+Archivos adjuntos:
+- @history.json
+- @persistent_logs.json
+- @shadow_trades_archive.json
+- @shadow_trades.json
+- @autopsies.json
+- @ALGORITHM_JOURNAL.md
+- @ALGO_DOCUMENTATION.md
+- @scheduled-analysis.js
+
+Reglas obligatorias:
+- Usa `shadow_trades_archive.json` como fuente principal para el análisis histórico del shadow trading.
+- Usa `shadow_trades.json` solo como contexto reciente, no como histórico total.
+- Si falta algún archivo crítico o hay datos truncados/incompletos, indícalo explícitamente al principio.
+- Si la muestra de trades reales es pequeña, dilo explícitamente y evita proponer cambios agresivos.
+- No propongas cambios de código sin justificar primero el problema con datos.
+- No modifiques ningún archivo hasta que yo lo confirme.
+- Distingue siempre entre:
+  - dato observado
+  - inferencia razonable
+  - hipótesis a validar
+
+Quiero que estructures la auditoría exactamente así:
+
+1. Resumen ejecutivo
+- Dame un veredicto inicial en 3-6 líneas.
+- Indica si la muestra tiene o no validez estadística suficiente.
+- Indica si el problema principal parece ser:
+  - frecuencia
+  - calidad de entrada
+  - régimen de mercado
+  - gestión TP/SL
+  - filtros demasiado laxos
+  - filtros demasiado restrictivos
+
+2. Métricas reales de performance
+- Calcula el Win Rate real con la fórmula:
+  WR = WIN / (WIN + LOSS)
+  Excluye OPEN y STALE_EXIT del denominador.
+- Desglosa el WR por régimen.
+- Muestra:
+  - total trades cerrados
+  - % WIN
+  - % LOSS
+  - % STALE_EXIT
+  - R:R real promedio
+- Si hay menos de 5 trades cerrados, dilo explícitamente.
+
+3. Frecuencia y throughput del sistema
+- ¿Cuántas señales reales se generaron?
+- ¿Cuántos near-misses hay en histórico y cuántos en la ventana reciente?
+- ¿La frecuencia actual es coherente con la calidad esperada del sistema o está demasiado filtrado?
+
+4. Auditoría de shadow trading
+- Calcula el WR hipotético de los near-misses usando `WOULD_WIN` y `WOULD_LOSE`.
+- Separa:
+  - conclusión histórica (`shadow_trades_archive.json`)
+  - conclusión reciente (`shadow_trades.json`)
+- Identifica el filtro más costoso en términos de trades ganadores perdidos.
+- Evalúa si los ajustes de momentum `+3 / -5` aportan señal útil o ruido.
+- Si el shadow reciente contradice el histórico, prioriza el histórico y explica por qué.
+
+5. Autopsia de operaciones reales
+- Para cada LOSS, clasifica la causa probable usando `history.json`, `autopsies.json` y `persistent_logs.json`.
+- Usa estas categorías si aplican:
+  - Fake Breakout
+  - Entrada overextended
+  - Correlación BTC
+  - Volumen engañoso
+  - Stop demasiado ajustado
+  - Baja liquidez / mala sesión
+  - Cambio macro / ruptura estructural
+- Para cada trade, explica brevemente por qué encaja en esa categoría.
+- Clasifica también los STALE_EXIT si existen.
+
+6. Revisión del Journal
+- Evalúa cuáles hipótesis pendientes quedan:
+  - validadas
+  - refutadas
+  - inconclusas
+- Detecta si alguna “lesson learned” se repite otra vez.
+- Indica si el mercado actual favorece probar alguna hipótesis pendiente.
+
+7. Contexto de mercado
+- Determina si el período analizado fue mayoritariamente:
+  - TRENDING
+  - RANGING
+  - TRANSITION
+  - DOWNTREND
+- Indica el color predominante de BTC-SEM.
+- Señala eventos de volatilidad, sesiones problemáticas o condiciones especiales.
+- Marca explícitamente qué conclusiones son inferencias y no lecturas directas.
+
+8. Diagnóstico estratégico
+- Responde cuál es el cuello de botella dominante del sistema ahora mismo:
+  - demasiadas pocas señales
+  - entradas mediocres
+  - mala adaptación al régimen
+  - TP/SL mal calibrado
+  - sesgo excesivo a TRANSITION
+  - dependencia excesiva de BTC context
+- Si el WR < 40% o el shadow da una alerta clara, compara estas alternativas:
+  - Momentum con filtro fuerte de régimen
+  - Capitulation bounce
+  - Alineación multi-timeframe pura
+  - Volatility breakout
+- Si ninguna mejora realmente el sistema, explica por qué.
+
+9. Recomendación final
+- Elige solo una:
+  - MANTENER
+  - AJUSTE QUIRÚRGICO
+  - AJUSTE MAYOR
+  - REVERTIR
+- Si propones cambios:
+  - explica exactamente qué cambiarías
+  - por qué
+  - qué riesgo intenta corregir
+  - qué métrica debería mejorar si el cambio funciona
+- Si propones cambios de código, indica archivo y línea aproximada, pero no modifiques nada todavía.
+
+10. Checklist final
+- Confirma uno por uno:
+  - WR calculado
+  - LOSS/STALE analizados
+  - shadow histórico vs reciente diferenciados
+  - hipótesis del journal evaluadas
+  - contexto de mercado documentado
+  - veredicto emitido
+
+Formato de respuesta obligatorio:
+- Primero hallazgos y diagnóstico.
+- Después veredicto.
+- Después recomendaciones.
+- Sé directo, preciso y orientado a evidencia.
+- No rellenes con generalidades.
+```
+
+---
+
+## 🚀 Paso 3 — Prompt de Auditoría Completo (Versión Larga)
+
+Copia y pega el siguiente prompt en el chat, con los archivos adjuntos via `@`, si prefieres una versión más detallada y prescriptiva:
 
 ```text
 Hola. Quiero hacer una auditoría de rendimiento completa del algoritmo de trading.
@@ -31,11 +196,20 @@ Hola. Quiero hacer una auditoría de rendimiento completa del algoritmo de tradi
 He actualizado y adjunto los siguientes archivos:
 - @history.json — Últimas operaciones con sus resultados.
 - @persistent_logs.json — El historial persistente de logs (sustituye a logs.txt).
-- @shadow_trades.json — Historial de operaciones fantasma (near-misses).
+- @shadow_trades_archive.json — Histórico completo de operaciones fantasma resueltas/expiradas.
+- @shadow_trades.json — Ventana activa reciente de operaciones fantasma (near-misses).
 - @autopsies.json — Diagnóstico de trades cerrados.
 - @ALGORITHM_JOURNAL.md — Contexto, hipótesis en prueba y lecciones aprendidas.
 
 Por favor realiza las siguientes tareas **antes de tocar ningún código**:
+
+### REGLAS DE ANÁLISIS
+
+- Usa `shadow_trades_archive.json` como fuente principal para el análisis histórico del shadow trading.
+- Usa `shadow_trades.json` solo como complemento para el contexto más reciente.
+- Si falta `shadow_trades_archive.json`, indícalo explícitamente y reduce tu nivel de confianza en cualquier conclusión de self-learning.
+- No asumas que el archivo de shadow activo representa todo el historial.
+- Si la muestra de trades reales es pequeña, dilo de forma explícita y evita sobreajustes.
 
 ---
 
@@ -47,7 +221,10 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
    - Muestra también: total trades cerrados, % LOSSes, % STALE_EXITs.
    - Si hay menos de 5 trades cerrados, indícalo explícitamente.
 
-2. **Frecuencia de señales:** ¿Cuántas señales se generaron reales vs cuántos near-misses se guardaron en `shadow_trades.json`?
+2. **Frecuencia de señales:** ¿Cuántas señales se generaron reales vs cuántos near-misses se guardaron en `shadow_trades_archive.json` y `shadow_trades.json`?
+   - Distingue entre:
+     - total histórico (`shadow_trades_archive.json`)
+     - ventana reciente (`shadow_trades.json`)
 
 3. **R:R Real promedio y Autopsias:** Utiliza `autopsies.json` para calcular:
    - Tiempo promedio que un trade ganador (WIN) está abierto vs. un perdedor (LOSS).
@@ -57,16 +234,20 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 
 ### BLOQUE 1.5 — Análisis de Self-Learning (Shadow Trading)
 
-4. **Evalúa las oportunidades fantasma (`shadow_trades.json`):**
+4. **Evalúa las oportunidades fantasma (`shadow_trades_archive.json` + `shadow_trades.json`):**
    - ¿Cuál habría sido el Win Rate de los *near-misses* si se hubieran operado (considerando los WOULD_WIN y WOULD_LOSE)?
    - ¿Qué filtro nos está costando más trades ganadores? (Filtro más costoso basado en rechazos que terminaron en WOULD_WIN).
    - Analiza si los ajustes de Momentum (+3 / -5) están beneficiando al sistema o introduciendo ruido.
+   - Separa claramente:
+     - conclusión histórica (archivo `archive`)
+     - conclusión reciente (archivo activo)
+   - Si ambas conclusiones difieren, explícalo y prioriza el histórico para decisiones estratégicas.
 
 ---
 
 ### BLOQUE 2 — Análisis de Patrones de Pérdida
 
-6. **Clasifica cada trade LOSS** cruzando `autopsies.json`, `history.json` y `persistent_logs.json`. Para cada LOSS, identifica la causa probable:
+5. **Clasifica cada trade LOSS** cruzando `autopsies.json`, `history.json` y `persistent_logs.json`. Para cada LOSS, identifica la causa probable:
    - 🔴 **Falsa ruptura (Fake Breakout):** MSS confirmado pero precio revirtió rápidamente.
    - 🔴 **Entrada overextended:** bbPercent > 0.90 o RSI > 70 en el momento de entrada.
    - 🟠 **Correlación BTC:** ¿BTC-SEM era RED o AMBER cuando se entró? ¿Hubo giro bajista intraday?
@@ -90,6 +271,7 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
    - ¿El mercado estaba mayoritariamente en DOWNTREND, RANGING o TRENDING?
    - ¿El BTC-SEM fue predominantemente RED, AMBER o GREEN?
    - ¿Hubo sesiones de alta volatilidad o eventos extraordinarios?
+   - Si una conclusión es una inferencia y no una lectura directa del dato, márcala explícitamente como **inferencia**.
 
 ---
 
@@ -126,6 +308,7 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
    - ❌ **REVERTIR:** La versión actual empeora el rendimiento. Propón exactamente a qué configuración revertir.
 
 11. Si se propone cualquier cambio de código, **espera mi confirmación** antes de modificar `scheduled-analysis.js`. Analiza primero, actúa después.
+12. Si la muestra es insuficiente o los datos están truncados/incompletos, dilo de forma explícita y prioriza **no tocar código** salvo que haya un bug claro.
 
 ---
 
@@ -152,6 +335,7 @@ Usa esta tabla como referencia rápida al recibir el análisis:
 | WR < 40% + mercado bajista global | ⚠️ Evaluar contexto antes de tocar código |
 | 0 señales en > 5 días | 🔄 Los filtros son demasiado restrictivos — relajar selectivamente |
 | R:R promedio > 2.0 pero WR < 30% | 🔄 El problema no es el R:R sino la calidad de entrada |
+| Shadow activo contradice al archivo histórico | ⚠️ Priorizar el histórico y revisar si el activo está truncado o sesgado |
 
 ---
 
@@ -163,6 +347,7 @@ Antes de cerrar cualquier sesión de auditoría, confirma que se han completado:
 - [ ] Trades LOSS/STALE_EXIT analizados individualmente
 - [ ] Hipótesis del Journal evaluadas
 - [ ] Contexto de mercado documentado
+- [ ] Shadow histórico vs shadow activo diferenciados
 - [ ] Veredicto emitido (MANTENER / AJUSTE / REVERTIR)
 - [ ] Si hubo cambios: `ALGORITHM_JOURNAL.md` actualizado
 - [ ] Si hubo cambios: `ALGO_DOCUMENTATION.md` actualizado

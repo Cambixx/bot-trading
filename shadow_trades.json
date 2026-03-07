@@ -1,17 +1,162 @@
 [
     {
-        "id": "shadow-1772745338128-AVAXUSDT",
-        "symbol": "AVAXUSDT",
+        "id": "shadow-1772815522094-BCHUSDT",
+        "symbol": "BCHUSDT",
+        "score": 53,
+        "price": 447,
+        "regime": "DOWNTREND",
+        "rejectReason": "SCORE (53 < 85)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772815522094,
+        "entryMetrics": {
+            "distToEma9": 0.37,
+            "distToEma21": -0.2,
+            "bbPercent": 0.45
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 0,
+            "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": 449.3,
+        "priceAfter12h": 447.2,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.51",
+        "maxAdverseMove": "0.04"
+    },
+    {
+        "id": "shadow-1772815523169-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 50,
+        "price": 0.2855,
+        "regime": "DOWNTREND",
+        "rejectReason": "SCORE (50 < 82)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772815523169,
+        "entryMetrics": {
+            "distToEma9": 0,
+            "distToEma21": -0.11,
+            "bbPercent": 0.31
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 75,
+            "volume": 20,
+            "patterns": 100
+        },
+        "priceAfter4h": 0.285,
+        "priceAfter12h": 0.2837,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.18",
+        "maxAdverseMove": "-0.63"
+    },
+    {
+        "id": "shadow-1772815533294-BCHUSDT",
+        "symbol": "BCHUSDT",
+        "score": 53,
+        "price": 447,
+        "regime": "DOWNTREND",
+        "rejectReason": "SCORE (53 < 85)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772815533295,
+        "entryMetrics": {
+            "distToEma9": 0.37,
+            "distToEma21": -0.2,
+            "bbPercent": 0.45
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 0,
+            "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": 448.3,
+        "priceAfter12h": 447.2,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.29",
+        "maxAdverseMove": "0.04"
+    },
+    {
+        "id": "shadow-1772815534246-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 50,
+        "price": 0.2855,
+        "regime": "DOWNTREND",
+        "rejectReason": "SCORE (50 < 82)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772815534246,
+        "entryMetrics": {
+            "distToEma9": 0,
+            "distToEma21": -0.11,
+            "bbPercent": 0.31
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 75,
+            "volume": 20,
+            "patterns": 100
+        },
+        "priceAfter4h": 0.285,
+        "priceAfter12h": 0.2837,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.18",
+        "maxAdverseMove": "-0.63"
+    },
+    {
+        "id": "shadow-1772816508488-GOLD(XAUT)USDT",
+        "symbol": "GOLD(XAUT)USDT",
+        "score": 53,
+        "price": 5115.1,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (53 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772816508488,
+        "entryMetrics": {
+            "distToEma9": 0.1,
+            "distToEma21": 0.38,
+            "bbPercent": 0.74
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 5137,
+        "priceAfter12h": 5146.4,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.61",
+        "maxAdverseMove": "0.43"
+    },
+    {
+        "id": "shadow-1772817319231-GOLD(XAUT)USDT",
+        "symbol": "GOLD(XAUT)USDT",
         "score": 60,
-        "price": 9.474,
+        "price": 5112.5,
         "regime": "TRANSITION",
         "rejectReason": "SCORE (60 < 75)",
         "btcRisk": "GREEN",
-        "timestamp": 1772745338128,
+        "timestamp": 1772817319231,
         "entryMetrics": {
-            "distToEma9": 0.39,
-            "distToEma21": 0.67,
-            "bbPercent": 0.89
+            "distToEma9": 0.04,
+            "distToEma21": 0.3,
+            "bbPercent": 0.7
         },
         "categoryScores": {
             "momentum": 30,
@@ -20,55 +165,862 @@
             "volume": 50,
             "patterns": 0
         },
-        "priceAfter4h": 9.375,
-        "priceAfter12h": 9.305,
+        "priceAfter4h": 5140.2,
+        "priceAfter12h": 5146.4,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
-        "outcome": "WOULD_LOSE",
-        "maxFavorableMove": "-1.04",
-        "maxAdverseMove": "-1.78"
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.66",
+        "maxAdverseMove": "0.54"
     },
     {
-        "id": "shadow-1772746234888-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 53,
-        "price": 0.9634,
+        "id": "shadow-1772817330201-GOLD(XAUT)USDT",
+        "symbol": "GOLD(XAUT)USDT",
+        "score": 66,
+        "price": 5112.5,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
+        "rejectReason": "SCORE (66 < 75)",
         "btcRisk": "GREEN",
-        "timestamp": 1772746234888,
+        "timestamp": 1772817330201,
         "entryMetrics": {
-            "distToEma9": 0.39,
-            "distToEma21": 0.74,
-            "bbPercent": 0.8
+            "distToEma9": 0.04,
+            "distToEma21": 0.3,
+            "bbPercent": 0.7
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": 5140.2,
+        "priceAfter12h": 5146.4,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.66",
+        "maxAdverseMove": "0.54"
+    },
+    {
+        "id": "shadow-1772818257387-GOLD(PAXG)USDT",
+        "symbol": "GOLD(PAXG)USDT",
+        "score": 51,
+        "price": 5154.04,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772818257387,
+        "entryMetrics": {
+            "distToEma9": 0.09,
+            "distToEma21": 0.34,
+            "bbPercent": 0.7
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 5177.96,
+        "priceAfter12h": 5183.21,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.57",
+        "maxAdverseMove": "0.46"
+    },
+    {
+        "id": "shadow-1772818257604-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 63,
+        "price": 0.286,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (63 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772818257604,
+        "entryMetrics": {
+            "distToEma9": 0.13,
+            "distToEma21": 0.07,
+            "bbPercent": 0.56
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 50
+        },
+        "priceAfter4h": 0.2848,
+        "priceAfter12h": 0.2837,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.42",
+        "maxAdverseMove": "-0.80"
+    },
+    {
+        "id": "shadow-1772818268774-GOLD(PAXG)USDT",
+        "symbol": "GOLD(PAXG)USDT",
+        "score": 51,
+        "price": 5154.04,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772818268774,
+        "entryMetrics": {
+            "distToEma9": 0.09,
+            "distToEma21": 0.34,
+            "bbPercent": 0.7
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 5178.43,
+        "priceAfter12h": 5183.21,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.57",
+        "maxAdverseMove": "0.47"
+    },
+    {
+        "id": "shadow-1772818268970-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 63,
+        "price": 0.286,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (63 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772818268970,
+        "entryMetrics": {
+            "distToEma9": 0.13,
+            "distToEma21": 0.07,
+            "bbPercent": 0.56
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 50
+        },
+        "priceAfter4h": 0.2847,
+        "priceAfter12h": 0.2837,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.45",
+        "maxAdverseMove": "-0.80"
+    },
+    {
+        "id": "shadow-1772820922030-GOLD(PAXG)USDT",
+        "symbol": "GOLD(PAXG)USDT",
+        "score": 50,
+        "price": 5156.67,
+        "regime": "TRENDING",
+        "rejectReason": "SCORE (50 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772820922030,
+        "entryMetrics": {
+            "distToEma9": 0.1,
+            "distToEma21": 0.31,
+            "bbPercent": 0.68
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 50
+        },
+        "priceAfter4h": 5185.82,
+        "priceAfter12h": 5183.21,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "0.57",
+        "maxAdverseMove": "0.51"
+    },
+    {
+        "id": "shadow-1772823653663-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 56,
+        "price": 0.2854,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (56 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772823653663,
+        "entryMetrics": {
+            "distToEma9": -0.07,
+            "distToEma21": -0.11,
+            "bbPercent": 0.34
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 25,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2848,
+        "priceAfter12h": 0.2837,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.21",
+        "maxAdverseMove": "-0.60"
+    },
+    {
+        "id": "shadow-1772825474667-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 59,
+        "price": 0.2851,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (59 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772825474667,
+        "entryMetrics": {
+            "distToEma9": -0.13,
+            "distToEma21": -0.19,
+            "bbPercent": 0.06
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2845,
+        "priceAfter12h": 0.2837,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.21",
+        "maxAdverseMove": "-0.49"
+    },
+    {
+        "id": "shadow-1772826335969-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 51,
+        "price": 0.2849,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772826335969,
+        "entryMetrics": {
+            "distToEma9": -0.16,
+            "distToEma21": -0.23,
+            "bbPercent": -0.06
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": 0.2836,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.42",
+        "maxAdverseMove": "-0.46"
+    },
+    {
+        "id": "shadow-1772827289300-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 51,
+        "price": 0.285,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772827289300,
+        "entryMetrics": {
+            "distToEma9": -0.1,
+            "distToEma21": -0.18,
+            "bbPercent": 0.09
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": 0.2836,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.46",
+        "maxAdverseMove": "-0.49"
+    },
+    {
+        "id": "shadow-1772828122400-DOTUSDT",
+        "symbol": "DOTUSDT",
+        "score": 51,
+        "price": 1.487,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772828122400,
+        "entryMetrics": {
+            "distToEma9": 0.22,
+            "distToEma21": 0.27,
+            "bbPercent": 0.81
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.494,
+        "priceAfter12h": 1.51,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_WIN",
+        "maxFavorableMove": "1.55",
+        "maxAdverseMove": "0.47"
+    },
+    {
+        "id": "shadow-1772828127028-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 51,
+        "price": 0.2849,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772828127028,
+        "entryMetrics": {
+            "distToEma9": -0.11,
+            "distToEma21": -0.2,
+            "bbPercent": 0.07
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": 0.2837,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "-0.42",
+        "maxAdverseMove": "-0.42"
+    },
+    {
+        "id": "shadow-1772829073822-DOTUSDT",
+        "symbol": "DOTUSDT",
+        "score": 59,
+        "price": 1.481,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (59 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772829073822,
+        "entryMetrics": {
+            "distToEma9": -0.15,
+            "distToEma21": -0.12,
+            "bbPercent": 0.62
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 45,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.494,
+        "priceAfter12h": 1.502,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "WOULD_FLAT",
+        "maxFavorableMove": "1.42",
+        "maxAdverseMove": "0.88"
+    },
+    {
+        "id": "shadow-1772830894450-PEPEUSDT",
+        "symbol": "PEPEUSDT",
+        "score": 51,
+        "price": 0.000003377,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772830894450,
+        "entryMetrics": {
+            "distToEma9": 0.29,
+            "distToEma21": 0.19,
+            "bbPercent": 0.82
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.000003353,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772830895677-DOTUSDT",
+        "symbol": "DOTUSDT",
+        "score": 51,
+        "price": 1.491,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772830895677,
+        "entryMetrics": {
+            "distToEma9": 0.4,
+            "distToEma21": 0.49,
+            "bbPercent": 0.86
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.494,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772830898463-TONUSDT",
+        "symbol": "TONUSDT",
+        "score": 59,
+        "price": 1.325,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (59 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772830898463,
+        "entryMetrics": {
+            "distToEma9": 0.21,
+            "distToEma21": 0.24,
+            "bbPercent": 0.66
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 60,
+            "structure": 60,
+            "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.338,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772832670818-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 51,
+        "price": 0.2847,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772832670818,
+        "entryMetrics": {
+            "distToEma9": -0.11,
+            "distToEma21": -0.19,
+            "bbPercent": 0.08
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772832681703-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 51,
+        "price": 0.2847,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (51 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772832681703,
+        "entryMetrics": {
+            "distToEma9": -0.11,
+            "distToEma21": -0.19,
+            "bbPercent": 0.08
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772834465990-DOTUSDT",
+        "symbol": "DOTUSDT",
+        "score": 61,
+        "price": 1.491,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (61 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772834465990,
+        "entryMetrics": {
+            "distToEma9": 0.22,
+            "distToEma21": 0.36,
+            "bbPercent": 0.77
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.494,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772834469126-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 58,
+        "price": 0.2846,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (58 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772834469126,
+        "entryMetrics": {
+            "distToEma9": -0.1,
+            "distToEma21": -0.19,
+            "bbPercent": 0.12
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 100,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835319870-WLDUSDT",
+        "symbol": "WLDUSDT",
+        "score": 56,
+        "price": 0.3881,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (56 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835319871,
+        "entryMetrics": {
+            "distToEma9": 0.14,
+            "distToEma21": 0.1,
+            "bbPercent": 0.7
         },
         "categoryScores": {
             "momentum": 30,
             "trend": 100,
             "structure": 40,
+            "volume": 25,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.3861,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835322147-DOTUSDT",
+        "symbol": "DOTUSDT",
+        "score": 66,
+        "price": 1.487,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (66 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835322147,
+        "entryMetrics": {
+            "distToEma9": -0.04,
+            "distToEma21": 0.09,
+            "bbPercent": 0.62
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.494,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835322570-FILUSDT",
+        "symbol": "FILUSDT",
+        "score": 56,
+        "price": 0.9775,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (56 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835322570,
+        "entryMetrics": {
+            "distToEma9": 0.12,
+            "distToEma21": 0.01,
+            "bbPercent": 0.68
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.9663,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835324926-ASTERUSDT",
+        "symbol": "ASTERUSDT",
+        "score": 60,
+        "price": 0.7016,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (60 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835324926,
+        "entryMetrics": {
+            "distToEma9": -0.02,
+            "distToEma21": 0.21,
+            "bbPercent": 0.6
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.6945,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835325647-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 50,
+        "price": 0.2846,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (50 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835325647,
+        "entryMetrics": {
+            "distToEma9": -0.08,
+            "distToEma21": -0.18,
+            "bbPercent": 0.15
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 100,
+            "structure": 60,
             "volume": 0,
             "patterns": 0
         },
-        "priceAfter4h": 0.9567,
-        "priceAfter12h": 0.9427,
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": null,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
-        "outcome": "WOULD_LOSE",
-        "maxFavorableMove": "-0.70",
-        "maxAdverseMove": "-2.15"
+        "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772746236725-ADAUSDT",
-        "symbol": "ADAUSDT",
-        "score": 53,
-        "price": 0.2713,
+        "id": "shadow-1772835332459-WLDUSDT",
+        "symbol": "WLDUSDT",
+        "score": 56,
+        "price": 0.3881,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
+        "rejectReason": "SCORE (56 < 75)",
         "btcRisk": "GREEN",
-        "timestamp": 1772746236725,
+        "timestamp": 1772835332459,
         "entryMetrics": {
-            "distToEma9": 0.26,
-            "distToEma21": 0.36,
+            "distToEma9": 0.14,
+            "distToEma21": 0.1,
+            "bbPercent": 0.7
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 40,
+            "volume": 25,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.3861,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835335594-DOTUSDT",
+        "symbol": "DOTUSDT",
+        "score": 66,
+        "price": 1.487,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (66 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835335594,
+        "entryMetrics": {
+            "distToEma9": -0.04,
+            "distToEma21": 0.09,
+            "bbPercent": 0.62
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.494,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835336198-FILUSDT",
+        "symbol": "FILUSDT",
+        "score": 56,
+        "price": 0.9775,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (56 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835336198,
+        "entryMetrics": {
+            "distToEma9": 0.12,
+            "distToEma21": 0.01,
+            "bbPercent": 0.68
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.9663,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835338644-ASTERUSDT",
+        "symbol": "ASTERUSDT",
+        "score": 60,
+        "price": 0.7016,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (60 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835338644,
+        "entryMetrics": {
+            "distToEma9": -0.02,
+            "distToEma21": 0.21,
+            "bbPercent": 0.6
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.6945,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772835339318-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 50,
+        "price": 0.2846,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (50 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772835339318,
+        "entryMetrics": {
+            "distToEma9": -0.08,
+            "distToEma21": -0.18,
+            "bbPercent": 0.15
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.2837,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772837125670-ADAUSDT",
+        "symbol": "ADAUSDT",
+        "score": 58,
+        "price": 0.2597,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (58 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772837125670,
+        "entryMetrics": {
+            "distToEma9": 0.24,
+            "distToEma21": 0.25,
             "bbPercent": 0.83
         },
         "categoryScores": {
@@ -78,27 +1030,25 @@
             "volume": 0,
             "patterns": 0
         },
-        "priceAfter4h": 0.2688,
-        "priceAfter12h": 0.2663,
+        "priceAfter4h": 0.2581,
+        "priceAfter12h": null,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
-        "outcome": "WOULD_LOSE",
-        "maxFavorableMove": "-0.92",
-        "maxAdverseMove": "-1.84"
+        "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772746239512-FILUSDT",
+        "id": "shadow-1772837126307-FILUSDT",
         "symbol": "FILUSDT",
-        "score": 58,
-        "price": 1.0202,
+        "score": 53,
+        "price": 0.979,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
+        "rejectReason": "SCORE (53 < 75)",
         "btcRisk": "GREEN",
-        "timestamp": 1772746239512,
+        "timestamp": 1772837126307,
         "entryMetrics": {
-            "distToEma9": 0.21,
-            "distToEma21": 0.34,
-            "bbPercent": 0.75
+            "distToEma9": 0.19,
+            "distToEma21": 0.14,
+            "bbPercent": 0.81
         },
         "categoryScores": {
             "momentum": 30,
@@ -107,27 +1057,538 @@
             "volume": 0,
             "patterns": 0
         },
-        "priceAfter4h": 1.0159,
-        "priceAfter12h": 1.0033,
+        "priceAfter4h": 0.9663,
+        "priceAfter12h": null,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
-        "outcome": "WOULD_LOSE",
-        "maxFavorableMove": "-0.42",
-        "maxAdverseMove": "-1.66"
+        "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772747134372-DOGEUSDT",
+        "id": "shadow-1772838099840-DOGEUSDT",
+        "symbol": "DOGEUSDT",
+        "score": 56,
+        "price": 0.09128,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (56 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772838099840,
+        "entryMetrics": {
+            "distToEma9": 0.13,
+            "distToEma21": 0.25,
+            "bbPercent": 0.84
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 25,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.09062,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772838920816-XRPUSDT",
+        "symbol": "XRPUSDT",
+        "score": 55,
+        "price": 1.3659,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (55 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772838920816,
+        "entryMetrics": {
+            "distToEma9": 0.07,
+            "distToEma21": 0.18,
+            "bbPercent": 0.76
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 80,
+            "structure": 60,
+            "volume": 25,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.3644,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772838921485-DOGEUSDT",
+        "symbol": "DOGEUSDT",
+        "score": 56,
+        "price": 0.09124,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (56 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772838921485,
+        "entryMetrics": {
+            "distToEma9": 0.07,
+            "distToEma21": 0.19,
+            "bbPercent": 0.78
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": 0.09062,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772839828905-DOGEUSDT",
         "symbol": "DOGEUSDT",
         "score": 60,
-        "price": 0.09401,
+        "price": 0.09137,
         "regime": "TRANSITION",
         "rejectReason": "SCORE (60 < 75)",
         "btcRisk": "GREEN",
-        "timestamp": 1772747134372,
+        "timestamp": 1772839828905,
         "entryMetrics": {
-            "distToEma9": -0.24,
-            "distToEma21": -0.2,
-            "bbPercent": 0.56
+            "distToEma9": 0.17,
+            "distToEma21": 0.3,
+            "bbPercent": 0.87
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 50
+        },
+        "priceAfter4h": 0.09062,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772839839734-DOGEUSDT",
+        "symbol": "DOGEUSDT",
+        "score": 60,
+        "price": 0.09137,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (60 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772839839734,
+        "entryMetrics": {
+            "distToEma9": 0.17,
+            "distToEma21": 0.3,
+            "bbPercent": 0.87
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 50
+        },
+        "priceAfter4h": 0.09062,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772840719202-SOLUSDT",
+        "symbol": "SOLUSDT",
+        "score": 54,
+        "price": 84.74,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (54 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772840719202,
+        "entryMetrics": {
+            "distToEma9": -0.15,
+            "distToEma21": -0.21,
+            "bbPercent": 0.3
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 40,
+            "volume": 45,
+            "patterns": 0
+        },
+        "priceAfter4h": 84.03,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772840719428-LINKUSDT",
+        "symbol": "LINKUSDT",
+        "score": 62,
+        "price": 8.791,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (62 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772840719428,
+        "entryMetrics": {
+            "distToEma9": -0.04,
+            "distToEma21": -0.05,
+            "bbPercent": 0.57
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 45,
+            "patterns": 50
+        },
+        "priceAfter4h": 8.76,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772840724128-TONUSDT",
+        "symbol": "TONUSDT",
+        "score": 53,
+        "price": 1.34,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (53 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772840724128,
+        "entryMetrics": {
+            "distToEma9": 0.24,
+            "distToEma21": 0.66,
+            "bbPercent": 0.85
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": 1.338,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772866928024-BTCUSDT",
+        "symbol": "BTCUSDT",
+        "score": 70,
+        "price": 67700,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (70 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772866928024,
+        "entryMetrics": {
+            "distToEma9": -0.35,
+            "distToEma21": -0.51,
+            "bbPercent": -0.05
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 100,
+            "structure": 85,
+            "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772866929725-LTCUSDT",
+        "symbol": "LTCUSDT",
+        "score": 57,
+        "price": 53.53,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (57 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772866929725,
+        "entryMetrics": {
+            "distToEma9": -0.33,
+            "distToEma21": -0.48,
+            "bbPercent": 0.01
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 80,
+            "structure": 85,
+            "volume": 45,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772866931109-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 50,
+        "price": 0.2838,
+        "regime": "DOWNTREND",
+        "rejectReason": "SCORE (50 < 82)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772866931109,
+        "entryMetrics": {
+            "distToEma9": -0.03,
+            "distToEma21": -0.11,
+            "bbPercent": 0.24
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772867731943-LTCUSDT",
+        "symbol": "LTCUSDT",
+        "score": 52,
+        "price": 53.59,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (52 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772867731943,
+        "entryMetrics": {
+            "distToEma9": -0.18,
+            "distToEma21": -0.34,
+            "bbPercent": 0.15
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 80,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772867733729-TONUSDT",
+        "symbol": "TONUSDT",
+        "score": 55,
+        "price": 1.339,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (55 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772867733729,
+        "entryMetrics": {
+            "distToEma9": -0.07,
+            "distToEma21": 0.04,
+            "bbPercent": 0.53
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 50
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772867734382-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 60,
+        "price": 0.2836,
+        "regime": "DOWNTREND",
+        "rejectReason": "SCORE (60 < 82)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772867734382,
+        "entryMetrics": {
+            "distToEma9": -0.08,
+            "distToEma21": -0.17,
+            "bbPercent": 0.1
+        },
+        "categoryScores": {
+            "momentum": 35,
+            "trend": 100,
+            "structure": 85,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772867744614-LTCUSDT",
+        "symbol": "LTCUSDT",
+        "score": 52,
+        "price": 53.59,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (52 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772867744614,
+        "entryMetrics": {
+            "distToEma9": -0.18,
+            "distToEma21": -0.34,
+            "bbPercent": 0.15
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 80,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772867745427-TONUSDT",
+        "symbol": "TONUSDT",
+        "score": 55,
+        "price": 1.339,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (55 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772867745427,
+        "entryMetrics": {
+            "distToEma9": -0.07,
+            "distToEma21": 0.04,
+            "bbPercent": 0.53
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 50
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772867746023-TRXUSDT",
+        "symbol": "TRXUSDT",
+        "score": 60,
+        "price": 0.2836,
+        "regime": "DOWNTREND",
+        "rejectReason": "SCORE (60 < 82)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772867746023,
+        "entryMetrics": {
+            "distToEma9": -0.08,
+            "distToEma21": -0.17,
+            "bbPercent": 0.1
+        },
+        "categoryScores": {
+            "momentum": 35,
+            "trend": 100,
+            "structure": 85,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772868625153-PEPEUSDT",
+        "symbol": "PEPEUSDT",
+        "score": 53,
+        "price": 0.000003341,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (53 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772868625153,
+        "entryMetrics": {
+            "distToEma9": -0.47,
+            "distToEma21": -0.77,
+            "bbPercent": 0.06
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 80,
+            "structure": 85,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772868628352-TONUSDT",
+        "symbol": "TONUSDT",
+        "score": 54,
+        "price": 1.34,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (54 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772868628352,
+        "entryMetrics": {
+            "distToEma9": 0,
+            "distToEma21": 0.1,
+            "bbPercent": 0.57
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 60,
+            "volume": 45,
+            "patterns": 50
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772869516161-ETHUSDT",
+        "symbol": "ETHUSDT",
+        "score": 65,
+        "price": 1977.88,
+        "regime": "TRANSITION",
+        "rejectReason": "SCORE (65 < 75)",
+        "btcRisk": "GREEN",
+        "timestamp": 1772869516161,
+        "entryMetrics": {
+            "distToEma9": 0.1,
+            "distToEma21": 0.04,
+            "bbPercent": 0.5
         },
         "categoryScores": {
             "momentum": 30,
@@ -136,868 +1597,112 @@
             "volume": 50,
             "patterns": 0
         },
-        "priceAfter4h": 0.09345,
+        "priceAfter4h": null,
         "priceAfter12h": null,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772747134798-PEPEUSDT",
-        "symbol": "PEPEUSDT",
-        "score": 53,
-        "price": 0.000003505,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747134798,
-        "entryMetrics": {
-            "distToEma9": -0.12,
-            "distToEma21": 0.21,
-            "bbPercent": 0.68
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.000003488,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747135854-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 66,
-        "price": 0.9569,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747135854,
-        "entryMetrics": {
-            "distToEma9": -0.23,
-            "distToEma21": 0.05,
-            "bbPercent": 0.61
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.9567,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747136916-WLDUSDT",
-        "symbol": "WLDUSDT",
+        "id": "shadow-1772869520231-TONUSDT",
+        "symbol": "TONUSDT",
         "score": 56,
-        "price": 0.4117,
+        "price": 1.343,
         "regime": "TRANSITION",
         "rejectReason": "SCORE (56 < 75)",
         "btcRisk": "GREEN",
-        "timestamp": 1772747136916,
+        "timestamp": 1772869520231,
         "entryMetrics": {
-            "distToEma9": 0.02,
+            "distToEma9": 0.18,
             "distToEma21": 0.29,
             "bbPercent": 0.73
         },
         "categoryScores": {
-            "momentum": 30,
+            "momentum": 0,
             "trend": 100,
             "structure": 60,
             "volume": 25,
-            "patterns": 0
+            "patterns": 50
         },
-        "priceAfter4h": 0.4073,
+        "priceAfter4h": null,
         "priceAfter12h": null,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772747137326-NEARUSDT",
-        "symbol": "NEARUSDT",
-        "score": 56,
-        "price": 1.275,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747137326,
-        "entryMetrics": {
-            "distToEma9": 0.01,
-            "distToEma21": 0.1,
-            "bbPercent": 0.67
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.2649,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747137755-ADAUSDT",
-        "symbol": "ADAUSDT",
-        "score": 56,
-        "price": 0.2694,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747137755,
-        "entryMetrics": {
-            "distToEma9": -0.35,
-            "distToEma21": -0.31,
-            "bbPercent": 0.52
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2688,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747137956-ETHUSDT",
+        "id": "shadow-1772870499630-ETHUSDT",
         "symbol": "ETHUSDT",
-        "score": 53,
-        "price": 2081.64,
+        "score": 75,
+        "price": 1983.01,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747137956,
+        "rejectReason": "BTC_RED (score 75 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870499630,
         "entryMetrics": {
-            "distToEma9": -0.2,
-            "distToEma21": -0.18,
-            "bbPercent": 0.57
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": 2076.04,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747138168-SOLUSDT",
-        "symbol": "SOLUSDT",
-        "score": 53,
-        "price": 89.1,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747138168,
-        "entryMetrics": {
-            "distToEma9": -0.13,
-            "distToEma21": -0.12,
-            "bbPercent": 0.63
+            "distToEma9": 0.29,
+            "distToEma21": 0.27,
+            "bbPercent": 0.74
         },
         "categoryScores": {
             "momentum": 30,
             "trend": 100,
-            "structure": 60,
-            "volume": 0,
+            "structure": 75,
+            "volume": 70,
             "patterns": 0
         },
-        "priceAfter4h": 88.13,
+        "priceAfter4h": null,
         "priceAfter12h": null,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772747138612-APTUSDT",
-        "symbol": "APTUSDT",
-        "score": 60,
-        "price": 0.9997,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (60 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747138612,
-        "entryMetrics": {
-            "distToEma9": 0.18,
-            "distToEma21": 0.54,
-            "bbPercent": 0.77
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.0098,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747140071-LINKUSDT",
+        "id": "shadow-1772870500032-LINKUSDT",
         "symbol": "LINKUSDT",
-        "score": 54,
-        "price": 9.234,
+        "score": 55,
+        "price": 8.806,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (54 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747140072,
+        "rejectReason": "BTC_RED (score 55 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870500032,
         "entryMetrics": {
-            "distToEma9": -0.18,
-            "distToEma21": 0,
-            "bbPercent": 0.64
+            "distToEma9": 0.22,
+            "distToEma21": 0.19,
+            "bbPercent": 0.65
         },
         "categoryScores": {
             "momentum": 30,
             "trend": 80,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": 9.207,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747140284-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 59,
-        "price": 1.541,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (59 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747140284,
-        "entryMetrics": {
-            "distToEma9": 0.42,
-            "distToEma21": 1.12,
-            "bbPercent": 0.82
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.524,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747140700-XRPUSDT",
-        "symbol": "XRPUSDT",
-        "score": 53,
-        "price": 1.4068,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747140700,
-        "entryMetrics": {
-            "distToEma9": -0.43,
-            "distToEma21": -0.46,
-            "bbPercent": 0.35
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.4008,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772747141753-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 53,
-        "price": 9.443,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772747141753,
-        "entryMetrics": {
-            "distToEma9": -0.06,
-            "distToEma21": 0.23,
-            "bbPercent": 0.69
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
+            "structure": 75,
             "volume": 0,
             "patterns": 0
         },
-        "priceAfter4h": 9.375,
+        "priceAfter4h": null,
         "priceAfter12h": null,
         "wouldHaveTP": null,
         "wouldHaveSL": null,
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772748077067-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 53,
-        "price": 0.9563,
+        "id": "shadow-1772870500230-SOLUSDT",
+        "symbol": "SOLUSDT",
+        "score": 60,
+        "price": 84.32,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772748077067,
-        "entryMetrics": {
-            "distToEma9": -0.24,
-            "distToEma21": -0.01,
-            "bbPercent": 0.59
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.9567,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772748084106-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 51,
-        "price": 5059.8,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772748084106,
+        "rejectReason": "BTC_RED (score 60 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870500230,
         "entryMetrics": {
             "distToEma9": 0.1,
-            "distToEma21": 0.06,
-            "bbPercent": 0.82
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 5084.7,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772748942174-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 53,
-        "price": 0.09368,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772748942174,
-        "entryMetrics": {
-            "distToEma9": -0.41,
-            "distToEma21": -0.48,
-            "bbPercent": 0.39
+            "distToEma21": -0.02,
+            "bbPercent": 0.49
         },
         "categoryScores": {
             "momentum": 30,
             "trend": 100,
             "structure": 60,
             "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.09345,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772748943716-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 53,
-        "price": 0.9561,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772748943716,
-        "entryMetrics": {
-            "distToEma9": -0.21,
-            "distToEma21": -0.03,
-            "bbPercent": 0.57
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.9567,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772748946121-ADAUSDT",
-        "symbol": "ADAUSDT",
-        "score": 55,
-        "price": 0.268,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (55 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772748946121,
-        "entryMetrics": {
-            "distToEma9": -0.62,
-            "distToEma21": -0.72,
-            "bbPercent": 0.3
-        },
-        "categoryScores": {
-            "momentum": 50,
-            "trend": 80,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2688,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772748946911-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 66,
-        "price": 71157.51,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772748946911,
-        "entryMetrics": {
-            "distToEma9": -0.06,
-            "distToEma21": -0.14,
-            "bbPercent": 0.59
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": 70668.49,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772748948079-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 56,
-        "price": 1.533,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772748948079,
-        "entryMetrics": {
-            "distToEma9": -0.13,
-            "distToEma21": 0.46,
-            "bbPercent": 0.67
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.524,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772749820486-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 60,
-        "price": 71153.05,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (60 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772749820486,
-        "entryMetrics": {
-            "distToEma9": -0.05,
-            "distToEma21": -0.13,
-            "bbPercent": 0.58
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": 70668.49,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772749821653-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 53,
-        "price": 1.521,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772749821653,
-        "entryMetrics": {
-            "distToEma9": -0.73,
-            "distToEma21": -0.3,
-            "bbPercent": 0.51
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.524,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772750715175-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 51,
-        "price": 0.9602,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772750715175,
-        "entryMetrics": {
-            "distToEma9": 0.22,
-            "distToEma21": 0.37,
-            "bbPercent": 0.65
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.9567,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772750717157-SOLUSDT",
-        "symbol": "SOLUSDT",
-        "score": 51,
-        "price": 89.22,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772750717157,
-        "entryMetrics": {
-            "distToEma9": 0.07,
-            "distToEma21": 0.05,
-            "bbPercent": 0.65
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 88.13,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772750718154-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 61,
-        "price": 71267.83,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (61 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772750718154,
-        "entryMetrics": {
-            "distToEma9": 0.09,
-            "distToEma21": 0.03,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 70668.49,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772750718961-ADAUSDT",
-        "symbol": "ADAUSDT",
-        "score": 51,
-        "price": 0.2697,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772750718961,
-        "entryMetrics": {
-            "distToEma9": 0.07,
-            "distToEma21": -0.04,
-            "bbPercent": 0.54
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 75,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2688,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772753419186-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 66,
-        "price": 71211.53,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772753419186,
-        "entryMetrics": {
-            "distToEma9": 0.01,
-            "distToEma21": -0.04,
-            "bbPercent": 0.58
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": 70668.49,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772753419936-ADAUSDT",
-        "symbol": "ADAUSDT",
-        "score": 51,
-        "price": 0.2695,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772753419936,
-        "entryMetrics": {
-            "distToEma9": 0.04,
-            "distToEma21": -0.06,
-            "bbPercent": 0.43
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2688,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772753421398-UNIUSDT",
-        "symbol": "UNIUSDT",
-        "score": 67,
-        "price": 3.986,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (67 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772753421398,
-        "entryMetrics": {
-            "distToEma9": -0.01,
-            "distToEma21": -0.15,
-            "bbPercent": 0.32
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 75,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": 3.972,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772754324572-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 50,
-        "price": 2075.95,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (50 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772754324572,
-        "entryMetrics": {
-            "distToEma9": -0.23,
-            "distToEma21": -0.31,
-            "bbPercent": 0.2
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 2076.04,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772754324825-SOLUSDT",
-        "symbol": "SOLUSDT",
-        "score": 53,
-        "price": 88.82,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772754324825,
-        "entryMetrics": {
-            "distToEma9": -0.26,
-            "distToEma21": -0.33,
-            "bbPercent": 0.18
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 88.13,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772754332868-BCHUSDT",
-        "symbol": "BCHUSDT",
-        "score": 56,
-        "price": 461.5,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772754332868,
-        "entryMetrics": {
-            "distToEma9": -0.03,
-            "distToEma21": 0.19,
-            "bbPercent": 0.7
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 458.5,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772780490505-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 56,
-        "price": 0.09339,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772780490505,
-        "entryMetrics": {
-            "distToEma9": -0.12,
-            "distToEma21": -0.21,
-            "bbPercent": 0.21
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 45,
             "patterns": 50
         },
         "priceAfter4h": null,
@@ -1007,1429 +1712,52 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772780492733-XRPUSDT",
-        "symbol": "XRPUSDT",
-        "score": 56,
-        "price": 1.4007,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772780492733,
-        "entryMetrics": {
-            "distToEma9": 0.06,
-            "distToEma21": -0.08,
-            "bbPercent": 0.4
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772781334965-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 53,
-        "price": 2071.86,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772781334965,
-        "entryMetrics": {
-            "distToEma9": 0.01,
-            "distToEma21": -0.1,
-            "bbPercent": 0.39
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772781335569-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 50,
-        "price": 0.09348,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (50 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772781335569,
-        "entryMetrics": {
-            "distToEma9": -0.02,
-            "distToEma21": -0.1,
-            "bbPercent": 0.35
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772781340264-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 71,
-        "price": 0.2864,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (71 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772781340264,
-        "entryMetrics": {
-            "distToEma9": 0.19,
-            "distToEma21": 0.31,
-            "bbPercent": 1.08
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782227079-SOLUSDT",
-        "symbol": "SOLUSDT",
+        "id": "shadow-1772870500685-AVAXUSDT",
+        "symbol": "AVAXUSDT",
         "score": 61,
-        "price": 88.69,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (61 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782227079,
-        "entryMetrics": {
-            "distToEma9": 0.59,
-            "distToEma21": 0.49,
-            "bbPercent": 0.92
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782227903-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 58,
-        "price": 2084.13,
+        "price": 9.015,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782227903,
-        "entryMetrics": {
-            "distToEma9": 0.48,
-            "distToEma21": 0.45,
-            "bbPercent": 0.79
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782228819-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 50,
-        "price": 1.34,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (50 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782228819,
-        "entryMetrics": {
-            "distToEma9": 0.21,
-            "distToEma21": 0.17,
-            "bbPercent": 0.9
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782230548-XRPUSDT",
-        "symbol": "XRPUSDT",
-        "score": 58,
-        "price": 1.4072,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782230548,
-        "entryMetrics": {
-            "distToEma9": 0.43,
-            "distToEma21": 0.36,
-            "bbPercent": 0.78
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782230780-XMRUSDT",
-        "symbol": "XMRUSDT",
-        "score": 54,
-        "price": 363,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (54 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782230780,
-        "entryMetrics": {
-            "distToEma9": 0.22,
-            "distToEma21": 0.17,
-            "bbPercent": 0.64
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782231184-LINKUSDT",
-        "symbol": "LINKUSDT",
-        "score": 55,
-        "price": 9.273,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (55 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782231184,
-        "entryMetrics": {
-            "distToEma9": 0.62,
-            "distToEma21": 0.6,
-            "bbPercent": 0.89
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782231600-XLMUSDT",
-        "symbol": "XLMUSDT",
-        "score": 55,
-        "price": 0.1588,
-        "regime": "RANGING",
-        "rejectReason": "SCORE (55 < 68)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782231600,
-        "entryMetrics": {
-            "distToEma9": 0.53,
-            "distToEma21": 0.56,
-            "bbPercent": 0.7
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782232073-UNIUSDT",
-        "symbol": "UNIUSDT",
-        "score": 65,
-        "price": 4.003,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (65 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782232073,
-        "entryMetrics": {
-            "distToEma9": 0.71,
-            "distToEma21": 0.68,
-            "bbPercent": 0.9
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782232503-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 58,
-        "price": 55.66,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782232503,
-        "entryMetrics": {
-            "distToEma9": 0.37,
-            "distToEma21": 0.32,
-            "bbPercent": 0.8
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772782233772-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 66,
-        "price": 0.2864,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772782233772,
-        "entryMetrics": {
-            "distToEma9": 0.15,
-            "distToEma21": 0.28,
-            "bbPercent": 0.99
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772783127500-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 62,
-        "price": 2084.27,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (62 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772783127500,
-        "entryMetrics": {
-            "distToEma9": 0.39,
-            "distToEma21": 0.41,
-            "bbPercent": 0.82
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 75,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772783127941-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 64,
-        "price": 71065.9,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (64 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772783127941,
-        "entryMetrics": {
-            "distToEma9": 0.51,
-            "distToEma21": 0.45,
-            "bbPercent": 0.77
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772783128605-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 53,
-        "price": 1.339,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772783128605,
-        "entryMetrics": {
-            "distToEma9": 0.11,
-            "distToEma21": 0.09,
-            "bbPercent": 0.86
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772783130192-XRPUSDT",
-        "symbol": "XRPUSDT",
-        "score": 58,
-        "price": 1.4073,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772783130192,
-        "entryMetrics": {
-            "distToEma9": 0.35,
-            "distToEma21": 0.34,
-            "bbPercent": 0.82
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772783131604-XLMUSDT",
-        "symbol": "XLMUSDT",
-        "score": 51,
-        "price": 0.1591,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772783131604,
-        "entryMetrics": {
-            "distToEma9": 0.57,
-            "distToEma21": 0.68,
-            "bbPercent": 0.8
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772783132214-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 56,
-        "price": 55.63,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772783132214,
-        "entryMetrics": {
-            "distToEma9": 0.25,
-            "distToEma21": 0.24,
-            "bbPercent": 0.78
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 75,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772783133449-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 56,
-        "price": 0.2861,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772783133449,
-        "entryMetrics": {
-            "distToEma9": 0.04,
-            "distToEma21": 0.16,
-            "bbPercent": 0.8
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784067826-HYPEUSDT",
-        "symbol": "HYPEUSDT",
-        "score": 56,
-        "price": 30.81,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784067826,
-        "entryMetrics": {
-            "distToEma9": -0.23,
-            "distToEma21": 0.04,
-            "bbPercent": 0.57
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784068630-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 56,
-        "price": 71047.84,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (56 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784068630,
-        "entryMetrics": {
-            "distToEma9": 0.39,
-            "distToEma21": 0.39,
-            "bbPercent": 0.77
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784069440-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 52,
-        "price": 1.334,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (52 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784069440,
-        "entryMetrics": {
-            "distToEma9": -0.21,
-            "distToEma21": -0.26,
-            "bbPercent": 0.32
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 50
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784073093-BNBUSDT",
-        "symbol": "BNBUSDT",
-        "score": 54,
-        "price": 646.94,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (54 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784073093,
-        "entryMetrics": {
-            "distToEma9": 0.15,
-            "distToEma21": 0.09,
-            "bbPercent": 0.61
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784073269-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 66,
-        "price": 55.59,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784073269,
-        "entryMetrics": {
-            "distToEma9": 0.14,
-            "distToEma21": 0.15,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784925824-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 55,
-        "price": 0.9668,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (55 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784925824,
-        "entryMetrics": {
-            "distToEma9": 0.31,
-            "distToEma21": 0.74,
-            "bbPercent": 0.8
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784926603-SOLUSDT",
-        "symbol": "SOLUSDT",
-        "score": 56,
-        "price": 88.4,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784926603,
-        "entryMetrics": {
-            "distToEma9": 0.03,
-            "distToEma21": 0.06,
-            "bbPercent": 0.64
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784927826-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 56,
-        "price": 70939.37,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (56 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784927826,
-        "entryMetrics": {
-            "distToEma9": 0.19,
-            "distToEma21": 0.21,
-            "bbPercent": 0.69
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784928634-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 66,
-        "price": 1.331,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784928634,
-        "entryMetrics": {
-            "distToEma9": -0.35,
-            "distToEma21": -0.44,
-            "bbPercent": 0.05
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 85,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784930654-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 56,
-        "price": 1.533,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784930654,
-        "entryMetrics": {
-            "distToEma9": -0.01,
-            "distToEma21": 0.21,
-            "bbPercent": 0.69
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784931258-XLMUSDT",
-        "symbol": "XLMUSDT",
-        "score": 60,
-        "price": 0.159,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (60 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784931258,
-        "entryMetrics": {
-            "distToEma9": 0.31,
-            "distToEma21": 0.5,
-            "bbPercent": 0.78
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772784931964-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 66,
-        "price": 55.54,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772784931964,
-        "entryMetrics": {
-            "distToEma9": 0.04,
-            "distToEma21": 0.06,
-            "bbPercent": 0.61
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772785814874-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 51,
-        "price": 0.9646,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772785814874,
-        "entryMetrics": {
-            "distToEma9": 0.07,
-            "distToEma21": 0.46,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772785817727-ENAUSDT",
-        "symbol": "ENAUSDT",
-        "score": 61,
-        "price": 0.11557,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (61 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772785817727,
-        "entryMetrics": {
-            "distToEma9": 0.53,
-            "distToEma21": 0.88,
-            "bbPercent": 0.9
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772785818116-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 56,
-        "price": 1.333,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772785818116,
-        "entryMetrics": {
-            "distToEma9": -0.16,
-            "distToEma21": -0.26,
-            "bbPercent": 0.25
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772785821263-BCHUSDT",
-        "symbol": "BCHUSDT",
-        "score": 53,
-        "price": 459.5,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772785821263,
-        "entryMetrics": {
-            "distToEma9": 0.08,
-            "distToEma21": 0.07,
-            "bbPercent": 0.64
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772785821672-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 53,
-        "price": 0.2854,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (53 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772785821672,
-        "entryMetrics": {
-            "distToEma9": -0.16,
-            "distToEma21": -0.09,
-            "bbPercent": 0.36
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772786743934-ASTERUSDT",
-        "symbol": "ASTERUSDT",
-        "score": 53,
-        "price": 0.7073,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772786743934,
-        "entryMetrics": {
-            "distToEma9": -0.12,
-            "distToEma21": 0.12,
-            "bbPercent": 0.63
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772786744153-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 53,
-        "price": 0.9609,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772786744153,
-        "entryMetrics": {
-            "distToEma9": -0.25,
-            "distToEma21": 0.07,
-            "bbPercent": 0.58
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772786748016-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 56,
-        "price": 1.334,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772786748016,
-        "entryMetrics": {
-            "distToEma9": -0.07,
-            "distToEma21": -0.17,
-            "bbPercent": 0.36
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772786749960-BNBUSDT",
-        "symbol": "BNBUSDT",
-        "score": 50,
-        "price": 644.66,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (50 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772786749960,
-        "entryMetrics": {
-            "distToEma9": -0.14,
-            "distToEma21": -0.22,
-            "bbPercent": 0.36
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772786750149-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 53,
-        "price": 55.47,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772786750149,
-        "entryMetrics": {
-            "distToEma9": -0.08,
-            "distToEma21": -0.07,
-            "bbPercent": 0.51
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772786750941-BCHUSDT",
-        "symbol": "BCHUSDT",
-        "score": 60,
-        "price": 459,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (60 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772786750941,
-        "entryMetrics": {
-            "distToEma9": -0.02,
-            "distToEma21": -0.03,
-            "bbPercent": 0.57
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772787615878-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 56,
-        "price": 70778,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (56 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772787615878,
-        "entryMetrics": {
-            "distToEma9": -0.08,
-            "distToEma21": -0.05,
-            "bbPercent": 0.6
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788531500-TAOUSDT",
-        "symbol": "TAOUSDT",
-        "score": 58,
-        "price": 183.7,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788531500,
-        "entryMetrics": {
-            "distToEma9": -1.17,
-            "distToEma21": -1.59,
-            "bbPercent": -0.18
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 60,
-            "structure": 85,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788532358-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 53,
-        "price": 70570.43,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (53 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788532358,
-        "entryMetrics": {
-            "distToEma9": -0.3,
-            "distToEma21": -0.31,
-            "bbPercent": 0.4
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788533266-ENAUSDT",
-        "symbol": "ENAUSDT",
-        "score": 56,
-        "price": 0.11404,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788533266,
-        "entryMetrics": {
-            "distToEma9": -0.68,
-            "distToEma21": -0.5,
-            "bbPercent": 0.46
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788534286-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 71,
-        "price": 1.337,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (71 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788534286,
-        "entryMetrics": {
-            "distToEma9": 0.11,
-            "distToEma21": 0.05,
-            "bbPercent": 0.65
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788535080-XRPUSDT",
-        "symbol": "XRPUSDT",
-        "score": 53,
-        "price": 1.4011,
-        "regime": "RANGING",
-        "rejectReason": "SCORE (53 < 68)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788535080,
-        "entryMetrics": {
-            "distToEma9": -0.17,
-            "distToEma21": -0.16,
-            "bbPercent": 0.48
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788536300-BNBUSDT",
-        "symbol": "BNBUSDT",
-        "score": 58,
-        "price": 642.27,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788536300,
-        "entryMetrics": {
-            "distToEma9": -0.38,
-            "distToEma21": -0.52,
-            "bbPercent": 0
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 80,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788536516-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 70,
-        "price": 55.21,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (70 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788536516,
-        "entryMetrics": {
-            "distToEma9": -0.41,
-            "distToEma21": -0.48,
-            "bbPercent": 0.03
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 100,
-            "structure": 85,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772788537900-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 64,
-        "price": 0.2864,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (64 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772788537900,
+        "rejectReason": "BTC_RED (score 61 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870500685,
         "entryMetrics": {
             "distToEma9": 0.16,
-            "distToEma21": 0.23,
-            "bbPercent": 0.87
+            "distToEma21": 0.08,
+            "bbPercent": 0.55
         },
         "categoryScores": {
-            "momentum": 0,
+            "momentum": 30,
+            "trend": 100,
+            "structure": 75,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772870502164-XRPUSDT",
+        "symbol": "XRPUSDT",
+        "score": 69,
+        "price": 1.3673,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 69 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870502164,
+        "entryMetrics": {
+            "distToEma9": 0.14,
+            "distToEma21": 0.14,
+            "bbPercent": 0.64
+        },
+        "categoryScores": {
+            "momentum": 30,
             "trend": 100,
             "structure": 60,
-            "volume": 70,
-            "patterns": 0
+            "volume": 20,
+            "patterns": 100
         },
         "priceAfter4h": null,
         "priceAfter12h": null,
@@ -2438,51 +1766,24 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772789411145-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 53,
-        "price": 2057.1,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772789411145,
-        "entryMetrics": {
-            "distToEma9": -0.7,
-            "distToEma21": -0.82,
-            "bbPercent": -0.02
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 80,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772789411551-DOGEUSDT",
+        "id": "shadow-1772870502798-DOGEUSDT",
         "symbol": "DOGEUSDT",
-        "score": 64,
-        "price": 0.09261,
+        "score": 50,
+        "price": 0.09057,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (64 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772789411551,
+        "rejectReason": "BTC_RED (score 50 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870502798,
         "entryMetrics": {
-            "distToEma9": -0.67,
-            "distToEma21": -0.89,
-            "bbPercent": -0.12
+            "distToEma9": -0.09,
+            "distToEma21": -0.29,
+            "bbPercent": 0.28
         },
         "categoryScores": {
             "momentum": 20,
-            "trend": 80,
-            "structure": 85,
-            "volume": 70,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
             "patterns": 0
         },
         "priceAfter4h": null,
@@ -2492,17 +1793,44 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772789411789-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 50,
-        "price": 70414.53,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (50 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772789411789,
+        "id": "shadow-1772870503187-BNBUSDT",
+        "symbol": "BNBUSDT",
+        "score": 58,
+        "price": 627.84,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 58 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870503187,
         "entryMetrics": {
-            "distToEma9": -0.42,
-            "distToEma21": -0.48,
+            "distToEma9": 0.1,
+            "distToEma21": 0.07,
+            "bbPercent": 0.66
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772870503413-HBARUSDT",
+        "symbol": "HBARUSDT",
+        "score": 55,
+        "price": 0.0965,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 55 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772870503413,
+        "entryMetrics": {
+            "distToEma9": -0.05,
+            "distToEma21": -0.29,
             "bbPercent": 0.27
         },
         "categoryScores": {
@@ -2519,24 +1847,51 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772789416146-XLMUSDT",
-        "symbol": "XLMUSDT",
-        "score": 53,
-        "price": 0.1568,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772789416147,
+        "id": "shadow-1772871310506-MBGUSDT",
+        "symbol": "MBGUSDT",
+        "score": 54,
+        "price": 0.3116,
+        "regime": "TRENDING",
+        "rejectReason": "BTC_RED (score 54 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871310506,
         "entryMetrics": {
-            "distToEma9": -0.77,
-            "distToEma21": -0.82,
-            "bbPercent": 0.14
+            "distToEma9": -0.51,
+            "distToEma21": -0.59,
+            "bbPercent": -0.1
         },
         "categoryScores": {
             "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772871310724-SUIUSDT",
+        "symbol": "SUIUSDT",
+        "score": 52,
+        "price": 0.9033,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 52 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871310724,
+        "entryMetrics": {
+            "distToEma9": 0.21,
+            "distToEma21": 0.19,
+            "bbPercent": 0.77
+        },
+        "categoryScores": {
+            "momentum": 30,
             "trend": 80,
             "structure": 60,
-            "volume": 70,
+            "volume": 0,
             "patterns": 0
         },
         "priceAfter4h": null,
@@ -2546,24 +1901,51 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772790332809-SOLUSDT",
+        "id": "shadow-1772871312072-LINKUSDT",
+        "symbol": "LINKUSDT",
+        "score": 50,
+        "price": 8.806,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 50 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871312072,
+        "entryMetrics": {
+            "distToEma9": 0.18,
+            "distToEma21": 0.17,
+            "bbPercent": 0.75
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 80,
+            "structure": 60,
+            "volume": 25,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772871312275-SOLUSDT",
         "symbol": "SOLUSDT",
-        "score": 64,
-        "price": 87.46,
+        "score": 53,
+        "price": 84.19,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (64 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772790332809,
+        "rejectReason": "BTC_RED (score 53 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871312275,
         "entryMetrics": {
-            "distToEma9": -0.58,
-            "distToEma21": -0.79,
-            "bbPercent": 0.09
+            "distToEma9": -0.04,
+            "distToEma21": -0.16,
+            "bbPercent": 0.34
         },
         "categoryScores": {
-            "momentum": 20,
-            "trend": 100,
-            "structure": 85,
-            "volume": 50,
+            "momentum": 30,
+            "trend": 80,
+            "structure": 60,
+            "volume": 45,
             "patterns": 0
         },
         "priceAfter4h": null,
@@ -2573,78 +1955,24 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772790333398-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 59,
-        "price": 2055.5,
+        "id": "shadow-1772871312681-AVAXUSDT",
+        "symbol": "AVAXUSDT",
+        "score": 61,
+        "price": 9.025,
         "regime": "TRANSITION",
-        "rejectReason": "SCORE (59 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772790333398,
+        "rejectReason": "BTC_RED (score 61 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871312681,
         "entryMetrics": {
-            "distToEma9": -0.63,
-            "distToEma21": -0.82,
-            "bbPercent": 0.01
+            "distToEma9": 0.22,
+            "distToEma21": 0.17,
+            "bbPercent": 0.75
         },
         "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772790337233-NEARUSDT",
-        "symbol": "NEARUSDT",
-        "score": 52,
-        "price": 1.2601,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (52 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772790337234,
-        "entryMetrics": {
-            "distToEma9": -0.41,
-            "distToEma21": -0.62,
-            "bbPercent": 0.01
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 60,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING"
-    },
-    {
-        "id": "shadow-1772790337803-XLMUSDT",
-        "symbol": "XLMUSDT",
-        "score": 59,
-        "price": 0.157,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (59 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772790337803,
-        "entryMetrics": {
-            "distToEma9": -0.52,
-            "distToEma21": -0.63,
-            "bbPercent": 0.22
-        },
-        "categoryScores": {
-            "momentum": 0,
+            "momentum": 30,
             "trend": 100,
             "structure": 60,
-            "volume": 70,
+            "volume": 20,
             "patterns": 0
         },
         "priceAfter4h": null,
@@ -2654,23 +1982,23 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772790338189-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 64,
-        "price": 55.16,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (64 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772790338189,
+        "id": "shadow-1772871313870-UNIUSDT",
+        "symbol": "UNIUSDT",
+        "score": 65,
+        "price": 3.829,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 65 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871313870,
         "entryMetrics": {
-            "distToEma9": -0.32,
-            "distToEma21": -0.47,
-            "bbPercent": 0.07
+            "distToEma9": 0.34,
+            "distToEma21": 0.2,
+            "bbPercent": 0.67
         },
         "categoryScores": {
-            "momentum": 20,
+            "momentum": 30,
             "trend": 100,
-            "structure": 85,
+            "structure": 60,
             "volume": 50,
             "patterns": 0
         },
@@ -2681,24 +2009,726 @@
         "outcome": "PENDING"
     },
     {
-        "id": "shadow-1772790339587-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 66,
-        "price": 0.2865,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1772790339587,
+        "id": "shadow-1772871314064-XRPUSDT",
+        "symbol": "XRPUSDT",
+        "score": 58,
+        "price": 1.3673,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 58 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871314064,
         "entryMetrics": {
             "distToEma9": 0.11,
-            "distToEma21": 0.21,
+            "distToEma21": 0.12,
+            "bbPercent": 0.77
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 50
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772871314634-DOGEUSDT",
+        "symbol": "DOGEUSDT",
+        "score": 50,
+        "price": 0.09059,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 50 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871314634,
+        "entryMetrics": {
+            "distToEma9": -0.05,
+            "distToEma21": -0.24,
+            "bbPercent": 0.27
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772871315038-BNBUSDT",
+        "symbol": "BNBUSDT",
+        "score": 50,
+        "price": 628.08,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 50 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772871315038,
+        "entryMetrics": {
+            "distToEma9": 0.11,
+            "distToEma21": 0.1,
             "bbPercent": 0.83
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 80,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772872236813-LINKUSDT",
+        "symbol": "LINKUSDT",
+        "score": 54,
+        "price": 8.776,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 54 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772872236813,
+        "entryMetrics": {
+            "distToEma9": -0.13,
+            "distToEma21": -0.15,
+            "bbPercent": 0.28
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 80,
+            "structure": 60,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772872237026-SOLUSDT",
+        "symbol": "SOLUSDT",
+        "score": 61,
+        "price": 84.4,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 61 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772872237026,
+        "entryMetrics": {
+            "distToEma9": 0.17,
+            "distToEma21": 0.08,
+            "bbPercent": 0.74
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772872238015-ADAUSDT",
+        "symbol": "ADAUSDT",
+        "score": 61,
+        "price": 0.2586,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 61 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772872238015,
+        "entryMetrics": {
+            "distToEma9": 0.08,
+            "distToEma21": 0.01,
+            "bbPercent": 0.54
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 25,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772872238399-UNIUSDT",
+        "symbol": "UNIUSDT",
+        "score": 71,
+        "price": 3.836,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 71 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772872238399,
+        "entryMetrics": {
+            "distToEma9": 0.41,
+            "distToEma21": 0.35,
+            "bbPercent": 0.82
         },
         "categoryScores": {
             "momentum": 30,
             "trend": 100,
             "structure": 60,
             "volume": 70,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772872238618-XRPUSDT",
+        "symbol": "XRPUSDT",
+        "score": 60,
+        "price": 1.3675,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 60 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772872238618,
+        "entryMetrics": {
+            "distToEma9": 0.1,
+            "distToEma21": 0.13,
+            "bbPercent": 0.83
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 50
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772873143249-MBGUSDT",
+        "symbol": "MBGUSDT",
+        "score": 54,
+        "price": 0.3115,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 54 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772873143249,
+        "entryMetrics": {
+            "distToEma9": -0.35,
+            "distToEma21": -0.51,
+            "bbPercent": 0.05
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772873144436-ETHUSDT",
+        "symbol": "ETHUSDT",
+        "score": 56,
+        "price": 1982.04,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 56 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772873144436,
+        "entryMetrics": {
+            "distToEma9": 0.08,
+            "distToEma21": 0.14,
+            "bbPercent": 0.8
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772873145527-AVAXUSDT",
+        "symbol": "AVAXUSDT",
+        "score": 56,
+        "price": 9.031,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 56 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772873145527,
+        "entryMetrics": {
+            "distToEma9": 0.16,
+            "distToEma21": 0.19,
+            "bbPercent": 0.85
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772873146114-ADAUSDT",
+        "symbol": "ADAUSDT",
+        "score": 61,
+        "price": 0.2589,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 61 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772873146114,
+        "entryMetrics": {
+            "distToEma9": 0.16,
+            "distToEma21": 0.11,
+            "bbPercent": 0.75
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 75,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772873146496-UNIUSDT",
+        "symbol": "UNIUSDT",
+        "score": 56,
+        "price": 3.832,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 56 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772873146496,
+        "entryMetrics": {
+            "distToEma9": 0.25,
+            "distToEma21": 0.22,
+            "bbPercent": 0.76
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772873146690-XRPUSDT",
+        "symbol": "XRPUSDT",
+        "score": 55,
+        "price": 1.3667,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 55 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772873146690,
+        "entryMetrics": {
+            "distToEma9": 0.03,
+            "distToEma21": 0.06,
+            "bbPercent": 0.73
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 50
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772873147458-DOGEUSDT",
+        "symbol": "DOGEUSDT",
+        "score": 61,
+        "price": 0.09079,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 61 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772873147458,
+        "entryMetrics": {
+            "distToEma9": 0.12,
+            "distToEma21": -0.01,
+            "bbPercent": 0.56
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874022993-MBGUSDT",
+        "symbol": "MBGUSDT",
+        "score": 54,
+        "price": 0.3113,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 54 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874022993,
+        "entryMetrics": {
+            "distToEma9": -0.33,
+            "distToEma21": -0.52,
+            "bbPercent": 0.06
+        },
+        "categoryScores": {
+            "momentum": 0,
+            "trend": 100,
+            "structure": 85,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874023673-SUIUSDT",
+        "symbol": "SUIUSDT",
+        "score": 53,
+        "price": 0.9041,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 53 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874023673,
+        "entryMetrics": {
+            "distToEma9": 0.09,
+            "distToEma21": 0.18,
+            "bbPercent": 0.73
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874024291-ETHUSDT",
+        "symbol": "ETHUSDT",
+        "score": 56,
+        "price": 1978.06,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 56 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874024291,
+        "entryMetrics": {
+            "distToEma9": -0.1,
+            "distToEma21": -0.05,
+            "bbPercent": 0.55
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874024502-TAOUSDT",
+        "symbol": "TAOUSDT",
+        "score": 53,
+        "price": 178.12,
+        "regime": "HIGH_VOLATILITY",
+        "rejectReason": "BTC_RED (score 53 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874024502,
+        "entryMetrics": {
+            "distToEma9": 0.25,
+            "distToEma21": 0.61,
+            "bbPercent": 0.83
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874024709-SOLUSDT",
+        "symbol": "SOLUSDT",
+        "score": 56,
+        "price": 84.37,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 56 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874024709,
+        "entryMetrics": {
+            "distToEma9": 0.07,
+            "distToEma21": 0.03,
+            "bbPercent": 0.73
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874025469-AVAXUSDT",
+        "symbol": "AVAXUSDT",
+        "score": 53,
+        "price": 9.004,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 53 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874025469,
+        "entryMetrics": {
+            "distToEma9": -0.11,
+            "distToEma21": -0.1,
+            "bbPercent": 0.46
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874025687-PEPEUSDT",
+        "symbol": "PEPEUSDT",
+        "score": 53,
+        "price": 0.000003342,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 53 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874025687,
+        "entryMetrics": {
+            "distToEma9": -0.31,
+            "distToEma21": -0.54,
+            "bbPercent": 0.08
+        },
+        "categoryScores": {
+            "momentum": 20,
+            "trend": 80,
+            "structure": 85,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874026094-ADAUSDT",
+        "symbol": "ADAUSDT",
+        "score": 53,
+        "price": 0.258,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 53 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874026094,
+        "entryMetrics": {
+            "distToEma9": -0.15,
+            "distToEma21": -0.21,
+            "bbPercent": 0.2
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874026310-UNIUSDT",
+        "symbol": "UNIUSDT",
+        "score": 51,
+        "price": 3.819,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 51 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874026310,
+        "entryMetrics": {
+            "distToEma9": -0.07,
+            "distToEma21": -0.11,
+            "bbPercent": 0.52
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 40,
+            "volume": 20,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874026529-XRPUSDT",
+        "symbol": "XRPUSDT",
+        "score": 55,
+        "price": 1.3653,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 55 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874026529,
+        "entryMetrics": {
+            "distToEma9": -0.05,
+            "distToEma21": -0.04,
+            "bbPercent": 0.51
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
+            "patterns": 50
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874026941-DOGEUSDT",
+        "symbol": "DOGEUSDT",
+        "score": 71,
+        "price": 0.09041,
+        "regime": "TRANSITION",
+        "rejectReason": "BTC_RED (score 71 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874026941,
+        "entryMetrics": {
+            "distToEma9": -0.24,
+            "distToEma21": -0.39,
+            "bbPercent": 0.03
+        },
+        "categoryScores": {
+            "momentum": 50,
+            "trend": 100,
+            "structure": 85,
+            "volume": 50,
+            "patterns": 0
+        },
+        "priceAfter4h": null,
+        "priceAfter12h": null,
+        "wouldHaveTP": null,
+        "wouldHaveSL": null,
+        "outcome": "PENDING"
+    },
+    {
+        "id": "shadow-1772874027701-BNBUSDT",
+        "symbol": "BNBUSDT",
+        "score": 53,
+        "price": 628.22,
+        "regime": "RANGING",
+        "rejectReason": "BTC_RED (score 53 < 88)",
+        "btcRisk": "RED",
+        "timestamp": 1772874027701,
+        "entryMetrics": {
+            "distToEma9": 0.03,
+            "distToEma21": 0.07,
+            "bbPercent": 0.72
+        },
+        "categoryScores": {
+            "momentum": 30,
+            "trend": 100,
+            "structure": 60,
+            "volume": 0,
             "patterns": 0
         },
         "priceAfter4h": null,

@@ -6,26 +6,36 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v6.0.1 (Active)
-**Date:** Mar 6, 2026
-**Theme:** "TRANSITION HARD LOCK" (Surgical Adjustment)
+## Current Version: v6.0.2 (Active)
+**Date:** Mar 7, 2026
+**Theme:** "SHADOW ARCHIVE" (Infraestructura de Auditoría)
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v6.0.1-SelfLearn` (alinea journal, documentación y logs).
+- **Runtime Version:** `v6.0.2-SelfLearn`.
+- **SHADOW activo:** [Mantener] ventana operativa corta para evaluar near-misses recientes.
+- **SHADOW histórico:** [Nuevo] archivo append-only separado para archivar permanentemente near-misses resueltos o expirados.
 - **TRANSITION Threshold:** **75 fijo**. Ya no puede bajar por `requirementsReduction` / SOTT.
 - **DOWNTREND Bounce Mode:** [Mantener] Bypass de régimen DOWNTREND si BTC RSI4H < 35 (Capitulación) + BTC-SEM GREEN + RSI15m < 45. Score requerido: 82.
-- **Dynamic BB% in TRENDING:** [Mantener] Límite de overextension sube a **0.90** si `SOTT > 0.5` en tendencia alcista 4H.
 
 ### Hypothesis / Goal:
-La auditoría del 6-Mar detectó que `TRANSITION` seguía siendo más laxo de lo documentado: el código aplicaba `75 - requirementsReduction`, permitiendo entradas efectivas en 70-71 cuando SOTT era favorable. Esto reabrió exactamente el patrón que v5.4 intentaba cerrar: fake breakouts en mercado choppy / de transición. v6.0.1 endurece el gate para que **75 sea un suelo real**, no solo documental.
+La auditoría del 7-Mar detectó un problema de observabilidad: `shadow_trades.json` no era un histórico real, sino una ventana truncada a las últimas 100 entradas y además limpiada por edad. Eso hacía que el self-learning fuese útil operativamente, pero débil para auditoría de versiones, filtros y regímenes. v6.0.2 mantiene el shadow activo corto y añade un archivo histórico persistente separado para no perder near-misses resueltos.
 
 ### Bugs Found:
-- **Threshold drift oculto:** `TRANSITION` figuraba como 75 en el journal/documentación, pero el código lo relajaba implícitamente a 70 o 65 mediante `requirementsReduction`.
-- **Desalineación de versión:** el runtime/logs ya corrían `v6.0-SelfLearn`, mientras el journal seguía declarando `v5.4` como versión activa.
+- **Shadow truncado:** el store principal conservaba solo las últimas 100 entradas, insuficiente para análisis histórico fiable.
+- **Retención corta:** el loader limpiaba near-misses de más de 48h, correcto para runtime pero incorrecto para auditoría longitudinal.
+- **Punto ciego de auditoría:** se podían perder near-misses ya resueltos antes de compararlos entre versiones.
 
 ---
 
 ## Past Versions (Audit History)
+
+### v6.0.1 (TRANSITION HARD LOCK)
+- **Status:** Superseded by v6.0.2 (Mar 7, 2026)
+- **Runtime Version:** `v6.0.1-SelfLearn`
+- **Key Change:** `TRANSITION` pasa a umbral duro de 75 sin reductores implícitos.
+- **Observation:** la lógica de régimen quedó alineada, pero la capa de shadow seguía sin conservar histórico completo para validarla en el tiempo.
+
+---
 
 ### v5.3 (PERFORMANCE TUNING — Post-Auditoría de Frecuencia)
 - **Status:** Superseded by v5.4 (Feb 28, 2026)
