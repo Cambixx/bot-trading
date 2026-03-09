@@ -10,11 +10,11 @@ Antes de iniciar el chat de auditoría, asegúrate de tener **descargados y actu
 
 | Archivo | Criticidad | Propósito |
 |---------|-----------|-----------|
-| `history.json` | 🔴 CRÍTICO | Resultados reales de cada operación (WIN/LOSS/OPEN/STALE_EXIT) con métricas de entrada |
+| `history.json` | 🔴 CRÍTICO | Resultados reales de cada operación (WIN/LOSS/OPEN/STALE_EXIT) con métricas de entrada, sector, score pre-momentum y ajuste de momentum |
 | `persistent_logs.json` | 🔴 CRÍTICO | Historial ininterrumpido de mensajes del servidor (NUEVO v6.0) - Evita el borrado de logs de Netlify |
-| `shadow_trades_archive.json` | 🔴 CRÍTICO | Histórico completo de near-misses resueltos/expirados. **Fuente principal** para auditoría longitudinal del self-learning |
+| `shadow_trades_archive.json` | 🔴 CRÍTICO | Histórico completo de near-misses resueltos/expirados. **Fuente principal** para auditoría longitudinal del self-learning, filtros, correlación y benchmark shadow |
 | `shadow_trades.json` | 🟠 IMPORTANTE | Shadow activo reciente. **No es histórico completo**; sirve como ventana operativa de corto plazo |
-| `autopsies.json` | 🔴 CRÍTICO | Diagnóstico detallado de trades cerrados con duración y excursiones máximas (NUEVO v6.0) |
+| `autopsies.json` | 🔴 CRÍTICO | Diagnóstico detallado de trades cerrados con duración, excursiones máximas, sector y trazabilidad del ajuste de momentum |
 | `signal_memory.json` | 🟡 RECOMENDADO | Historial de momentum y puntajes por símbolo (NUEVO v6.0) |
 | `ALGORITHM_JOURNAL.md` | 🟠 IMPORTANTE | Contexto de la versión activa, hipótesis en prueba y lecciones aprendidas |
 | `ALGO_DOCUMENTATION.md` | 🟡 RECOMENDADO | Si se van a cambiar parámetros, se necesita para actualizarlo con los cambios |
@@ -25,6 +25,8 @@ Antes de iniciar el chat de auditoría, asegúrate de tener **descargados y actu
 - `shadow_trades_archive.json` debe usarse como base del análisis histórico del self-learning.
 - `shadow_trades.json` debe tratarse como una ventana reciente de trabajo, no como la verdad histórica completa.
 - Si `shadow_trades_archive.json` no está adjunto, el análisis debe indicarlo explícitamente como **limitación de calidad de datos** antes de sacar conclusiones fuertes sobre filtros o Win Rate fantasma.
+- El shadow actual persiste benchmark explícito (`shadowBenchmark`), `wouldHaveTP`, `wouldHaveSL`, `resolvedAt` y near-misses de correlación (`SECTOR_CORRELATION`). La auditoría debe usarlos si están disponibles.
+- El ajuste de momentum ya es auditable vía `scoreBeforeMomentum` y `momentumAdjustment` en `history.json`, `shadow_trades*.json` y `autopsies.json`.
 
 ---
 
@@ -60,6 +62,7 @@ Reglas obligatorias:
 - Usa `shadow_trades_archive.json` como fuente principal para el análisis histórico del shadow trading.
 - Usa `shadow_trades.json` solo como contexto reciente, no como histórico total.
 - Si falta algún archivo crítico o hay datos truncados/incompletos, indícalo explícitamente al principio.
+- Si el shadow incluye `shadowBenchmark`, documenta el benchmark efectivo antes de interpretar el WR hipotético. No mezcles conclusiones entre benchmarks distintos sin avisarlo.
 - Si la muestra de trades reales es pequeña, dilo explícitamente y evita proponer cambios agresivos.
 - No propongas cambios de código sin justificar primero el problema con datos.
 - No modifiques ningún archivo hasta que yo lo confirme.
@@ -105,7 +108,9 @@ Quiero que estructures la auditoría exactamente así:
   - conclusión histórica (`shadow_trades_archive.json`)
   - conclusión reciente (`shadow_trades.json`)
 - Identifica el filtro más costoso en términos de trades ganadores perdidos.
-- Evalúa si los ajustes de momentum `+3 / -5` aportan señal útil o ruido.
+- Evalúa si los ajustes de momentum `+3 / -5` aportan señal útil o ruido usando `scoreBeforeMomentum` y `momentumAdjustment` si existen.
+- Identifica cuántos near-misses provienen de `SECTOR_CORRELATION` y si el filtro sectorial está bloqueando edge real o evitando sobreexposición útil.
+- Si existe `shadowBenchmark`, `wouldHaveTP` y `wouldHaveSL`, aclara explícitamente con qué benchmark se está calculando el shadow antes de interpretar su WR.
 - Si el shadow reciente contradice el histórico, prioriza el histórico y explica por qué.
 
 5. Autopsia de operaciones reales
@@ -208,6 +213,7 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 - Usa `shadow_trades_archive.json` como fuente principal para el análisis histórico del shadow trading.
 - Usa `shadow_trades.json` solo como complemento para el contexto más reciente.
 - Si falta `shadow_trades_archive.json`, indícalo explícitamente y reduce tu nivel de confianza en cualquier conclusión de self-learning.
+- Si los archivos de shadow incluyen `shadowBenchmark`, `wouldHaveTP` y `wouldHaveSL`, documenta primero el benchmark efectivo y no mezcles conclusiones entre benchmarks distintos.
 - No asumas que el archivo de shadow activo representa todo el historial.
 - Si la muestra de trades reales es pequeña, dilo de forma explícita y evita sobreajustes.
 
@@ -225,6 +231,7 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
    - Distingue entre:
      - total histórico (`shadow_trades_archive.json`)
      - ventana reciente (`shadow_trades.json`)
+   - Si existe `SECTOR_CORRELATION`, separa cuántos near-misses vienen de filtros clásicos (score/BTC/strong categories) vs cuántos vienen del filtro de correlación.
 
 3. **R:R Real promedio y Autopsias:** Utiliza `autopsies.json` para calcular:
    - Tiempo promedio que un trade ganador (WIN) está abierto vs. un perdedor (LOSS).
@@ -237,7 +244,9 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 4. **Evalúa las oportunidades fantasma (`shadow_trades_archive.json` + `shadow_trades.json`):**
    - ¿Cuál habría sido el Win Rate de los *near-misses* si se hubieran operado (considerando los WOULD_WIN y WOULD_LOSE)?
    - ¿Qué filtro nos está costando más trades ganadores? (Filtro más costoso basado en rechazos que terminaron en WOULD_WIN).
-   - Analiza si los ajustes de Momentum (+3 / -5) están beneficiando al sistema o introduciendo ruido.
+   - Analiza si los ajustes de Momentum (+3 / -5) están beneficiando al sistema o introduciendo ruido usando `scoreBeforeMomentum` y `momentumAdjustment` si están presentes.
+   - Separa explícitamente los near-misses `SECTOR_CORRELATION` del resto para medir si la correlación está controlando riesgo o bloqueando throughput innecesariamente.
+   - Si el archivo incluye `shadowBenchmark`, `wouldHaveTP` y `wouldHaveSL`, especifica el benchmark usado antes de citar el WR fantasma.
    - Separa claramente:
      - conclusión histórica (archivo `archive`)
      - conclusión reciente (archivo activo)
@@ -335,6 +344,8 @@ Usa esta tabla como referencia rápida al recibir el análisis:
 | WR < 40% + mercado bajista global | ⚠️ Evaluar contexto antes de tocar código |
 | 0 señales en > 5 días | 🔄 Los filtros son demasiado restrictivos — relajar selectivamente |
 | R:R promedio > 2.0 pero WR < 30% | 🔄 El problema no es el R:R sino la calidad de entrada |
+| Muchas señales bloqueadas por `SECTOR_CORRELATION` con shadow fuerte | 🔧 Revisar correlación por sector, no bajar score global |
+| Shadow fuerte solo con benchmark muy laxo | ⚠️ No relajar filtros hasta revisar `shadowBenchmark` |
 | Shadow activo contradice al archivo histórico | ⚠️ Priorizar el histórico y revisar si el activo está truncado o sesgado |
 
 ---
@@ -348,6 +359,9 @@ Antes de cerrar cualquier sesión de auditoría, confirma que se han completado:
 - [ ] Hipótesis del Journal evaluadas
 - [ ] Contexto de mercado documentado
 - [ ] Shadow histórico vs shadow activo diferenciados
+- [ ] Benchmark shadow explícitamente documentado si existe en los archivos
+- [ ] Efecto de `momentumAdjustment` evaluado si existe en los archivos
+- [ ] Near-misses `SECTOR_CORRELATION` revisados si existen
 - [ ] Veredicto emitido (MANTENER / AJUSTE / REVERTIR)
 - [ ] Si hubo cambios: `ALGORITHM_JOURNAL.md` actualizado
 - [ ] Si hubo cambios: `ALGO_DOCUMENTATION.md` actualizado

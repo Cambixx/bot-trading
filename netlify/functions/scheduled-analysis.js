@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v6.0.2-SelfLearn';
+const ALGORITHM_VERSION = 'v6.0.3-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -43,6 +43,9 @@ export const SHADOW_ARCHIVE_STORE_KEY = 'shadow-trades-archive-v1';
 export const MEMORY_STORE_KEY = 'signal-memory-v1';
 export const AUTOPSY_STORE_KEY = 'trade-autopsies-v1';
 export const PERSISTENT_LOG_STORE_KEY = 'persistent-logs-v1';
+const SHADOW_BENCHMARK_VERSION = 'v1.5-1.2-audited';
+const SHADOW_BENCHMARK_TP_PCT = process.env.SHADOW_BENCHMARK_TP_PCT ? Number(process.env.SHADOW_BENCHMARK_TP_PCT) : 0.015;
+const SHADOW_BENCHMARK_SL_PCT = process.env.SHADOW_BENCHMARK_SL_PCT ? Number(process.env.SHADOW_BENCHMARK_SL_PCT) : 0.012;
 
 // const lastNotifiedAtByKey = new Map(); // Replaced by Blobs
 
@@ -80,6 +83,10 @@ const SECTOR_MAP = {
 function getSector(symbol) {
   const base = symbol.replace(QUOTE_ASSET, '');
   return SECTOR_MAP[base] || 'OTHER';
+}
+
+function isProtectedSector(sector) {
+  return sector && sector !== 'UNKNOWN' && sector !== 'OTHER';
 }
 
 // NEW: Session filter - avoid low liquidity periods
@@ -284,6 +291,11 @@ async function recordSignalHistory(signal, context) {
       hasMSS: !!signal.hasMSS,
       hasSweep: !!signal.hasSweep,
       btcRisk: signal.btcContext?.status || 'UNKNOWN',
+      sector: signal.sector || getSector(signal.symbol),
+      scoreBeforeMomentum: signal.scoreBeforeMomentum ?? signal.score,
+      momentumAdjustment: signal.momentumAdjustment || 0,
+      requiredScore: signal.requiredScore || null,
+      requiredStrongCategories: signal.requiredStrongCategories || null,
 
       // Enhanced metrics for analysis
       entryMetrics: signal.entryMetrics || null,
@@ -473,25 +485,44 @@ async function archiveResolvedShadowTrades(shadows, context, pLog = console.log)
   return shadows;
 }
 
-function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcContext, entryMetrics, categoryScores) {
+function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcContext, entryMetrics, categoryScores, meta = {}) {
   // Returns a shadow trade object (saved in batch at end of cycle)
+  const now = Date.now();
+  const benchmarkTpPct = meta.shadowBenchmarkTpPct ?? SHADOW_BENCHMARK_TP_PCT;
+  const benchmarkSlPct = meta.shadowBenchmarkSlPct ?? SHADOW_BENCHMARK_SL_PCT;
   return {
-    id: `shadow-${Date.now()}-${symbol}`,
+    id: `shadow-${now}-${symbol}`,
     symbol,
     score,
+    scoreBeforeMomentum: meta.scoreBeforeMomentum ?? score,
+    momentumAdjustment: meta.momentumAdjustment || 0,
+    requiredScore: meta.requiredScore ?? null,
+    requiredStrongCategories: meta.requiredStrongCategories ?? null,
+    scoreGap: meta.requiredScore !== undefined && meta.requiredScore !== null
+      ? Number((meta.requiredScore - score).toFixed(2))
+      : null,
     price,
     regime,
     rejectReason,
     btcRisk: btcContext?.status || 'UNKNOWN',
-    timestamp: Date.now(),
+    sector: meta.sector || getSector(symbol),
+    blockedBySector: meta.blockedBySector || null,
+    blockedBySymbol: meta.blockedBySymbol || null,
+    timestamp: now,
     entryMetrics: entryMetrics || null,
     categoryScores: categoryScores || null,
+    shadowBenchmark: {
+      version: meta.shadowBenchmarkVersion || SHADOW_BENCHMARK_VERSION,
+      tpPct: benchmarkTpPct,
+      slPct: benchmarkSlPct
+    },
     // These get filled in later by updateShadowTrades
     priceAfter4h: null,
     priceAfter12h: null,
     wouldHaveTP: null,
     wouldHaveSL: null,
     outcome: 'PENDING', // PENDING → WOULD_WIN / WOULD_LOSE / EXPIRED
+    resolvedAt: null,
     archivedAt: null
   };
 }
@@ -523,9 +554,20 @@ async function updateShadowTrades(tickers, context, pLog = console.log) {
         updated = true;
       }
 
+      if (!shadow.shadowBenchmark) {
+        shadow.shadowBenchmark = {
+          version: SHADOW_BENCHMARK_VERSION,
+          tpPct: SHADOW_BENCHMARK_TP_PCT,
+          slPct: SHADOW_BENCHMARK_SL_PCT
+        };
+        updated = true;
+      }
+
       // After 12h+, determine if this near-miss would have been profitable
-      // Use a fixed 2% TP / 1.2% SL as a standard benchmark
+      // Use a fixed audited benchmark to keep shadow results comparable across cycles.
       if (elapsedHours >= 12 && shadow.priceAfter12h) {
+        const benchmarkTpPct = shadow.shadowBenchmark?.tpPct ?? SHADOW_BENCHMARK_TP_PCT;
+        const benchmarkSlPct = shadow.shadowBenchmark?.slPct ?? SHADOW_BENCHMARK_SL_PCT;
         const maxMove = Math.max(
           shadow.priceAfter4h ? (shadow.priceAfter4h - shadow.price) / shadow.price : 0,
           (shadow.priceAfter12h - shadow.price) / shadow.price
@@ -535,10 +577,13 @@ async function updateShadowTrades(tickers, context, pLog = console.log) {
           (shadow.priceAfter12h - shadow.price) / shadow.price
         );
 
-        // Did it reach 1.5% profit before hitting -1.2% loss?
-        if (maxMove >= 0.015) {
+        shadow.wouldHaveTP = maxMove >= benchmarkTpPct;
+        shadow.wouldHaveSL = minMove <= -benchmarkSlPct;
+        shadow.resolvedAt = Date.now();
+
+        if (shadow.wouldHaveTP) {
           shadow.outcome = 'WOULD_WIN';
-        } else if (minMove <= -0.012) {
+        } else if (shadow.wouldHaveSL) {
           shadow.outcome = 'WOULD_LOSE';
         } else {
           shadow.outcome = 'WOULD_FLAT';
@@ -656,7 +701,7 @@ function calculateMomentumAdjustment(memory, symbol, pLog = console.log) {
   }
 
   if (isSpike) {
-    console.log(`[MEMORY] ⚠️ ${symbol}: Score spike detected (${lastTwo[0]}→${lastTwo[1]}) -5 penalty`);
+    pLog(`[MEMORY] ⚠️ ${symbol}: Score spike detected (${lastTwo[0]}→${lastTwo[1]}) -5 penalty`);
     return { adjustment: -5, reason: `⚠️ Spike (${lastTwo[0]}→${lastTwo[1]})` };
   }
 
@@ -684,6 +729,11 @@ async function recordTradeAutopsy(item, context) {
       regime: item.regime || 'UNKNOWN',
       btcRisk: item.btcRisk || 'UNKNOWN',
       score: item.score || 0,
+      sector: item.sector || getSector(item.symbol),
+      scoreBeforeMomentum: item.scoreBeforeMomentum ?? item.score ?? 0,
+      momentumAdjustment: item.momentumAdjustment || 0,
+      requiredScore: item.requiredScore || null,
+      requiredStrongCategories: item.requiredStrongCategories || null,
       hoursOpen: Number(hoursOpen.toFixed(1)),
       favorableMovePct: Number((favorableMove * 100).toFixed(2)),
       hasMSS: !!item.hasMSS,
@@ -2560,6 +2610,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     reasons.push('🎯 Alta Confluencia');
   }
 
+  const scoreBeforeMomentum = score;
+
   // === SELF-LEARNING: Momentum Adjustment from Signal Memory ===
   if (momentumAdj && momentumAdj.adjustment !== 0) {
     score += momentumAdj.adjustment;
@@ -2575,6 +2627,16 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const distToEma21 = ema21 ? (currentPrice - ema21) / ema21 * 100 : 0;
   const distToEma50 = ema50 ? (currentPrice - ema50) / ema50 * 100 : 0;
   const distToEma9 = ema9_15m ? (currentPrice - ema9_15m) / ema9_15m * 100 : 0;
+  const shadowEntryMetrics = {
+    distToEma9: Number(distToEma9.toFixed(2)),
+    distToEma21: Number(distToEma21.toFixed(2)),
+    bbPercent: Number(bbPercent.toFixed(2))
+  };
+  const shadowMetaBase = {
+    scoreBeforeMomentum,
+    momentumAdjustment: momentumAdj?.adjustment || 0,
+    sector: getSector(symbol)
+  };
 
   if (signalType === 'BUY') {
     // 1. RSI/BB Overextension
@@ -2644,7 +2706,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       // Extreme Filter during BTC corrections
       if (score < 88) {
         console.log(`[REJECT] ${symbol}: BTC RED requires score 88, got ${score}`);
-        if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(symbol, score, currentPrice, regime, `BTC_RED (score ${score} < 88)`, btcContext, { distToEma9: Number(distToEma9.toFixed(2)), distToEma21: Number(distToEma21.toFixed(2)), bbPercent: Number(bbPercent.toFixed(2)) }, categoryScores));
+        if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
+          symbol,
+          score,
+          currentPrice,
+          regime,
+          `BTC_RED (score ${score} < 88)`,
+          btcContext,
+          shadowEntryMetrics,
+          categoryScores,
+          { ...shadowMetaBase, requiredScore: 88 }
+        ));
         return null;
       }
       reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
@@ -2654,7 +2726,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       const requiredScore = (trend4h === 'BULLISH' && volumeRatio > 1.2) ? 70 : 78;
       if (score < requiredScore) {
         console.log(`[REJECT] ${symbol}: BTC AMBER requires score ${requiredScore}, got ${score}`);
-        if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(symbol, score, currentPrice, regime, `BTC_AMBER (score ${score} < ${requiredScore})`, btcContext, { distToEma9: Number(distToEma9.toFixed(2)), distToEma21: Number(distToEma21.toFixed(2)), bbPercent: Number(bbPercent.toFixed(2)) }, categoryScores));
+        if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
+          symbol,
+          score,
+          currentPrice,
+          regime,
+          `BTC_AMBER (score ${score} < ${requiredScore})`,
+          btcContext,
+          shadowEntryMetrics,
+          categoryScores,
+          { ...shadowMetaBase, requiredScore }
+        ));
         return null;
       }
       reasons.push('⚠️ Precaución Macro (BTC Ambar)');
@@ -2768,7 +2850,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // Final score check
   if (score < MIN_QUALITY_SCORE) {
     console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE} | SOTT: ${sottValue.toFixed(2)} (${sottSignal.toFixed(2)})`);
-    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(symbol, score, currentPrice, regime, `SCORE (${score} < ${MIN_QUALITY_SCORE})`, btcContext, { distToEma9: Number(distToEma9.toFixed(2)), distToEma21: Number(distToEma21.toFixed(2)), bbPercent: Number(bbPercent.toFixed(2)) }, categoryScores));
+    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
+      symbol,
+      score,
+      currentPrice,
+      regime,
+      `SCORE (${score} < ${MIN_QUALITY_SCORE})`,
+      btcContext,
+      shadowEntryMetrics,
+      categoryScores,
+      { ...shadowMetaBase, requiredScore: MIN_QUALITY_SCORE }
+    ));
     return null;
   }
 
@@ -2783,7 +2875,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
   if (strongCategories < requiredStrong) {
     console.log(`[REJECT] ${symbol}: Strong Categories ${strongCategories} < ${requiredStrong}`);
-    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(symbol, score, currentPrice, regime, `STRONG_CAT (${strongCategories} < ${requiredStrong})`, btcContext, { distToEma9: Number(distToEma9.toFixed(2)), distToEma21: Number(distToEma21.toFixed(2)), bbPercent: Number(bbPercent.toFixed(2)) }, categoryScores));
+    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
+      symbol,
+      score,
+      currentPrice,
+      regime,
+      `STRONG_CAT (${strongCategories} < ${requiredStrong})`,
+      btcContext,
+      shadowEntryMetrics,
+      categoryScores,
+      { ...shadowMetaBase, requiredScore: MIN_QUALITY_SCORE, requiredStrongCategories: requiredStrong }
+    ));
     return null;
   }
 
@@ -2881,6 +2983,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         bbPercent: Number((bbPercent || 0).toFixed(2)),
         riskRewardRatio: Number(realRR.toFixed(2)) // FIX v5.2a: R:R real calculado a partir de multiplicadores ATR reales
       },
+      scoreBeforeMomentum,
+      momentumAdjustment: momentumAdj?.adjustment || 0,
+      requiredScore: MIN_QUALITY_SCORE,
+      requiredStrongCategories: requiredStrong,
       reasons,
       mode: finalMode,
       recommendedSize: calculateRecommendedSize(score, atrPercent15m, regime),
@@ -3075,7 +3181,8 @@ export async function runAnalysis(context) {
     const shadowCandidates = []; // NEW: Collect near-misses this cycle
     let analyzed = 0;
     let errors = 0;
-    const selectedSectors = new Set(); // Track sectors to avoid correlation
+    const selectedSectors = new Set(); // Track protected sectors to avoid correlation
+    const selectedSectorLeaders = new Map();
 
     // === SELF-LEARNING: Load Signal Memory ===
     const signalMemory = await loadSignalMemory(context);
@@ -3143,13 +3250,6 @@ export async function runAnalysis(context) {
       if (cooldowns[symbol] && (Date.now() - cooldowns[symbol] < ALERT_COOLDOWN_MIN * 60000)) {
         continue;
       }
-
-      const sector = getSector(symbol);
-      if (sector !== 'UNKNOWN' && selectedSectors.has(sector)) {
-        pLog(`[${runId}] Skipping ${symbol} - Sector ${sector} already selected`);
-        continue;
-      }
-
       try {
         const [candles15m, orderBook, candles1hRaw, candles4hRaw] = await Promise.all([
           getKlines(symbol, '15m', 500),
@@ -3172,24 +3272,57 @@ export async function runAnalysis(context) {
         const momentumAdj = calculateMomentumAdjustment(signalMemory, symbol, pLog);
 
         const signal = generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, momentumAdj, shadowCandidates);
+        let signalAccepted = false;
         if (signal) {
-          // IMMEDIATE COOLDOWN PROTECTION
-          cooldowns[symbol] = Date.now();
-          await saveCooldowns(cooldowns, context);
+          const sector = getSector(symbol);
+          signal.sector = sector;
+          const protectedSector = isProtectedSector(sector);
 
-          // NEW: Track sector for correlation protection
-          selectedSectors.add(sector);
+          if (protectedSector && selectedSectors.has(sector)) {
+            const blockedBySymbol = selectedSectorLeaders.get(sector) || 'UNKNOWN';
+            shadowCandidates.push(recordShadowNearMiss(
+              symbol,
+              signal.score,
+              signal.price,
+              signal.regime,
+              `SECTOR_CORRELATION (${sector} blocked by ${blockedBySymbol})`,
+              signal.btcContext,
+              signal.entryMetrics,
+              signal.categoryScores,
+              {
+                scoreBeforeMomentum: signal.scoreBeforeMomentum,
+                momentumAdjustment: signal.momentumAdjustment,
+                requiredScore: signal.requiredScore,
+                requiredStrongCategories: signal.requiredStrongCategories,
+                sector,
+                blockedBySector: sector,
+                blockedBySymbol
+              }
+            ));
+            pLog(`[${runId}] Skipping ${symbol} - Sector ${sector} already selected by ${blockedBySymbol}`);
+          } else {
+            // IMMEDIATE COOLDOWN PROTECTION
+            cooldowns[symbol] = Date.now();
+            await saveCooldowns(cooldowns, context);
 
-          await recordSignalHistory(signal, context);
-          signals.push(signal);
-          pLog(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Sector: ${sector}`);
+            // Only protect sectors with a meaningful taxonomy; leave OTHER unbounded.
+            if (protectedSector) {
+              selectedSectors.add(sector);
+              selectedSectorLeaders.set(sector, symbol);
+            }
 
-          // Record score in memory (passed)
-          recordSymbolScore(signalMemory, symbol, signal.score, signal.regime);
+            await recordSignalHistory(signal, context);
+            signals.push(signal);
+            signalAccepted = true;
+            pLog(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Sector: ${sector}`);
+
+            // Record score in memory (passed)
+            recordSymbolScore(signalMemory, symbol, signal.score, signal.regime);
+          }
         }
         // Record near-miss scores in memory too (for momentum tracking)
         const lastShadow = shadowCandidates.length > 0 ? shadowCandidates[shadowCandidates.length - 1] : null;
-        if (!signal && lastShadow && lastShadow.symbol === symbol) {
+        if (!signalAccepted && lastShadow && lastShadow.symbol === symbol) {
           recordSymbolScore(signalMemory, symbol, lastShadow.score, lastShadow.regime);
         }
 

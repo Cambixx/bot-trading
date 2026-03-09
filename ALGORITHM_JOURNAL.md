@@ -6,28 +6,36 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v6.0.2 (Active)
-**Date:** Mar 7, 2026
-**Theme:** "SHADOW ARCHIVE" (Infraestructura de Auditoría)
+## Current Version: v6.0.3 (Active)
+**Date:** Mar 9, 2026
+**Theme:** "AUDIT TRACEABILITY" (Menos ceguera operativa, menos throttling artificial)
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v6.0.2-SelfLearn`.
-- **SHADOW activo:** [Mantener] ventana operativa corta para evaluar near-misses recientes.
-- **SHADOW histórico:** [Nuevo] archivo append-only separado para archivar permanentemente near-misses resueltos o expirados.
-- **TRANSITION Threshold:** **75 fijo**. Ya no puede bajar por `requirementsReduction` / SOTT.
-- **DOWNTREND Bounce Mode:** [Mantener] Bypass de régimen DOWNTREND si BTC RSI4H < 35 (Capitulación) + BTC-SEM GREEN + RSI15m < 45. Score requerido: 82.
+- **Runtime Version:** `v6.0.3-SelfLearn`.
+- **Sector Correlation Filter:** [Refinado] solo protege sectores clasificados explícitamente. `OTHER` ya no actúa como pseudo-sector global.
+- **Shadow Benchmark:** [Clarificado] benchmark fijo auditado `TP +1.5% / SL -1.2%` persistido por entrada para evitar ambigüedad futura.
+- **Shadow de Correlación:** [Nuevo] señales válidas bloqueadas por correlación sectorial se guardan como near-miss con `SECTOR_CORRELATION`.
+- **Momentum Traceability:** [Nuevo] `scoreBeforeMomentum` y `momentumAdjustment` se persisten en señales, shadow y autopsias.
+- **TRANSITION Threshold:** [Mantener] **75 fijo**. Ya no puede bajar por `requirementsReduction` / SOTT.
 
 ### Hypothesis / Goal:
-La auditoría del 7-Mar detectó un problema de observabilidad: `shadow_trades.json` no era un histórico real, sino una ventana truncada a las últimas 100 entradas y además limpiada por edad. Eso hacía que el self-learning fuese útil operativamente, pero débil para auditoría de versiones, filtros y regímenes. v6.0.2 mantiene el shadow activo corto y añade un archivo histórico persistente separado para no perder near-misses resueltos.
+La auditoría del 9-Mar detectó dos fallos prácticos. Primero, el filtro sectorial estaba tratando `OTHER` como un sector único, ahogando throughput real y escondiendo setups válidos detrás de un throttle artificial. Segundo, el shadow y el ajuste de momentum seguían siendo parcialmente opacos: el benchmark efectivo no quedaba persistido y el impacto de `+3 / -5` no quedaba trazado en history/autopsy/shadow. v6.0.3 corrige ambos puntos sin relajar el hard lock de `TRANSITION`.
 
 ### Bugs Found:
-- **Shadow truncado:** el store principal conservaba solo las últimas 100 entradas, insuficiente para análisis histórico fiable.
-- **Retención corta:** el loader limpiaba near-misses de más de 48h, correcto para runtime pero incorrecto para auditoría longitudinal.
-- **Punto ciego de auditoría:** se podían perder near-misses ya resueltos antes de compararlos entre versiones.
+- **Throttle artificial en `OTHER`:** múltiples símbolos no correlacionados quedaban bloqueados como si compartieran el mismo sector.
+- **Benchmark shadow implícito:** el runtime resolvía near-misses con `+1.5% / -1.2%`, pero esa referencia no quedaba persistida dentro de cada entrada.
+- **Momentum no auditable:** el efecto del ajuste `+3 / -5` no quedaba guardado en history, shadow ni autopsies.
+- **Correlación no medible:** una señal válida bloqueada por correlación no dejaba rastro estructurado en shadow.
 
 ---
 
 ## Past Versions (Audit History)
+
+### v6.0.2 (SHADOW ARCHIVE)
+- **Status:** Superseded by v6.0.3 (Mar 9, 2026)
+- **Runtime Version:** `v6.0.2-SelfLearn`
+- **Key Change:** shadow activo corto + archivo histórico append-only para near-misses resueltos/expirados.
+- **Observation:** solucionó el histórico truncado, pero seguían faltando trazas del benchmark efectivo, del efecto de momentum y del coste de la correlación sectorial.
 
 ### v6.0.1 (TRANSITION HARD LOCK)
 - **Status:** Superseded by v6.0.2 (Mar 7, 2026)
