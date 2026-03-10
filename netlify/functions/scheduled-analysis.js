@@ -503,6 +503,7 @@ function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcCon
       : null,
     price,
     regime,
+    atrPercent: entryMetrics?.atrPercent || null,
     rejectReason,
     btcRisk: btcContext?.status || 'UNKNOWN',
     sector: meta.sector || getSector(symbol),
@@ -532,85 +533,79 @@ async function updateShadowTrades(tickers, context, pLog = console.log) {
     const shadows = await loadShadowTrades(context);
     if (!shadows.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
 
-    const prices = new Map(tickers.map(t => [t.symbol, Number(t.lastPrice)]));
+    const pendingShadows = shadows.filter(s => s.outcome === 'PENDING');
+    if (!pendingShadows.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
+
+    // Group pending by symbol to minimize API calls
+    const symbols = [...new Set(pendingShadows.map(s => s.symbol))];
+    const tickerMap = new Map(tickers.map(t => [t.symbol, t]));
     let updated = false;
 
-    for (const shadow of shadows) {
-      if (shadow.outcome !== 'PENDING') continue;
+    for (const symbol of symbols) {
+      try {
+        const symbolShadows = pendingShadows.filter(s => s.symbol === symbol);
+        // Get 15m candles (last 200 cover 50 hours, enough for 48h limit)
+        const candles = await getKlines(symbol, '15m', 200).catch(() => null);
+        if (!candles) continue;
 
-      const currentPrice = prices.get(shadow.symbol);
-      if (!currentPrice) continue;
+        for (const shadow of symbolShadows) {
+          const entryTime = shadow.timestamp;
+          const entryPrice = shadow.price;
 
-      const elapsed = Date.now() - shadow.timestamp;
-      const elapsedHours = elapsed / 3600000;
+          // Use audited multipliers to be consistent with generation
+          const tpMultiplier = 3.0;
+          const slMultiplier = 1.8;
+          const atrPctAtEntry = shadow.atrPercent || 0.5; // Fallback
 
-      // Update price checkpoints
-      if (!shadow.priceAfter4h && elapsedHours >= 4) {
-        shadow.priceAfter4h = currentPrice;
-        updated = true;
-      }
-      if (!shadow.priceAfter12h && elapsedHours >= 12) {
-        shadow.priceAfter12h = currentPrice;
-        updated = true;
-      }
+          const tpLevel = entryPrice * (1 + (shadow.shadowBenchmark?.tpPct || (atrPctAtEntry / 100 * tpMultiplier)));
+          const slLevel = entryPrice * (1 - (shadow.shadowBenchmark?.slPct || (atrPctAtEntry / 100 * slMultiplier)));
 
-      if (!shadow.shadowBenchmark) {
-        shadow.shadowBenchmark = {
-          version: SHADOW_BENCHMARK_VERSION,
-          tpPct: SHADOW_BENCHMARK_TP_PCT,
-          slPct: SHADOW_BENCHMARK_SL_PCT
-        };
-        updated = true;
-      }
+          // Analyze future candles
+          const futureCandles = candles.filter(c => c.time > entryTime);
 
-      // After 12h+, determine if this near-miss would have been profitable
-      // Use a fixed audited benchmark to keep shadow results comparable across cycles.
-      if (elapsedHours >= 12 && shadow.priceAfter12h) {
-        const benchmarkTpPct = shadow.shadowBenchmark?.tpPct ?? SHADOW_BENCHMARK_TP_PCT;
-        const benchmarkSlPct = shadow.shadowBenchmark?.slPct ?? SHADOW_BENCHMARK_SL_PCT;
-        const maxMove = Math.max(
-          shadow.priceAfter4h ? (shadow.priceAfter4h - shadow.price) / shadow.price : 0,
-          (shadow.priceAfter12h - shadow.price) / shadow.price
-        );
-        const minMove = Math.min(
-          shadow.priceAfter4h ? (shadow.priceAfter4h - shadow.price) / shadow.price : 0,
-          (shadow.priceAfter12h - shadow.price) / shadow.price
-        );
+          for (const candle of futureCandles) {
+            const hitTP = candle.high >= tpLevel;
+            const hitSL = candle.low <= slLevel;
 
-        shadow.wouldHaveTP = maxMove >= benchmarkTpPct;
-        shadow.wouldHaveSL = minMove <= -benchmarkSlPct;
-        shadow.resolvedAt = Date.now();
+            if (hitTP && hitSL) {
+              // Both hit in same candle? Be conservative: mark as LOSS or check open/close
+              shadow.outcome = (candle.close > candle.open) ? 'WOULD_WIN' : 'WOULD_LOSE';
+              shadow.wouldHaveTP = shadow.outcome === 'WOULD_WIN';
+              shadow.wouldHaveSL = shadow.outcome === 'WOULD_LOSE';
+              shadow.resolvedAt = Date.now();
+              updated = true;
+              break;
+            } else if (hitTP) {
+              shadow.outcome = 'WOULD_WIN';
+              shadow.wouldHaveTP = true;
+              shadow.wouldHaveSL = false;
+              shadow.resolvedAt = Date.now();
+              updated = true;
+              break;
+            } else if (hitSL) {
+              shadow.outcome = 'WOULD_LOSE';
+              shadow.wouldHaveTP = false;
+              shadow.wouldHaveSL = true;
+              shadow.resolvedAt = Date.now();
+              updated = true;
+              break;
+            }
+          }
 
-        if (shadow.wouldHaveTP) {
-          shadow.outcome = 'WOULD_WIN';
-        } else if (shadow.wouldHaveSL) {
-          shadow.outcome = 'WOULD_LOSE';
-        } else {
-          shadow.outcome = 'WOULD_FLAT';
+          // If still pending after 48h, mark as EXPIRED
+          if (shadow.outcome === 'PENDING' && (Date.now() - shadow.timestamp > 48 * 3600 * 1000)) {
+            shadow.outcome = 'EXPIRED';
+            shadow.resolvedAt = Date.now();
+            updated = true;
+          }
         }
-        shadow.maxFavorableMove = (maxMove * 100).toFixed(2);
-        shadow.maxAdverseMove = (minMove * 100).toFixed(2);
-        updated = true;
-
-        if (shadow.outcome === 'WOULD_WIN') {
-          pLog(`[SHADOW] ❌ MISSED OPPORTUNITY: ${shadow.symbol} (score=${shadow.score}, rejected="${shadow.rejectReason}") moved +${shadow.maxFavorableMove}%`);
-        }
-      }
-
-      // Expire after 48h without resolution
-      if (elapsedHours >= 48 && shadow.outcome === 'PENDING') {
-        shadow.outcome = 'EXPIRED';
-        updated = true;
+      } catch (err) {
+        console.error(`[SHADOW] Error resolving ${symbol}:`, err.message);
       }
     }
 
-    const hasUnarchivedResolved = shadows.some(s => s.outcome !== 'PENDING' && !s.archivedAt);
-
-    if (updated || hasUnarchivedResolved) {
+    if (updated) {
       await archiveResolvedShadowTrades(shadows, context, pLog);
-    }
-
-    if (updated || hasUnarchivedResolved) {
       await saveShadowTrades(shadows, context);
     }
 
@@ -876,6 +871,9 @@ async function getAllTickers24h() {
 function getTopSymbolsByOpportunity(tickers, quoteAsset, limit, minQuoteVolume) {
   const stableBases = new Set(['USDT', 'USDC', 'BUSD', 'FDUSD', 'DAI', 'EUR', 'GBP']);
 
+  const btcTicker = tickers.find(t => t.symbol === `BTC${quoteAsset}`);
+  const btcChange = btcTicker ? Number(btcTicker.priceChangePercent || 0) : 0;
+
   const candidates = tickers
     .filter(t => typeof t.symbol === 'string' && t.symbol.endsWith(quoteAsset))
     .filter(t => {
@@ -894,14 +892,18 @@ function getTopSymbolsByOpportunity(tickers, quoteAsset, limit, minQuoteVolume) 
       const volatility = low > 0 ? ((high - low) / low) * 100 : 0;
       const priceChange = Number(t.priceChangePercent || 0);
 
-      const opportunityScore = (Math.log10(volume) * 0.3) + (volatility * 0.5) + (Math.abs(priceChange) * 0.2);
+      // Relative Strength 24h factor
+      const rs24h = priceChange - btcChange;
 
-      return { symbol: t.symbol, opportunityScore, volatility, priceChange };
+      // opportunityScore (v7.0): Prioritize Volume > RS24h > Volatility
+      const opportunityScore = (Math.log10(volume) * 0.4) + (rs24h * 0.4) + (volatility * 0.2);
+
+      return { symbol: t.symbol, opportunityScore, volatility, priceChange, rs24h };
     })
     .sort((a, b) => b.opportunityScore - a.opportunityScore)
     .slice(0, limit);
 
-  console.log(`Smart Selection: Top ${candidates.length} coins selected based on Opportunity Score.`);
+  console.log(`Smart Selection v7.0: Top ${candidates.length} coins selected (Avg RS24h: ${(candidates.reduce((a, b) => a + b.rs24h, 0) / candidates.length).toFixed(2)}%)`);
   return candidates.map(t => t.symbol);
 }
 
@@ -1654,6 +1656,15 @@ function detectSmartMoneyConcepts(candles, lookback = 50) {
   return { fvgs, orderBlocks };
 }
 
+function calculateRelativeStrength(symbolCloses, btcCloses, lookback = 16) {
+  if (!symbolCloses || !btcCloses || symbolCloses.length < lookback || btcCloses.length < lookback) return 0;
+
+  const symbolChange = (symbolCloses[symbolCloses.length - 1] - symbolCloses[symbolCloses.length - lookback]) / symbolCloses[symbolCloses.length - lookback];
+  const btcChange = (btcCloses[btcCloses.length - 1] - btcCloses[btcCloses.length - lookback]) / btcCloses[btcCloses.length - lookback];
+
+  return symbolChange - btcChange;
+}
+
 // ==================== PRICE ACTION PATTERNS ====================
 
 function detectMarketStructureShift(candles, lookback = 50) {
@@ -2078,36 +2089,32 @@ function validateSignalExpert(symbol, type, volRatio, delta, obMetrics) {
  * 🚀 ESTRATEGIA MILLONARIA: Dynamic Position Sizing Pro
  * Size más agresivo para señales de alta calidad con gestión de riesgo inteligente
  */
-function calculateRecommendedSize(score, atrPct, regime, hasMSS = false, hasSweep = false, volumeRatio = 1.0) {
-  let size = 1.5; // Base aumentada a 1.5%
+function calculateRecommendedSize(score, atrPct, regime, hasMSS = false, hasSweep = false, volumeRatio = 1.0, relativeStrength = 0) {
+  let size = 1.5; // Base augmented to 1.5%
 
-  // 📈 Bonus por calidad de señal (más agresivo)
-  if (score >= 85) size += 1.0;
-  if (score >= 90) size += 1.5;
+  // 📈 Quality bonus (more aggressive)
+  if (score >= 82) size += 0.8; // Lowered threshold for bonus
+  if (score >= 88) size += 1.2;
   if (score >= 95) size += 2.0;
 
-  // 🏆 Bonus por estructura de mercado (confirmación fuerte)
+  // 🏆 Performance & Alpha bonus
+  if (relativeStrength > 0.02) size += 1.0; // Extra size for tokens outperforming BTC by 2%+
   if (hasMSS) size += 0.8;
-  if (hasSweep) size += 1.2;
+  if (hasSweep) size += 1.0;
   if (volumeRatio > 2.0) size += 0.5;
-  if (volumeRatio > 3.0) size += 1.0;
 
-  // 📉 Ajuste por volatilidad (más inteligente)
+  // 📉 Volatility adjustment
   if (atrPct > 3.0) size *= 0.5;
-  else if (atrPct > 2.0) size *= 0.7;
-  else if (atrPct > 1.0) size *= 0.9;
-  else size *= 1.1; // Bonus por baja volatilidad
+  else if (atrPct > 1.5) size *= 0.8;
+  else size *= 1.1;
 
-  // 🎯 Ajuste por régimen (optimizado)
+  // 🎯 Regime adjustment
   if (regime === 'HIGH_VOLATILITY') size *= 0.6;
-  else if (regime === 'TRANSITION') size *= 0.8;
-  else if (regime === 'RANGING') size *= 1.3;
-  else if (regime === 'TRENDING') size *= 1.5; // Máximo tamaño en tendencias
-  else if (regime === 'DOWNTREND') size *= 0.7; // Más conservador en bajistas
+  else if (regime === 'TRENDING') size *= 1.5;
+  else if (regime === 'DOWNTREND') size *= 0.8;
 
-  // 🛡️ Límites de seguridad con ampliación para señales premium
-  const minSize = 0.8; // Mínimo aumentado
-  const maxSize = score >= 90 ? 6.0 : 4.5; // Hasta 6% para señales excelentes
+  const minSize = 0.5;
+  const maxSize = score >= 90 ? 7.0 : 5.0; // Increased max to 7% for god-tier signals
 
   return Math.max(minSize, Math.min(size, maxSize)).toFixed(1);
 }
@@ -2134,6 +2141,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (closedCandles1h.length < 50) return null;
   const closes1h = closedCandles1h.map(c => c.close);
   const currentPrice1h = closes1h[closes1h.length - 1];
+
+  // === NEW: RELATIVE STRENGTH (RS) INDEX v7.0 ===
+  const rs4h = btcContext?.closes4h ? calculateRelativeStrength(closes1h, btcContext.closes4h, 16) : 0;
+  const rs1h = btcContext?.closes1h ? calculateRelativeStrength(closes15m, btcContext.closes1h, 4) : 0;
+  const alphaSignal = rs4h > 0.015 || rs1h > 0.01; // Outperforming BTC by 1.5% in 4h or 1% in 1h
 
   const rsi15m = calculateRSI(closes15m, 14);
   const stoch15m = calculateStochasticRSI(closes15m);
@@ -2543,37 +2555,34 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (sottValue > 0.8 && sottSignal > 0.3) requirementsReduction = 10;
   else if (sottSignal > 0.2) requirementsReduction = 5;
 
-  // === REGIME FILTERS v5.2 REFINED (REVERTED AGGRESSIVE MODE) ===
-  let MIN_QUALITY_SCORE = 72;
+  // === REGIME FILTERS v7.0 (Optimized for Throughput) ===
+  let MIN_QUALITY_SCORE = 68; // Lowered baseline (was 72)
 
   if (regime === 'DOWNTREND') {
-    // 🚀 v5.2: Toughened Downtrend - Require extreme confluence
     if (trend4h === 'BULLISH') {
       reasons.push('📉 DOWNTREND (Pullback Opportunity)');
-      MIN_QUALITY_SCORE = 82 - requirementsReduction;
+      MIN_QUALITY_SCORE = alphaSignal ? 72 : 78; // Massively relaxed if Alpha
     }
-    else if (rsi1h < 25 && volumeRatio > 2.0) {  // Toughened
+    else if (rsi1h < 25 && volumeRatio > 1.8) {
       reasons.push('🎯 DOWNTREND (Extreme Oversold Bounce)');
-      MIN_QUALITY_SCORE = 85 - requirementsReduction;
+      MIN_QUALITY_SCORE = 80;
     }
-    // v5.3 NEW: DOWNTREND Bounce Mode Logic
-    else if (btcContext?.rsi4h < 35 && btcContext?.status === 'GREEN' && rsi15m < 45) {
-      reasons.push('🔥 DOWNTREND (Capitulation Bounce)');
-      MIN_QUALITY_SCORE = 82 - requirementsReduction;
+    else if (btcContext?.status === 'GREEN' && rsi15m < 45 && alphaSignal) {
+      reasons.push('🔥 DOWNTREND (Capitulation Alpha Bounce)');
+      MIN_QUALITY_SCORE = 75;
     }
     else {
-      console.log(`[REJECT] ${symbol}: DOWNTREND regime - Stricter v5.2 filters not met`);
+      console.log(`[REJECT] ${symbol}: DOWNTREND regime - filters too tight`);
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    // v6.0.1: Keep TRANSITION as a hard floor. SOTT can improve score, but must not relax the regime gate.
-    MIN_QUALITY_SCORE = 75;
+    MIN_QUALITY_SCORE = alphaSignal ? 70 : 75;
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = 75 - requirementsReduction;
+    MIN_QUALITY_SCORE = alphaSignal ? 65 : 72; // Baseline 72 is better than 75
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 80 - requirementsReduction;
+    MIN_QUALITY_SCORE = 78;
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 68 - requirementsReduction;
+    MIN_QUALITY_SCORE = 65;
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
@@ -2597,6 +2606,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // v5.1 SOTT Quality Bonus (applied to final score)
   if (sottValue > 0.5) score += 5;
   if (sottSignal > 0.2) score += 5;
+
+  // v7.0 ALPHA BONUS: Reward decoupled assets
+  if (rs4h > 0.02) { score += 8; reasons.push('🚀 Alpha Fuerte vs BTC'); }
+  else if (rs4h > 0.01) { score += 4; reasons.push('📈 Outperforming BTC'); }
 
   // Count strong categories (>60%) - simplified confluence check
   const strongCategories = Object.values(categoryScores).filter(s => s >= 60).length;
@@ -2630,6 +2643,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const shadowEntryMetrics = {
     distToEma9: Number(distToEma9.toFixed(2)),
     distToEma21: Number(distToEma21.toFixed(2)),
+    atrPercent: Number(atrPercent15m.toFixed(2)),
     bbPercent: Number(bbPercent.toFixed(2))
   };
   const shadowMetaBase = {
@@ -2699,43 +2713,40 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (signalType === 'SELL_ALERT') return null;
 
-  // === BTC CONTEXT FILTER (GLOBAL) ===
-  // btcContext is now passed as the last argument
+  // === BTC CONTEXT FILTER v7.0 (NOW SUPPORTS DECOUPLING) ===
   if (btcContext) {
     if (btcContext.status === 'RED') {
-      // Extreme Filter during BTC corrections
-      if (score < 88) {
-        console.log(`[REJECT] ${symbol}: BTC RED requires score 88, got ${score}`);
+      const btcRedThreshold = alphaSignal ? 78 : 88; // Lower threshold if token is de-correlated (Alpha)
+      if (score < btcRedThreshold) {
+        console.log(`[REJECT] ${symbol}: BTC RED requires score ${btcRedThreshold}, got ${score}`);
         if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
           symbol,
           score,
           currentPrice,
           regime,
-          `BTC_RED (score ${score} < 88)`,
+          `BTC_RED (score ${score} < ${btcRedThreshold})`,
           btcContext,
           shadowEntryMetrics,
           categoryScores,
-          { ...shadowMetaBase, requiredScore: 88 }
+          { ...shadowMetaBase, requiredScore: btcRedThreshold }
         ));
         return null;
       }
-      reasons.push('⚠️ Mercado Macro Bajista (BTC Rojo)');
+      reasons.push(alphaSignal ? '🔥 Alpha decoupling in BTC RED' : '⚠️ Mercado Macro Bajista (BTC Rojo)');
     } else if (btcContext.status === 'AMBER') {
-      // Moderate Filter
-      // v4.6 FIX: Relax BTC AMBER requirement if coin has strong momentum
-      const requiredScore = (trend4h === 'BULLISH' && volumeRatio > 1.2) ? 70 : 78;
-      if (score < requiredScore) {
-        console.log(`[REJECT] ${symbol}: BTC AMBER requires score ${requiredScore}, got ${score}`);
+      const btcAmberThreshold = alphaSignal ? 68 : 75; // Baseline 75 (was 78)
+      if (score < btcAmberThreshold) {
+        console.log(`[REJECT] ${symbol}: BTC AMBER requires score ${btcAmberThreshold}, got ${score}`);
         if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
           symbol,
           score,
           currentPrice,
           regime,
-          `BTC_AMBER (score ${score} < ${requiredScore})`,
+          `BTC_AMBER (score ${score} < ${btcAmberThreshold})`,
           btcContext,
           shadowEntryMetrics,
           categoryScores,
-          { ...shadowMetaBase, requiredScore }
+          { ...shadowMetaBase, requiredScore: btcAmberThreshold }
         ));
         return null;
       }
@@ -2980,6 +2991,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         distToEma9: Number(distToEma9.toFixed(2)),
         distToEma21: Number(distToEma21.toFixed(2)),
         distToEma50: Number(distToEma50.toFixed(2)),
+        atrPercent: Number(atrPercent15m.toFixed(2)),
         bbPercent: Number((bbPercent || 0).toFixed(2)),
         riskRewardRatio: Number(realRR.toFixed(2)) // FIX v5.2a: R:R real calculado a partir de multiplicadores ATR reales
       },
@@ -2989,7 +3001,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       requiredStrongCategories: requiredStrong,
       reasons,
       mode: finalMode,
-      recommendedSize: calculateRecommendedSize(score, atrPercent15m, regime),
+      recommendedSize: calculateRecommendedSize(score, atrPercent15m, regime, !!mss, !!sweep, volumeRatio, rs4h),
       btcContext // Include context in result
     };
   }
@@ -3207,13 +3219,31 @@ export async function runAnalysis(context) {
         const btcRsi1h = calculateRSI(closes1h, 14);
 
         if (btcSt4h.bearish || btcRsi4h > 75) {
-          btcContext = { status: 'RED', reason: 'BTC 4H Bearish or Overextended', rsi4h: btcRsi4h };
+          btcContext = {
+            status: 'RED',
+            reason: 'BTC 4H Bearish or Overextended',
+            rsi4h: btcRsi4h,
+            closes4h: closes4h,
+            closes1h: closes1h
+          };
           pLog(`[BTC-SEM] 🔴 RED: ST=${btcSt4h.bearish ? 'Bear' : 'Bull'}, RSI4H=${btcRsi4h.toFixed(1)}`);
         } else if (btcSt4h.bullish && btcRsi1h > 65) {
-          btcContext = { status: 'AMBER', reason: 'BTC 1H Overbought', rsi4h: btcRsi4h };
+          btcContext = {
+            status: 'AMBER',
+            reason: 'BTC 1H Overbought',
+            rsi4h: btcRsi4h,
+            closes4h: closes4h,
+            closes1h: closes1h
+          };
           pLog(`[BTC-SEM] 🟡 AMBER: RSI1H=${btcRsi1h.toFixed(1)}`);
         } else {
-          btcContext = { status: 'GREEN', reason: 'BTC Healthy', rsi4h: btcRsi4h };
+          btcContext = {
+            status: 'GREEN',
+            reason: 'BTC Healthy',
+            rsi4h: btcRsi4h,
+            closes4h: closes4h,
+            closes1h: closes1h
+          };
           pLog(`[BTC-SEM] 🟢 GREEN: Trend Healthy`);
         }
       }
