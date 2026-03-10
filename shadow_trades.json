@@ -1,2802 +1,4202 @@
 [
-    {
-        "id": "shadow-1773051320610-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 56,
-        "price": 67922.86,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773051320610,
-        "entryMetrics": {
-            "distToEma9": 0.05,
-            "distToEma21": 0.41,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 68861.22,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773051321784-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 51,
-        "price": 1.335,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773051321784,
-        "entryMetrics": {
-            "distToEma9": 0.27,
-            "distToEma21": 0.58,
-            "bbPercent": 0.86
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.344,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773051322982-BCHUSDT",
-        "symbol": "BCHUSDT",
-        "score": 61,
-        "price": 449.8,
-        "regime": "RANGING",
-        "rejectReason": "SCORE (61 < 68)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773051322982,
-        "entryMetrics": {
-            "distToEma9": 0.19,
-            "distToEma21": 0.26,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 449.2,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773052223112-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 56,
-        "price": 2001.5,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (56 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773052223112,
-        "entryMetrics": {
-            "distToEma9": 0.06,
-            "distToEma21": 0.4,
-            "bbPercent": 0.64
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": 2021.91,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773052224406-SOLUSDT",
-        "symbol": "SOLUSDT",
-        "score": 51,
-        "price": 83.84,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773052224406,
-        "entryMetrics": {
-            "distToEma9": -0.03,
-            "distToEma21": 0.25,
-            "bbPercent": 0.59
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": 85.13,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773052228068-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 56,
-        "price": 0.2857,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (56 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773052228068,
-        "entryMetrics": {
-            "distToEma9": -0.65,
-            "distToEma21": -0.86,
-            "bbPercent": -0.36
-        },
-        "categoryScores": {
-            "momentum": 35,
-            "trend": 60,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2849,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773053123991-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 60,
-        "price": 0.2858,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (60 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773053123991,
-        "entryMetrics": {
-            "distToEma9": -0.5,
-            "distToEma21": -0.75,
-            "bbPercent": -0.16
-        },
-        "categoryScores": {
-            "momentum": 35,
-            "trend": 100,
-            "structure": 85,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2852,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773054115461-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 58,
-        "price": 1.336,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773054115461,
-        "entryMetrics": {
-            "distToEma9": 0.28,
-            "distToEma21": 0.55,
-            "bbPercent": 0.87
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": 1.348,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773054117127-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 71,
-        "price": 0.2854,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (71 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773054117127,
-        "entryMetrics": {
-            "distToEma9": -0.51,
-            "distToEma21": -0.81,
-            "bbPercent": -0.13
-        },
-        "categoryScores": {
-            "momentum": 35,
-            "trend": 100,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2851,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773054916001-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 55,
-        "price": 1.334,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (55 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773054916001,
-        "entryMetrics": {
-            "distToEma9": 0.1,
-            "distToEma21": 0.36,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 50
-        },
-        "priceAfter4h": 1.348,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773054917623-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 71,
-        "price": 0.2852,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (71 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773054917623,
-        "entryMetrics": {
-            "distToEma9": -0.46,
-            "distToEma21": -0.8,
-            "bbPercent": -0.05
-        },
-        "categoryScores": {
-            "momentum": 35,
-            "trend": 100,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2851,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773054927411-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 58,
-        "price": 1.334,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (58 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773054927411,
-        "entryMetrics": {
-            "distToEma9": 0.1,
-            "distToEma21": 0.36,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 50
-        },
-        "priceAfter4h": 1.348,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773054928754-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 68,
-        "price": 0.2852,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (68 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773054928754,
-        "entryMetrics": {
-            "distToEma9": -0.46,
-            "distToEma21": -0.8,
-            "bbPercent": -0.05
-        },
-        "categoryScores": {
-            "momentum": 35,
-            "trend": 100,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2851,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773055827292-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 62,
-        "price": 1.335,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (62 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773055827292,
-        "entryMetrics": {
-            "distToEma9": 0.14,
-            "distToEma21": 0.39,
-            "bbPercent": 0.77
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 50
-        },
-        "priceAfter4h": 1.352,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773055828868-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 53,
-        "price": 0.2853,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (53 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773055828868,
-        "entryMetrics": {
-            "distToEma9": -0.34,
-            "distToEma21": -0.7,
-            "bbPercent": 0.04
-        },
-        "categoryScores": {
-            "momentum": 35,
-            "trend": 100,
-            "structure": 85,
-            "volume": 0,
-            "patterns": 50
-        },
-        "priceAfter4h": 0.2853,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773056731255-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 63,
-        "price": 0.2856,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (63 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773056731255,
-        "entryMetrics": {
-            "distToEma9": -0.19,
-            "distToEma21": -0.54,
-            "bbPercent": 0.15
-        },
-        "categoryScores": {
-            "momentum": 35,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": 0.2854,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773059441759-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 50,
-        "price": 9.143,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (50 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773059441759,
-        "entryMetrics": {
-            "distToEma9": 0.56,
-            "distToEma21": 0.63,
-            "bbPercent": 0.87
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": 9.316,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773060331509-TAOUSDT",
-        "symbol": "TAOUSDT",
-        "score": 54,
-        "price": 193.39,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (54 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773060331509,
-        "entryMetrics": {
-            "distToEma9": -0.77,
-            "distToEma21": -0.86,
-            "bbPercent": -0.05
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 85,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": 194.49,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773060332511-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 59,
-        "price": 9.143,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (59 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773060332511,
-        "entryMetrics": {
-            "distToEma9": 0.45,
-            "distToEma21": 0.57,
-            "bbPercent": 0.84
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": 9.287,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773060333334-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 55,
-        "price": 0.9112,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (55 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773060333334,
-        "entryMetrics": {
-            "distToEma9": 0.38,
-            "distToEma21": 0.55,
-            "bbPercent": 0.83
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 40,
-            "volume": 70,
-            "patterns": 50
-        },
-        "priceAfter4h": 0.9316,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773060334871-LINKUSDT",
-        "symbol": "LINKUSDT",
-        "score": 66,
-        "price": 8.813,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (66 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773060334871,
-        "entryMetrics": {
-            "distToEma9": 0.26,
-            "distToEma21": 0.47,
-            "bbPercent": 0.85
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": 8.942,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773060336460-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 53,
-        "price": 1.341,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (53 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773060336460,
-        "entryMetrics": {
-            "distToEma9": 0.17,
-            "distToEma21": 0.51,
-            "bbPercent": 0.83
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 50
-        },
-        "priceAfter4h": 1.356,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773061335108-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 50,
-        "price": 0.9118,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (50 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773061335108,
-        "entryMetrics": {
-            "distToEma9": 0.35,
-            "distToEma21": 0.56,
-            "bbPercent": 0.84
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 0,
-            "patterns": 50
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773063925380-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 58,
-        "price": 5046.4,
-        "regime": "RANGING",
-        "rejectReason": "SCORE (58 < 68)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773063925380,
-        "entryMetrics": {
-            "distToEma9": -0.3,
-            "distToEma21": -0.37,
-            "bbPercent": -0.01
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 60,
-            "structure": 85,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773063925891-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 59,
-        "price": 1.346,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (59 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773063925891,
-        "entryMetrics": {
-            "distToEma9": 0.23,
-            "distToEma21": 0.61,
-            "bbPercent": 0.85
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773063937117-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 52,
-        "price": 5046.4,
-        "regime": "RANGING",
-        "rejectReason": "SCORE (52 < 68)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773063937117,
-        "entryMetrics": {
-            "distToEma9": -0.3,
-            "distToEma21": -0.37,
-            "bbPercent": -0.01
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 60,
-            "structure": 85,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773063937513-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 59,
-        "price": 1.346,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (59 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773063937513,
-        "entryMetrics": {
-            "distToEma9": 0.23,
-            "distToEma21": 0.61,
-            "bbPercent": 0.85
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773064831543-FILUSDT",
-        "symbol": "FILUSDT",
-        "score": 50,
-        "price": 0.9468,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 50 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773064831543,
-        "entryMetrics": {
-            "distToEma9": -0.08,
-            "distToEma21": 0.06,
-            "bbPercent": 0.59
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773064832902-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 64,
-        "price": 5045.6,
-        "regime": "RANGING",
-        "rejectReason": "BTC_AMBER (score 64 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773064832902,
-        "entryMetrics": {
-            "distToEma9": -0.25,
-            "distToEma21": -0.36,
-            "bbPercent": 0.04
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 80,
-            "structure": 85,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773064833279-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 69,
-        "price": 1.342,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 69 < 70)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773064833279,
-        "entryMetrics": {
-            "distToEma9": -0.06,
-            "distToEma21": 0.28,
-            "bbPercent": 0.67
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 50
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065725214-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 55,
-        "price": 9.235,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 55 < 70)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065725214,
-        "entryMetrics": {
-            "distToEma9": 0.39,
-            "distToEma21": 0.93,
-            "bbPercent": 0.86
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065725407-ETHUSDT",
-        "symbol": "ETHUSDT",
-        "score": 66,
-        "price": 2014.06,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 66 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065725407,
-        "entryMetrics": {
-            "distToEma9": 0.12,
-            "distToEma21": 0.49,
-            "bbPercent": 0.74
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065725607-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 66,
-        "price": 0.09122,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 66 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065725607,
-        "entryMetrics": {
-            "distToEma9": -0.09,
-            "distToEma21": 0.32,
-            "bbPercent": 0.69
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065726018-LINKUSDT",
-        "symbol": "LINKUSDT",
-        "score": 50,
-        "price": 8.87,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 50 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065726018,
-        "entryMetrics": {
-            "distToEma9": 0.06,
-            "distToEma21": 0.54,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 0,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065726853-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 53,
-        "price": 1.491,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 53 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065726853,
-        "entryMetrics": {
-            "distToEma9": -0.13,
-            "distToEma21": 0.21,
-            "bbPercent": 0.66
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065727073-ADAUSDT",
-        "symbol": "ADAUSDT",
-        "score": 58,
-        "price": 0.2575,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 58 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065727073,
-        "entryMetrics": {
-            "distToEma9": 0.11,
-            "distToEma21": 0.42,
-            "bbPercent": 0.73
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065727272-FILUSDT",
-        "symbol": "FILUSDT",
-        "score": 54,
-        "price": 0.936,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 54 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065727272,
-        "entryMetrics": {
-            "distToEma9": -0.98,
-            "distToEma21": -0.99,
-            "bbPercent": 0.19
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065727841-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 66,
-        "price": 53.97,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 66 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065727841,
-        "entryMetrics": {
-            "distToEma9": 0.06,
-            "distToEma21": 0.46,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065728285-XRPUSDT",
-        "symbol": "XRPUSDT",
-        "score": 60,
-        "price": 1.3621,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 60 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065728285,
-        "entryMetrics": {
-            "distToEma9": 0.07,
-            "distToEma21": 0.43,
-            "bbPercent": 0.74
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065728516-WLDUSDT",
-        "symbol": "WLDUSDT",
-        "score": 60,
-        "price": 0.3688,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 60 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065728516,
-        "entryMetrics": {
-            "distToEma9": 0.12,
-            "distToEma21": 0.55,
-            "bbPercent": 0.77
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065728713-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 50,
-        "price": 5042.5,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 50 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065728713,
-        "entryMetrics": {
-            "distToEma9": -0.25,
-            "distToEma21": -0.38,
-            "bbPercent": 0.04
-        },
-        "categoryScores": {
-            "momentum": 20,
-            "trend": 80,
-            "structure": 85,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065729098-BCHUSDT",
-        "symbol": "BCHUSDT",
-        "score": 53,
-        "price": 448.5,
-        "regime": "HIGH_VOLATILITY",
-        "rejectReason": "BTC_AMBER (score 53 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065729098,
-        "entryMetrics": {
-            "distToEma9": -0.77,
-            "distToEma21": -0.51,
-            "bbPercent": 0.3
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 60,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773065729284-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 52,
-        "price": 1.342,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 52 < 70)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773065729284,
-        "entryMetrics": {
-            "distToEma9": -0.05,
-            "distToEma21": 0.26,
-            "bbPercent": 0.65
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773066649995-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 53,
-        "price": 9.285,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 53 < 70)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773066649995,
-        "entryMetrics": {
-            "distToEma9": 0.75,
-            "distToEma21": 1.34,
-            "bbPercent": 0.96
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 0,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773066650608-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 55,
-        "price": 0.09162,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 55 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773066650608,
-        "entryMetrics": {
-            "distToEma9": 0.28,
-            "distToEma21": 0.69,
-            "bbPercent": 0.82
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773066651881-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 60,
-        "price": 1.501,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 60 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773066651881,
-        "entryMetrics": {
-            "distToEma9": 0.43,
-            "distToEma21": 0.8,
-            "bbPercent": 0.84
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773066654297-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 64,
-        "price": 1.344,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 64 < 70)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773066654297,
-        "entryMetrics": {
-            "distToEma9": 0.08,
-            "distToEma21": 0.37,
-            "bbPercent": 0.72
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773067557924-ASTERUSDT",
-        "symbol": "ASTERUSDT",
-        "score": 51,
-        "price": 0.7071,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773067557924,
-        "entryMetrics": {
-            "distToEma9": 0.16,
-            "distToEma21": 0.48,
-            "bbPercent": 0.78
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773067558940-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 52,
-        "price": 5080,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 52 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773067558940,
-        "entryMetrics": {
-            "distToEma9": 0.4,
-            "distToEma21": 0.34,
-            "bbPercent": 0.87
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068467630-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 51,
-        "price": 9.254,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068467630,
-        "entryMetrics": {
-            "distToEma9": 0.18,
-            "distToEma21": 0.79,
-            "bbPercent": 0.78
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068469468-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 51,
-        "price": 1.499,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068469468,
-        "entryMetrics": {
-            "distToEma9": 0.11,
-            "distToEma21": 0.51,
-            "bbPercent": 0.74
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068470690-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 51,
-        "price": 54.09,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068470690,
-        "entryMetrics": {
-            "distToEma9": 0.1,
-            "distToEma21": 0.49,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068471568-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 54,
-        "price": 5063.5,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 54 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068471568,
-        "entryMetrics": {
-            "distToEma9": 0.06,
-            "distToEma21": 0.02,
-            "bbPercent": 0.52
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 75,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068479948-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 51,
-        "price": 9.254,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068479948,
-        "entryMetrics": {
-            "distToEma9": 0.18,
-            "distToEma21": 0.79,
-            "bbPercent": 0.78
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068481581-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 51,
-        "price": 1.499,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068481581,
-        "entryMetrics": {
-            "distToEma9": 0.11,
-            "distToEma21": 0.51,
-            "bbPercent": 0.74
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068482954-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 51,
-        "price": 54.09,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068482954,
-        "entryMetrics": {
-            "distToEma9": 0.1,
-            "distToEma21": 0.49,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068483725-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 57,
-        "price": 5063.5,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 57 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068483725,
-        "entryMetrics": {
-            "distToEma9": 0.06,
-            "distToEma21": 0.02,
-            "bbPercent": 0.52
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 75,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773068484528-GOLD(PAXG)USDT",
-        "symbol": "GOLD(PAXG)USDT",
-        "score": 50,
-        "price": 5103.27,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 50 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773068484528,
-        "entryMetrics": {
-            "distToEma9": 0.06,
-            "distToEma21": 0.02,
-            "bbPercent": 0.53
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069345924-TAOUSDT",
-        "symbol": "TAOUSDT",
-        "score": 51,
-        "price": 196.82,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069345924,
-        "entryMetrics": {
-            "distToEma9": 0.12,
-            "distToEma21": 0.41,
-            "bbPercent": 0.7
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069348680-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 51,
-        "price": 0.09155,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069348680,
-        "entryMetrics": {
-            "distToEma9": 0.05,
-            "distToEma21": 0.43,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069349452-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 54,
-        "price": 1.498,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 54 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069349452,
-        "entryMetrics": {
-            "distToEma9": 0.04,
-            "distToEma21": 0.41,
-            "bbPercent": 0.7
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069349654-ADAUSDT",
-        "symbol": "ADAUSDT",
-        "score": 60,
-        "price": 0.2568,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 60 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069349654,
-        "entryMetrics": {
-            "distToEma9": -0.29,
-            "distToEma21": -0.04,
-            "bbPercent": 0.55
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069350980-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 51,
-        "price": 54.11,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069350980,
-        "entryMetrics": {
-            "distToEma9": 0.11,
-            "distToEma21": 0.48,
-            "bbPercent": 0.74
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069351607-WLDUSDT",
-        "symbol": "WLDUSDT",
-        "score": 60,
-        "price": 0.3652,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 60 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069351607,
-        "entryMetrics": {
-            "distToEma9": -0.9,
-            "distToEma21": -0.62,
-            "bbPercent": 0.35
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069352266-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 53,
-        "price": 1.348,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 53 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069352266,
-        "entryMetrics": {
-            "distToEma9": 0.23,
-            "distToEma21": 0.52,
-            "bbPercent": 0.82
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773069352703-GOLD(PAXG)USDT",
-        "symbol": "GOLD(PAXG)USDT",
-        "score": 50,
-        "price": 5100.29,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 50 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773069352703,
-        "entryMetrics": {
-            "distToEma9": 0,
-            "distToEma21": -0.04,
-            "bbPercent": 0.49
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070235085-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 51,
-        "price": 9.241,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 51 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070235085,
-        "entryMetrics": {
-            "distToEma9": 0.01,
-            "distToEma21": 0.52,
-            "bbPercent": 0.7
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070235946-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 53,
-        "price": 0.0913,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 53 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070235946,
-        "entryMetrics": {
-            "distToEma9": -0.18,
-            "distToEma21": 0.14,
-            "bbPercent": 0.6
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070236808-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 56,
-        "price": 1.495,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070236808,
-        "entryMetrics": {
-            "distToEma9": -0.13,
-            "distToEma21": 0.19,
-            "bbPercent": 0.63
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070238115-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 56,
-        "price": 53.99,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070238115,
-        "entryMetrics": {
-            "distToEma9": -0.09,
-            "distToEma21": 0.24,
-            "bbPercent": 0.64
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070238870-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 56,
-        "price": 1.35,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070238870,
-        "entryMetrics": {
-            "distToEma9": 0.31,
-            "distToEma21": 0.61,
-            "bbPercent": 0.89
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070239428-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 68,
-        "price": 5069.8,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 68 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070239428,
-        "entryMetrics": {
-            "distToEma9": 0.15,
-            "distToEma21": 0.13,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 50
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070251913-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 53,
-        "price": 0.0913,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 53 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070251913,
-        "entryMetrics": {
-            "distToEma9": -0.18,
-            "distToEma21": 0.14,
-            "bbPercent": 0.6
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070252740-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 56,
-        "price": 1.495,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070252740,
-        "entryMetrics": {
-            "distToEma9": -0.13,
-            "distToEma21": 0.19,
-            "bbPercent": 0.63
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070254127-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 56,
-        "price": 53.99,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070254127,
-        "entryMetrics": {
-            "distToEma9": -0.09,
-            "distToEma21": 0.24,
-            "bbPercent": 0.64
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070254897-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 56,
-        "price": 1.35,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070254897,
-        "entryMetrics": {
-            "distToEma9": 0.31,
-            "distToEma21": 0.61,
-            "bbPercent": 0.89
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070255086-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 71,
-        "price": 5069.8,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 71 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070255086,
-        "entryMetrics": {
-            "distToEma9": 0.15,
-            "distToEma21": 0.13,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 50
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070265166-DOGEUSDT",
-        "symbol": "DOGEUSDT",
-        "score": 56,
-        "price": 0.0913,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070265166,
-        "entryMetrics": {
-            "distToEma9": -0.18,
-            "distToEma21": 0.14,
-            "bbPercent": 0.6
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070265860-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 56,
-        "price": 1.495,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070265860,
-        "entryMetrics": {
-            "distToEma9": -0.13,
-            "distToEma21": 0.19,
-            "bbPercent": 0.63
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070267030-LTCUSDT",
-        "symbol": "LTCUSDT",
-        "score": 56,
-        "price": 53.99,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070267030,
-        "entryMetrics": {
-            "distToEma9": -0.09,
-            "distToEma21": 0.24,
-            "bbPercent": 0.64
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070267693-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 56,
-        "price": 1.35,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070267693,
-        "entryMetrics": {
-            "distToEma9": 0.31,
-            "distToEma21": 0.61,
-            "bbPercent": 0.89
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773070267869-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 71,
-        "price": 5069.8,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 71 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773070267869,
-        "entryMetrics": {
-            "distToEma9": 0.15,
-            "distToEma21": 0.13,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 50
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773071152889-TAOUSDT",
-        "symbol": "TAOUSDT",
-        "score": 52,
-        "price": 195.72,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 52 < 70)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773071152889,
-        "entryMetrics": {
-            "distToEma9": -0.27,
-            "distToEma21": -0.12,
-            "bbPercent": 0.5
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773071155070-BTCUSDT",
-        "symbol": "BTCUSDT",
-        "score": 55,
-        "price": 68758.06,
-        "regime": "TRENDING",
-        "rejectReason": "BTC_AMBER (score 55 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773071155070,
-        "entryMetrics": {
-            "distToEma9": -0.26,
-            "distToEma21": 0.24,
-            "bbPercent": 0.61
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 40,
-            "volume": 50,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773071156129-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 56,
-        "price": 1.494,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 56 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773071156129,
-        "entryMetrics": {
-            "distToEma9": -0.16,
-            "distToEma21": 0.11,
-            "bbPercent": 0.6
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773071158181-TONUSDT",
-        "symbol": "TONUSDT",
-        "score": 64,
-        "price": 1.355,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 64 < 70)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773071158181,
-        "entryMetrics": {
-            "distToEma9": 0.54,
-            "distToEma21": 0.89,
-            "bbPercent": 1.07
-        },
-        "categoryScores": {
-            "momentum": 55,
-            "trend": 100,
-            "structure": 0,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773071158402-GOLD(XAUT)USDT",
-        "symbol": "GOLD(XAUT)USDT",
-        "score": 50,
-        "price": 5063.8,
-        "regime": "TRANSITION",
-        "rejectReason": "BTC_AMBER (score 50 < 78)",
-        "btcRisk": "AMBER",
-        "timestamp": 1773071158402,
-        "entryMetrics": {
-            "distToEma9": 0.02,
-            "distToEma21": 0.01,
-            "bbPercent": 0.57
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 75,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773072019129-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 51,
-        "price": 9.274,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773072019129,
-        "entryMetrics": {
-            "distToEma9": 0.3,
-            "distToEma21": 0.76,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773072020685-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 61,
-        "price": 1.501,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (61 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773072020685,
-        "entryMetrics": {
-            "distToEma9": 0.25,
-            "distToEma21": 0.53,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 25,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773072024245-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 52,
-        "price": 0.2854,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (52 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773072024245,
-        "entryMetrics": {
-            "distToEma9": 0.05,
-            "distToEma21": -0.05,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773072029630-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 51,
-        "price": 9.274,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773072029630,
-        "entryMetrics": {
-            "distToEma9": 0.3,
-            "distToEma21": 0.76,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773072031039-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 64,
-        "price": 1.501,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (64 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773072031039,
-        "entryMetrics": {
-            "distToEma9": 0.25,
-            "distToEma21": 0.53,
-            "bbPercent": 0.71
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 45,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773072034119-TRXUSDT",
-        "symbol": "TRXUSDT",
-        "score": 52,
-        "price": 0.2854,
-        "regime": "DOWNTREND",
-        "rejectReason": "SCORE (52 < 82)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773072034119,
-        "entryMetrics": {
-            "distToEma9": 0.05,
-            "distToEma21": -0.05,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 80,
-            "structure": 60,
-            "volume": 0,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773072947372-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 66,
-        "price": 9.3,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (66 < 70)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773072947372,
-        "entryMetrics": {
-            "distToEma9": 0.47,
-            "distToEma21": 0.95,
-            "bbPercent": 0.8
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773073879067-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 51,
-        "price": 9.322,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (51 < 70)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773073879067,
-        "entryMetrics": {
-            "distToEma9": 0.56,
-            "distToEma21": 1.08,
-            "bbPercent": 0.85
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 0,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773073889783-SUIUSDT",
-        "symbol": "SUIUSDT",
-        "score": 51,
-        "price": 0.9356,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773073889783,
-        "entryMetrics": {
-            "distToEma9": 0.6,
-            "distToEma21": 1.27,
-            "bbPercent": 0.82
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773074732661-TAOUSDT",
-        "symbol": "TAOUSDT",
-        "score": 59,
-        "price": 194.58,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (59 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773074732661,
-        "entryMetrics": {
-            "distToEma9": -0.44,
-            "distToEma21": -0.54,
-            "bbPercent": 0.26
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 70,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773074734039-AVAXUSDT",
-        "symbol": "AVAXUSDT",
-        "score": 61,
-        "price": 9.299,
-        "regime": "TRENDING",
-        "rejectReason": "SCORE (61 < 70)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773074734039,
-        "entryMetrics": {
-            "distToEma9": 0.25,
-            "distToEma21": 0.75,
-            "bbPercent": 0.75
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773074736627-FILUSDT",
-        "symbol": "FILUSDT",
-        "score": 64,
-        "price": 0.944,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (64 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773074736627,
-        "entryMetrics": {
-            "distToEma9": 0.24,
-            "distToEma21": 0.18,
-            "bbPercent": 0.56
-        },
-        "categoryScores": {
-            "momentum": 30,
-            "trend": 100,
-            "structure": 75,
-            "volume": 20,
-            "patterns": 0
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    },
-    {
-        "id": "shadow-1773075667338-DOTUSDT",
-        "symbol": "DOTUSDT",
-        "score": 51,
-        "price": 1.498,
-        "regime": "TRANSITION",
-        "rejectReason": "SCORE (51 < 75)",
-        "btcRisk": "GREEN",
-        "timestamp": 1773075667338,
-        "entryMetrics": {
-            "distToEma9": -0.12,
-            "distToEma21": 0.14,
-            "bbPercent": 0.55
-        },
-        "categoryScores": {
-            "momentum": 0,
-            "trend": 100,
-            "structure": 60,
-            "volume": 20,
-            "patterns": 50
-        },
-        "priceAfter4h": null,
-        "priceAfter12h": null,
-        "wouldHaveTP": null,
-        "wouldHaveSL": null,
-        "outcome": "PENDING",
-        "archivedAt": null
-    }
+  {
+    "id": "shadow-1773138669277-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 27,
+    "price": 87.08,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 51 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773138669277,
+    "entryMetrics": {
+      "distToEma9": 0.01,
+      "distToEma21": 0.3,
+      "bbPercent": 0.71
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 85.99,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773138672905-LTCUSDT",
+    "symbol": "LTCUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 28,
+    "price": 54.09,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 50 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773138672905,
+    "entryMetrics": {
+      "distToEma9": -0.27,
+      "distToEma21": -0.18,
+      "bbPercent": 0.43
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 25,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 54.09,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773138673939-GOLD(PAXG)USDT",
+    "symbol": "GOLD(PAXG)USDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 5171.74,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 53 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773138673939,
+    "entryMetrics": {
+      "distToEma9": -0.16,
+      "distToEma21": -0.12,
+      "bbPercent": 0.1
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 5213.9,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773138674145-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 0.2852,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 53 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773138674145,
+    "entryMetrics": {
+      "distToEma9": -0.14,
+      "distToEma21": -0.2,
+      "bbPercent": -0.08
+    },
+    "categoryScores": {
+      "momentum": 20,
+      "trend": 80,
+      "structure": 85,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 0.2843,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139542117-SUIUSDT",
+    "symbol": "SUIUSDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 20,
+    "price": 0.9734,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 58 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139542117,
+    "entryMetrics": {
+      "distToEma9": 0.45,
+      "distToEma21": 1.17,
+      "bbPercent": 0.82
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 1.0074,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139543136-TAOUSDT",
+    "symbol": "TAOUSDT",
+    "score": 65,
+    "scoreBeforeMomentum": 65,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 5,
+    "price": 200.46,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 65 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139543136,
+    "entryMetrics": {
+      "distToEma9": 0.07,
+      "distToEma21": 0.44,
+      "bbPercent": 0.71
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 202.28,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139543565-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 19,
+    "price": 0.09497,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 59 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "MEME",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139543565,
+    "entryMetrics": {
+      "distToEma9": 0.58,
+      "distToEma21": 1.55,
+      "bbPercent": 0.83
+    },
+    "categoryScores": {
+      "momentum": 55,
+      "trend": 100,
+      "structure": 40,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 0.09941,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139543944-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 1.4051,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 53 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139543944,
+    "entryMetrics": {
+      "distToEma9": -0.18,
+      "distToEma21": 0.41,
+      "bbPercent": 0.65
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 1.4369,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139546315-ENAUSDT",
+    "symbol": "ENAUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 0.10402,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 53 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139546315,
+    "entryMetrics": {
+      "distToEma9": -0.07,
+      "distToEma21": 0.48,
+      "bbPercent": 0.66
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 0.10644,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139547640-GOLD(XAUT)USDT",
+    "symbol": "GOLD(XAUT)USDT",
+    "score": 61,
+    "scoreBeforeMomentum": 61,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 9,
+    "price": 5132.8,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 61 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139547640,
+    "entryMetrics": {
+      "distToEma9": -0.15,
+      "distToEma21": -0.13,
+      "bbPercent": 0.06
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 5174.1,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139548015-GOLD(PAXG)USDT",
+    "symbol": "GOLD(PAXG)USDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 5167.55,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 54 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139548015,
+    "entryMetrics": {
+      "distToEma9": -0.19,
+      "distToEma21": -0.18,
+      "bbPercent": -0.06
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 5211.52,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773139548209-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 28,
+    "price": 0.2852,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 50 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773139548209,
+    "entryMetrics": {
+      "distToEma9": -0.11,
+      "distToEma21": -0.18,
+      "bbPercent": 0.01
+    },
+    "categoryScores": {
+      "momentum": 20,
+      "trend": 80,
+      "structure": 85,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 0.2847,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773140522718-SUIUSDT",
+    "symbol": "SUIUSDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 0.9772,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 54 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773140522718,
+    "entryMetrics": {
+      "distToEma9": 0.67,
+      "distToEma21": 1.42,
+      "bbPercent": 0.87
+    },
+    "categoryScores": {
+      "momentum": 55,
+      "trend": 100,
+      "structure": 0,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 0.9917,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773140524596-AVAXUSDT",
+    "symbol": "AVAXUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 27,
+    "price": 9.535,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 51 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773140524596,
+    "entryMetrics": {
+      "distToEma9": 0.23,
+      "distToEma21": 0.68,
+      "bbPercent": 0.78
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 9.711,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773140529135-TONUSDT",
+    "symbol": "TONUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 1.337,
+    "regime": "RANGING",
+    "rejectReason": "BTC_AMBER (score 53 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773140529135,
+    "entryMetrics": {
+      "distToEma9": 0,
+      "distToEma21": -0.07,
+      "bbPercent": 0.34
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 1.347,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773140529351-GOLD(PAXG)USDT",
+    "symbol": "GOLD(PAXG)USDT",
+    "score": 66,
+    "scoreBeforeMomentum": 66,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 4,
+    "price": 5181.03,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 66 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773140529351,
+    "entryMetrics": {
+      "distToEma9": 0.05,
+      "distToEma21": 0.07,
+      "bbPercent": 0.56
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 70,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 5226.5,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773141336392-SUIUSDT",
+    "symbol": "SUIUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 0.9739,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 53 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773141336392,
+    "entryMetrics": {
+      "distToEma9": 0.27,
+      "distToEma21": 0.98,
+      "bbPercent": 0.77
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 0.9917,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773141338094-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 26,
+    "price": 0.09518,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 52 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "MEME",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773141338094,
+    "entryMetrics": {
+      "distToEma9": 0.46,
+      "distToEma21": 1.44,
+      "bbPercent": 0.8
+    },
+    "categoryScores": {
+      "momentum": 55,
+      "trend": 100,
+      "structure": 0,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 0.09777,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773141338802-AVAXUSDT",
+    "symbol": "AVAXUSDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 9.529,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 54 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773141338802,
+    "entryMetrics": {
+      "distToEma9": 0.13,
+      "distToEma21": 0.56,
+      "bbPercent": 0.74
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 9.711,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773141344902-GOLD(XAUT)USDT",
+    "symbol": "GOLD(XAUT)USDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 5152.9,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 54 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773141344902,
+    "entryMetrics": {
+      "distToEma9": 0.19,
+      "distToEma21": 0.24,
+      "bbPercent": 0.98
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 5186.2,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773141345560-GOLD(PAXG)USDT",
+    "symbol": "GOLD(PAXG)USDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 12,
+    "price": 5196,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 58 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773141345560,
+    "entryMetrics": {
+      "distToEma9": 0.27,
+      "distToEma21": 0.33,
+      "bbPercent": 1.09
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": 5226.5,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773142216722-TAOUSDT",
+    "symbol": "TAOUSDT",
+    "score": 57,
+    "scoreBeforeMomentum": 57,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 13,
+    "price": 201.16,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 57 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773142216722,
+    "entryMetrics": {
+      "distToEma9": 0.39,
+      "distToEma21": 0.69,
+      "bbPercent": 0.82
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773142217102-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 0.09481,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 54 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "MEME",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773142217102,
+    "entryMetrics": {
+      "distToEma9": 0.06,
+      "distToEma21": 0.95,
+      "bbPercent": 0.71
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773142218391-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 19,
+    "price": 2064.62,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 51 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773142218391,
+    "entryMetrics": {
+      "distToEma9": 0.14,
+      "distToEma21": 0.37,
+      "bbPercent": 0.7
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 40,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773142222082-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 20,
+    "price": 0.2845,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 50 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773142222082,
+    "entryMetrics": {
+      "distToEma9": -0.26,
+      "distToEma21": -0.37,
+      "bbPercent": -0.18
+    },
+    "categoryScores": {
+      "momentum": 35,
+      "trend": 40,
+      "structure": 85,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773143114268-SUIUSDT",
+    "symbol": "SUIUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 0.9706,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 53 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773143114268,
+    "entryMetrics": {
+      "distToEma9": -0.13,
+      "distToEma21": 0.48,
+      "bbPercent": 0.65
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773143115326-TAOUSDT",
+    "symbol": "TAOUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 201.68,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 53 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773143115326,
+    "entryMetrics": {
+      "distToEma9": 0.52,
+      "distToEma21": 0.86,
+      "bbPercent": 0.9
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 0,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773143115776-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 19,
+    "price": 0.09443,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 51 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "MEME",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773143115776,
+    "entryMetrics": {
+      "distToEma9": -0.28,
+      "distToEma21": 0.49,
+      "bbPercent": 0.62
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 25,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773143115969-AVAXUSDT",
+    "symbol": "AVAXUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 9.535,
+    "regime": "TRENDING",
+    "rejectReason": "BTC_AMBER (score 53 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773143115969,
+    "entryMetrics": {
+      "distToEma9": 0.09,
+      "distToEma21": 0.5,
+      "bbPercent": 0.7
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773143118665-LINKUSDT",
+    "symbol": "LINKUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 27,
+    "price": 9.076,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 51 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773143118665,
+    "entryMetrics": {
+      "distToEma9": -0.15,
+      "distToEma21": -0.02,
+      "bbPercent": 0.42
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 20,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773143121376-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "score": 61,
+    "scoreBeforeMomentum": 61,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 9,
+    "price": 0.2841,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 61 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773143121376,
+    "entryMetrics": {
+      "distToEma9": -0.32,
+      "distToEma21": -0.46,
+      "bbPercent": -0.18
+    },
+    "categoryScores": {
+      "momentum": 35,
+      "trend": 80,
+      "structure": 85,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773144069525-AVAXUSDT",
+    "symbol": "AVAXUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 9.493,
+    "regime": "TRENDING",
+    "rejectReason": "SCORE (52 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773144069525,
+    "entryMetrics": {
+      "distToEma9": -0.28,
+      "distToEma21": 0.05,
+      "bbPercent": 0.54
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773144915274-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 0.09465,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773144915274,
+    "entryMetrics": {
+      "distToEma9": 0,
+      "distToEma21": 0.61,
+      "bbPercent": 0.62
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 40,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773144915736-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 86.48,
+    "regime": "TRENDING",
+    "rejectReason": "SCORE (51 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773144915736,
+    "entryMetrics": {
+      "distToEma9": -0.38,
+      "distToEma21": -0.37,
+      "bbPercent": 0.02
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773144916842-ADAUSDT",
+    "symbol": "ADAUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 0.2632,
+    "regime": "TRENDING",
+    "rejectReason": "SCORE (59 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773144916842,
+    "entryMetrics": {
+      "distToEma9": -0.6,
+      "distToEma21": -0.27,
+      "bbPercent": 0.42
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773144918499-DOTUSDT",
+    "symbol": "DOTUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 68,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 1.512,
+    "regime": "RANGING",
+    "rejectReason": "SCORE (51 < 68)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773144918499,
+    "entryMetrics": {
+      "distToEma9": -0.46,
+      "distToEma21": -0.59,
+      "bbPercent": 0.02
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 85,
+      "volume": 20,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773146726066-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 0.09487,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (50 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773146726066,
+    "entryMetrics": {
+      "distToEma9": 0.22,
+      "distToEma21": 0.74,
+      "bbPercent": 0.65
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773146727391-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 61,
+    "scoreBeforeMomentum": 61,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 14,
+    "price": 2050.35,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (61 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773146727391,
+    "entryMetrics": {
+      "distToEma9": -0.34,
+      "distToEma21": -0.31,
+      "bbPercent": 0.01
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 45,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773147620645-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 21,
+    "price": 2049.79,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (54 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773147620645,
+    "entryMetrics": {
+      "distToEma9": -0.3,
+      "distToEma21": -0.31,
+      "bbPercent": 0
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 0,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773147621439-MBGUSDT",
+    "symbol": "MBGUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 0.3283,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (59 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773147621439,
+    "entryMetrics": {
+      "distToEma9": -0.19,
+      "distToEma21": -0.68,
+      "bbPercent": 0.24
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773147623332-BCHUSDT",
+    "symbol": "BCHUSDT",
+    "score": 55,
+    "scoreBeforeMomentum": 55,
+    "momentumAdjustment": 0,
+    "requiredScore": 68,
+    "requiredStrongCategories": null,
+    "scoreGap": 13,
+    "price": 449.1,
+    "regime": "RANGING",
+    "rejectReason": "SCORE (55 < 68)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773147623332,
+    "entryMetrics": {
+      "distToEma9": 0.31,
+      "distToEma21": 0.3,
+      "bbPercent": 0.67
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 75,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148511793-XLMUSDT",
+    "symbol": "XLMUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 0.1615,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148511793,
+    "entryMetrics": {
+      "distToEma9": 0.41,
+      "distToEma21": 0.99,
+      "bbPercent": 0.7
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148513689-ADAUSDT",
+    "symbol": "ADAUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 0.2661,
+    "regime": "TRENDING",
+    "rejectReason": "SCORE (51 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148513689,
+    "entryMetrics": {
+      "distToEma9": 0.56,
+      "distToEma21": 0.77,
+      "bbPercent": 0.69
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 40,
+      "volume": 20,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148513898-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 2054.86,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (52 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148513898,
+    "entryMetrics": {
+      "distToEma9": -0.04,
+      "distToEma21": -0.05,
+      "bbPercent": 0.25
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 100
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148514126-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 1.3967,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (50 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148514126,
+    "entryMetrics": {
+      "distToEma9": 0.27,
+      "distToEma21": 0.15,
+      "bbPercent": 0.41
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148514713-TRUMPUSDT",
+    "symbol": "TRUMPUSDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 2.92,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (58 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148514713,
+    "entryMetrics": {
+      "distToEma9": 0.49,
+      "distToEma21": 0.43,
+      "bbPercent": 0.7
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148524802-ADAUSDT",
+    "symbol": "ADAUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 0.2661,
+    "regime": "TRENDING",
+    "rejectReason": "SCORE (51 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148524802,
+    "entryMetrics": {
+      "distToEma9": 0.56,
+      "distToEma21": 0.77,
+      "bbPercent": 0.69
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 40,
+      "volume": 20,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148524976-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 2054.86,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (52 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148524976,
+    "entryMetrics": {
+      "distToEma9": -0.04,
+      "distToEma21": -0.05,
+      "bbPercent": 0.25
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 100
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148525145-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 1.3967,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148525145,
+    "entryMetrics": {
+      "distToEma9": 0.27,
+      "distToEma21": 0.15,
+      "bbPercent": 0.41
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773148525673-TRUMPUSDT",
+    "symbol": "TRUMPUSDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 2.92,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (58 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773148525673,
+    "entryMetrics": {
+      "distToEma9": 0.49,
+      "distToEma21": 0.43,
+      "bbPercent": 0.7
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773149476061-FILUSDT",
+    "symbol": "FILUSDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 0.9363,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (58 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773149476061,
+    "entryMetrics": {
+      "distToEma9": 0.23,
+      "distToEma21": 0.11,
+      "bbPercent": 0.51
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 75,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773149476933-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 1.3999,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773149476933,
+    "entryMetrics": {
+      "distToEma9": 0.4,
+      "distToEma21": 0.34,
+      "bbPercent": 0.47
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150358583-SUIUSDT",
+    "symbol": "SUIUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 0.9699,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (59 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150358583,
+    "entryMetrics": {
+      "distToEma9": -0.3,
+      "distToEma21": 0.06,
+      "bbPercent": 0.4
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150358799-TAOUSDT",
+    "symbol": "TAOUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 198.27,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (59 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150358799,
+    "entryMetrics": {
+      "distToEma9": -0.78,
+      "distToEma21": -0.81,
+      "bbPercent": -0.05
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150359458-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 69930.13,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150359458,
+    "entryMetrics": {
+      "distToEma9": -0.81,
+      "distToEma21": -0.86,
+      "bbPercent": -0.18
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 60,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150360053-ADAUSDT",
+    "symbol": "ADAUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 0.2629,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (59 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150360053,
+    "entryMetrics": {
+      "distToEma9": -0.62,
+      "distToEma21": -0.47,
+      "bbPercent": 0.17
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150360899-TRUMPUSDT",
+    "symbol": "TRUMPUSDT",
+    "score": 60,
+    "scoreBeforeMomentum": 60,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 15,
+    "price": 2.902,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (60 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150360899,
+    "entryMetrics": {
+      "distToEma9": -0.14,
+      "distToEma21": -0.18,
+      "bbPercent": 0.37
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150361363-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 86.13,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (59 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150361363,
+    "entryMetrics": {
+      "distToEma9": -0.66,
+      "distToEma21": -0.71,
+      "bbPercent": -0.1
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150361771-AVAXUSDT",
+    "symbol": "AVAXUSDT",
+    "score": 65,
+    "scoreBeforeMomentum": 65,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 10,
+    "price": 9.377,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (65 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150361771,
+    "entryMetrics": {
+      "distToEma9": -0.74,
+      "distToEma21": -0.87,
+      "bbPercent": -0.01
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150361995-LINKUSDT",
+    "symbol": "LINKUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 8.975,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150361995,
+    "entryMetrics": {
+      "distToEma9": -0.76,
+      "distToEma21": -0.91,
+      "bbPercent": -0.19
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 60,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150362201-UNIUSDT",
+    "symbol": "UNIUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 3.882,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (59 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150362201,
+    "entryMetrics": {
+      "distToEma9": -0.92,
+      "distToEma21": -1.23,
+      "bbPercent": -0.09
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150363763-BCHUSDT",
+    "symbol": "BCHUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 448.4,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (50 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150363763,
+    "entryMetrics": {
+      "distToEma9": -0.02,
+      "distToEma21": 0.06,
+      "bbPercent": 0.5
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 25,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773150364448-LTCUSDT",
+    "symbol": "LTCUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 54.04,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773150364448,
+    "entryMetrics": {
+      "distToEma9": -0.19,
+      "distToEma21": -0.2,
+      "bbPercent": 0.25
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 60,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151254474-SUIUSDT",
+    "symbol": "SUIUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 0.9721,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (52 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151254474,
+    "entryMetrics": {
+      "distToEma9": -0.06,
+      "distToEma21": 0.27,
+      "bbPercent": 0.49
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151254669-TAOUSDT",
+    "symbol": "TAOUSDT",
+    "score": 55,
+    "scoreBeforeMomentum": 55,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 20,
+    "price": 199.14,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (55 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151254669,
+    "entryMetrics": {
+      "distToEma9": -0.28,
+      "distToEma21": -0.34,
+      "bbPercent": 0.2
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 50
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151256108-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 65,
+    "scoreBeforeMomentum": 65,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 10,
+    "price": 2033.54,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (65 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151256108,
+    "entryMetrics": {
+      "distToEma9": -0.67,
+      "distToEma21": -0.89,
+      "bbPercent": -0.09
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151257343-AVAXUSDT",
+    "symbol": "AVAXUSDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 21,
+    "price": 9.376,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (54 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151257343,
+    "entryMetrics": {
+      "distToEma9": -0.6,
+      "distToEma21": -0.81,
+      "bbPercent": 0.03
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 20,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151257537-LINKUSDT",
+    "symbol": "LINKUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 8.965,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (52 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151257537,
+    "entryMetrics": {
+      "distToEma9": -0.7,
+      "distToEma21": -0.93,
+      "bbPercent": -0.1
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 85,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151257738-UNIUSDT",
+    "symbol": "UNIUSDT",
+    "score": 56,
+    "scoreBeforeMomentum": 56,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 19,
+    "price": 3.871,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (56 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151257738,
+    "entryMetrics": {
+      "distToEma9": -0.96,
+      "distToEma21": -1.37,
+      "bbPercent": -0.07
+    },
+    "categoryScores": {
+      "momentum": 35,
+      "trend": 60,
+      "structure": 85,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151258661-GOLD(XAUT)USDT",
+    "symbol": "GOLD(XAUT)USDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 21,
+    "price": 5168.2,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (54 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151258661,
+    "entryMetrics": {
+      "distToEma9": 0.14,
+      "distToEma21": 0.31,
+      "bbPercent": 0.86
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773151259922-LTCUSDT",
+    "symbol": "LTCUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 54.05,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773151259922,
+    "entryMetrics": {
+      "distToEma9": -0.14,
+      "distToEma21": -0.16,
+      "bbPercent": 0.28
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 60,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152118161-XLMUSDT",
+    "symbol": "XLMUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 29,
+    "price": 0.1594,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (53 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152118161,
+    "entryMetrics": {
+      "distToEma9": -0.74,
+      "distToEma21": -0.44,
+      "bbPercent": -0.08
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 65,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152118770-TAOUSDT",
+    "symbol": "TAOUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 196.3,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (59 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152118770,
+    "entryMetrics": {
+      "distToEma9": -1.37,
+      "distToEma21": -1.61,
+      "bbPercent": -0.28
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152120382-ADAUSDT",
+    "symbol": "ADAUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 30,
+    "price": 0.2618,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (52 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152120382,
+    "entryMetrics": {
+      "distToEma9": -0.78,
+      "distToEma21": -0.79,
+      "bbPercent": -0.02
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 85,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152121804-AVAXUSDT",
+    "symbol": "AVAXUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 9.329,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (59 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152121804,
+    "entryMetrics": {
+      "distToEma9": -0.88,
+      "distToEma21": -1.19,
+      "bbPercent": -0.05
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152121991-UNIUSDT",
+    "symbol": "UNIUSDT",
+    "score": 63,
+    "scoreBeforeMomentum": 63,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 12,
+    "price": 3.852,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (63 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152121991,
+    "entryMetrics": {
+      "distToEma9": -1.16,
+      "distToEma21": -1.69,
+      "bbPercent": -0.09
+    },
+    "categoryScores": {
+      "momentum": 35,
+      "trend": 100,
+      "structure": 65,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152122199-LINKUSDT",
+    "symbol": "LINKUSDT",
+    "score": 62,
+    "scoreBeforeMomentum": 62,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 13,
+    "price": 8.888,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (62 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152122199,
+    "entryMetrics": {
+      "distToEma9": -1.25,
+      "distToEma21": -1.62,
+      "bbPercent": -0.23
+    },
+    "categoryScores": {
+      "momentum": 35,
+      "trend": 80,
+      "structure": 85,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152122596-DOTUSDT",
+    "symbol": "DOTUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 1.5,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152122596,
+    "entryMetrics": {
+      "distToEma9": -0.67,
+      "distToEma21": -0.98,
+      "bbPercent": 0
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 60,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773152122974-GOLD(XAUT)USDT",
+    "symbol": "GOLD(XAUT)USDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 22,
+    "price": 5160,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (53 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773152122974,
+    "entryMetrics": {
+      "distToEma9": -0.02,
+      "distToEma21": 0.14,
+      "bbPercent": 0.69
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773153090421-XLMUSDT",
+    "symbol": "XLMUSDT",
+    "score": 52,
+    "scoreBeforeMomentum": 52,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 30,
+    "price": 0.1603,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (52 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773153090421,
+    "entryMetrics": {
+      "distToEma9": -0.14,
+      "distToEma21": 0.11,
+      "bbPercent": 0.27
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773153092831-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 65,
+    "scoreBeforeMomentum": 65,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 2024.9,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (65 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773153092831,
+    "entryMetrics": {
+      "distToEma9": -0.62,
+      "distToEma21": -1.04,
+      "bbPercent": 0.02
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773153103750-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 23,
+    "price": 2024.9,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (59 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773153103750,
+    "entryMetrics": {
+      "distToEma9": -0.62,
+      "distToEma21": -1.04,
+      "bbPercent": 0.02
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773153106303-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "score": 59,
+    "scoreBeforeMomentum": 59,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 641.64,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (59 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773153106303,
+    "entryMetrics": {
+      "distToEma9": -0.29,
+      "distToEma21": -0.47,
+      "bbPercent": 0.06
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773153919323-MBGUSDT",
+    "symbol": "MBGUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 0.3239,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (51 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773153919323,
+    "entryMetrics": {
+      "distToEma9": -0.82,
+      "distToEma21": -1.38,
+      "bbPercent": 0.04
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 85,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773153920347-UNIUSDT",
+    "symbol": "UNIUSDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 82,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 3.915,
+    "regime": "DOWNTREND",
+    "rejectReason": "SCORE (58 < 82)",
+    "btcRisk": "GREEN",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773153920347,
+    "entryMetrics": {
+      "distToEma9": 0.42,
+      "distToEma21": 0,
+      "bbPercent": 0.44
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 100,
+      "structure": 75,
+      "volume": 25,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773153921210-DOTUSDT",
+    "symbol": "DOTUSDT",
+    "score": 51,
+    "scoreBeforeMomentum": 51,
+    "momentumAdjustment": 0,
+    "requiredScore": 75,
+    "requiredStrongCategories": null,
+    "scoreGap": 24,
+    "price": 1.522,
+    "regime": "TRANSITION",
+    "rejectReason": "SCORE (51 < 75)",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773153921210,
+    "entryMetrics": {
+      "distToEma9": 0.63,
+      "distToEma21": 0.46,
+      "bbPercent": 0.72
+    },
+    "categoryScores": {
+      "momentum": 0,
+      "trend": 80,
+      "structure": 60,
+      "volume": 45,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773154850980-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 17,
+    "price": 71428.19,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 53 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773154850980,
+    "entryMetrics": {
+      "distToEma9": 1.4,
+      "distToEma21": 1.4,
+      "bbPercent": 1.04
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 0,
+      "volume": 70,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773154851747-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 20,
+    "price": 88.1,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 50 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773154851747,
+    "entryMetrics": {
+      "distToEma9": 1.66,
+      "distToEma21": 1.68,
+      "bbPercent": 1.1
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 0,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773154852502-UNIUSDT",
+    "symbol": "UNIUSDT",
+    "score": 60,
+    "scoreBeforeMomentum": 60,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 10,
+    "price": 3.972,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 60 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773154852502,
+    "entryMetrics": {
+      "distToEma9": 1.5,
+      "distToEma21": 1.32,
+      "bbPercent": 0.94
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773154852688-LINKUSDT",
+    "symbol": "LINKUSDT",
+    "score": 50,
+    "scoreBeforeMomentum": 50,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 20,
+    "price": 9.147,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 50 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773154852688,
+    "entryMetrics": {
+      "distToEma9": 1.34,
+      "distToEma21": 1.22,
+      "bbPercent": 0.92
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 0,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773154853654-GOLD(XAUT)USDT",
+    "symbol": "GOLD(XAUT)USDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 20,
+    "price": 5174.2,
+    "regime": "TRANSITION",
+    "rejectReason": "BTC_AMBER (score 58 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773154853654,
+    "entryMetrics": {
+      "distToEma9": 0.14,
+      "distToEma21": 0.32,
+      "bbPercent": 0.83
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155758470-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "score": 55,
+    "scoreBeforeMomentum": 55,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 15,
+    "price": 1.4267,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 55 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155758470,
+    "entryMetrics": {
+      "distToEma9": 1.22,
+      "distToEma21": 1.75,
+      "bbPercent": 1.01
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155759105-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "score": 55,
+    "scoreBeforeMomentum": 55,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 15,
+    "price": 71211.94,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 55 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155759105,
+    "entryMetrics": {
+      "distToEma9": 0.88,
+      "distToEma21": 0.99,
+      "bbPercent": 0.89
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155759491-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 55,
+    "scoreBeforeMomentum": 55,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 15,
+    "price": 2068.39,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 55 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155759491,
+    "entryMetrics": {
+      "distToEma9": 0.86,
+      "distToEma21": 0.87,
+      "bbPercent": 0.77
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155759685-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "score": 55,
+    "scoreBeforeMomentum": 55,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 15,
+    "price": 87.6,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 55 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155759685,
+    "entryMetrics": {
+      "distToEma9": 0.86,
+      "distToEma21": 1,
+      "bbPercent": 0.86
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155760808-DOTUSDT",
+    "symbol": "DOTUSDT",
+    "score": 54,
+    "scoreBeforeMomentum": 54,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 16,
+    "price": 1.532,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 54 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155760808,
+    "entryMetrics": {
+      "distToEma9": 0.76,
+      "distToEma21": 0.89,
+      "bbPercent": 0.96
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 80,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155761239-LINKUSDT",
+    "symbol": "LINKUSDT",
+    "score": 55,
+    "scoreBeforeMomentum": 55,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 15,
+    "price": 9.109,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 55 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155761239,
+    "entryMetrics": {
+      "distToEma9": 0.73,
+      "distToEma21": 0.73,
+      "bbPercent": 0.76
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 40,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155761422-UNIUSDT",
+    "symbol": "UNIUSDT",
+    "score": 60,
+    "scoreBeforeMomentum": 60,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "scoreGap": 10,
+    "price": 3.949,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 60 < 70)",
+    "btcRisk": "AMBER",
+    "sector": "DEFI",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155761422,
+    "entryMetrics": {
+      "distToEma9": 0.73,
+      "distToEma21": 0.66,
+      "bbPercent": 0.74
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 50,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155762156-GOLD(XAUT)USDT",
+    "symbol": "GOLD(XAUT)USDT",
+    "score": 58,
+    "scoreBeforeMomentum": 58,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 20,
+    "price": 5187.4,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 58 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155762156,
+    "entryMetrics": {
+      "distToEma9": 0.32,
+      "distToEma21": 0.52,
+      "bbPercent": 0.97
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1773155762336-GOLD(PAXG)USDT",
+    "symbol": "GOLD(PAXG)USDT",
+    "score": 53,
+    "scoreBeforeMomentum": 53,
+    "momentumAdjustment": 0,
+    "requiredScore": 78,
+    "requiredStrongCategories": null,
+    "scoreGap": 25,
+    "price": 5227.15,
+    "regime": "HIGH_VOLATILITY",
+    "rejectReason": "BTC_AMBER (score 53 < 78)",
+    "btcRisk": "AMBER",
+    "sector": "OTHER",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "timestamp": 1773155762336,
+    "entryMetrics": {
+      "distToEma9": 0.32,
+      "distToEma21": 0.52,
+      "bbPercent": 0.95
+    },
+    "categoryScores": {
+      "momentum": 30,
+      "trend": 100,
+      "structure": 60,
+      "volume": 0,
+      "patterns": 0
+    },
+    "shadowBenchmark": {
+      "version": "v1.5-1.2-audited",
+      "tpPct": 0.015,
+      "slPct": 0.012
+    },
+    "priceAfter4h": null,
+    "priceAfter12h": null,
+    "wouldHaveTP": null,
+    "wouldHaveSL": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  }
 ]
