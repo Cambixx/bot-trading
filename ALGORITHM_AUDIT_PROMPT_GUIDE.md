@@ -20,6 +20,13 @@ Antes de iniciar el chat de auditoría, asegúrate de tener **descargados y actu
 | `ALGO_DOCUMENTATION.md` | 🟡 RECOMENDADO | Si se van a cambiar parámetros, se necesita para actualizarlo con los cambios |
 | `scheduled-analysis.js` | 🟡 RECOMENDADO | Solo si se detectan bugs o se propone cambio de código |
 
+### 🛠️ Automatización de la descarga
+Para agilizar este paso, puedes usar el comando:
+```bash
+npm run sync
+```
+Este comando descarga automáticamente todos los archivos necesarios desde Netlify Blobs a tu directorio local, asegurando que trabajas con los datos más frescos.
+
 ### Nota importante sobre Shadow Trading
 
 - `shadow_trades_archive.json` debe usarse como base del análisis histórico del self-learning.

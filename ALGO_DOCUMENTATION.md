@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v6.0.3 Self-Learn)
+# 🦅 Documentación del Algoritmo de Trading (v7.0 Alpha Gen)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -31,6 +31,7 @@ El puntaje final (0–100) utiliza pesos fijos y una validación binaria final (
 | **Structure** | 25% | Order Blocks (OB), Fair Value Gaps (FVG), BB%, MSS, Sweep |
 | **Volume** | 15% | Volume ratio vs SMA20, Delta (taker flow), OBI |
 | **Patterns** | 5% | Candlestick patterns, divergencias RSI |
+| **Alpha (RS)** | Bonus | **Relative Strength vs BTC** (Desacoplamiento) |
 
 ### Bonus de Score
 - SOTT value > 0.5 → **+5 pts**
@@ -41,6 +42,12 @@ El puntaje final (0–100) utiliza pesos fijos y una validación binaria final (
 El sistema rastrea los scores de un símbolo en los últimos ciclos (Signal Memory):
 - **Momentum Alcista Sano:** (el score sube progresivamente en ciclos consecutivos) → **+3 pts**
 - **Spike Sospechoso:** (el score salta abruptamente de 0 o muy bajo a > 70 en un ciclo) → **-5 pts**
+
+### 🚀 Alpha & Relative Strength (v7.0)
+El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h y 1h.
+- **Outperforming BTC (>2.0%):** **+8 pts** al Score final.
+- **Outperforming BTC (>1.0%):** **+4 pts** al Score final.
+- **Alpha Signal:** Si un token tiene RS positiva fuerte, el bot **suaviza los umbrales de BTC-SEM** y regímenes, permitiendo operar activos desacoplados en mercados bajistas.
 
 ---
 
@@ -60,11 +67,13 @@ El sistema rastrea los scores de un símbolo en los últimos ciclos (Signal Memo
 
 | Régimen | Score Mínimo | Estrategia | Size Sugerido |
 |---------|-------------|------------|---------------|
-| **RANGING** | 68 | Mean reversion — comprar en soporte, vender en resistencia | 1.0% – 4.0% |
-| **TRENDING** | 75 | Solo pullbacks a EMA21/50 — no perseguir rupturas | 1.5% – 6.0% |
-| **HIGH_VOLATILITY** | 80 | Estructura obligatoria (MSS o Sweep) — size reducido | 0.8% – 3.5% |
-| **TRANSITION** | 75 | Alta selectividad con **suelo duro**; SOTT ya no rebaja este umbral | 1.0% – 4.0% |
-| **DOWNTREND** | 82 | Solo bounce con score > 82 y confluencia extrema | 0.5% – 2.0% |
+| **RANGING** | 65 | Mean reversion — optimizado en v7.0 | 1.5% – 5.0% |
+| **TRENDING** | 72 | Pullbacks dinámicos; Alpha reduce threshold a 65 | 2.5% – 7.0% |
+| **HIGH_VOLATILITY** | 78 | Estructura obligatoria — size defensivo | 1.0% – 4.0% |
+| **TRANSITION** | 70 - 75 | El umbral baja a 70 si el token tiene Alpha fuerte | 1.5% – 5.0% |
+| **DOWNTREND** | 72 - 80 | Solo RS positiva o rebote extremo | 0.8% – 3.0% |
+
+> **Nota v7.0:** Se han relajado los umbrales estáticos para priorizar el **Desacoplamiento (Alpha)**. Un token que sube con BTC bajando es ahora la señal de mayor prioridad del sistema.
 
 > **Nota v6.0.3:** El umbral de `TRANSITION` se mantiene en **75 real**. Los bonus de SOTT pueden elevar el score final, pero ya no reducen el gate mínimo del régimen. Se mantiene el BB% Hard Filter (>0.92 → REJECT).
 
@@ -89,12 +98,10 @@ El sistema rastrea los scores de un símbolo en los últimos ciclos (Signal Memo
 - **Auto-Expiración:** Trades abiertos más de 48h se marcan como EXPIRED.
 - **Cooldown:** 4 horas entre señales del mismo par (configurable con `ALERT_COOLDOWN_MIN`).
 - **Break-Even:** ❌ **ELIMINADO en v5.2** — los trades cierran solo en TP (WIN) o SL (LOSS).
-- **BTC-SEM Filter:**
-  - RED → Score mínimo 88 para pasar
-  - AMBER → Score mínimo 70-78 (dependiendo del momentum)
-  - GREEN → Umbral normal por régimen
-
-  - GREEN → Umbral normal por régimen
+- **BTC-SEM Filter (v7.0 Decoupled):**
+  - **RED** → Score $\geq$ 88. Pero si el token tiene **Alpha fuerte (RS)**, el umbral baja a **78**.
+  - **AMBER** → Score $\geq$ 75. Pero si el token tiene **Alpha**, el umbral baja a **68**.
+  - **GREEN** → Umbral normal por régimen.
 
 ---
 
@@ -106,9 +113,9 @@ El bot no solo emite señales, sino que **aprende** monitoreando continuamente s
 Si una señal logra un score $\geq$ 50 pero es rechazada en la fase final (por un filtro de BTC, score menor al umbral de régimen, o falta de categorías fuertes), se guarda como un *near-miss* (casi acierto). En análisis posteriores, el bot rastrea qué hubiera pasado (WOULD_WIN o WOULD_LOSE) para decirnos qué filtros nos están quitando trades ganadores.
 
 - **Shadow Activo:** mantiene una ventana reciente y ligera para evaluación operativa del runtime.
-- **Shadow Histórico (v6.0.2):** cada near-miss resuelto o expirado se archiva de forma permanente en un store separado. Esto evita perder histórico por el límite operativo del shadow activo o por la limpieza de 48h.
-- **Benchmark Persistido (v6.0.3):** cada near-miss guarda el benchmark con el que fue evaluado (`TP +1.5% / SL -1.2%`) y flags `wouldHaveTP` / `wouldHaveSL`.
-- **Correlación Auditada (v6.0.3):** una señal válida bloqueada por correlación sectorial ya no desaparece; entra al shadow como `SECTOR_CORRELATION`.
+- **Shadow Histórico (v6.0.2):** cada near-miss resuelto o expirado se archiva de forma permanente en un store separado.
+- **Benchmark Persistido (v6.0.3):** cada near-miss guarda el benchmark con el que fue evaluado.
+- **Resolución Hifi (v7.0):** El bot ya no usa "checkpoints" de precio fijos. Ahora descarga el historial de velas de 15m para simular el path exacto del precio y resolver TP/SL con precisión real de exchange.
 
 ### 2. Signal Memory (Momentum Cross-Cycle)
 El algoritmo rompe la limitación de la falta de estado (statelessness). Guarda los puntajes de los activos ciclo tras ciclo. En el momento de calificar, lee este historial y aplica los **Ajustes de Momentum (+3 ó -5 puntos)** descritos en la sección de Scoring.
@@ -183,7 +190,29 @@ Solo disponibles para el ADMIN configurado:
 
 ---
 
+---
+
+## 8.5. Herramientas de Desarrollo y Diagnóstico Local
+
+Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los ciclos de 15 minutos de Netlify, se han implementado herramientas locales:
+
+| Comando | Script | Propósito |
+|---------|--------|-----------|
+| `npm run sync` | `sync-blobs.js` | Descarga los archivos JSON (history, shadow, logs, etc.) desde Netlify Blobs a local. |
+| `npm run scan` | `manual-run.js` | Ejecuta el algoritmo v7.0 localmente usando los datos más recientes de la API de MEXC. Útil para verificar señales en tiempo real. |
+
+> 💡 **Tip:** Usa `npm run sync` antes de una auditoría para asegurarte de que tus archivos locales coinciden con la realidad de producción.
+
+---
+
 ## 9. Historial de Versiones (Changelog)
+
+### v7.0 — Alpha Generation (Mar 10, 2026) - ACTUAL
+- **Relative Strength (RS) Index:** Nuevo cálculo de fuerza relativa vs BTC incorporado en el scoring.
+- **Decoupled BTC Filters:** Los umbrales de BTC RED/AMBER ahora son dinámicos. Los activos que demuestran "Alpha" (desacoplamiento) pueden emitir señales en mercados bajistas con umbrales reducidos.
+- **Hifi Shadow Engine:** Resolución de shadow trades mediante análisis de historial de velas de 15m (simulación de path real).
+- **Ajuste de Throughput:** Relajación de umbrales estáticos en todos los regímenes para aumentar la frecuencia de señales de alta calidad.
+- **Smart Selection v7.0:** El scanner de activos ahora prioriza tokens por RS24h sobre el volumen bruto.
 
 ### v6.0.3 — Audit Traceability (Mar 09, 2026)
 - **Sector gate refinado:** `OTHER` deja de bloquear señales por correlación; solo se protegen sectores clasificados explícitamente.
@@ -255,4 +284,4 @@ Solo disponibles para el ADMIN configurado:
 
 ---
 
-**Documentación actualizada a v6.0.3 — 9 Marzo 2026**
+**Documentación actualizada a v7.0 — 10 Marzo 2026**
