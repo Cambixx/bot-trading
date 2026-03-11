@@ -6,30 +6,30 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v6.0.3 (Active)
-**Date:** Mar 9, 2026
-**Theme:** "AUDIT TRACEABILITY" (Menos ceguera operativa, menos throttling artificial)
+## Current Version: v7.1.0 (Active)
+**Date:** Mar 11, 2026
+**Theme:** "CAPITULATION SCALPING" (Desbloqueo de rebotes)
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v6.0.3-SelfLearn`.
-- **Sector Correlation Filter:** [Refinado] solo protege sectores clasificados explícitamente. `OTHER` ya no actúa como pseudo-sector global.
-- **Shadow Benchmark:** [Clarificado] benchmark fijo auditado `TP +1.5% / SL -1.2%` persistido por entrada para evitar ambigüedad futura.
-- **Shadow de Correlación:** [Nuevo] señales válidas bloqueadas por correlación sectorial se guardan como near-miss con `SECTOR_CORRELATION`.
-- **Momentum Traceability:** [Nuevo] `scoreBeforeMomentum` y `momentumAdjustment` se persisten en señales, shadow y autopsias.
-- **TRANSITION Threshold:** [Mantener] **75 fijo**. Ya no puede bajar por `requirementsReduction` / SOTT.
+- **Runtime Version:** `v7.1.0-SelfLearn`.
+- **Capitulation Bounce [Nuevo]:** Si BTC-SEM es GREEN y RSI4H BTC < 40 + estructura confirmada (MSS o Sweep), los threshold de `DOWNTREND` y `TRANSITION` se relajan agresivamente a 60 y 55.
+- **Baseline Relax [Refinado]:** El suelo duro de 75 en `TRANSITION` fue revertido. Ahora el score base es 65 (ó 60 si hay Alpha Signal) para permitir rebotes que han demostrado históricamente >55% WR en los reportes de Shadow.
 
 ### Hypothesis / Goal:
-La auditoría del 9-Mar detectó dos fallos prácticos. Primero, el filtro sectorial estaba tratando `OTHER` como un sector único, ahogando throughput real y escondiendo setups válidos detrás de un throttle artificial. Segundo, el shadow y el ajuste de momentum seguían siendo parcialmente opacos: el benchmark efectivo no quedaba persistido y el impacto de `+3 / -5` no quedaba trazado en history/autopsy/shadow. v6.0.3 corrige ambos puntos sin relajar el hard lock de `TRANSITION`.
+La auditoría del 11-Mar demostró que el Hard Lock de 75 en `TRANSITION` estaba ahogando el throughput. Los trades rechazados con scores bajos (55-65) en TRANSITION/DOWNTREND tenían altísimos retornos porque eran entradas frescas tras un sweep. Exigir >75 en este entorno nos forzaba a entrar tarde ("buy the top"), de ahí que los únicos dos trades tomados tuvieran 0% favorable move antes de rebotar hacia Stop Loss. Esta versión pretende exprimir las caídas bruscas mientras la macro (BTC verde) lo justifique.
 
-### Bugs Found:
-- **Throttle artificial en `OTHER`:** múltiples símbolos no correlacionados quedaban bloqueados como si compartieran el mismo sector.
-- **Benchmark shadow implícito:** el runtime resolvía near-misses con `+1.5% / -1.2%`, pero esa referencia no quedaba persistida dentro de cada entrada.
-- **Momentum no auditable:** el efecto del ajuste `+3 / -5` no quedaba guardado en history, shadow ni autopsies.
-- **Correlación no medible:** una señal válida bloqueada por correlación no dejaba rastro estructurado en shadow.
+### Bugs Found / Fixes:
+- **Sobrerestricción:** Hard lock en TRANSITION causaba late entries. Corregido ajustando base de 75 a 65 y añadiendo el "Capitulation Bounce Mode".
 
 ---
 
 ## Past Versions (Audit History)
+
+### v6.0.3 (AUDIT TRACEABILITY / v7.0 Alpha Gen)
+- **Status:** Superseded by v7.1.0 (Mar 11, 2026)
+- **Runtime Version:** `v6.0.3-SelfLearn` (Conocida luego como v7.0).
+- **Key Change:** Sector correlation mitigations and initial Alpha Gen metrics.
+- **Observation:** El sistema ganaba trazabilidad y detectaba correlación, pero seguía asfixiado por el threshold de 75 en `TRANSITION` y `DOWNTREND`. La muestra de trades reales cayó a 2 (0% WR) a pesar de un mercado fuertemente rebotador detectado por el shadow trading (98% WR en ventana activa).
 
 ### v6.0.2 (SHADOW ARCHIVE)
 - **Status:** Superseded by v6.0.3 (Mar 9, 2026)

@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v7.0 Alpha Gen)
+# 🦅 Documentación del Algoritmo de Trading (v7.1.0 Capitulation Scalping)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -63,19 +63,17 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 
 ---
 
-## 4. Regímenes de Mercado y Umbrales (v6.0.3 — activo)
+## 4. Regímenes de Mercado y Umbrales (v7.1.0 — activo)
 
 | Régimen | Score Mínimo | Estrategia | Size Sugerido |
 |---------|-------------|------------|---------------|
-| **RANGING** | 65 | Mean reversion — optimizado en v7.0 | 1.5% – 5.0% |
-| **TRENDING** | 72 | Pullbacks dinámicos; Alpha reduce threshold a 65 | 2.5% – 7.0% |
-| **HIGH_VOLATILITY** | 78 | Estructura obligatoria — size defensivo | 1.0% – 4.0% |
-| **TRANSITION** | 70 - 75 | El umbral baja a 70 si el token tiene Alpha fuerte | 1.5% – 5.0% |
-| **DOWNTREND** | 72 - 80 | Solo RS positiva o rebote extremo | 0.8% – 3.0% |
+| **RANGING** | 60 | Mean reversion — optimizado en v7.0 | 1.5% – 5.0% |
+| **TRENDING** | 65 | Pullbacks dinámicos; Alpha reduce threshold a 60 | 2.5% – 7.0% |
+| **HIGH_VOLATILITY** | 70 | Estructura obligatoria — size defensivo | 1.0% – 4.0% |
+| **TRANSITION** | 65 | Alpha baja a 60. Capitulation Bounce baja a 55 | 1.5% – 5.0% |
+| **DOWNTREND** | 68 - 75 | Alpha baja a 68. Capitulation Bounce baja a 60 | 0.8% – 3.0% |
 
-> **Nota v7.0:** Se han relajado los umbrales estáticos para priorizar el **Desacoplamiento (Alpha)**. Un token que sube con BTC bajando es ahora la señal de mayor prioridad del sistema.
-
-> **Nota v6.0.3:** El umbral de `TRANSITION` se mantiene en **75 real**. Los bonus de SOTT pueden elevar el score final, pero ya no reducen el gate mínimo del régimen. Se mantiene el BB% Hard Filter (>0.92 → REJECT).
+> **Nota v7.1.0:** Se relajan MASIVAMENTE los umbrales de score. Análisis de shadow trading probó que exigir >75 forzaba a atrapar techos (fake breakouts) en el mercado de retrocesos violentos. Se introdujo la **Capitulation Bounce Strategy**: si BTC está en status GREEN pero su RSI 4h < 40 y el token tiene estructura validada, el umbral de entrada rompe todas las barreras y cae a 55-60. 
 
 ---
 
@@ -207,7 +205,12 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ## 9. Historial de Versiones (Changelog)
 
-### v7.0 — Alpha Generation (Mar 10, 2026) - ACTUAL
+### v7.1.0 — Capitulation Scalping (Mar 11, 2026) - ACTUAL
+- **Capitulation Bounce Mode:** Cuando BTC es GREEN pero el RSI 4h de BTC < 40, se desbloquean los umbrales mínimos a niveles ultra-agresivos (55-60) siempre que el token muestre MSS o Sweep.
+- **Relajación de Baseline:** Revertido el freno de los \`75 puntos\` en \`TRANSITION\`. Retorna a un baseline de 65, habiendo auditado que los trades de bajo score perdidos registraban WR histórico masivo.
+- **Resolución de Late Entries:** La corrección relaja thresholds generales para no ser forzado a comprar cuando la moneda ya completó gran parte de la correción al alza.
+
+### v7.0 — Alpha Generation (Mar 10, 2026)
 - **Relative Strength (RS) Index:** Nuevo cálculo de fuerza relativa vs BTC incorporado en el scoring.
 - **Decoupled BTC Filters:** Los umbrales de BTC RED/AMBER ahora son dinámicos. Los activos que demuestran "Alpha" (desacoplamiento) pueden emitir señales en mercados bajistas con umbrales reducidos.
 - **Hifi Shadow Engine:** Resolución de shadow trades mediante análisis de historial de velas de 15m (simulación de path real).
@@ -284,4 +287,4 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ---
 
-**Documentación actualizada a v7.0 — 10 Marzo 2026**
+**Documentación actualizada a v7.1.0 — 11 Marzo 2026**

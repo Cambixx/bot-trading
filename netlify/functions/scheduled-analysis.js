@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v6.0.3-SelfLearn';
+const ALGORITHM_VERSION = 'v7.1.0-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -2555,34 +2555,47 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (sottValue > 0.8 && sottSignal > 0.3) requirementsReduction = 10;
   else if (sottSignal > 0.2) requirementsReduction = 5;
 
-  // === REGIME FILTERS v7.0 (Optimized for Throughput) ===
-  let MIN_QUALITY_SCORE = 68; // Lowered baseline (was 72)
+  // === REGIME FILTERS v7.1 (Optimized for Throughput & Capitulation Scalping) ===
+  let MIN_QUALITY_SCORE = 68; // Lowered baseline 
+
+  // Capitulation Bounce Condition: BTC oversold/panic sell + structure confirmed
+  const isCapitulationBounce = btcContext?.status === 'GREEN' && btcContext?.rsi4h < 40 && (hasMSS || hasSweep);
 
   if (regime === 'DOWNTREND') {
-    if (trend4h === 'BULLISH') {
+    if (isCapitulationBounce) {
+      reasons.push('🔥 DOWNTREND (Capitulation Bounce)');
+      MIN_QUALITY_SCORE = 60; // Massively relaxed for capitulation entries
+    }
+    else if (trend4h === 'BULLISH') {
       reasons.push('📉 DOWNTREND (Pullback Opportunity)');
-      MIN_QUALITY_SCORE = alphaSignal ? 72 : 78; // Massively relaxed if Alpha
+      MIN_QUALITY_SCORE = alphaSignal ? 66 : 72; // Relaxed to allow dips
     }
     else if (rsi1h < 25 && volumeRatio > 1.8) {
       reasons.push('🎯 DOWNTREND (Extreme Oversold Bounce)');
-      MIN_QUALITY_SCORE = 80;
+      MIN_QUALITY_SCORE = 75;
     }
     else if (btcContext?.status === 'GREEN' && rsi15m < 45 && alphaSignal) {
-      reasons.push('🔥 DOWNTREND (Capitulation Alpha Bounce)');
-      MIN_QUALITY_SCORE = 75;
+      reasons.push('🚀 DOWNTREND (Alpha Bounce)');
+      MIN_QUALITY_SCORE = 68;
     }
     else {
       console.log(`[REJECT] ${symbol}: DOWNTREND regime - filters too tight`);
       return null;
     }
   } else if (regime === 'TRANSITION') {
-    MIN_QUALITY_SCORE = alphaSignal ? 70 : 75;
+    if (isCapitulationBounce) {
+      reasons.push('🔥 TRANSITION (Capitulation Bounce)');
+      MIN_QUALITY_SCORE = 55;
+    } else {
+      // Relaxed to 65 to un-choke valid bounce trades that were blocked at 75
+      MIN_QUALITY_SCORE = alphaSignal ? 60 : 65; 
+    }
   } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = alphaSignal ? 65 : 72; // Baseline 72 is better than 75
+    MIN_QUALITY_SCORE = alphaSignal ? 60 : 65;
   } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 78;
+    MIN_QUALITY_SCORE = 70;
   } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 65;
+    MIN_QUALITY_SCORE = 60;
   }
 
   // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
