@@ -6,24 +6,28 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v7.1.0 (Active)
-**Date:** Mar 11, 2026
-**Theme:** "CAPITULATION SCALPING" (Desbloqueo de rebotes)
+## Current Version: v7.1.1 (Active)
+**Date:** Mar 12, 2026
+**Theme:** "INERTIA FILTER" (Protección de Transición)
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v7.1.0-SelfLearn`.
-- **Capitulation Bounce [Nuevo]:** Si BTC-SEM es GREEN y RSI4H BTC < 40 + estructura confirmada (MSS o Sweep), los threshold de `DOWNTREND` y `TRANSITION` se relajan agresivamente a 60 y 55.
-- **Baseline Relax [Refinado]:** El suelo duro de 75 en `TRANSITION` fue revertido. Ahora el score base es 65 (ó 60 si hay Alpha Signal) para permitir rebotes que han demostrado históricamente >55% WR en los reportes de Shadow.
+- **Runtime Version:** `v7.1.1-SelfLearn`.
+- **Inertia Filter [Nuevo]:** En régimen `TRANSITION`, se exige ahora `volumeRatio > 2.0` (antes ~1.5).
+- **Goal:** Reducir los Fake Breakouts en zonas de indecisión donde el WR era de apenas 25%.
 
 ### Hypothesis / Goal:
-La auditoría del 11-Mar demostró que el Hard Lock de 75 en `TRANSITION` estaba ahogando el throughput. Los trades rechazados con scores bajos (55-65) en TRANSITION/DOWNTREND tenían altísimos retornos porque eran entradas frescas tras un sweep. Exigir >75 en este entorno nos forzaba a entrar tarde ("buy the top"), de ahí que los únicos dos trades tomados tuvieran 0% favorable move antes de rebotar hacia Stop Loss. Esta versión pretende exprimir las caídas bruscas mientras la macro (BTC verde) lo justifique.
-
-### Bugs Found / Fixes:
-- **Sobrerestricción:** Hard lock en TRANSITION causaba late entries. Corregido ajustando base de 75 a 65 y añadiendo el "Capitulation Bounce Mode".
+La auditoría del 12-Mar reveló que el sistema ganaba en tendencia pero perdía en transiciones por falta de inercia. Al endurecer el filtro de volumen, esperamos que el WR en `TRANSITION` suba de 25% a >45% filtrando el ruido de baja liquidez.
 
 ---
 
 ## Past Versions (Audit History)
+
+### v7.1.0 (CAPITULATION SCALPING)
+- **Status:** Superseded by v7.1.1 (Mar 12, 2026)
+- **Runtime Version:** `v7.1.0-SelfLearn`.
+- **Key Change:** Desbloqueo de rebotes con umbrales de 55-60 en DOWNTREND/TRANSITION si BTC es GREEN y RSI4H < 40.
+- **Observation:** Aumentó el throughput (de 0 a 8 señales), pero expuso fragilidad en TRANSITION (25% WR).
+
 
 ### v6.0.3 (AUDIT TRACEABILITY / v7.0 Alpha Gen)
 - **Status:** Superseded by v7.1.0 (Mar 11, 2026)

@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v7.1.0-SelfLearn';
+const ALGORITHM_VERSION = 'v7.1.1-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -2868,6 +2868,15 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // de la confirmación de estructura. Un precio en la BB superior no es un buen punto de entrada.
   if (regime === 'TRANSITION' && signalType === 'BUY' && bbPercent > 0.92) {
     console.log(`[REJECT] ${symbol} (TRANSITION): BB% overextended (${bbPercent.toFixed(2)} > 0.92) - entrada en zona de resistencia`);
+    return null;
+  }
+
+  // === AUDIT v7.1.0-FIX: TRANSITION Volume Inertia Hard Filter ===
+  // Auditoría Mar-12: El régimen TRANSITION tiene un WR del 25% (muy bajo).
+  // La mayoría de los fallos ocurren por entrar sin suficiente inercia real (fake breakouts).
+  // Endurecer el gate de volumen de 1.5 a 2.0 específicamente para TRANSITION.
+  if (regime === 'TRANSITION' && volumeRatio < 2.0) {
+    console.log(`[REJECT] ${symbol} (TRANSITION): Volume ratio ${volumeRatio.toFixed(2)} < 2.0 - inercia insuficiente para transición`);
     return null;
   }
 

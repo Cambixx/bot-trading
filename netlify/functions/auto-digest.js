@@ -20,8 +20,9 @@ import {
 const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
 function escapeMarkdownV2(text) {
-    if (!text && text !== 0) return '';
-    return String(text).replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
+    if (typeof text !== 'string') text = String(text !== undefined && text !== null ? text : '');
+    // v7.1.1 Sync: Using the robust version from scheduled-analysis.js
+    return text.replace(/([_*\u005B\u005D()~`>#+=|{}.!-])/g, '\\$1');
 }
 const esc = (v) => escapeMarkdownV2(v !== undefined && v !== null ? v : '');
 
@@ -77,7 +78,7 @@ async function generateDigest(context) {
     const losses = closed.filter(h => h.outcome === 'LOSS' || h.outcome === 'STALE_EXIT');
     const opens = history.filter(h => h.status === 'OPEN');
     const totalDecisive = wins.length + losses.length;
-    const overallWR = totalDecisive > 0 ? (wins.length / totalDecisive * 100).toFixed(1) : '0.0';
+    const overallWR = totalDecisive > 0 ? Math.round(wins.length / totalDecisive * 100) : 0;
 
     let msg = `🧠 *DAILY SELF\\-LEARNING DIGEST*\n\n`;
     msg += `📊 *Performance General:*\n`;
@@ -120,12 +121,13 @@ async function generateDigest(context) {
         // Top missed opportunities
         if (wouldWin.length > 0) {
             const topMissed = wouldWin
-                .sort((a, b) => Number(b.maxFavorableMove) - Number(a.maxFavorableMove))
+                .sort((a, b) => (Number(b.maxFavorableMove || 0)) - (Number(a.maxFavorableMove || 0)))
                 .slice(0, 3);
 
             msg += `❌ *Top Oportunidades Perdidas:*\n`;
             for (const miss of topMissed) {
-                msg += `  • ${esc(miss.symbol)}: \\+${esc(miss.maxFavorableMove)}% \\(score=${esc(miss.score)}, filtro=${esc(miss.rejectReason)}\\)\n`;
+                const moveStr = miss.maxFavorableMove ? `\\+${esc(miss.maxFavorableMove)}% ` : '';
+                msg += `  • ${esc(miss.symbol)}: ${moveStr}\\(score=${esc(miss.score)}, filtro=${esc(miss.rejectReason)}\\)\n`;
             }
             msg += `\n`;
         }
@@ -160,14 +162,14 @@ async function generateDigest(context) {
         msg += `🔬 *Autopsia de Trades:*\n`;
 
         if (winAutopsies.length > 0) {
-            const avgHoursWin = (winAutopsies.reduce((s, a) => s + a.hoursOpen, 0) / winAutopsies.length).toFixed(1);
-            const avgScoreWin = (winAutopsies.reduce((s, a) => s + a.score, 0) / winAutopsies.length).toFixed(0);
+            const avgHoursWin = (winAutopsies.reduce((s, a) => s + (a.hoursOpen || 0), 0) / winAutopsies.length).toFixed(1);
+            const avgScoreWin = Math.round(winAutopsies.reduce((s, a) => s + (a.score || 0), 0) / winAutopsies.length);
             msg += `  ✅ Wins: avg ${esc(avgHoursWin)}h, avg score ${esc(avgScoreWin)}\n`;
         }
         if (lossAutopsies.length > 0) {
-            const avgHoursLoss = (lossAutopsies.reduce((s, a) => s + a.hoursOpen, 0) / lossAutopsies.length).toFixed(1);
-            const avgScoreLoss = (lossAutopsies.reduce((s, a) => s + a.score, 0) / lossAutopsies.length).toFixed(0);
-            const avgMaxFavLoss = (lossAutopsies.reduce((s, a) => s + a.favorableMovePct, 0) / lossAutopsies.length).toFixed(2);
+            const avgHoursLoss = (lossAutopsies.reduce((s, a) => s + (a.hoursOpen || 0), 0) / lossAutopsies.length).toFixed(1);
+            const avgScoreLoss = Math.round(lossAutopsies.reduce((s, a) => s + (a.score || 0), 0) / lossAutopsies.length);
+            const avgMaxFavLoss = (lossAutopsies.reduce((s, a) => s + (a.favorableMovePct || 0), 0) / lossAutopsies.length).toFixed(2);
             msg += `  ❌ Losses: avg ${esc(avgHoursLoss)}h, avg score ${esc(avgScoreLoss)}, maxFav ${esc(avgMaxFavLoss)}%\n`;
         }
         msg += `\n`;
