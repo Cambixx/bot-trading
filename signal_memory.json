@@ -1,61 +1,40 @@
 {
-  "BTCUSDT": [
+  "SOLUSDT": [
     {
-      "score": 69,
-      "regime": "TRANSITION",
-      "timestamp": 1773249339860
+      "score": 59,
+      "regime": "DOWNTREND",
+      "timestamp": 1773328531303
     }
   ],
-  "ADAUSDT": [
+  "XRPUSDT": [
     {
-      "score": 51,
-      "regime": "TRANSITION",
-      "timestamp": 1773249341081
-    }
-  ],
-  "SUIUSDT": [
-    {
-      "score": 58,
-      "regime": "TRANSITION",
-      "timestamp": 1773249341481
-    }
-  ],
-  "UNIUSDT": [
-    {
-      "score": 58,
-      "regime": "TRANSITION",
-      "timestamp": 1773249344005
+      "score": 66,
+      "regime": "DOWNTREND",
+      "timestamp": 1773328532338
     },
     {
-      "score": 58,
-      "regime": "TRANSITION",
-      "timestamp": 1773250234059
+      "score": 50,
+      "regime": "DOWNTREND",
+      "timestamp": 1773329481909
+    },
+    {
+      "score": 53,
+      "regime": "DOWNTREND",
+      "timestamp": 1773329495120
     }
   ],
   "DOGEUSDT": [
     {
-      "score": 55,
-      "regime": "TRANSITION",
-      "timestamp": 1773250228285
-    }
-  ],
-  "WLFIUSDT": [
-    {
-      "score": 59,
-      "regime": "TRANSITION",
-      "timestamp": 1773251170011
-    }
-  ],
-  "AVAXUSDT": [
-    {
       "score": 53,
-      "regime": "TRANSITION",
-      "timestamp": 1773252148924
-    },
+      "regime": "DOWNTREND",
+      "timestamp": 1773328531101
+    }
+  ],
+  "FILUSDT": [
     {
-      "score": 58,
+      "score": 56,
       "regime": "TRANSITION",
-      "timestamp": 1773252936874
+      "timestamp": 1773334866636
     }
   ]
 }
