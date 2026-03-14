@@ -3,38 +3,69 @@
     {
       "score": 59,
       "regime": "DOWNTREND",
-      "timestamp": 1773328531303
+      "timestamp": 1773471772498
+    }
+  ],
+  "LINKUSDT": [
+    {
+      "score": 56,
+      "regime": "DOWNTREND",
+      "timestamp": 1773471773764
+    },
+    {
+      "score": 59,
+      "regime": "DOWNTREND",
+      "timestamp": 1773472543902
+    },
+    {
+      "score": 56,
+      "regime": "DOWNTREND",
+      "timestamp": 1773473418591
+    },
+    {
+      "score": 63,
+      "regime": "DOWNTREND",
+      "timestamp": 1773474349357
+    }
+  ],
+  "BCHUSDT": [
+    {
+      "score": 58,
+      "regime": "TRANSITION",
+      "timestamp": 1773473423620
+    }
+  ],
+  "UNIUSDT": [
+    {
+      "score": 52,
+      "regime": "DOWNTREND",
+      "timestamp": 1773474350176
     }
   ],
   "XRPUSDT": [
     {
-      "score": 66,
+      "score": 59,
       "regime": "DOWNTREND",
-      "timestamp": 1773328532338
+      "timestamp": 1773475344637
     },
+    {
+      "score": 53,
+      "regime": "DOWNTREND",
+      "timestamp": 1773475355565
+    }
+  ],
+  "AVAXUSDT": [
     {
       "score": 50,
       "regime": "DOWNTREND",
-      "timestamp": 1773329481909
-    },
-    {
-      "score": 53,
-      "regime": "DOWNTREND",
-      "timestamp": 1773329495120
+      "timestamp": 1773476129041
     }
   ],
-  "DOGEUSDT": [
+  "TRXUSDT": [
     {
-      "score": 53,
+      "score": 63,
       "regime": "DOWNTREND",
-      "timestamp": 1773328531101
-    }
-  ],
-  "FILUSDT": [
-    {
-      "score": 56,
-      "regime": "TRANSITION",
-      "timestamp": 1773334866636
+      "timestamp": 1773476134112
     }
   ]
 }
