@@ -1210,6 +1210,116 @@ function calculateADX(candles, period = 14) {
   };
 }
 
+function calculateMysticPulse(candles, period = 14) {
+  if (!candles || candles.length < (period * 2 + 50)) return null;
+
+  let trSum = 0;
+  let plusDMSum = 0;
+  let minusDMSum = 0;
+
+  for (let i = 1; i <= period; i++) {
+    const current = candles[i];
+    const prev = candles[i - 1];
+
+    const upMove = current.high - prev.high;
+    const downMove = prev.low - current.low;
+
+    const plusDM = upMove > downMove && upMove > 0 ? upMove : 0;
+    const minusDM = downMove > upMove && downMove > 0 ? downMove : 0;
+
+    const tr = Math.max(
+      current.high - current.low,
+      Math.abs(current.high - prev.close),
+      Math.abs(current.low - prev.close)
+    );
+
+    trSum += tr;
+    plusDMSum += plusDM;
+    minusDMSum += minusDM;
+  }
+
+  let atr = trSum;
+  let plusDM14 = plusDMSum;
+  let minusDM14 = minusDMSum;
+
+  const validPosData = [];
+  const validNegData = [];
+
+  let positive_count = 0;
+  let negative_count = 0;
+
+  for (let i = period + 1; i < candles.length; i++) {
+    const current = candles[i];
+    const prev = candles[i - 1];
+
+    const upMove = current.high - prev.high;
+    const downMove = prev.low - current.low;
+
+    const plusDM = upMove > downMove && upMove > 0 ? upMove : 0;
+    const minusDM = downMove > upMove && downMove > 0 ? downMove : 0;
+
+    const tr = Math.max(
+      current.high - current.low,
+      Math.abs(current.high - prev.close),
+      Math.abs(current.low - prev.close)
+    );
+
+    atr = atr - (atr / period) + tr;
+    plusDM14 = plusDM14 - (plusDM14 / period) + plusDM;
+    minusDM14 = minusDM14 - (minusDM14 / period) + minusDM;
+
+    if (!Number.isFinite(atr) || atr <= 0) {
+      if (i >= period * 2) {
+        validPosData.push(positive_count);
+        validNegData.push(negative_count);
+      }
+      continue;
+    }
+
+    const plus = (plusDM14 / atr) * 100;
+    const minus = (minusDM14 / atr) * 100;
+
+    if (plus > minus) {
+      positive_count += (plus - minus);
+      negative_count = 0;
+    } else if (minus > plus) {
+      negative_count += (minus - plus);
+      positive_count = 0;
+    } else {
+      positive_count = 0;
+      negative_count = 0;
+    }
+
+    if (i >= period * 2) {
+      validPosData.push(positive_count);
+      validNegData.push(negative_count);
+    }
+  }
+
+  const emaPosArr = calculateEMASeries(validPosData, period);
+  const emaNegArr = calculateEMASeries(validNegData, period);
+
+  if (!emaPosArr || !emaNegArr || emaPosArr.length < 2) return null;
+
+  const lastIndex = emaPosArr.length - 1;
+  const emaPos = emaPosArr[lastIndex];
+  const emaNeg = emaNegArr[lastIndex];
+  const prevEmaPos = emaPosArr[lastIndex - 1];
+  const prevEmaNeg = emaNegArr[lastIndex - 1];
+
+  return {
+    emaPos,
+    emaNeg,
+    prevEmaPos,
+    prevEmaNeg,
+    bullishCross: prevEmaPos <= prevEmaNeg && emaPos > emaNeg,
+    bearishCross: prevEmaNeg <= prevEmaPos && emaNeg > emaPos,
+    bullish: emaPos > emaNeg,
+    bearish: emaNeg > emaPos,
+    momentumSpread: emaPos - emaNeg
+  };
+}
+
 function calculateCMF(candles, period = 20) {
   if (!candles || candles.length < period) return null;
 
@@ -2156,6 +2266,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const ema50_15m = calculateEMA(closes15m, 50);
   const superTrend15m = calculateSuperTrend(closedCandles15m, 10, 3);
   const adx15m = calculateADX(closedCandles15m, 14);
+  const mystic15m = calculateMysticPulse(closedCandles15m, 14);
   const atr15m = calculateATR(closedCandles15m, 14);
   const atrPercent15m = atr15m ? (atr15m / currentPrice) * 100 : null;
   if (!atrPercent15m || atrPercent15m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) return null;
@@ -2219,6 +2330,21 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   // === CATEGORY 1: MOMENTUM (0-100) ===
   let momentumScore = 0;
+
+  // MYSTIC PULSE V2 (0-40)
+  if (mystic15m) {
+    if (mystic15m.bullishCross || (mystic15m.bullish && mystic15m.momentumSpread > 5)) {
+       momentumScore += 40;
+       reasons.push(mystic15m.bullishCross ? '🔥 Mystic Pulse Cross' : '🌊 Mystic Pulse Fuerte');
+       if (!signalType) signalType = 'BUY';
+    } else if (mystic15m.bearishCross || (mystic15m.bearish && mystic15m.momentumSpread < -5)) {
+       if (trend4h !== 'BULLISH') {
+         momentumScore += 40;
+         reasons.push(mystic15m.bearishCross ? '❄️ Mystic Pulse Cross' : '📉 Mystic Pulse Fuerte');
+         if (!signalType) signalType = 'SELL_ALERT';
+       }
+    }
+  }
 
   // RSI (0-35)
   if (rsi15m < 30) {
@@ -2391,21 +2517,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
   }
 
-  // Bollinger Bands (0-25)
+  // Bollinger Bands (0-15) - Only used for scoring/context, no longer a signal trigger
   const bbPercent = bb15m ? (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower) : 0.5;
   if (bbPercent < 0.1) {
-    structureScore += 25;
+    structureScore += 15;
     reasons.push('🏀 BB Inferior');
-    if (!signalType) signalType = 'BUY';
   } else if (bbPercent > 0.9) {
-    // v4.6 FIX: Upper BB in uptrend is breakout, not sell
     if (trend4h !== 'BULLISH') {
-      structureScore += 25;
+      structureScore += 15;
       reasons.push('🎈 BB Superior');
-      if (!signalType) signalType = 'SELL_ALERT';
     } else {
       reasons.push('🚀 BB Breakout Potential');
-      // Do not force sell
     }
   }
 
@@ -2666,17 +2788,21 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   };
 
   if (signalType === 'BUY') {
-    // 1. RSI/BB Overextension
-    // v4.6 FIX: Allow overextension if trend is BULLISH or SOTT signal is very strong
-    const isBreakout = (trend4h === 'BULLISH' || sottSignal > 0.4) && rsi15m < 85;
+    // 1. RSI/BB Overextension (Mystic Pulse update: strict BB limits to prevent overextended entries)
+    const strictBbLimit = regime === 'TRANSITION' ? 0.82 : 0.85;
 
-    // v5.3: Dynamic BB% limit for TRENDING BULLISH
-    const dynamicBbLimit = (regime === 'TRENDING' && trend4h === 'BULLISH' && sottValue > 0.5) ? 0.90 : 0.88;
-
-    if ((rsi15m > 70 || bbPercent > dynamicBbLimit) && !isBreakout) {
-      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)}) or BB(${bbPercent.toFixed(2)}) - Limit: ${dynamicBbLimit}, Trend: ${trend4h}`);
+    if (bbPercent > strictBbLimit) {
+      console.log(`[REJECT] ${symbol}: Strict BB Overextension Block (BB: ${bbPercent.toFixed(2)}) - Limit: ${strictBbLimit}`);
       return null;
     }
+
+    if (rsi15m > 72) {
+      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)})`);
+      return null;
+    }
+
+    // Retain isBreakout logic for subsequent filters
+    const isBreakout = (trend4h === 'BULLISH' || sottSignal > 0.4) && rsi15m < 85;
 
     // 2. Distance to EMA21 - Standard filter
     if (distToEma21 > 1.8) {
@@ -2864,10 +2990,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // === FIX v5.2a: TRANSITION BB Overextension Hard Filter ===
   // Auditoría Feb-24: TRXUSDT entró con bbPercent=1.01 en régimen TRANSITION porque
   // el path MSS/Sweep bypaseaba el filtro general de overextension (línea 2234).
-  // Este gate explícito evita entradas overextended en TRANSITION, independientemente
-  // de la confirmación de estructura. Un precio en la BB superior no es un buen punto de entrada.
-  if (regime === 'TRANSITION' && signalType === 'BUY' && bbPercent > 0.92) {
-    console.log(`[REJECT] ${symbol} (TRANSITION): BB% overextended (${bbPercent.toFixed(2)} > 0.92) - entrada en zona de resistencia`);
+  // Mantenemos este gate explícito (con umbral más ajustado) como fail-safe final.
+  if (regime === 'TRANSITION' && signalType === 'BUY' && bbPercent > 0.82) {
+    console.log(`[REJECT] ${symbol} (TRANSITION): BB% overextended (${bbPercent.toFixed(2)} > 0.82) - entrada en zona de resistencia`);
     return null;
   }
 

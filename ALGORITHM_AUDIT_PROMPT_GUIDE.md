@@ -265,7 +265,7 @@ Por favor realiza las siguientes tareas **antes de tocar ningún código**:
 
 5. **Clasifica cada trade LOSS** cruzando `autopsies.json`, `history.json` y `persistent_logs.json`. Para cada LOSS, identifica la causa probable:
    - 🔴 **Falsa ruptura (Fake Breakout):** MSS confirmado pero precio revirtió rápidamente.
-   - 🔴 **Entrada overextended:** bbPercent > 0.90 o RSI > 70 en el momento de entrada.
+   - 🔴 **Entrada overextended:** bbPercent > 0.85 o RSI > 72 en el momento de entrada.
    - 🟠 **Correlación BTC:** ¿BTC-SEM era RED o AMBER cuando se entró? ¿Hubo giro bajista intraday?
    - 🟠 **Volumen engañoso:** volumeRatio alto pero delta negativo (OBI contrario a la señal).
    - 🟡 **Stop demasiado ajustado:** Precio tocó SL pero luego recuperó hacia TP (R:R problemático).

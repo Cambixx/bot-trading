@@ -6,21 +6,27 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v7.1.1 (Active)
-**Date:** Mar 12, 2026
-**Theme:** "INERTIA FILTER" (Protección de Transición)
+## Current Version: v7.2.0 (Active)
+**Date:** Mar 14, 2026
+**Theme:** "MYSTIC PULSE & STRICT MOMENTUM" (Anti-Knife Catching)
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v7.1.1-SelfLearn`.
-- **Inertia Filter [Nuevo]:** En régimen `TRANSITION`, se exige ahora `volumeRatio > 2.0` (antes ~1.5).
-- **Goal:** Reducir los Fake Breakouts en zonas de indecisión donde el WR era de apenas 25%.
+- **Runtime Version:** `v7.2.0-SelfLearn`.
+- **Mystic Pulse V2.0:** Se reemplaza el RSI y BB% como disparadores primarios de momentum por un oscilador de INERCIA direccional basado en racha (streak) del ADX (+DI vs -DI) suavizado con EMA. Otorga 40 puntos de momentum al cruzar o tener un spread contundente.
+- **Strict BB% Cutoff:** Se eliminan los bypass de breakout. Si una operación se trata de ejecutar con `bbPercent > 0.85` (o `> 0.82` en TRANSITION), es rechazada automáticamente de forma incondicional.
 
 ### Hypothesis / Goal:
-La auditoría del 12-Mar reveló que el sistema ganaba en tendencia pero perdía en transiciones por falta de inercia. Al endurecer el filtro de volumen, esperamos que el WR en `TRANSITION` suba de 25% a >45% filtrando el ruido de baja liquidez.
+La auditoría de métricas evidenció que el Win Rate real era de <30%. La vasta mayoría de trades se iniciaban persiguiendo "velas extendidas" muy cerca de la banda Bollinger superior sin inercia real (fake breakouts). Al introducir Mystic Pulse exigimos inercia direccional sostenida, y al poner techos duros en las Bandas de Bollinger, prevenimos directamente las compras en techos locales. Esperamos que el WR repunte dramáticamente por encima del 55-60%, a coste de una drástica reducción en la frecuencia de operaciones.
 
 ---
 
 ## Past Versions (Audit History)
+
+### v7.1.1 (INERTIA FILTER)
+- **Status:** Superseded by v7.2.0 (Mar 14, 2026)
+- **Runtime Version:** `v7.1.1-SelfLearn`.
+- **Key Change:** En régimen `TRANSITION`, se exige `volumeRatio > 2.0` (antes ~1.5) para evitar fake breakouts.
+- **Observation:** El mercado bajista forzó múltiples rechazos correctos pero el sistema seguía arrastrando el error base de entrar con el precio pagado a las bandas superiores basándose solo en falsos breakouts de corto plazo.
 
 ### v7.1.0 (CAPITULATION SCALPING)
 - **Status:** Superseded by v7.1.1 (Mar 12, 2026)

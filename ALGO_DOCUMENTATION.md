@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v7.1.0 Capitulation Scalping)
+# 🦅 Documentación del Algoritmo de Trading (v7.2.0 Mystic Pulse & Strict Momentum)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -26,7 +26,7 @@ El puntaje final (0–100) utiliza pesos fijos y una validación binaria final (
 
 | Categoría | Peso | Indicadores |
 |-----------|------|-------------|
-| **Momentum** | 25% | RSI 14, StochRSI, MACD (histograma) |
+| **Momentum** | 25% | **Mystic Pulse V2.0 (ADX Streak EMA)**, RSI 14, StochRSI, MACD (histograma) |
 | **Trend** | 30% | SuperTrend, EMA alignment (9/21/50), ADX, SOTT |
 | **Structure** | 25% | Order Blocks (OB), Fair Value Gaps (FVG), BB%, MSS, Sweep |
 | **Volume** | 15% | Volume ratio vs SMA20, Delta (taker flow), OBI |
@@ -63,7 +63,7 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 
 ---
 
-## 4. Regímenes de Mercado y Umbrales (v7.1.0 — activo)
+## 4. Regímenes de Mercado y Umbrales (v7.2.0 — activo)
 
 | Régimen | Score Mínimo | Estrategia | Size Sugerido |
 |---------|-------------|------------|---------------|
@@ -135,7 +135,7 @@ El orden de evaluación para cada señal es:
 ```
 1. Sesión Asia (00-07 UTC)      → REJECT si AVOID_ASIA_SESSION=true
 2. Volume DEAD (ratio < 0.3)    → REJECT siempre
-3. RSI > 70 o BB% > 0.88-0.90   → REJECT (excepto isBreakout o Trending Bullish SOTT>0.5)
+3. bbPercent > 0.85 (0.82 en TRANSITION) → REJECT estricto (no se permite bypass por breakouts)
 4. Dist EMA21 > 1.8%            → REJECT (precio demasiado lejos para comprar)
 5. Dist EMA9 > 2.0% (!breakout) → REJECT (chasing filter)
 6. BTC-SEM RED y score < 88     → REJECT
@@ -205,7 +205,12 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ## 9. Historial de Versiones (Changelog)
 
-### v7.1.0 — Capitulation Scalping (Mar 11, 2026) - ACTUAL
+### v7.2.0 — Mystic Pulse & Strict Momentum (Mar 14, 2026) - ACTUAL
+- **Mystic Pulse V2.0:** Se instaura un disparador de momentum contundente utilizando las racas direccionales del ADX suavizadas por EMA, filtrando los spikes de RSI como drivers principales de las compras.
+- **BB% Hard Limits Globales:** Se erradica por completo la asunción de "breakout seguro" en topes de la banda. El bot ahora corta estrictamente de tajo cualquier compra que ocurra en el 85% superior general, o 82% superior dentro de TRANSITION. El falso breakout ahora es rechazado sin excepción.
+- **Limpieza Estructural:** Mystic Pulse pasa a dictaminar en la categoría Momentum, dándole prioridad direccional al impulso prolongado sobre explosiones que atrapaban en los local-tops.
+
+### v7.1.0 — Capitulation Scalping (Mar 11, 2026)
 - **Capitulation Bounce Mode:** Cuando BTC es GREEN pero el RSI 4h de BTC < 40, se desbloquean los umbrales mínimos a niveles ultra-agresivos (55-60) siempre que el token muestre MSS o Sweep.
 - **Relajación de Baseline:** Revertido el freno de los \`75 puntos\` en \`TRANSITION\`. Retorna a un baseline de 65, habiendo auditado que los trades de bajo score perdidos registraban WR histórico masivo.
 - **Resolución de Late Entries:** La corrección relaja thresholds generales para no ser forzado a comprar cuando la moneda ya completó gran parte de la correción al alza.
@@ -287,4 +292,4 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ---
 
-**Documentación actualizada a v7.1.0 — 11 Marzo 2026**
+**Documentación actualizada a v7.2.0 — 14 Marzo 2026**
