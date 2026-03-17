@@ -18,6 +18,12 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 ### Hypothesis / Goal:
 La auditoría de métricas evidenció que el Win Rate real era de <30%. La vasta mayoría de trades se iniciaban persiguiendo "velas extendidas" muy cerca de la banda Bollinger superior sin inercia real (fake breakouts). Al introducir Mystic Pulse exigimos inercia direccional sostenida, y al poner techos duros en las Bandas de Bollinger, prevenimos directamente las compras en techos locales. Esperamos que el WR repunte dramáticamente por encima del 55-60%, a coste de una drástica reducción en la frecuencia de operaciones.
 
+### Verdict (v7.2.0 Audit — Mar 17, 2026):
+**MANTENER.** La configuración v7.2.0 está logrando exactamente lo pretendido. 
+- **WR Real:** 61.5% (16W / 10L).
+- El tiempo promedio en trades ganadores (7.9h) vs perdedores (3.9h) muestra que las purgas son rápidas y los ganadores corren.
+- El "Shadow Trading" reciente (últimos 100 ciclos en mercado tóxico/AMBER) muestra solo un 26% de WR si se hubieran ignorado los filtros, comprobando que el algoritmo nos ahorró múltiples pérdidas por "Knife Catching". El sistema no necesita ajustes por ahora.
+
 ---
 
 ## Past Versions (Audit History)
