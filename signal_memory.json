@@ -1,178 +1,118 @@
 {
-  "SOLUSDT": [
+  "TRXUSDT": [
     {
-      "score": 56,
-      "regime": "RANGING",
-      "timestamp": 1773738030579
-    },
-    {
-      "score": 56,
-      "regime": "RANGING",
-      "timestamp": 1773738042046
-    },
-    {
-      "score": 53,
-      "regime": "RANGING",
-      "timestamp": 1773738947300
-    },
-    {
-      "score": 66,
-      "regime": "RANGING",
-      "timestamp": 1773741682524
-    }
-  ],
-  "SUIUSDT": [
-    {
-      "score": 58,
-      "regime": "DOWNTREND",
-      "timestamp": 1773739882594
-    },
-    {
-      "score": 67,
-      "regime": "DOWNTREND",
-      "timestamp": 1773741683294
-    },
-    {
-      "score": 67,
-      "regime": "DOWNTREND",
-      "timestamp": 1773741694378
-    },
-    {
-      "score": 68,
-      "regime": "DOWNTREND",
-      "timestamp": 1773742542665
-    },
-    {
-      "score": 62,
-      "regime": "DOWNTREND",
-      "timestamp": 1773743423180
-    }
-  ],
-  "UNIUSDT": [
-    {
-      "score": 60,
-      "regime": "DOWNTREND",
-      "timestamp": 1773737161271
-    },
-    {
-      "score": 50,
-      "regime": "DOWNTREND",
-      "timestamp": 1773742544879
-    }
-  ],
-  "WLFIUSDT": [
-    {
-      "score": 69,
-      "regime": "DOWNTREND",
-      "timestamp": 1773738951500
-    },
-    {
-      "score": 54,
-      "regime": "DOWNTREND",
-      "timestamp": 1773741686543
-    }
-  ],
-  "AVAXUSDT": [
-    {
-      "score": 50,
-      "regime": "RANGING",
-      "timestamp": 1773738032315
-    },
-    {
-      "score": 50,
-      "regime": "RANGING",
-      "timestamp": 1773738043404
-    },
-    {
-      "score": 53,
-      "regime": "RANGING",
-      "timestamp": 1773738948943
-    },
-    {
-      "score": 53,
+      "score": 55,
       "regime": "TRANSITION",
-      "timestamp": 1773739883391
+      "timestamp": 1773851492202
     },
     {
-      "score": 53,
+      "score": 55,
       "regime": "TRANSITION",
-      "timestamp": 1773742543763
+      "timestamp": 1773851502816
+    },
+    {
+      "score": 61,
+      "regime": "TRANSITION",
+      "timestamp": 1773852318383
     },
     {
       "score": 56,
       "regime": "TRANSITION",
-      "timestamp": 1773743423778
-    }
-  ],
-  "PEPEUSDT": [
-    {
-      "score": 57,
-      "regime": "DOWNTREND",
-      "timestamp": 1773738945019
+      "timestamp": 1773853252209
     },
     {
-      "score": 52,
-      "regime": "DOWNTREND",
-      "timestamp": 1773743421403
-    }
-  ],
-  "ETHUSDT": [
+      "score": 53,
+      "regime": "TRANSITION",
+      "timestamp": 1773854146419
+    },
     {
-      "score": 63,
-      "regime": "RANGING",
-      "timestamp": 1773738945795
+      "score": 53,
+      "regime": "TRANSITION",
+      "timestamp": 1773854157448
     }
   ],
   "NEARUSDT": [
     {
-      "score": 78,
-      "regime": "TRENDING",
-      "timestamp": 1773738946300
-    }
-  ],
-  "ETHFIUSDT": [
-    {
-      "score": 50,
-      "regime": "RANGING",
-      "timestamp": 1773738951891
+      "score": 54,
+      "regime": "DOWNTREND",
+      "timestamp": 1773851501436
     },
-    {
-      "score": 58,
-      "regime": "TRANSITION",
-      "timestamp": 1773742547182
-    }
-  ],
-  "GOLD(XAUT)USDT": [
-    {
-      "score": 52,
-      "regime": "RANGING",
-      "timestamp": 1773738952525
-    },
-    {
-      "score": 63,
-      "regime": "RANGING",
-      "timestamp": 1773739887186
-    }
-  ],
-  "BTCUSDT": [
-    {
-      "score": 64,
-      "regime": "RANGING",
-      "timestamp": 1773739881255
-    }
-  ],
-  "DOGEUSDT": [
-    {
-      "score": 69,
-      "regime": "TRANSITION",
-      "timestamp": 1773742543137
-    }
-  ],
-  "LINKUSDT": [
     {
       "score": 54,
-      "regime": "TRANSITION",
-      "timestamp": 1773743423590
+      "regime": "DOWNTREND",
+      "timestamp": 1773852316611
+    },
+    {
+      "score": 57,
+      "regime": "DOWNTREND",
+      "timestamp": 1773853249903
+    },
+    {
+      "score": 54,
+      "regime": "DOWNTREND",
+      "timestamp": 1773854144558
+    },
+    {
+      "score": 54,
+      "regime": "DOWNTREND",
+      "timestamp": 1773854155907
+    },
+    {
+      "score": 61,
+      "regime": "DOWNTREND",
+      "timestamp": 1773855023157
+    },
+    {
+      "score": 61,
+      "regime": "DOWNTREND",
+      "timestamp": 1773855034356
+    },
+    {
+      "score": 52,
+      "regime": "DOWNTREND",
+      "timestamp": 1773855974014
+    }
+  ],
+  "DOTUSDT": [
+    {
+      "score": 61,
+      "regime": "DOWNTREND",
+      "timestamp": 1773852316427
+    },
+    {
+      "score": 67,
+      "regime": "DOWNTREND",
+      "timestamp": 1773853249667
+    },
+    {
+      "score": 67,
+      "regime": "DOWNTREND",
+      "timestamp": 1773854144370
+    },
+    {
+      "score": 67,
+      "regime": "DOWNTREND",
+      "timestamp": 1773854155724
+    },
+    {
+      "score": 66,
+      "regime": "DOWNTREND",
+      "timestamp": 1773855022959
+    },
+    {
+      "score": 66,
+      "regime": "DOWNTREND",
+      "timestamp": 1773855034163
+    },
+    {
+      "score": 56,
+      "regime": "DOWNTREND",
+      "timestamp": 1773855973811
+    },
+    {
+      "score": 56,
+      "regime": "DOWNTREND",
+      "timestamp": 1773855985164
     }
   ]
 }
