@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v7.2.0 Mystic Pulse & Strict Momentum)
+# 🦅 Documentación del Algoritmo de Trading (v7.3.0 Capitulation & Trend Discipline)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -63,7 +63,7 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 
 ---
 
-## 4. Regímenes de Mercado y Umbrales (v7.2.0 — activo)
+## 4. Regímenes de Mercado y Umbrales (v7.3.0 — activo)
 
 | Régimen | Score Mínimo | Estrategia | Size Sugerido |
 |---------|-------------|------------|---------------|
@@ -71,7 +71,7 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 | **TRENDING** | 65 | Pullbacks dinámicos; Alpha reduce threshold a 60 | 2.5% – 7.0% |
 | **HIGH_VOLATILITY** | 70 | Estructura obligatoria — size defensivo | 1.0% – 4.0% |
 | **TRANSITION** | 65 | Alpha baja a 60. Capitulation Bounce baja a 55 | 1.5% – 5.0% |
-| **DOWNTREND** | 68 - 75 | Alpha baja a 68. Capitulation Bounce baja a 60 | 0.8% – 3.0% |
+| **DOWNTREND** | 68 - 75 | Alpha 65. Capitulation Bounce/BTC Verde baja a 55-60 | 0.8% – 3.0% |
 
 > **Nota v7.1.0:** Se relajan MASIVAMENTE los umbrales de score. Análisis de shadow trading probó que exigir >75 forzaba a atrapar techos (fake breakouts) en el mercado de retrocesos violentos. Se introdujo la **Capitulation Bounce Strategy**: si BTC está en status GREEN pero su RSI 4h < 40 y el token tiene estructura validada, el umbral de entrada rompe todas las barreras y cae a 55-60. 
 
@@ -205,7 +205,12 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ## 9. Historial de Versiones (Changelog)
 
-### v7.2.0 — Mystic Pulse & Strict Momentum (Mar 14, 2026) - ACTUAL
+### v7.3.0 — Capitulation & Trend Discipline (Mar 18, 2026) - ACTUAL
+- **Trend BB% Hard Limit:** En régimen `TRENDING`, el límite máximo permitido de las Bandas de Bollinger se aprieta dramáticamente de 0.85 a **0.65**. Suprime compras sobre-extendidas para mitigar masivamente los *fake-breakouts* detectados (19% WR). 
+- **Green Capitulation:** Los umbrales mínimos de `DOWNTREND` se deprimen a 55-60 cuando BTC-SEM es GREEN, incrementando las oportunidades de los rebotes sobrevendidos (históricamente el régimen más rentable, 55% WR).
+- **Momentum Deprecation:** El ajuste predictivo transversal transversal `+3/-5` (Signal Memory) se neutralizó a 0, puesto que estadísticamente agregaba ruido sin ganancia real.
+
+### v7.2.0 — Mystic Pulse & Strict Momentum (Mar 14, 2026)
 - **Mystic Pulse V2.0:** Se instaura un disparador de momentum contundente utilizando las racas direccionales del ADX suavizadas por EMA, filtrando los spikes de RSI como drivers principales de las compras.
 - **BB% Hard Limits Globales:** Se erradica por completo la asunción de "breakout seguro" en topes de la banda. El bot ahora corta estrictamente de tajo cualquier compra que ocurra en el 85% superior general, o 82% superior dentro de TRANSITION. El falso breakout ahora es rechazado sin excepción.
 - **Limpieza Estructural:** Mystic Pulse pasa a dictaminar en la categoría Momentum, dándole prioridad direccional al impulso prolongado sobre explosiones que atrapaban en los local-tops.

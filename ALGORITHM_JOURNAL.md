@@ -6,27 +6,31 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v7.2.0 (Active)
-**Date:** Mar 14, 2026
-**Theme:** "MYSTIC PULSE & STRICT MOMENTUM" (Anti-Knife Catching)
+## Current Version: v7.3.0 (Active)
+**Date:** Mar 18, 2026
+**Theme:** "CAPITULATION & TREND DISCIPLINE"
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v7.2.0-SelfLearn`.
-- **Mystic Pulse V2.0:** Se reemplaza el RSI y BB% como disparadores primarios de momentum por un oscilador de INERCIA direccional basado en racha (streak) del ADX (+DI vs -DI) suavizado con EMA. Otorga 40 puntos de momentum al cruzar o tener un spread contundente.
-- **Strict BB% Cutoff:** Se eliminan los bypass de breakout. Si una operación se trata de ejecutar con `bbPercent > 0.85` (o `> 0.82` en TRANSITION), es rechazada automáticamente de forma incondicional.
+- **Runtime Version:** `v7.3.0-SelfLearn`.
+- **Trend Discipline:** En régimen `TRENDING`, se bloquean incondicionalmente las entradas si el precio está extendido en la banda (`bbPercent > 0.65`, antes 0.85). El objetivo es frenar el sangrado del 19% WR por fake breakouts y comprar solo pullbacks genuinos o bandas medias.
+- **Capitulation Power:** En `DOWNTREND`, si BTC está en status GREEN, la señal fluye de forma extremadamente agresiva (requiriendo score de solo 60 para pullbacks o 55 para rebotes sobrevendidos), capitalizando el >55% WR del algoritmo en compras oportunistas durante pánicos.
+- **Momentum Deprecation:** Se desactiva el impacto del bono estadístico (`+3/-5`) de Signal Memory ya que la métrica `momentumAdjustment` operaba en < 0.5% de operaciones y no aportaba valor predictivo.
 
 ### Hypothesis / Goal:
-La auditoría de métricas evidenció que el Win Rate real era de <30%. La vasta mayoría de trades se iniciaban persiguiendo "velas extendidas" muy cerca de la banda Bollinger superior sin inercia real (fake breakouts). Al introducir Mystic Pulse exigimos inercia direccional sostenida, y al poner techos duros en las Bandas de Bollinger, prevenimos directamente las compras en techos locales. Esperamos que el WR repunte dramáticamente por encima del 55-60%, a coste de una drástica reducción en la frecuencia de operaciones.
+Al cerrar la llave de compras en el 35% superior de la Banda de Bollinger en regímenes `TRENDING`, se asume erradicar el 80% de pérdidas provenientes de rupturas falsas y velas sobre-extendidas sin inercia. Al flexibilizar `DOWNTREND` con viento a favor (BTC Verde), estimamos incrementar la frecuencia de nuestro régimen históricamente más rentable (55% WR real). 
 
-### Verdict (v7.2.0 Audit — Mar 17, 2026):
-**MANTENER.** La configuración v7.2.0 está logrando exactamente lo pretendido. 
-- **WR Real:** 61.5% (16W / 10L).
-- El tiempo promedio en trades ganadores (7.9h) vs perdedores (3.9h) muestra que las purgas son rápidas y los ganadores corren.
-- El "Shadow Trading" reciente (últimos 100 ciclos en mercado tóxico/AMBER) muestra solo un 26% de WR si se hubieran ignorado los filtros, comprobando que el algoritmo nos ahorró múltiples pérdidas por "Knife Catching". El sistema no necesita ajustes por ahora.
+### Verdict (v7.3.0 Audit — Pendiente):
+...
 
 ---
 
 ## Past Versions (Audit History)
+
+### v7.2.0 (MYSTIC PULSE & STRICT MOMENTUM)
+- **Status:** Superseded by v7.3.0 (Mar 18, 2026)
+- **Runtime Version:** `v7.2.0-SelfLearn`.
+- **Key Change:** Reemplazó RSI por Mystic Pulse (ADX Streak) y estableció BB% cutoff global en 0.85 para evitar overextension.
+- **Observation:** El veredicto temprano de "MANTENER, 61.5% WR" probó ser prematuro en una muestra más amplia (62 trades reales). La auditoría exhaustiva reveló un **Win Rate real del 31.67%**, fuertemente lastrado por el régimen `TRENDING` (19% WR) donde el filtro de 0.85 de BB% permitía la compra en techos locales antes de la reversión. DOWNTREND, sorpresivamente, operó excelente (55%).
 
 ### v7.1.1 (INERTIA FILTER)
 - **Status:** Superseded by v7.2.0 (Mar 14, 2026)

@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v7.1.1-SelfLearn';
+const ALGORITHM_VERSION = 'v7.3.0-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -2686,7 +2686,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (regime === 'DOWNTREND') {
     if (isCapitulationBounce) {
       reasons.push('🔥 DOWNTREND (Capitulation Bounce)');
-      MIN_QUALITY_SCORE = 60; // Massively relaxed for capitulation entries
+      MIN_QUALITY_SCORE = 55; // Massively relaxed for capitulation entries and green BTC
+    }
+    else if (btcContext?.status === 'GREEN' && trend4h === 'BULLISH') {
+      reasons.push('🟢 DOWNTREND (Pullback Support BTC-GREEN)');
+      MIN_QUALITY_SCORE = 60; // Rewarding green BTC pullbacks
     }
     else if (trend4h === 'BULLISH') {
       reasons.push('📉 DOWNTREND (Pullback Opportunity)');
@@ -2698,7 +2702,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
     else if (btcContext?.status === 'GREEN' && rsi15m < 45 && alphaSignal) {
       reasons.push('🚀 DOWNTREND (Alpha Bounce)');
-      MIN_QUALITY_SCORE = 68;
+      MIN_QUALITY_SCORE = 65; // Relaxed
     }
     else {
       console.log(`[REJECT] ${symbol}: DOWNTREND regime - filters too tight`);
@@ -2761,10 +2765,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const scoreBeforeMomentum = score;
 
   // === SELF-LEARNING: Momentum Adjustment from Signal Memory ===
-  if (momentumAdj && momentumAdj.adjustment !== 0) {
-    score += momentumAdj.adjustment;
-    if (momentumAdj.reason) reasons.push(momentumAdj.reason);
-  }
+  // Audit v7.3.0: Disabled because statistically it adds 0 value
+  if (momentumAdj) momentumAdj.adjustment = 0;
 
   // Ensure score is non-negative before clamping
   score = Math.max(0, score);
@@ -2789,7 +2791,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   if (signalType === 'BUY') {
     // 1. RSI/BB Overextension (Mystic Pulse update: strict BB limits to prevent overextended entries)
-    const strictBbLimit = regime === 'TRANSITION' ? 0.82 : 0.85;
+    let strictBbLimit = 0.85;
+    if (regime === 'TRANSITION') strictBbLimit = 0.82;
+    if (regime === 'TRENDING') strictBbLimit = 0.65; // Evitar fake breakouts en tendencia
 
     if (bbPercent > strictBbLimit) {
       console.log(`[REJECT] ${symbol}: Strict BB Overextension Block (BB: ${bbPercent.toFixed(2)}) - Limit: ${strictBbLimit}`);
