@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v7.3.0-SelfLearn';
+const ALGORITHM_VERSION = 'v7.4.0-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -2677,16 +2677,23 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (sottValue > 0.8 && sottSignal > 0.3) requirementsReduction = 10;
   else if (sottSignal > 0.2) requirementsReduction = 5;
 
-  // === REGIME FILTERS v7.1 (Optimized for Throughput & Capitulation Scalping) ===
+  // === REGIME FILTERS v7.4 (Spot Long-Only Regime Scalper) ===
   let MIN_QUALITY_SCORE = 68; // Lowered baseline 
+  let shadowOnlyRegimeReason = null;
+  const hasBullishStructure = !!mss || !!sweep;
 
-  // Capitulation Bounce Condition: BTC oversold/panic sell + structure confirmed
-  const isCapitulationBounce = btcContext?.status === 'GREEN' && btcContext?.rsi4h < 40 && (hasMSS || hasSweep);
+  // Capitulation Bounce Condition: BTC panic sell + oversold intraday + structure confirmed
+  const isCapitulationBounce =
+    btcContext?.status === 'GREEN' &&
+    btcContext?.rsi4h < 35 &&
+    rsi15m < 45 &&
+    hasBullishStructure;
 
   if (regime === 'DOWNTREND') {
+    shadowOnlyRegimeReason = 'REGIME_SHADOW_ONLY (DOWNTREND live disabled)';
     if (isCapitulationBounce) {
-      reasons.push('🔥 DOWNTREND (Capitulation Bounce)');
-      MIN_QUALITY_SCORE = 55; // Massively relaxed for capitulation entries and green BTC
+      reasons.push('🧪 DOWNTREND (Capitulation Shadow)');
+      MIN_QUALITY_SCORE = 55; // Shadow monitor for extreme capitulation candidates
     }
     else if (btcContext?.status === 'GREEN' && trend4h === 'BULLISH') {
       reasons.push('🟢 DOWNTREND (Pullback Support BTC-GREEN)');
@@ -2709,11 +2716,12 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       return null;
     }
   } else if (regime === 'TRANSITION') {
+    shadowOnlyRegimeReason = 'REGIME_SHADOW_ONLY (TRANSITION live disabled)';
     if (isCapitulationBounce) {
-      reasons.push('🔥 TRANSITION (Capitulation Bounce)');
+      reasons.push('🧪 TRANSITION (Capitulation Shadow)');
       MIN_QUALITY_SCORE = 55;
     } else {
-      // Relaxed to 65 to un-choke valid bounce trades that were blocked at 75
+      // Keep legacy thresholding for shadow observation while live stays disabled
       MIN_QUALITY_SCORE = alphaSignal ? 60 : 65; 
     }
   } else if (regime === 'TRENDING') {
@@ -3060,6 +3068,26 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const realRR = slMultiplier > 0 ? tpMultiplier / slMultiplier : 0;
   if (realRR < 1.5) {
     console.log(`[REJECT] ${symbol}: R:R real insuficiente (${realRR.toFixed(2)} < 1.50) para régimen ${regime}`);
+    return null;
+  }
+
+  if (shadowOnlyRegimeReason) {
+    console.log(`[REJECT] ${symbol}: ${regime} configured as SHADOW_ONLY for live spot entries`);
+    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
+      symbol,
+      score,
+      currentPrice,
+      regime,
+      shadowOnlyRegimeReason,
+      btcContext,
+      shadowEntryMetrics,
+      categoryScores,
+      {
+        ...shadowMetaBase,
+        requiredScore: MIN_QUALITY_SCORE,
+        requiredStrongCategories: requiredStrong
+      }
+    ));
     return null;
   }
 

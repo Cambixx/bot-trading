@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v7.3.0 Capitulation & Trend Discipline)
+# 🦅 Documentación del Algoritmo de Trading (v7.4.0 Spot Regime Scalper)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -39,9 +39,10 @@ El puntaje final (0–100) utiliza pesos fijos y una validación binaria final (
 - 3+ categorías fuertes (>60) → **+3 pts** | 4+ → **+5 pts**
 
 ### 🧠 Ajuste de Momentum (Self-Learning v6.0)
-El sistema rastrea los scores de un símbolo en los últimos ciclos (Signal Memory):
-- **Momentum Alcista Sano:** (el score sube progresivamente en ciclos consecutivos) → **+3 pts**
-- **Spike Sospechoso:** (el score salta abruptamente de 0 o muy bajo a > 70 en un ciclo) → **-5 pts**
+El sistema sigue rastreando los scores de un símbolo en los últimos ciclos (`Signal Memory`), pero desde `v7.3.0` el ajuste quedó **desactivado en runtime**:
+- **Momentum Alcista Sano:** se sigue midiendo y persistiendo, pero el bonus live está neutralizado a `0`.
+- **Spike Sospechoso:** se sigue midiendo y persistiendo, pero la penalización live está neutralizada a `0`.
+- **Objetivo actual:** conservar trazabilidad para auditoría sin contaminar entradas live con una señal estadísticamente débil.
 
 ### 🚀 Alpha & Relative Strength (v7.0)
 El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h y 1h.
@@ -63,31 +64,31 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 
 ---
 
-## 4. Regímenes de Mercado y Umbrales (v7.3.0 — activo)
+## 4. Regímenes de Mercado y Umbrales (v7.4.0 — activo)
 
-| Régimen | Score Mínimo | Estrategia | Size Sugerido |
-|---------|-------------|------------|---------------|
-| **RANGING** | 60 | Mean reversion — optimizado en v7.0 | 1.5% – 5.0% |
-| **TRENDING** | 65 | Pullbacks dinámicos; Alpha reduce threshold a 60 | 2.5% – 7.0% |
-| **HIGH_VOLATILITY** | 70 | Estructura obligatoria — size defensivo | 1.0% – 4.0% |
-| **TRANSITION** | 65 | Alpha baja a 60. Capitulation Bounce baja a 55 | 1.5% – 5.0% |
-| **DOWNTREND** | 68 - 75 | Alpha 65. Capitulation Bounce/BTC Verde baja a 55-60 | 0.8% – 3.0% |
+| Régimen | Score Mínimo Live | Estrategia | Size Sugerido |
+|---------|-------------------|------------|---------------|
+| **RANGING** | 60 | Mean reversion long-only; comprar barato con estructura | 1.5% – 5.0% |
+| **TRENDING** | 65 | Pullback continuation; Alpha puede bajar a 60 | 2.5% – 7.0% |
+| **HIGH_VOLATILITY** | 70 | Breakout ultra-estricto con estructura y volumen fuerte | 1.0% – 4.0% |
+| **TRANSITION** | **Shadow-only** | No se opera live; se monitoriza edge real con `REGIME_SHADOW_ONLY` | 0% live |
+| **DOWNTREND** | **Shadow-only** | No se opera live; capitulaciones se observan primero vía shadow | 0% live |
 
-> **Nota v7.1.0:** Se relajan MASIVAMENTE los umbrales de score. Análisis de shadow trading probó que exigir >75 forzaba a atrapar techos (fake breakouts) en el mercado de retrocesos violentos. Se introdujo la **Capitulation Bounce Strategy**: si BTC está en status GREEN pero su RSI 4h < 40 y el token tiene estructura validada, el umbral de entrada rompe todas las barreras y cae a 55-60. 
+> **Nota v7.4.0:** El motor se reorienta a spot long-only para scalping/day trading. `TRANSITION` y `DOWNTREND` conservan lógica interna de score para auditoría shadow, pero sus setups ya no se ejecutan en live hasta demostrar edge nuevo de forma consistente.
 
 ---
 
 ## 5. Gestión de Riesgo
 
-### SL/TP Adaptativo por Régimen (v5.2a — activos)
+### SL/TP Adaptativo por Régimen (parámetros del motor)
 
 | Régimen | SL (×ATR) | TP (×ATR) | R:R Real |
 |---------|-----------|-----------|----------|
 | **TRENDING** | 2.2× | 4.5× | **2.05:1** |
 | **RANGING** | 1.8× | 3.0× | **1.67:1** |
 | **HIGH_VOL** | 1.0× | 2.5× | **2.50:1** |
-| **DOWNTREND** | 1.8× | 3.8× | **2.11:1** |
-| **TRANSITION** | 1.6× | 3.2× | **2.00:1** |
+| **DOWNTREND** | 1.8× | 3.8× | **2.11:1** *(shadow-only)* |
+| **TRANSITION** | 1.6× | 3.2× | **2.00:1** *(shadow-only)* |
 
 > **FIX v5.2a — R:R Real Gate:** Se añadió un gate pre-emisión que calcula el R:R real (TP_mult / SL_mult) y rechaza cualquier señal con R:R < 1.5. El `entryMetrics.riskRewardRatio` ahora refleja el R:R real, no un valor teórico fijo.
 
@@ -116,7 +117,7 @@ Si una señal logra un score $\geq$ 50 pero es rechazada en la fase final (por u
 - **Resolución Hifi (v7.0):** El bot ya no usa "checkpoints" de precio fijos. Ahora descarga el historial de velas de 15m para simular el path exacto del precio y resolver TP/SL con precisión real de exchange.
 
 ### 2. Signal Memory (Momentum Cross-Cycle)
-El algoritmo rompe la limitación de la falta de estado (statelessness). Guarda los puntajes de los activos ciclo tras ciclo. En el momento de calificar, lee este historial y aplica los **Ajustes de Momentum (+3 ó -5 puntos)** descritos en la sección de Scoring.
+El algoritmo rompe la limitación de la falta de estado (statelessness). Guarda los puntajes de los activos ciclo tras ciclo. En el momento de calificar, lee este historial y registra el ajuste de momentum potencial, aunque desde `v7.3.0` su impacto live está neutralizado a `0`.
 
 - **Trazabilidad v6.0.3:** `scoreBeforeMomentum` y `momentumAdjustment` se persisten en señales, near-misses y autopsias para medir el edge real del self-learning.
 
@@ -135,7 +136,7 @@ El orden de evaluación para cada señal es:
 ```
 1. Sesión Asia (00-07 UTC)      → REJECT si AVOID_ASIA_SESSION=true
 2. Volume DEAD (ratio < 0.3)    → REJECT siempre
-3. bbPercent > 0.85 (0.82 en TRANSITION) → REJECT estricto (no se permite bypass por breakouts)
+3. bbPercent > 0.85 general, 0.82 en `TRANSITION`, 0.65 en `TRENDING` → REJECT estricto
 4. Dist EMA21 > 1.8%            → REJECT (precio demasiado lejos para comprar)
 5. Dist EMA9 > 2.0% (!breakout) → REJECT (chasing filter)
 6. BTC-SEM RED y score < 88     → REJECT
@@ -144,9 +145,9 @@ El orden de evaluación para cada señal es:
 9. HIGH_VOLATILITY: score < 90 + sin estructura + vol < 1.5x → REJECT
 10. TRENDING: sin pullback ni estructura → REJECT
 11. RANGING: BB% > 0.75 (BUY) o sin MSS/Sweep (score < 85) → REJECT
-12. TRANSITION: BB% > 0.92 (BUY) → REJECT [FIX v5.2a]
-13. DOWNTREND: Capitulation Bounce requerimientos especiales [v5.3]
-14. Score < MIN_QUALITY_SCORE por régimen → REJECT (`TRANSITION` usa 75 fijo)
+12. `TRANSITION`: BB% > 0.82 (BUY) → REJECT
+13. `DOWNTREND` / `TRANSITION`: si pasan el pipeline, se guardan como `REGIME_SHADOW_ONLY` en lugar de emitirse live
+14. Score < MIN_QUALITY_SCORE por régimen → REJECT
 15. Score < 80 sin confirmación visual → REJECT
 16. Strong Categories < mínimo por régimen → REJECT
 17. R:R real < 1.5 → REJECT [FIX v5.2a]
@@ -205,7 +206,13 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ## 9. Historial de Versiones (Changelog)
 
-### v7.3.0 — Capitulation & Trend Discipline (Mar 18, 2026) - ACTUAL
+### v7.4.0 — Spot Regime Scalper (Mar 20, 2026) - ACTUAL
+- **Scope live reorientado:** `TRANSITION` y `DOWNTREND` salen de producción live y pasan a `shadow-only` para proteger el estilo `spot` long-only frente a compras de baja calidad estructural.
+- **Nuevo rechazo trazable:** Los setups válidos que pertenecen a esos regímenes se persisten como near-misses `REGIME_SHADOW_ONLY (...)`, permitiendo seguir midiendo si realmente había edge sin asumir riesgo real.
+- **Bug fix crítico:** El runtime deja de referenciar `hasMSS` / `hasSweep` fuera de scope y usa la estructura detectada (`mss` / `sweep`), eliminando una fuente de errores operativos en producción.
+- **Capitulation más estricta:** La observación de rebotes se estrecha a contexto más extremo: `BTC RSI4H < 35`, `RSI15m < 45` y estructura confirmada.
+
+### v7.3.0 — Capitulation & Trend Discipline (Mar 18, 2026)
 - **Trend BB% Hard Limit:** En régimen `TRENDING`, el límite máximo permitido de las Bandas de Bollinger se aprieta dramáticamente de 0.85 a **0.65**. Suprime compras sobre-extendidas para mitigar masivamente los *fake-breakouts* detectados (19% WR). 
 - **Green Capitulation:** Los umbrales mínimos de `DOWNTREND` se deprimen a 55-60 cuando BTC-SEM es GREEN, incrementando las oportunidades de los rebotes sobrevendidos (históricamente el régimen más rentable, 55% WR).
 - **Momentum Deprecation:** El ajuste predictivo transversal transversal `+3/-5` (Signal Memory) se neutralizó a 0, puesto que estadísticamente agregaba ruido sin ganancia real.
