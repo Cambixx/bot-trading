@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v7.4.0-SelfLearn';
+const ALGORITHM_VERSION = 'v7.4.1-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -445,7 +445,7 @@ export async function loadShadowTradeArchive(context) {
 async function saveShadowTrades(shadows, context) {
   try {
     const store = getInternalStore(context);
-    await store.setJSON(SHADOW_STORE_KEY, shadows.slice(-100)); // Keep last 100
+    await store.setJSON(SHADOW_STORE_KEY, shadows.slice(-100)); // Keep last 100 pending near-misses
   } catch (e) {
     console.error('[SHADOW] Error saving:', e.message);
   }
@@ -461,28 +461,37 @@ async function saveShadowTradeArchive(shadows, context) {
 }
 
 async function archiveResolvedShadowTrades(shadows, context, pLog = console.log) {
-  const resolved = shadows.filter(s => s.outcome !== 'PENDING' && !s.archivedAt);
-  if (!resolved.length) return shadows;
+  const settled = shadows.filter(s => s.outcome !== 'PENDING');
+  if (!settled.length) return shadows;
 
-  const archive = await loadShadowTradeArchive(context);
-  const archiveIds = new Set(archive.map(s => s.id));
-  const archivedAt = Date.now();
-  const newArchiveEntries = [];
+  const resolvedToArchive = settled.filter(s => !s.archivedAt);
+  if (resolvedToArchive.length) {
+    const archive = await loadShadowTradeArchive(context);
+    const archiveIds = new Set(archive.map(s => s.id));
+    const archivedAt = Date.now();
+    const newArchiveEntries = [];
 
-  for (const shadow of resolved) {
-    shadow.archivedAt = shadow.archivedAt || archivedAt;
-    if (!archiveIds.has(shadow.id)) {
-      archiveIds.add(shadow.id);
-      newArchiveEntries.push({ ...shadow });
+    for (const shadow of resolvedToArchive) {
+      shadow.archivedAt = shadow.archivedAt || archivedAt;
+      if (!archiveIds.has(shadow.id)) {
+        archiveIds.add(shadow.id);
+        newArchiveEntries.push({ ...shadow });
+      }
+    }
+
+    if (newArchiveEntries.length > 0) {
+      await saveShadowTradeArchive([...archive, ...newArchiveEntries], context);
+      pLog(`[SHADOW_ARCHIVE] Archived ${newArchiveEntries.length} resolved near-misses`);
     }
   }
 
-  if (newArchiveEntries.length > 0) {
-    await saveShadowTradeArchive([...archive, ...newArchiveEntries], context);
-    pLog(`[SHADOW_ARCHIVE] Archived ${newArchiveEntries.length} resolved near-misses`);
+  const activePendingOnly = shadows.filter(s => s.outcome === 'PENDING');
+  const prunedCount = shadows.length - activePendingOnly.length;
+  if (prunedCount > 0) {
+    pLog(`[SHADOW] Pruned ${prunedCount} resolved near-misses from active window`);
   }
 
-  return shadows;
+  return activePendingOnly;
 }
 
 function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcContext, entryMetrics, categoryScores, meta = {}) {
@@ -530,11 +539,26 @@ function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcCon
 
 async function updateShadowTrades(tickers, context, pLog = console.log) {
   try {
-    const shadows = await loadShadowTrades(context);
+    let shadows = await loadShadowTrades(context);
     if (!shadows.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
 
+    const alreadyResolved = shadows.filter(s => s.outcome !== 'PENDING' && s.outcome !== 'EXPIRED');
+    if (shadows.some(s => s.outcome !== 'PENDING')) {
+      const activePendingOnly = await archiveResolvedShadowTrades(shadows, context, pLog);
+      if (activePendingOnly.length !== shadows.length) {
+        shadows = activePendingOnly;
+        await saveShadowTrades(shadows, context);
+      } else {
+        shadows = activePendingOnly;
+      }
+    }
+
     const pendingShadows = shadows.filter(s => s.outcome === 'PENDING');
-    if (!pendingShadows.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
+    if (!pendingShadows.length) {
+      const wouldWin = alreadyResolved.filter(s => s.outcome === 'WOULD_WIN').length;
+      const wouldLose = alreadyResolved.filter(s => s.outcome === 'WOULD_LOSE').length;
+      return { total: alreadyResolved.length, wouldWin, wouldLose };
+    }
 
     // Group pending by symbol to minimize API calls
     const symbols = [...new Set(pendingShadows.map(s => s.symbol))];
@@ -605,8 +629,13 @@ async function updateShadowTrades(tickers, context, pLog = console.log) {
     }
 
     if (updated) {
-      await archiveResolvedShadowTrades(shadows, context, pLog);
+      const resolvedBeforeCleanup = shadows.filter(s => s.outcome !== 'PENDING' && s.outcome !== 'EXPIRED');
+      shadows = await archiveResolvedShadowTrades(shadows, context, pLog);
       await saveShadowTrades(shadows, context);
+
+      const wouldWin = resolvedBeforeCleanup.filter(s => s.outcome === 'WOULD_WIN').length;
+      const wouldLose = resolvedBeforeCleanup.filter(s => s.outcome === 'WOULD_LOSE').length;
+      return { total: resolvedBeforeCleanup.length, wouldWin, wouldLose };
     }
 
     const resolved = shadows.filter(s => s.outcome !== 'PENDING' && s.outcome !== 'EXPIRED');
@@ -3069,6 +3098,20 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   if (realRR < 1.5) {
     console.log(`[REJECT] ${symbol}: R:R real insuficiente (${realRR.toFixed(2)} < 1.50) para régimen ${regime}`);
     return null;
+  }
+
+  // Reopen only the audited DOWNTREND subset that still buys cheap with real support.
+  const allowLiveDowntrendSubset =
+    shadowOnlyRegimeReason === 'REGIME_SHADOW_ONLY (DOWNTREND live disabled)' &&
+    signalType === 'BUY' &&
+    btcContext?.status === 'GREEN' &&
+    hasBullishStructure &&
+    bbPercent <= 0 &&
+    categoryScores.volume >= 50;
+
+  if (allowLiveDowntrendSubset) {
+    shadowOnlyRegimeReason = null;
+    reasons.push('🟢 DOWNTREND subset live');
   }
 
   if (shadowOnlyRegimeReason) {

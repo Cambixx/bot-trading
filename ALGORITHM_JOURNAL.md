@@ -6,27 +6,33 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v7.4.0 (Active)
-**Date:** Mar 20, 2026
-**Theme:** "SPOT REGIME SCALPER"
+## Current Version: v7.4.1 (Active)
+**Date:** Mar 24, 2026
+**Theme:** "DOWNTREND SUBSET RE-ENTRY"
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v7.4.0-SelfLearn`.
-- **Live Scope:** El runtime prioriza el estilo `spot` long-only de scalping/day trading. `RANGING` y `TRENDING` siguen operativos en live; `TRANSITION` y `DOWNTREND` pasan a modo **shadow-only** para cortar compras estructuralmente frágiles.
-- **Shadow Quarantine:** Si un setup de `TRANSITION` o `DOWNTREND` supera calidad, volumen, confirmación visual, categorías fuertes y R:R, no se ejecuta en live; se registra como near-miss con rechazo `REGIME_SHADOW_ONLY (...)` para seguir midiendo edge sin pagar pérdidas reales.
-- **Bug Fix Crítico:** Se corrige el uso de `hasMSS` / `hasSweep` fuera de scope dentro del bloque de capitulación. El runtime debe usar `mss` / `sweep` detectados en la señal. Este bug generó miles de errores en logs y redujo la fiabilidad operacional.
-- **Capitulation Tightening:** La hipótesis de capitulación ya no se interpreta como licencia agresiva. Queda restringida a contexto más extremo (`BTC RSI4H < 35`, `RSI15m < 45`, estructura confirmada) y se observa primero vía shadow.
-- **Momentum Deprecation:** Se mantiene el impacto de Signal Memory neutralizado a `0`; la métrica sigue guardándose para auditoría, pero no altera entradas.
+- **Runtime Version:** `v7.4.1-SelfLearn`.
+- **Live Scope:** `RANGING`, `TRENDING` y `HIGH_VOLATILITY` siguen operativos en live. `TRANSITION` permanece en **shadow-only**. `DOWNTREND` sigue en cuarentena por defecto, pero se reabre un micro-subset explícito.
+- **DOWNTREND Surgical Re-Entry:** Un setup `DOWNTREND` solo puede volver a live si supera el pipeline completo y además cumple `BTC-SEM GREEN` + estructura alcista (`MSS` o `Sweep`) + `bbPercent <= 0` + score de volumen `>= 50`. Todo lo demás sigue registrándose como `REGIME_SHADOW_ONLY (...)`.
+- **Shadow Hygiene Fix:** Los near-misses resueltos/expirados se archivan y se purgan del shadow activo. `shadow_trades.json` debe volver a representar solo la ventana pendiente reciente, sin contaminarse con filas ya archivadas.
+- **Bug Found:** El shadow activo retenía registros ya resueltos tras archivarlos, lo que solapaba la ventana reciente con el histórico y sesgaba las auditorías.
+- **Momentum Audit Note:** `momentumAdjustment` se mantiene neutralizado a `0`; cualquier diferencia entre `scoreBeforeMomentum` y `score` viene del castigo de bajo volumen, no de self-learning activo.
 
 ### Hypothesis / Goal:
-El objetivo es elevar el WR real cortando por completo la exposición live a los dos regímenes que acaban de mostrar `0% WR` (`TRANSITION` y `DOWNTREND`) sin perder aprendizaje. Si el shadow demuestra que un subconjunto muy concreto de esas señales vuelve a tener edge, se reintroducirá con reglas explícitas y tamaño conservador.
+Recuperar WR live sin reabrir todo `DOWNTREND`: solo se deja pasar el subset "comprar barato con estructura, BTC sano y volumen real" que sí mostró edge en shadow. En paralelo, restaurar fiabilidad de auditoría manteniendo el shadow activo limpio y no solapado con el archive.
 
-### Verdict (v7.4.0 Audit — Pendiente):
-Pendiente de muestra nueva en producción.
+### Verdict (v7.4.1 Audit — Pendiente):
+Pendiente de muestra nueva en producción. `TRANSITION` sigue bloqueado; `DOWNTREND` queda reintroducido solo en un subset estrecho que debe demostrar WR live > 55% antes de ampliarse.
 
 ---
 
 ## Past Versions (Audit History)
+
+### v7.4.0 (SPOT REGIME SCALPER)
+- **Status:** Superseded by v7.4.1 (Mar 24, 2026)
+- **Runtime Version:** `v7.4.0-SelfLearn`.
+- **Key Change:** `TRANSITION` y `DOWNTREND` pasaron a cuarentena total `shadow-only` para proteger el estilo `spot` long-only.
+- **Observation:** La cuarentena protegió capital frente a `TRANSITION`, pero la auditoría posterior detectó dos hechos clave: un subset barato y estructurado de `DOWNTREND` seguía teniendo edge en shadow, y el shadow activo retenía filas ya archivadas, contaminando la lectura de la ventana reciente.
 
 ### v7.3.0 (CAPITULATION & TREND DISCIPLINE)
 - **Status:** Superseded by v7.4.0 (Mar 20, 2026)
@@ -112,6 +118,8 @@ v5.2a mantiene todos los umbrales de score de v5.2 (que funcionaron correctament
 6. **Threshold documentado != threshold efectivo:** [Mar 6] Si un régimen necesita un suelo duro, no puede compartir reductores globales de score. SOTT puede mejorar el setup, pero no debe rebajar el gate de `TRANSITION`.
 7. **BTC-SEM GREEN no basta:** [Mar 20] Un BTC saludable no autoriza compras agresivas en altcoins si el régimen local sigue en `DOWNTREND` o `TRANSITION`. El contexto macro puede estar verde mientras la estructura operable de los alts sigue rota.
 8. **Shadow Quarantine > Threshold Whiplash:** [Mar 20] Cuando un régimen entero entra en sospecha, es mejor moverlo temporalmente a `shadow-only` que seguir oscilando thresholds live sin edge confirmado.
+9. **Shadow activo != shadow histórico:** [Mar 24] El store activo debe contener solo near-misses pendientes. Si mezcla resueltos ya archivados, la ventana reciente deja de ser interpretable.
+10. **No todo `DOWNTREND` es basura:** [Mar 24] El régimen completo sigue siendo frágil, pero el subset "barato + estructura + BTC GREEN + volumen suficiente" sí merece validación live controlada.
 
 ---
 
@@ -119,6 +127,8 @@ v5.2a mantiene todos los umbrales de score de v5.2 (que funcionaron correctament
 
 - **~~Risk:Reward Adjustment~~:** ~~Si win rate cae bajo 50% con MODO AGRESIVO, considera subir el Target/R:R de 1.5 a 1.8.~~ **RESUELTO en v5.2a:** El gate de R:R mínimo 1.5 ya garantiza este mínimo usando el R:R real de ATR. Si el mercado no ofrece R:R ≥ 1.5, simplemente no se emite la señal.
 - **Time-based filtering:** El sistema restringe el trading durante la sesión Asia (baja liquidez). Hay que evaluar explícitamente el WR de trades que entran en la apertura London vs. NY. El único trade perdedor (TRXUSDT) parece haberse gestado antes de London.
-- **DOWNTREND Bounce Mode [NUEVA — Feb 24]:** Cuando BTC-SEM=GREEN y el mercado está en oversold extremo (RSI4H BTC < 35), permitir entradas de rebote con umbral elevado (score > 80) + RSI15m < 45 (no sobreextendido) + estructura confirmada (MSS o Sweep). El 23-Feb a las ~17:15 UTC, ETH/DOT/BTC tenían score ~70, estructura OK y BTC verde, pero fueron rechazados por DOWNTREND. Este patrón de rebote merece ser capturado con controles de seguridad.
-- **TRANSITION Hard Lock Validation [NUEVA — Mar 6]:** Monitorizar los próximos near-misses resueltos de score 71-74 en `TRANSITION`. Si el shadow trading demuestra que la mayoría de esos rechazos vuelven a ser `WOULD_WIN`, habrá que refinar por contexto (BTC/session/structure), no relajar de nuevo el umbral global.
-- **Regime Shadow Re-Entry [NUEVA — Mar 20]:** Si los near-misses `REGIME_SHADOW_ONLY` muestran durante varias sesiones un WR > 55% en un subconjunto claro (`BTC GREEN`, estructura confirmada, RSI15m < 45 y score alto), reintroducir ese subset con tamaño reducido antes de reabrir el régimen completo.
+- **~~DOWNTREND Bounce Mode~~:** **PARCIALMENTE VALIDADA en v7.4.1.** No se reabre el régimen completo. Solo pasa a live el subset con `BTC GREEN` + `MSS/Sweep` + `bbPercent <= 0` + volumen categórico `>= 50`. Falta validar WR live antes de ampliar.
+- **~~TRANSITION Hard Lock Validation~~:** **REFUTADA en auditoría Mar 24.** Los near-misses `TRANSITION` de score 71-74 resolvieron `1W / 9L`; no hay base para relajar el lock.
+- **~~Regime Shadow Re-Entry~~:** **PARCIALMENTE VALIDADA en v7.4.1.** La reapertura se limita a `DOWNTREND`; `TRANSITION` sigue fuera por falta de edge.
+- **Downtrend Live Subset Validation [NUEVA — Mar 24]:** Si el subset `DOWNTREND` reintroducido mantiene WR > 55% con drawdown controlado durante varias sesiones, evaluar si merece una ampliación por horario o por score.
+- **Shadow Window Sanity [NUEVA — Mar 24]:** Verificar en los próximos ciclos que `shadow_trades.json` quede compuesto solo por near-misses `PENDING` y sin solape estructural con `shadow_trades_archive.json`.

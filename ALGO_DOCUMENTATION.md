@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v7.4.0 Spot Regime Scalper)
+# 🦅 Documentación del Algoritmo de Trading (v7.4.1 Spot Regime Scalper)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -64,7 +64,7 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 
 ---
 
-## 4. Regímenes de Mercado y Umbrales (v7.4.0 — activo)
+## 4. Regímenes de Mercado y Umbrales (v7.4.1 — activo)
 
 | Régimen | Score Mínimo Live | Estrategia | Size Sugerido |
 |---------|-------------------|------------|---------------|
@@ -72,9 +72,9 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 | **TRENDING** | 65 | Pullback continuation; Alpha puede bajar a 60 | 2.5% – 7.0% |
 | **HIGH_VOLATILITY** | 70 | Breakout ultra-estricto con estructura y volumen fuerte | 1.0% – 4.0% |
 | **TRANSITION** | **Shadow-only** | No se opera live; se monitoriza edge real con `REGIME_SHADOW_ONLY` | 0% live |
-| **DOWNTREND** | **Shadow-only** | No se opera live; capitulaciones se observan primero vía shadow | 0% live |
+| **DOWNTREND** | **55–75 + subset gate** | Rebote spot long-only solo si `BTC GREEN` + `MSS/Sweep` + `bbPercent <= 0` + volumen categórico `>= 50` | 0.5% – 2.0% *(subset)* |
 
-> **Nota v7.4.0:** El motor se reorienta a spot long-only para scalping/day trading. `TRANSITION` y `DOWNTREND` conservan lógica interna de score para auditoría shadow, pero sus setups ya no se ejecutan en live hasta demostrar edge nuevo de forma consistente.
+> **Nota v7.4.1:** El motor sigue orientado a spot long-only para scalping/day trading. `TRANSITION` permanece completamente en `shadow-only`. `DOWNTREND` solo puede volver a live en un micro-subset auditado; el resto del régimen sigue en cuarentena.
 
 ---
 
@@ -87,7 +87,7 @@ El bot mide cuánto se desvía un token del rendimiento de BTC en ventanas de 4h
 | **TRENDING** | 2.2× | 4.5× | **2.05:1** |
 | **RANGING** | 1.8× | 3.0× | **1.67:1** |
 | **HIGH_VOL** | 1.0× | 2.5× | **2.50:1** |
-| **DOWNTREND** | 1.8× | 3.8× | **2.11:1** *(shadow-only)* |
+| **DOWNTREND** | 1.8× | 3.8× | **2.11:1** *(subset live auditado)* |
 | **TRANSITION** | 1.6× | 3.2× | **2.00:1** *(shadow-only)* |
 
 > **FIX v5.2a — R:R Real Gate:** Se añadió un gate pre-emisión que calcula el R:R real (TP_mult / SL_mult) y rechaza cualquier señal con R:R < 1.5. El `entryMetrics.riskRewardRatio` ahora refleja el R:R real, no un valor teórico fijo.
@@ -111,10 +111,11 @@ El bot no solo emite señales, sino que **aprende** monitoreando continuamente s
 ### 1. Shadow Trading (Paper Trading Fantasma)
 Si una señal logra un score $\geq$ 50 pero es rechazada en la fase final (por un filtro de BTC, score menor al umbral de régimen, o falta de categorías fuertes), se guarda como un *near-miss* (casi acierto). En análisis posteriores, el bot rastrea qué hubiera pasado (WOULD_WIN o WOULD_LOSE) para decirnos qué filtros nos están quitando trades ganadores.
 
-- **Shadow Activo:** mantiene una ventana reciente y ligera para evaluación operativa del runtime.
+- **Shadow Activo:** mantiene solo near-misses `PENDING` en una ventana reciente y ligera para evaluación operativa del runtime.
 - **Shadow Histórico (v6.0.2):** cada near-miss resuelto o expirado se archiva de forma permanente en un store separado.
 - **Benchmark Persistido (v6.0.3):** cada near-miss guarda el benchmark con el que fue evaluado.
 - **Resolución Hifi (v7.0):** El bot ya no usa "checkpoints" de precio fijos. Ahora descarga el historial de velas de 15m para simular el path exacto del precio y resolver TP/SL con precisión real de exchange.
+- **Saneamiento v7.4.1:** al archivarse, los near-misses resueltos/expirados se purgan del shadow activo para evitar solape con `shadow_trades_archive.json`.
 
 ### 2. Signal Memory (Momentum Cross-Cycle)
 El algoritmo rompe la limitación de la falta de estado (statelessness). Guarda los puntajes de los activos ciclo tras ciclo. En el momento de calificar, lee este historial y registra el ajuste de momentum potencial, aunque desde `v7.3.0` su impacto live está neutralizado a `0`.
@@ -146,12 +147,13 @@ El orden de evaluación para cada señal es:
 10. TRENDING: sin pullback ni estructura → REJECT
 11. RANGING: BB% > 0.75 (BUY) o sin MSS/Sweep (score < 85) → REJECT
 12. `TRANSITION`: BB% > 0.82 (BUY) → REJECT
-13. `DOWNTREND` / `TRANSITION`: si pasan el pipeline, se guardan como `REGIME_SHADOW_ONLY` en lugar de emitirse live
-14. Score < MIN_QUALITY_SCORE por régimen → REJECT
-15. Score < 80 sin confirmación visual → REJECT
-16. Strong Categories < mínimo por régimen → REJECT
-17. R:R real < 1.5 → REJECT [FIX v5.2a]
-18. Correlación sectorial protegida → REJECT operativo + shadow `SECTOR_CORRELATION`
+13. `TRANSITION`: si pasa el pipeline, se guarda como `REGIME_SHADOW_ONLY`
+14. `DOWNTREND`: solo puede emitirse live si `BTC GREEN` + `MSS/Sweep` + `bbPercent <= 0` + score de volumen `>= 50`; si no, `REGIME_SHADOW_ONLY`
+15. Score < MIN_QUALITY_SCORE por régimen → REJECT
+16. Score < 80 sin confirmación visual → REJECT
+17. Strong Categories < mínimo por régimen → REJECT
+18. R:R real < 1.5 → REJECT [FIX v5.2a]
+19. Correlación sectorial protegida → REJECT operativo + shadow `SECTOR_CORRELATION`
 ```
 
 > **Nota v6.0.3:** solo los sectores taxonomizados (`L1`, `DEFI`, `AI`, etc.) activan el filtro de correlación. `OTHER` deja de actuar como pseudo-sector global.
@@ -198,7 +200,7 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 | Comando | Script | Propósito |
 |---------|--------|-----------|
 | `npm run sync` | `sync-blobs.js` | Descarga los archivos JSON (history, shadow, logs, etc.) desde Netlify Blobs a local. |
-| `npm run scan` | `manual-run.js` | Ejecuta el algoritmo v7.0 localmente usando los datos más recientes de la API de MEXC. Útil para verificar señales en tiempo real. |
+| `npm run scan` | `manual-run.js` | Ejecuta el runtime actual localmente usando los datos más recientes de la API de MEXC. Útil para verificar señales en tiempo real. |
 
 > 💡 **Tip:** Usa `npm run sync` antes de una auditoría para asegurarte de que tus archivos locales coinciden con la realidad de producción.
 
@@ -206,7 +208,13 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ## 9. Historial de Versiones (Changelog)
 
-### v7.4.0 — Spot Regime Scalper (Mar 20, 2026) - ACTUAL
+### v7.4.1 — Downtrend Subset Re-Entry (Mar 24, 2026) - ACTUAL
+- **Reapertura quirúrgica:** `DOWNTREND` deja de ser un bloqueo absoluto. Solo vuelve a live un subset muy estrecho: `BTC GREEN` + estructura confirmada (`MSS/Sweep`) + compra barata (`bbPercent <= 0`) + soporte real de volumen (`categoryScores.volume >= 50`).
+- **TRANSITION sigue cerrado:** el régimen permanece en `shadow-only` sin cambios por falta de edge suficiente.
+- **Shadow activo saneado:** los near-misses resueltos/expirados se archivan y se purgan del store activo para que `shadow_trades.json` vuelva a representar solo la ventana pendiente reciente.
+- **Objetivo:** recuperar edge live desde el único subset con respaldo histórico sin volver a abrir el régimen bajista completo ni contaminar las métricas de self-learning.
+
+### v7.4.0 — Spot Regime Scalper (Mar 20, 2026)
 - **Scope live reorientado:** `TRANSITION` y `DOWNTREND` salen de producción live y pasan a `shadow-only` para proteger el estilo `spot` long-only frente a compras de baja calidad estructural.
 - **Nuevo rechazo trazable:** Los setups válidos que pertenecen a esos regímenes se persisten como near-misses `REGIME_SHADOW_ONLY (...)`, permitiendo seguir midiendo si realmente había edge sin asumir riesgo real.
 - **Bug fix crítico:** El runtime deja de referenciar `hasMSS` / `hasSweep` fuera de scope y usa la estructura detectada (`mss` / `sweep`), eliminando una fuente de errores operativos en producción.
