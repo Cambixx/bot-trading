@@ -1,80 +1,19 @@
 {
   "TRXUSDT": [
     {
-      "score": 61,
-      "regime": "TRENDING",
-      "timestamp": 1774339245633
-    },
-    {
-      "score": 66,
-      "regime": "TRENDING",
-      "timestamp": 1774341943710
-    },
-    {
-      "score": 62,
+      "score": 60,
       "regime": "DOWNTREND",
-      "timestamp": 1774342993030
+      "timestamp": 1774536355837
     },
     {
-      "score": 72,
+      "score": 60,
       "regime": "DOWNTREND",
-      "timestamp": 1774343767723
+      "timestamp": 1774536366961
     },
     {
-      "score": 72,
+      "score": 54,
       "regime": "DOWNTREND",
-      "timestamp": 1774343778296
-    },
-    {
-      "score": 50,
-      "regime": "DOWNTREND",
-      "timestamp": 1774344679516
-    },
-    {
-      "score": 50,
-      "regime": "DOWNTREND",
-      "timestamp": 1774344690666
-    }
-  ],
-  "WLDUSDT": [
-    {
-      "score": 78,
-      "regime": "TRANSITION",
-      "timestamp": 1774341101221
-    },
-    {
-      "score": 55,
-      "regime": "RANGING",
-      "timestamp": 1774344676020
-    },
-    {
-      "score": 55,
-      "regime": "RANGING",
-      "timestamp": 1774344687603
-    },
-    {
-      "score": 63,
-      "regime": "RANGING",
-      "timestamp": 1774346423833
-    }
-  ],
-  "AVAXUSDT": [
-    {
-      "score": 72,
-      "regime": "TRANSITION",
-      "timestamp": 1774342986255
-    }
-  ],
-  "TONUSDT": [
-    {
-      "score": 59,
-      "regime": "DOWNTREND",
-      "timestamp": 1774346426130
-    },
-    {
-      "score": 59,
-      "regime": "DOWNTREND",
-      "timestamp": 1774346436495
+      "timestamp": 1774540865041
     }
   ]
 }
