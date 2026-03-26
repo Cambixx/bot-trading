@@ -2830,7 +2830,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     // 1. RSI/BB Overextension (Mystic Pulse update: strict BB limits to prevent overextended entries)
     let strictBbLimit = 0.85;
     if (regime === 'TRANSITION') strictBbLimit = 0.82;
-    if (regime === 'TRENDING') strictBbLimit = 0.65; // Evitar fake breakouts en tendencia
+    if (regime === 'TRENDING') strictBbLimit = 0.55; // Audit v7.4.2: Tightened to avoid buying tops
 
     if (bbPercent > strictBbLimit) {
       console.log(`[REJECT] ${symbol}: Strict BB Overextension Block (BB: ${bbPercent.toFixed(2)}) - Limit: ${strictBbLimit}`);
@@ -2839,6 +2839,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
     if (rsi15m > 72) {
       console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)})`);
+      return null;
+    }
+
+    if (regime === 'TRENDING' && rsi15m > 68) {
+      console.log(`[REJECT] ${symbol}: Overextended RSI in TRENDING (${rsi15m.toFixed(1)} > 68)`);
       return null;
     }
 
@@ -2859,11 +2864,11 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     }
 
     // === NEW: TRENDING REGIME PULLBACK FILTER ===
-    // In TRENDING regime, only buy pullbacks (near EMA21 or EMA50)
-    // v4.6 FIX: Disable pullback requirement for strong breakouts
-    if (regime === 'TRENDING' && !isBreakout) {
-      const nearEMA21 = Math.abs(distToEma21) < 0.8;  // Within 0.8% of EMA21
-      const nearEMA50 = Math.abs(distToEma50) < 1.5;  // Within 1.5% of EMA50
+    // In TRENDING regime, only buy strict pullbacks (near EMA21 or EMA50)
+    // Audit v7.4.2: Removed isBreakout exception, tightened distances
+    if (regime === 'TRENDING') {
+      const nearEMA21 = Math.abs(distToEma21) < 0.5;  // Within 0.5% of EMA21
+      const nearEMA50 = Math.abs(distToEma50) < 1.0;  // Within 1.0% of EMA50
       const priceAboveEMA21 = distToEma21 > 0;        // Price above EMA21 (uptrend)
       const priceAboveEMA50 = distToEma50 > 0;        // Price above EMA50 (uptrend)
 
@@ -2873,14 +2878,14 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
         return null;
       }
 
-      // Must be at pullback (near EMA21 or EMA50)
+      // Must be at strict pullback (near EMA21 or EMA50)
       if (!nearEMA21 && !nearEMA50) {
-        console.log(`[REJECT] ${symbol}: TRENDING but no pullback to EMA21/50 (dist21: ${distToEma21.toFixed(2)}%, dist50: ${distToEma50.toFixed(2)}%)`);
+        console.log(`[REJECT] ${symbol}: TRENDING but no strict pullback to EMA21/50 (dist21: ${distToEma21.toFixed(2)}%, dist50: ${distToEma50.toFixed(2)}%)`);
         return null;
       }
 
-      if (nearEMA21) reasons.push('📉 Pullback EMA21');
-      if (nearEMA50 && !nearEMA21) reasons.push('📉 Pullback EMA50');
+      if (nearEMA21) reasons.push('📉 Strict Pullback EMA21');
+      if (nearEMA50 && !nearEMA21) reasons.push('📉 Strict Pullback EMA50');
     }
 
     // === NEW: RANGING REGIME STRUCTURE FILTER ===
@@ -3002,10 +3007,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // TRENDING: Require pullback confirmation
   if (regime === 'TRENDING') {
     const hasStructure = mss || sweep;
-    const hasPullback = Math.abs(distToEma21) < 0.8 || Math.abs(distToEma50) < 1.5;
+    const hasPullback = Math.abs(distToEma21) < 0.5 || Math.abs(distToEma50) < 1.0;
 
     if (!hasStructure && !hasPullback) {
-      console.log(`[REJECT] ${symbol} (TRENDING): No structure or pullback (dist21: ${distToEma21.toFixed(2)}%)`);
+      console.log(`[REJECT] ${symbol} (TRENDING): No structure or strict pullback (dist21: ${distToEma21.toFixed(2)}%)`);
       return null;
     }
 
