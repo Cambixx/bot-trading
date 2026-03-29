@@ -6,27 +6,41 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v7.4.1 (Active)
-**Date:** Mar 24, 2026
-**Theme:** "DOWNTREND SUBSET RE-ENTRY"
+## Current Version: v7.4.2 (Active)
+**Date:** Mar 29, 2026
+**Theme:** "DOWNTREND RE-QUARANTINE + RANGING TIGHTENING"
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v7.4.1-SelfLearn`.
-- **Live Scope:** `RANGING`, `TRENDING` y `HIGH_VOLATILITY` siguen operativos en live. `TRANSITION` permanece en **shadow-only**. `DOWNTREND` sigue en cuarentena por defecto, pero se reabre un micro-subset explícito.
-- **DOWNTREND Surgical Re-Entry:** Un setup `DOWNTREND` solo puede volver a live si supera el pipeline completo y además cumple `BTC-SEM GREEN` + estructura alcista (`MSS` o `Sweep`) + `bbPercent <= 0` + score de volumen `>= 50`. Todo lo demás sigue registrándose como `REGIME_SHADOW_ONLY (...)`.
-- **Shadow Hygiene Fix:** Los near-misses resueltos/expirados se archivan y se purgan del shadow activo. `shadow_trades.json` debe volver a representar solo la ventana pendiente reciente, sin contaminarse con filas ya archivadas.
-- **Bug Found:** El shadow activo retenía registros ya resueltos tras archivarlos, lo que solapaba la ventana reciente con el histórico y sesgaba las auditorías.
-- **Momentum Audit Note:** `momentumAdjustment` se mantiene neutralizado a `0`; cualquier diferencia entre `scoreBeforeMomentum` y `score` viene del castigo de bajo volumen, no de self-learning activo.
+- **Runtime Version:** `v7.4.2-SelfLearn`.
+- **Live Scope:** `RANGING`, `TRENDING` y `HIGH_VOLATILITY` operativos en live. `TRANSITION` y `DOWNTREND` en **shadow-only** completo.
+- **DOWNTREND Re-Quarantine:** El subset live reintroducido en v7.4.1 se desactiva por completo. Resultado empírico: **1W / 4L (20% WR)** con **0% favorable move** en las 4 LOSS. El edge shadow (51.9%) no se trasladaba a live porque el benchmark shadow (R:R 1.25:1) es mucho más laxo que el R:R live (2.11:1).
+- **RANGING BB% Cutoff: 0.75 → 0.65:** Las LOSS de TAO (BB%=0.70) y LTC (BB%=0.71) entraron overextended en la banda superior. Las 6 WIN tenían BB% ≤ 0.37. Se reduce el cutoff para eliminar compras en la parte alta del rango.
+- **Low Vol Hard Rejection:** Si el `volumeRatio < 0.8` (que ya dispara Low Vol Penalty -10), ahora se rechaza directamente. LTC LOSS (score 71→61, volRatio 0.69×) entró con volumen muerto y cayó en 12 minutos. El near-miss se registra como `LOW_VOL_HARD`.
 
 ### Hypothesis / Goal:
-Recuperar WR live sin reabrir todo `DOWNTREND`: solo se deja pasar el subset "comprar barato con estructura, BTC sano y volumen real" que sí mostró edge en shadow. En paralelo, restaurar fiabilidad de auditoría manteniendo el shadow activo limpio y no solapado con el archive.
+Subir el WR live de 43.8% hacia ~54.5% eliminando las dos fuentes de LOSS más claras: entradas DOWNTREND sin edge real y entradas RANGING en la banda superior con volumen débil.
 
-### Verdict (v7.4.1 Audit — Pendiente):
-Pendiente de muestra nueva en producción. `TRANSITION` sigue bloqueado; `DOWNTREND` queda reintroducido solo en un subset estrecho que debe demostrar WR live > 55% antes de ampliarse.
+### Bug Found:
+- Low Vol Penalty (-10) era insuficiente como protección sola. El score penalizado seguía superando el umbral de RANGING (60), permitiendo trades con volumen muerto que flash-stopped.
+
+### Lesson Learned:
+- **Shadow benchmark laxo (R:R 1.25:1) exagera el edge de regímenes frágiles respecto al R:R live (2.11:1).** No confiar en el WR shadow como predictor directo del WR live sin ajustar por discrepancia de benchmark.
+- **BB% > 0.65 en RANGING correlacionó 100% con LOSS en la muestra (n=2 LOSS, 0 WIN).** Las WIN en RANGING compran barato (BB% medio ~0.32).
+
+### Pending Hypotheses:
+1. ¿El DOWNTREND podría funcionar con TP más ajustado (3.0× → 2.5× ATR)?
+2. ¿El filtro BTC_RED es excesivamente conservador? (Shadow: 81.8% WR pero con benchmark laxo)
+3. ¿Un trailing stop parcial mejoraría la recuperación en trades direccionalmente correctos que no alcanzan TP?
 
 ---
 
 ## Past Versions (Audit History)
+
+### v7.4.1 — Downtrend Subset Re-Entry (Mar 24, 2026)
+- **Reapertura quirúrgica:** `DOWNTREND` dejaba de ser un bloqueo absoluto. Solo volvía a live un subset muy estrecho: `BTC GREEN` + estructura confirmada (`MSS/Sweep`) + `bbPercent <= 0` + `categoryScores.volume >= 50`.
+- **Shadow Hygiene Fix:** Near-misses resueltos/expirados se archivan y se purgan del shadow activo.
+- **Bug Found:** El shadow activo retenía registros ya resueltos tras archivarlos (solapamiento).
+- **Verdict (Auditoría Mar 29):** **AJUSTE QUIRÚRGICO.** El subset DOWNTREND mostró 1W / 4L (20% WR) con 0% favorable move en todas las LOSS. Se revierte a shadow-only completo en v7.4.2.
 
 ### v7.4.0 (SPOT REGIME SCALPER)
 - **Status:** Superseded by v7.4.1 (Mar 24, 2026)

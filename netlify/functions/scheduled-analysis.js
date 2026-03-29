@@ -13,7 +13,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v7.4.1-SelfLearn';
+const ALGORITHM_VERSION = 'v7.4.2-SelfLearn';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -2957,7 +2957,24 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     // Low Volume Penalty: Requires higher quality in other areas to pass
     score -= 10;
     reasons.push(`⚠️ Low Vol Penalty (-10)`);
-    // We do NOT return null here anymore. We let the Score decide.
+    // === AUDIT v7.4.2: Hard reject if penalty is steep AND volume is truly dead ===
+    // LTC LOSS (score 71→61, volRatio 0.69×) entered with dead volume and flash-stopped in 12min.
+    // If the penalty dropped the score AND volumeRatio is below 0.8, this is not a tradeable setup.
+    if (volumeRatio < 0.8) {
+      console.log(`[REJECT] ${symbol}: Low Vol hard reject (volRatio ${volumeRatio.toFixed(2)} < 0.8 with -10 penalty)`);
+      if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
+        symbol,
+        score,
+        currentPrice,
+        regime,
+        `LOW_VOL_HARD (volRatio ${volumeRatio.toFixed(2)})`,
+        btcContext,
+        { distToEma9: 0, distToEma21: 0, atrPercent: 0, bbPercent: 0 },
+        categoryScores,
+        { scoreBeforeMomentum: score + 10, momentumAdjustment: 0, sector: getSector(symbol) }
+      ));
+      return null;
+    }
   }
 
   // Directional volume check: volume must flow in signal direction
@@ -3021,7 +3038,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   // RANGING: Require structure + buy cheap principle
   if (regime === 'RANGING') {
     // Don't buy in the upper part of the range
-    if (signalType === 'BUY' && bbPercent > 0.75) {
+    // === AUDIT v7.4.2: Tightened from 0.75 → 0.65 ===
+    // TAO LOSS (BB%=0.70) and LTC LOSS (BB%=0.71) entered overextended. All 6 WINs had BB% ≤ 0.37.
+    if (signalType === 'BUY' && bbPercent > 0.65) {
       console.log(`[REJECT] ${symbol} (RANGING): BB% too high (${bbPercent.toFixed(2)})`);
       return null;
     }
@@ -3105,19 +3124,12 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
-  // Reopen only the audited DOWNTREND subset that still buys cheap with real support.
-  const allowLiveDowntrendSubset =
-    shadowOnlyRegimeReason === 'REGIME_SHADOW_ONLY (DOWNTREND live disabled)' &&
-    signalType === 'BUY' &&
-    btcContext?.status === 'GREEN' &&
-    hasBullishStructure &&
-    bbPercent <= 0 &&
-    categoryScores.volume >= 50;
-
-  if (allowLiveDowntrendSubset) {
-    shadowOnlyRegimeReason = null;
-    reasons.push('🟢 DOWNTREND subset live');
-  }
+  // === AUDIT v7.4.2: DOWNTREND subset DISABLED — returned to full shadow-only ===
+  // v7.4.1 reopened this subset but live results were 1W / 4L (20% WR) with 0% favorable move
+  // on all 4 LOSS trades. The shadow edge (51.9% WR) doesn't translate to live because the
+  // shadow benchmark (R:R 1.25:1) is much more lenient than the live R:R (2.11:1).
+  // Keeping as shadow-only until a tighter benchmark validates real edge.
+  // const allowLiveDowntrendSubset = false; // QUARANTINED
 
   if (shadowOnlyRegimeReason) {
     console.log(`[REJECT] ${symbol}: ${regime} configured as SHADOW_ONLY for live spot entries`);

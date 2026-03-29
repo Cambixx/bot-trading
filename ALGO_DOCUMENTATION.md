@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v7.4.1 Spot Regime Scalper)
+# 🦅 Documentación del Algoritmo de Trading (v7.4.2 Spot Regime Scalper)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -208,7 +208,13 @@ Para facilitar las pruebas y el mantenimiento sin depender exclusivamente de los
 
 ## 9. Historial de Versiones (Changelog)
 
-### v7.4.1 — Downtrend Subset Re-Entry (Mar 24, 2026) - ACTUAL
+### v7.4.2 — Downtrend Re-Quarantine + Ranging Tightening (Mar 29, 2026) - ACTUAL
+- **DOWNTREND → shadow-only completo:** El subset live reintroducido en v7.4.1 se desactiva. Resultado empírico: 1W / 4L (20% WR) con 0% favorable move en las 4 LOSS. El edge shadow (51.9%) no se trasladaba a live por discrepancia de benchmark (R:R 1.25:1 shadow vs 2.11:1 live).
+- **RANGING BB% cutoff: 0.75 → 0.65:** Las LOSS de TAO (BB%=0.70) y LTC (BB%=0.71) entraron overextended. Las 6 WIN tenían BB% ≤ 0.37.
+- **Low Vol Hard Rejection:** Si `volumeRatio < 0.8` (ya con Low Vol Penalty -10 activa), se rechaza directamente. Near-miss registrado como `LOW_VOL_HARD`. Corrige LTC LOSS (score 71→61, volRatio 0.69×, flash-stopped en 12min).
+- **Objetivo:** Subir WR live de 43.8% hacia ~54.5% eliminando las dos fuentes de LOSS más claras.
+
+### v7.4.1 — Downtrend Subset Re-Entry (Mar 24, 2026)
 - **Reapertura quirúrgica:** `DOWNTREND` deja de ser un bloqueo absoluto. Solo vuelve a live un subset muy estrecho: `BTC GREEN` + estructura confirmada (`MSS/Sweep`) + compra barata (`bbPercent <= 0`) + soporte real de volumen (`categoryScores.volume >= 50`).
 - **TRANSITION sigue cerrado:** el régimen permanece en `shadow-only` sin cambios por falta de edge suficiente.
 - **Shadow activo saneado:** los near-misses resueltos/expirados se archivan y se purgan del store activo para que `shadow_trades.json` vuelva a representar solo la ventana pendiente reciente.
