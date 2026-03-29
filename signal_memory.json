@@ -1,19 +1,26 @@
 {
-  "TRXUSDT": [
-    {
-      "score": 60,
-      "regime": "DOWNTREND",
-      "timestamp": 1774536355837
-    },
-    {
-      "score": 60,
-      "regime": "DOWNTREND",
-      "timestamp": 1774536366961
-    },
+  "HYPEUSDT": [
     {
       "score": 54,
-      "regime": "DOWNTREND",
-      "timestamp": 1774540865041
+      "regime": "RANGING",
+      "timestamp": 1774770335393
+    },
+    {
+      "score": 50,
+      "regime": "RANGING",
+      "timestamp": 1774771304984
+    },
+    {
+      "score": 50,
+      "regime": "RANGING",
+      "timestamp": 1774772160920
+    }
+  ],
+  "TAOUSDT": [
+    {
+      "score": 58,
+      "regime": "RANGING",
+      "timestamp": 1774774859924
     }
   ]
 }
