@@ -6,7 +6,45 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v7.4.2 (Active)
+## Current Version: v8.0.0 (Active)
+**Date:** Mar 30, 2026
+**Theme:** "RESEARCH-DRIVEN MODULAR RESET"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v8.0.0-ResearchDriven`.
+- **Architecture Reset:** Se abandona el enfoque de `score soup` centrado en decenas de señales correlacionadas y filtros parcheados. El runtime ahora evalúa solo dos módulos `long-only`:
+  - `TREND_PULLBACK`
+  - `BREAKOUT_CONTINUATION`
+- **Bias estructural:** Solo se buscan compras en activos líquidos con tendencia 4H/1H favorable, fortaleza relativa vs BTC y confirmación de volumen/order-flow.
+- **Regime simplification:** `DOWNTREND` vuelve a `shadow-only` completo. `TRANSITION` solo permite `BREAKOUT_CONTINUATION`; cualquier setup no-breakout en ese régimen se rechaza o queda para shadow.
+- **Liquidity-first:** Se añade clasificación `ELITE / HIGH / MEDIUM / LOW` usando volumen 24h, profundidad y spread. `LOW` queda fuera directamente.
+- **Shadow benchmark alignment:** Los near-misses ya no dependen solo del benchmark global por defecto; cuando existe un candidato válido rechazado, el `shadow` hereda el TP/SL porcentual real del módulo correspondiente.
+- **Time stop por setup:** El `stale exit` deja de ser fijo a 12h y pasa a leer `expectedHoldingHours` del setup (por ejemplo, breakout más corto, pullback más largo).
+- **Telemetry upgrade:** `history`, `shadow` y `autopsies` ahora conservan `module`, `entryArchetype`, `liquidityTier`, `expectedHoldingHours` y `riskModel`.
+
+### Hypothesis / Goal:
+Construir un motor más robusto y defendible para `spot` intradía `long-only`, aunque al principio sacrifique frecuencia. La prioridad explícita pasa a ser: calidad de entrada, coherencia live/shadow, liquidez ejecutable y control del riesgo.
+
+### Initial Runtime Observation:
+- **Manual scan ejecutado el 30-Mar-2026 a las 22:00 UTC:** `40` símbolos analizados, `0` señales, `0` errores, `0` near-misses registrados.
+- Lectura provisional: la nueva arquitectura está funcionando y no rompe el runtime, pero podría haber quedado demasiado estricta para el estado actual de mercado o para el universo seleccionado.
+
+### Bug Found:
+- No se detectó bug de ejecución en el scan manual local. La siguiente duda ya no es técnica sino estratégica: si el throughput queda persistentemente en `0`, habrá que relajar reglas concretas sin reintroducir complejidad arbitraria.
+
+### Lesson Learned:
+- **La simplificación era necesaria.** El problema ya no parecía “falta de indicador”, sino demasiada lógica local sin edge demostrado.
+- **Mejor 0 señales limpias que señales malas por obligación.** Aun así, un sistema que nunca encuentra ni near-misses útiles tampoco aprende; hay que vigilar el throughput real.
+- **El benchmark shadow debe parecerse al live o miente.** Por eso v8 traspasa TP/SL reales del módulo al near-miss cuando existe setup válido.
+
+### Pending Hypotheses:
+1. ¿`TREND_PULLBACK` está demasiado estricto en `1H` o en proximidad a EMA21/EMA50?
+2. ¿`BREAKOUT_CONTINUATION` necesita una versión algo menos dura para mercados `TRANSITION` con BTC `GREEN`?
+3. ¿Conviene registrar también near-misses "proto-setup" para no perder aprendizaje cuando ningún módulo llega a candidato completo?
+
+---
+
+## Previous Version: v7.4.2
 **Date:** Mar 29, 2026
 **Theme:** "DOWNTREND RE-QUARANTINE + RANGING TIGHTENING"
 

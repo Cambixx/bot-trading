@@ -1,8 +1,61 @@
-# 🦅 Documentación del Algoritmo de Trading (v7.4.2 Spot Regime Scalper)
+# 🦅 Documentación del Algoritmo de Trading (v8.0.0 Research-Driven)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
 > ⚠️ **Regla de mantenimiento:** Cualquier cambio en `scheduled-analysis.js` debe reflejarse en este documento Y en `ALGORITHM_JOURNAL.md` antes de considerarse completo.
+
+> ℹ️ **Nota de transición:** Desde `v8.0.0-ResearchDriven`, el runtime cambió de una arquitectura basada en score heurístico multi-indicador a una arquitectura modular mucho más simple. Las secciones siguientes contienen todavía bastante contexto histórico de `v7.x`; cuando haya conflicto, manda siempre el bloque `Current Runtime Snapshot (v8.0.0)` de abajo.
+
+---
+
+## Current Runtime Snapshot (v8.0.0)
+
+### Resumen
+- **Runtime Version:** `v8.0.0-ResearchDriven`
+- **Estilo:** `spot`, `long-only`, intradía/day trading
+- **Filosofía:** menos indicadores, más liquidez, más fortaleza relativa, mejor alineación entre `shadow` y `live`
+
+### Arquitectura activa
+- `TREND_PULLBACK`
+  - Busca pullbacks controlados en activos líquidos con tendencia favorable en `4H` y `1H`
+  - Requiere fortaleza relativa vs BTC, control de sobreextensión y reclaim local
+- `BREAKOUT_CONTINUATION`
+  - Busca rupturas con expansión real de volumen y confirmación direccional
+  - Es el único módulo que puede operar en `TRANSITION`
+
+### Filtros estructurales activos
+- Solo pares `USDT`
+- `spread` y `depth` duros
+- filtro fuerte de volumen 24h
+- clasificación de liquidez:
+  - `ELITE`
+  - `HIGH`
+  - `MEDIUM`
+  - `LOW`
+- `LOW` queda fuera del runtime live
+
+### Regímenes activos
+- `TRENDING`: operativo
+- `RANGING`: operativo solo si el setup sigue siendo compatible con sesgo alcista
+- `HIGH_VOLATILITY`: operativo con reglas más estrictas
+- `TRANSITION`: solo `BREAKOUT_CONTINUATION`
+- `DOWNTREND`: `shadow-only`
+
+### Gestión de riesgo activa
+- Cada módulo define su propio:
+  - `tpMultiplier`
+  - `slMultiplier`
+  - `expectedHoldingHours`
+- El `stale exit` ya no es fijo; usa `expectedHoldingHours` del setup cuando existe
+- El benchmark de `shadow` hereda el TP/SL porcentual real del módulo cuando un candidato válido es rechazado
+
+### Telemetría activa
+Las señales, near-misses y autopsias ahora guardan también:
+- `module`
+- `entryArchetype`
+- `liquidityTier`
+- `expectedHoldingHours`
+- `riskModel`
 
 ---
 

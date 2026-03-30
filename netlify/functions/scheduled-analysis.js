@@ -1,19 +1,13 @@
 /**
- * Netlify Scheduled Function - Advanced Day Trading Analysis
- * Optimized for SPOT DAY TRADING with multi-timeframe confluence
- * Uses MEXC Public API for OHLCV + Order Book metrics
- * 
- * Key Features:
- * - Multi-timeframe analysis (15m + 1h confluence)
- * - Stochastic RSI, ADX, SuperTrend for momentum
- * - Price action patterns detection
- * - Enhanced order flow scoring
+ * Netlify Scheduled Function - Research-Driven Spot Day Trading Analysis
+ * Focused on long-only intraday signals for liquid crypto pairs.
+ * Uses MEXC Public API for OHLCV and order book metrics.
  */
 
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v7.4.2-SelfLearn';
+const ALGORITHM_VERSION = 'v8.0.0-ResearchDriven';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 // Environment Configuration - Optimized for Day Trading
@@ -292,10 +286,15 @@ async function recordSignalHistory(signal, context) {
       hasSweep: !!signal.hasSweep,
       btcRisk: signal.btcContext?.status || 'UNKNOWN',
       sector: signal.sector || getSector(signal.symbol),
+      module: signal.module || null,
+      entryArchetype: signal.entryArchetype || null,
+      liquidityTier: signal.liquidityTier || null,
       scoreBeforeMomentum: signal.scoreBeforeMomentum ?? signal.score,
       momentumAdjustment: signal.momentumAdjustment || 0,
       requiredScore: signal.requiredScore || null,
       requiredStrongCategories: signal.requiredStrongCategories || null,
+      expectedHoldingHours: signal.expectedHoldingHours || null,
+      riskModel: signal.riskModel || null,
 
       // Enhanced metrics for analysis
       entryMetrics: signal.entryMetrics || null,
@@ -361,19 +360,21 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
           }
         }
 
-        // AUDIT v3.0: Early exit if no favorable movement after 12 hours
-        // Historical data: 50% of LOSS trades never moved in favorable direction
+        const staleExitHours = Number.isFinite(item.expectedHoldingHours) ? item.expectedHoldingHours : 12;
+
+        // Time stop: if a setup has not shown enough positive progress by its expected holding window,
+        // close it as stale instead of letting weak momentum linger indefinitely.
         const hoursOpen = (Date.now() - item.time) / 3600000;
         const favorableMove = item.type === 'BUY'
           ? (item.maxFavorable - entryPrice) / entryPrice
           : (entryPrice - item.maxFavorable) / entryPrice;
 
-        if (item.status === 'OPEN' && hoursOpen > 12 && favorableMove < 0.003) {
+        if (item.status === 'OPEN' && hoursOpen > staleExitHours && favorableMove < 0.003) {
           item.status = 'CLOSED';
           item.outcome = 'STALE_EXIT';
           updated = true;
           recordTradeAutopsy(item, context);
-          pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move only ${(favorableMove * 100).toFixed(2)}%`);
+          pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move only ${(favorableMove * 100).toFixed(2)}% (limit ${staleExitHours}h)`);
         }
         // Auto-expire after 48 hours
         else if (item.status === 'OPEN' && Date.now() - item.time > 48 * 3600 * 1000) {
@@ -516,8 +517,13 @@ function recordShadowNearMiss(symbol, score, price, regime, rejectReason, btcCon
     rejectReason,
     btcRisk: btcContext?.status || 'UNKNOWN',
     sector: meta.sector || getSector(symbol),
+    module: meta.module || null,
+    entryArchetype: meta.entryArchetype || null,
+    liquidityTier: meta.liquidityTier || null,
     blockedBySector: meta.blockedBySector || null,
     blockedBySymbol: meta.blockedBySymbol || null,
+    expectedHoldingHours: meta.expectedHoldingHours || null,
+    riskModel: meta.riskModel || null,
     timestamp: now,
     entryMetrics: entryMetrics || null,
     categoryScores: categoryScores || null,
@@ -754,10 +760,15 @@ async function recordTradeAutopsy(item, context) {
       btcRisk: item.btcRisk || 'UNKNOWN',
       score: item.score || 0,
       sector: item.sector || getSector(item.symbol),
+      module: item.module || null,
+      entryArchetype: item.entryArchetype || null,
+      liquidityTier: item.liquidityTier || null,
       scoreBeforeMomentum: item.scoreBeforeMomentum ?? item.score ?? 0,
       momentumAdjustment: item.momentumAdjustment || 0,
       requiredScore: item.requiredScore || null,
       requiredStrongCategories: item.requiredStrongCategories || null,
+      expectedHoldingHours: item.expectedHoldingHours || null,
+      riskModel: item.riskModel || null,
       hoursOpen: Number(hoursOpen.toFixed(1)),
       favorableMovePct: Number((favorableMove * 100).toFixed(2)),
       hasMSS: !!item.hasMSS,
@@ -2224,38 +2235,430 @@ function validateSignalExpert(symbol, type, volRatio, delta, obMetrics) {
   return { passed: true, confidence };
 }
 
-/**
- * 🚀 ESTRATEGIA MILLONARIA: Dynamic Position Sizing Pro
- * Size más agresivo para señales de alta calidad con gestión de riesgo inteligente
- */
-function calculateRecommendedSize(score, atrPct, regime, hasMSS = false, hasSweep = false, volumeRatio = 1.0, relativeStrength = 0) {
-  let size = 1.5; // Base augmented to 1.5%
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
 
-  // 📈 Quality bonus (more aggressive)
-  if (score >= 82) size += 0.8; // Lowered threshold for bonus
-  if (score >= 88) size += 1.2;
-  if (score >= 95) size += 2.0;
+function roundMetric(value, decimals = 2) {
+  return Number.isFinite(value) ? Number(value.toFixed(decimals)) : null;
+}
 
-  // 🏆 Performance & Alpha bonus
-  if (relativeStrength > 0.02) size += 1.0; // Extra size for tokens outperforming BTC by 2%+
-  if (hasMSS) size += 0.8;
-  if (hasSweep) size += 1.0;
-  if (volumeRatio > 2.0) size += 0.5;
+function classifyLiquidityTier(quoteVol24h, depthQuoteTopN, spreadBps) {
+  if (quoteVol24h >= 50000000 && depthQuoteTopN >= 250000 && spreadBps <= 3) return 'ELITE';
+  if (quoteVol24h >= 20000000 && depthQuoteTopN >= 150000 && spreadBps <= 5) return 'HIGH';
+  if (quoteVol24h >= 8000000 && depthQuoteTopN >= 90000 && spreadBps <= MAX_SPREAD_BPS) return 'MEDIUM';
+  return 'LOW';
+}
 
-  // 📉 Volatility adjustment
-  if (atrPct > 3.0) size *= 0.5;
-  else if (atrPct > 1.5) size *= 0.8;
-  else size *= 1.1;
+function getRecentRangeLevels(candles, lookback = 20) {
+  if (!candles || candles.length < lookback + 1) return null;
 
-  // 🎯 Regime adjustment
-  if (regime === 'HIGH_VOLATILITY') size *= 0.6;
-  else if (regime === 'TRENDING') size *= 1.5;
-  else if (regime === 'DOWNTREND') size *= 0.8;
+  const slice = candles.slice(-(lookback + 1), -1);
+  let high = -Infinity;
+  let low = Infinity;
 
-  const minSize = 0.5;
-  const maxSize = score >= 90 ? 7.0 : 5.0; // Increased max to 7% for god-tier signals
+  for (const candle of slice) {
+    if (candle.high > high) high = candle.high;
+    if (candle.low < low) low = candle.low;
+  }
 
-  return Math.max(minSize, Math.min(size, maxSize)).toFixed(1);
+  if (!Number.isFinite(high) || !Number.isFinite(low) || high <= 0 || low <= 0) return null;
+
+  return {
+    high,
+    low,
+    widthPct: ((high - low) / low) * 100
+  };
+}
+
+function getBullishPatternSignal(patterns = []) {
+  const bullish = patterns
+    .filter(p => p.type === 'BULLISH')
+    .sort((a, b) => b.strength - a.strength)[0];
+
+  if (!bullish) return { score: 0, reason: null };
+  return {
+    score: bullish.strength >= 35 ? 15 : 10,
+    reason: bullish.name
+  };
+}
+
+function getBullishDivergenceSignal(divergences = []) {
+  const bullish = divergences
+    .filter(d => d.type === 'BULLISH')
+    .sort((a, b) => b.strength - a.strength)[0];
+
+  if (!bullish) return { score: 0, reason: null };
+  return {
+    score: bullish.strength >= 10 ? 15 : 10,
+    reason: bullish.name
+  };
+}
+
+function buildRiskModel(regime, module, atrPercent) {
+  let tpMultiplier = 3.0;
+  let slMultiplier = 1.6;
+  let timeStopHours = 12;
+
+  if (module === 'TREND_PULLBACK') {
+    if (regime === 'TRENDING') {
+      tpMultiplier = 3.6;
+      slMultiplier = 1.8;
+      timeStopHours = 16;
+    } else if (regime === 'RANGING') {
+      tpMultiplier = 2.8;
+      slMultiplier = 1.6;
+      timeStopHours = 12;
+    } else if (regime === 'HIGH_VOLATILITY') {
+      tpMultiplier = 2.6;
+      slMultiplier = 1.3;
+      timeStopHours = 8;
+    } else {
+      tpMultiplier = 3.0;
+      slMultiplier = 1.6;
+      timeStopHours = 10;
+    }
+  } else if (module === 'BREAKOUT_CONTINUATION') {
+    if (regime === 'HIGH_VOLATILITY') {
+      tpMultiplier = 2.8;
+      slMultiplier = 1.4;
+      timeStopHours = 8;
+    } else if (regime === 'TRANSITION') {
+      tpMultiplier = 3.0;
+      slMultiplier = 1.5;
+      timeStopHours = 10;
+    } else {
+      tpMultiplier = 3.4;
+      slMultiplier = 1.6;
+      timeStopHours = 12;
+    }
+  }
+
+  const tpPct = (atrPercent / 100) * tpMultiplier;
+  const slPct = (atrPercent / 100) * slMultiplier;
+
+  return {
+    tpMultiplier,
+    slMultiplier,
+    tpPct,
+    slPct,
+    realRR: slMultiplier > 0 ? tpMultiplier / slMultiplier : 0,
+    timeStopHours
+  };
+}
+
+function evaluateTrendPullbackModule(ctx) {
+  const {
+    bull4h,
+    bull1h,
+    bull15m,
+    regime,
+    rsi15m,
+    rsi1h,
+    volumeRatio,
+    deltaRatio,
+    obMetrics,
+    rs1h,
+    rs4h,
+    distToEma9,
+    distToEma21,
+    distToEma50,
+    currentPrice,
+    ema50_15m,
+    ema9_15m,
+    vwap15m,
+    bbPercent,
+    liquidityTier,
+    patterns,
+    divergences,
+    mss,
+    sweep,
+    atrPercent15m,
+    lastCandle,
+    ema50Slope1h
+  } = ctx;
+
+  if (!bull4h || !bull1h) return null;
+  if (!(regime === 'TRENDING' || regime === 'RANGING' || regime === 'TRANSITION')) return null;
+  if (!Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m) || currentPrice <= ema50_15m) return null;
+  if (distToEma21 > 0.95 || distToEma9 > 1.15 || distToEma50 < -1.5) return null;
+
+  const nearEMA21 = Math.abs(distToEma21) <= 0.75;
+  const nearEMA50 = Math.abs(distToEma50) <= 1.2;
+  if (!nearEMA21 && !nearEMA50) return null;
+
+  if (bbPercent > 0.72 || bbPercent < 0.05) return null;
+  if (rsi15m < 40 || rsi15m > 67 || rsi1h < 45 || rsi1h > 70) return null;
+  if (volumeRatio < 0.85) return null;
+  if (deltaRatio !== null && deltaRatio < -0.02) return null;
+  if (obMetrics.obi < -0.08) return null;
+  if (rs4h < -0.003 || rs1h < -0.003) return null;
+
+  const reclaimOk =
+    currentPrice > ema9_15m ||
+    (Number.isFinite(vwap15m) && currentPrice > vwap15m * 0.997) ||
+    lastCandle.close > lastCandle.open;
+
+  if (!reclaimOk) return null;
+
+  const patternSignal = getBullishPatternSignal(patterns);
+  const divergenceSignal = getBullishDivergenceSignal(divergences);
+
+  const trend = clamp(
+    (bull4h ? 55 : 0) +
+    (bull1h ? 25 : 0) +
+    (bull15m ? 10 : 0) +
+    (ema50Slope1h > 0 ? 10 : 0),
+    0,
+    100
+  );
+
+  const structure = clamp(
+    (nearEMA21 ? 55 : 0) +
+    (nearEMA50 ? 35 : 0) +
+    (bbPercent >= 0.12 && bbPercent <= 0.55 ? 10 : 0),
+    0,
+    100
+  );
+
+  const volume = clamp(
+    (volumeRatio >= 1.25 ? 45 : volumeRatio >= 1 ? 30 : 15) +
+    (deltaRatio === null ? 10 : deltaRatio > 0.08 ? 35 : deltaRatio >= 0 ? 20 : 0) +
+    (obMetrics.obi > 0.08 ? 20 : obMetrics.obi >= 0 ? 10 : 0),
+    0,
+    100
+  );
+
+  const relativeStrength = clamp(
+    (rs4h > 0.02 ? 60 : rs4h > 0.008 ? 45 : rs4h >= 0 ? 30 : 0) +
+    (rs1h > 0.01 ? 30 : rs1h > 0.003 ? 20 : rs1h >= 0 ? 10 : 0) +
+    (liquidityTier === 'ELITE' ? 10 : liquidityTier === 'HIGH' ? 5 : 0),
+    0,
+    100
+  );
+
+  const confirmation = clamp(
+    20 +
+    (currentPrice > ema9_15m ? 10 : 0) +
+    (Number.isFinite(vwap15m) && currentPrice > vwap15m ? 15 : 0) +
+    (mss?.type === 'BULLISH_MSS' ? 10 : 0) +
+    (sweep?.type === 'BULLISH_SWEEP' ? 8 : 0) +
+    patternSignal.score +
+    divergenceSignal.score,
+    0,
+    100
+  );
+
+  const categoryScores = {
+    trend,
+    structure,
+    volume,
+    relativeStrength,
+    confirmation
+  };
+
+  const score = Math.round(
+    trend * 0.30 +
+    structure * 0.25 +
+    volume * 0.18 +
+    relativeStrength * 0.17 +
+    confirmation * 0.10
+  );
+
+  const reasons = ['Trend Pullback Continuation'];
+  if (nearEMA21) reasons.push('Retest EMA21');
+  if (!nearEMA21 && nearEMA50) reasons.push('Retest EMA50');
+  if (currentPrice > ema9_15m) reasons.push('Reclaim EMA9');
+  if (Number.isFinite(vwap15m) && currentPrice > vwap15m) reasons.push('Above VWAP');
+  if (volumeRatio >= 1.25) reasons.push(`Volume ${volumeRatio.toFixed(2)}x`);
+  if (rs4h > 0.02) reasons.push('Strong RS vs BTC');
+  else if (rs4h > 0.008 || rs1h > 0.003) reasons.push('Positive RS vs BTC');
+  if (mss?.type === 'BULLISH_MSS') reasons.push('Bullish MSS');
+  if (sweep?.type === 'BULLISH_SWEEP') reasons.push('Bullish Sweep');
+  if (divergenceSignal.reason) reasons.push(divergenceSignal.reason);
+  if (patternSignal.reason) reasons.push(patternSignal.reason);
+
+  return {
+    module: 'TREND_PULLBACK',
+    entryArchetype: 'Trend Pullback Continuation',
+    score: clamp(score, 0, 100),
+    baseRequiredScore: 72,
+    categoryScores,
+    reasons,
+    riskModel: buildRiskModel(regime, 'TREND_PULLBACK', atrPercent15m),
+    hasPattern: !!patternSignal.reason,
+    hasDivergence: !!divergenceSignal.reason,
+    hasMSS: mss?.type === 'BULLISH_MSS',
+    hasSweep: sweep?.type === 'BULLISH_SWEEP',
+    breakoutDistancePct: null
+  };
+}
+
+function evaluateBreakoutModule(ctx) {
+  const {
+    bull4h,
+    bull1h,
+    bull15m,
+    regime,
+    rsi15m,
+    rsi1h,
+    volumeRatio,
+    deltaRatio,
+    obMetrics,
+    rs1h,
+    rs4h,
+    distToEma21,
+    bbPercent,
+    currentPrice,
+    ema9_15m,
+    vwap15m,
+    range20,
+    lastCandle,
+    liquidityTier,
+    patterns,
+    divergences,
+    mss,
+    sweep,
+    atrPercent15m,
+    ema50Slope1h
+  } = ctx;
+
+  if (!bull4h || !bull1h || !bull15m) return null;
+  if (!(regime === 'TRENDING' || regime === 'HIGH_VOLATILITY' || regime === 'TRANSITION')) return null;
+  if (!range20) return null;
+
+  const breakoutDistancePct = ((currentPrice - range20.high) / range20.high) * 100;
+  const touchedBreakout = currentPrice >= range20.high * 0.998 || lastCandle.high >= range20.high;
+
+  if (!touchedBreakout) return null;
+  if (breakoutDistancePct > 1.5) return null;
+  if (distToEma21 > 2.4) return null;
+  if (bbPercent < 0.58 || bbPercent > 0.97) return null;
+  if (rsi15m < 55 || rsi15m > 74 || rsi1h > 72) return null;
+  if (volumeRatio < (regime === 'TRANSITION' ? 2.0 : 1.6)) return null;
+  if (deltaRatio !== null && deltaRatio < 0.05) return null;
+  if (obMetrics.obi < -0.02) return null;
+  if (rs1h < 0.007 && rs4h < 0.012) return null;
+  if (!(Number.isFinite(vwap15m) && currentPrice > vwap15m)) return null;
+  if (regime === 'TRANSITION' && liquidityTier === 'MEDIUM') return null;
+
+  const candleRange = lastCandle.high - lastCandle.low;
+  const strongClose = candleRange > 0
+    ? lastCandle.close >= (lastCandle.high - candleRange * 0.35)
+    : true;
+  if (!strongClose) return null;
+
+  const patternSignal = getBullishPatternSignal(patterns);
+  const divergenceSignal = getBullishDivergenceSignal(divergences);
+
+  const trend = clamp(
+    (bull4h ? 40 : 0) +
+    (bull1h ? 25 : 0) +
+    (bull15m ? 20 : 0) +
+    (ema50Slope1h > 0 ? 15 : 0),
+    0,
+    100
+  );
+
+  const structure = clamp(
+    (breakoutDistancePct >= 0 ? 45 : 30) +
+    (bbPercent >= 0.65 ? 20 : 10) +
+    (strongClose ? 20 : 0) +
+    (mss?.type === 'BULLISH_MSS' ? 15 : 0),
+    0,
+    100
+  );
+
+  const volume = clamp(
+    (volumeRatio >= 2.0 ? 50 : 40) +
+    (deltaRatio === null ? 10 : deltaRatio > 0.12 ? 30 : 20) +
+    (obMetrics.obi > 0.08 ? 20 : obMetrics.obi >= 0 ? 10 : 0),
+    0,
+    100
+  );
+
+  const relativeStrength = clamp(
+    (rs4h > 0.02 ? 55 : rs4h > 0.012 ? 40 : 25) +
+    (rs1h > 0.015 ? 35 : rs1h > 0.007 ? 25 : 10) +
+    (liquidityTier === 'ELITE' ? 10 : liquidityTier === 'HIGH' ? 5 : 0),
+    0,
+    100
+  );
+
+  const confirmation = clamp(
+    20 +
+    (currentPrice > ema9_15m ? 10 : 0) +
+    (sweep?.type === 'BULLISH_SWEEP' ? 8 : 0) +
+    patternSignal.score +
+    Math.round(divergenceSignal.score * 0.5),
+    0,
+    100
+  );
+
+  const categoryScores = {
+    trend,
+    structure,
+    volume,
+    relativeStrength,
+    confirmation
+  };
+
+  const score = Math.round(
+    trend * 0.27 +
+    structure * 0.24 +
+    volume * 0.24 +
+    relativeStrength * 0.17 +
+    confirmation * 0.08
+  );
+
+  const reasons = ['Breakout Continuation'];
+  reasons.push(`Breakout ${breakoutDistancePct >= 0 ? '+' : ''}${breakoutDistancePct.toFixed(2)}%`);
+  reasons.push(`Volume ${volumeRatio.toFixed(2)}x`);
+  if (rs4h > 0.02 || rs1h > 0.015) reasons.push('Momentum leader vs BTC');
+  else reasons.push('Positive RS vs BTC');
+  if (mss?.type === 'BULLISH_MSS') reasons.push('Bullish MSS');
+  if (sweep?.type === 'BULLISH_SWEEP') reasons.push('Bullish Sweep');
+  if (patternSignal.reason) reasons.push(patternSignal.reason);
+  if (divergenceSignal.reason) reasons.push(divergenceSignal.reason);
+
+  return {
+    module: 'BREAKOUT_CONTINUATION',
+    entryArchetype: 'Breakout Continuation With Volume',
+    score: clamp(score, 0, 100),
+    baseRequiredScore: 78,
+    categoryScores,
+    reasons,
+    riskModel: buildRiskModel(regime, 'BREAKOUT_CONTINUATION', atrPercent15m),
+    hasPattern: !!patternSignal.reason,
+    hasDivergence: !!divergenceSignal.reason,
+    hasMSS: mss?.type === 'BULLISH_MSS',
+    hasSweep: sweep?.type === 'BULLISH_SWEEP',
+    breakoutDistancePct: roundMetric(breakoutDistancePct, 2)
+  };
+}
+
+function calculateRecommendedSize(score, atrPct, regime, module = 'TREND_PULLBACK', liquidityTier = 'MEDIUM', volumeRatio = 1.0, relativeStrength = 0) {
+  let size = 1.0;
+
+  if (module === 'BREAKOUT_CONTINUATION') size += 0.3;
+  if (score >= 80) size += 0.5;
+  if (score >= 88) size += 0.7;
+
+  if (liquidityTier === 'ELITE') size += 0.6;
+  else if (liquidityTier === 'HIGH') size += 0.3;
+
+  if (volumeRatio > 1.8) size += 0.3;
+  if (relativeStrength > 0.02) size += 0.5;
+  else if (relativeStrength > 0.01) size += 0.2;
+
+  if (atrPct > 3.0) size *= 0.55;
+  else if (atrPct > 1.8) size *= 0.75;
+  else if (atrPct < 0.6) size *= 0.85;
+
+  if (regime === 'HIGH_VOLATILITY') size *= 0.7;
+  else if (regime === 'TRENDING') size *= 1.15;
+
+  return clamp(size, 0.5, 4.0).toFixed(1);
 }
 
 function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext = null, momentumAdj = null, shadowCollector = null) {
@@ -2264,70 +2667,64 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const closedCandles15m = getClosedCandles(candles15m, '15m');
   if (closedCandles15m.length < 200) return null;
 
-  const closes15m = closedCandles15m.map(c => c.close);
-  const currentPrice = closes15m[closes15m.length - 1];
-  const prevPrice = closes15m[closes15m.length - 2];
+  const closedCandles1h = getClosedCandles(candles1h, '60m');
+  if (closedCandles1h.length < 120) return null;
 
-  const btcRisk = btcContext?.status || 'UNKNOWN';
+  const closedCandles4h = getClosedCandles(candles4h, '4h');
+  if (closedCandles4h.length < 60) return null;
 
   const obMetrics = calculateOrderBookMetrics(orderBook);
   if (!obMetrics) return null;
-
   if (obMetrics.spreadBps > MAX_SPREAD_BPS) return null;
   if (obMetrics.depthQuoteTopN < MIN_DEPTH_QUOTE) return null;
 
-  const closedCandles1h = getClosedCandles(candles1h, '60m');
-  if (closedCandles1h.length < 50) return null;
-  const closes1h = closedCandles1h.map(c => c.close);
-  const currentPrice1h = closes1h[closes1h.length - 1];
+  const quoteVol24h = ticker24h ? Number(ticker24h.quoteVolume) : null;
+  const hardLiquidityFloor = Math.max(MIN_QUOTE_VOL_24H, 5000000);
+  if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < hardLiquidityFloor) return null;
 
-  // === NEW: RELATIVE STRENGTH (RS) INDEX v7.0 ===
-  const rs4h = btcContext?.closes4h ? calculateRelativeStrength(closes1h, btcContext.closes4h, 16) : 0;
-  const rs1h = btcContext?.closes1h ? calculateRelativeStrength(closes15m, btcContext.closes1h, 4) : 0;
-  const alphaSignal = rs4h > 0.015 || rs1h > 0.01; // Outperforming BTC by 1.5% in 4h or 1% in 1h
+  const liquidityTier = classifyLiquidityTier(quoteVol24h, obMetrics.depthQuoteTopN, obMetrics.spreadBps);
+  if (liquidityTier === 'LOW') return null;
+
+  const closes15m = closedCandles15m.map(c => c.close);
+  const closes1h = closedCandles1h.map(c => c.close);
+  const closes4h = closedCandles4h.map(c => c.close);
+
+  const currentPrice = closes15m[closes15m.length - 1];
+  const currentPrice1h = closes1h[closes1h.length - 1];
+  const currentPrice4h = closes4h[closes4h.length - 1];
 
   const rsi15m = calculateRSI(closes15m, 14);
+  const rsi1h = calculateRSI(closes1h, 14);
   const stoch15m = calculateStochasticRSI(closes15m);
   const macd15m = calculateMACD(closes15m);
+  const macd1h = calculateMACD(closes1h);
   const bb15m = calculateBollingerBands(closes15m, 20, 2);
   const ema9_15m = calculateEMA(closes15m, 9);
   const ema21_15m = calculateEMA(closes15m, 21);
   const ema50_15m = calculateEMA(closes15m, 50);
+  const ema21_1h = calculateEMA(closes1h, 21);
+  const ema50_1h = calculateEMA(closes1h, 50);
+  const ema50_4h = calculateEMA(closes4h, 50);
+  const ema50Slope1h = calculateEMASlope(closes1h, 50) || 0;
   const superTrend15m = calculateSuperTrend(closedCandles15m, 10, 3);
+  const superTrend1h = calculateSuperTrend(closedCandles1h, 10, 3);
+  const superTrend4h = calculateSuperTrend(closedCandles4h, 10, 3);
   const adx15m = calculateADX(closedCandles15m, 14);
-  const mystic15m = calculateMysticPulse(closedCandles15m, 14);
   const atr15m = calculateATR(closedCandles15m, 14);
   const atrPercent15m = atr15m ? (atr15m / currentPrice) * 100 : null;
-  if (!atrPercent15m || atrPercent15m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) return null;
-
-  const cmf15m = calculateCMF(closedCandles15m, 20);
-  const swingBands = calculateSwingStructureBands(closedCandles15m, 100);
-
-  const rsi1h = calculateRSI(closes1h, 14);
-  const macd1h = calculateMACD(closes1h);
-  const superTrend1h = calculateSuperTrend(closedCandles1h, 10, 3);
-
-  let superTrend4h = null;
-  let trend4h = 'NEUTRAL';
-  if (candles4h && candles4h.length > 20) {
-    const closedCandles4h = getClosedCandles(candles4h, '4h');
-    const closes4h = closedCandles4h.map(c => c.close);
-    superTrend4h = calculateSuperTrend(closedCandles4h, 10, 3);
-    const ema50_4h = calculateEMA(closes4h, 50);
-
-    if (superTrend4h && ema50_4h) {
-      const lastClose = closes4h[closes4h.length - 1];
-      if (superTrend4h.bullish && lastClose > ema50_4h) trend4h = 'BULLISH';
-      else if (superTrend4h.bearish && lastClose < ema50_4h) trend4h = 'BEARISH';
-    }
-  }
-
   const vwap15m = calculateVWAP(closedCandles15m, 50);
   const volumeSMA15m = calculateVolumeSMA(closedCandles15m, 20);
   const currentVolume15m = closedCandles15m[closedCandles15m.length - 1].volume;
-
-  const divergences = detectDivergences(closedCandles15m, closes15m);
+  const volumeRatio = volumeSMA15m ? currentVolume15m / volumeSMA15m : 1;
+  const range20 = getRecentRangeLevels(closedCandles15m, 20);
   const patterns = detectPriceActionPatterns(closedCandles15m);
+  const divergences = detectDivergences(closedCandles15m, closes15m);
+  const mss = detectMarketStructureShift(closedCandles15m);
+  const sweep = detectLiquiditySweep(closedCandles15m);
+
+  if (!bb15m || !superTrend15m || !superTrend1h || !superTrend4h || !atrPercent15m) return null;
+  if (atrPercent15m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) return null;
+  if (!Number.isFinite(rsi15m) || !Number.isFinite(rsi1h)) return null;
 
   const lastCandle = closedCandles15m[closedCandles15m.length - 1];
   const takerBuyBase = Number.isFinite(lastCandle.takerBuyBaseVolume) ? lastCandle.takerBuyBaseVolume : null;
@@ -2335,917 +2732,231 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const buyRatio = takerBuyBase !== null && totalBaseVol > 0 ? takerBuyBase / totalBaseVol : null;
   const deltaRatio = buyRatio === null ? null : (2 * buyRatio - 1);
 
-  // Relaxed indicator validation - allow some indicators to fail
-  if (!rsi15m && !macd15m && !bb15m) return null; // At least one major indicator must work
-
-  // === SIMPLIFIED CATEGORY-BASED SCORING FRAMEWORK v4.0 ===
-  // Fixed weights for transparency and easier debugging
-  let signalType = null;
-  const reasons = [];
-  const volumeRatio = volumeSMA15m ? currentVolume15m / volumeSMA15m : 1;
-
-  const categoryScores = {
-    momentum: 0,
-    trend: 0,
-    structure: 0,
-    volume: 0,
-    patterns: 0
-  };
-
-  // v5.0 NEW: Signs of the Times (SOTT)
-  const sott = calculateSOTT(closedCandles15m, 20);
-  const sottValue = sott.value;
-  const sottSignal = sott.signal;
-
-  // === CATEGORY 1: MOMENTUM (0-100) ===
-  let momentumScore = 0;
-
-  // MYSTIC PULSE V2 (0-40)
-  if (mystic15m) {
-    if (mystic15m.bullishCross || (mystic15m.bullish && mystic15m.momentumSpread > 5)) {
-       momentumScore += 40;
-       reasons.push(mystic15m.bullishCross ? '🔥 Mystic Pulse Cross' : '🌊 Mystic Pulse Fuerte');
-       if (!signalType) signalType = 'BUY';
-    } else if (mystic15m.bearishCross || (mystic15m.bearish && mystic15m.momentumSpread < -5)) {
-       if (trend4h !== 'BULLISH') {
-         momentumScore += 40;
-         reasons.push(mystic15m.bearishCross ? '❄️ Mystic Pulse Cross' : '📉 Mystic Pulse Fuerte');
-         if (!signalType) signalType = 'SELL_ALERT';
-       }
-    }
-  }
-
-  // RSI (0-35)
-  if (rsi15m < 30) {
-    momentumScore += 35;
-    reasons.push(`⚡ RSI Sobrevendido (${rsi15m.toFixed(1)})`);
-    signalType = 'BUY';
-  } else if (rsi15m > 70) {
-    // v4.6 FIX: Bull Run Blindness
-    if (trend4h === 'BULLISH') {
-      if (rsi15m > 85) {
-        momentumScore += 35;
-        reasons.push(`⚠️ RSI Extremo (>85)`);
-        signalType = 'SELL_ALERT';
-      } else {
-        momentumScore += 25; // Treat as strong momentum
-        reasons.push(`🚀 Momentum Fuerte (RSI > 70)`);
-        // Do NOT force SELL_ALERT in uptrend
-      }
-    } else {
-      momentumScore += 35;
-      reasons.push(`⚠️ RSI Sobrecomprado (${rsi15m.toFixed(1)})`);
-      signalType = 'SELL_ALERT';
-    }
-  } else if (rsi15m < 40 && rsi1h < 45) {
-    momentumScore += 20;
-    reasons.push(`📊 RSI zona de compra (${rsi15m.toFixed(1)})`);
-    if (!signalType) signalType = 'BUY';
-  } else if (rsi15m > 60 && rsi1h > 55) {
-    // v4.6 FIX: Don't force sell based on zone if bullish
-    if (trend4h !== 'BULLISH') {
-      momentumScore += 20;
-      reasons.push(`📊 RSI zona de venta (${rsi15m.toFixed(1)})`);
-      if (!signalType) signalType = 'SELL_ALERT';
-    }
-  }
-
-  // Stochastic RSI (0-35)
-  if (stoch15m) {
-    if (stoch15m.oversold && stoch15m.k > stoch15m.d) {
-      momentumScore += 35;
-      reasons.push('🎯 StochRSI Cross Up');
-      if (!signalType) signalType = 'BUY';
-    } else if (stoch15m.overbought && stoch15m.k < stoch15m.d) {
-      // v4.6 FIX: Ignore stoch sell in strong uptrend unless confirmed by structure
-      if (trend4h !== 'BULLISH') {
-        momentumScore += 35;
-        reasons.push('🎯 StochRSI Cross Down');
-        if (!signalType) signalType = 'SELL_ALERT';
-      }
-    }
-  }
-
-  // MACD (0-30)
-  if (macd15m?.bullish) {
-    momentumScore += 30;
-    reasons.push('📈 MACD Alcista');
-    if (!signalType) signalType = 'BUY';
-  } else if (!macd15m?.bullish) {
-    // v4.6 FIX: Ignore MACD Sell in strong uptrend (it's just a pullback)
-    if (trend4h !== 'BULLISH') {
-      reasons.push('📉 MACD Bajista');
-      if (!signalType) signalType = 'SELL_ALERT';
-    }
-  }
-
-  categoryScores.momentum = Math.min(100, momentumScore);
-
-  // === CATEGORY 2: TREND (0-100) ===
-  let trendScore = 0;
-
-  // SuperTrend 15m (0-40)
-  if (superTrend15m?.bullish) {
-    trendScore += 40;
-    reasons.push('🟢 SuperTrend Alcista');
-    if (!signalType || signalType === 'BUY') signalType = 'BUY';
-  } else if (superTrend15m?.bearish) {
-    trendScore += 40;
-    reasons.push('🔴 SuperTrend Bajista');
-    // v4.6 FIX: SuperTrend Bearish in 4H Bullish = Pullback Opportunity, NOT Sell
-    if (trend4h !== 'BULLISH') {
-      if (!signalType || signalType === 'SELL_ALERT') signalType = 'SELL_ALERT';
-    }
-  }
-
-  if (superTrend15m?.flipped) {
-    reasons.push(superTrend15m.bullish ? '🔄 FLIP ALCISTA' : '🔄 FLIP BAJISTA');
-  }
-
-  // Multi-TF Confluence (0-40)
-  if (USE_MULTI_TF) {
-    const stAligned1h = superTrend15m?.bullish === superTrend1h?.bullish;
-    const stAligned4h = superTrend4h ? superTrend15m?.bullish === superTrend4h.bullish : false;
-
-    if (stAligned1h && stAligned4h) {
-      trendScore += 40;
-      reasons.push('✅ Confluencia Total (3-TF)');
-      // v4.6 FIX: If total confluence, FORCE BUY signal if undef
-      if (!signalType && trend4h === 'BULLISH') signalType = 'BUY';
-    } else if (stAligned1h) {
-      trendScore += 20;
-      reasons.push('✅ Confluencia 1H');
-    }
-    // Added for Sniper 2.0 check
-    if (stAligned1h && stAligned4h) {
-      reasons.push('🌐 MTF_ALIGNED_TOTAL');
-    }
-  }
-
-  // ADX Strength (0-20)
-  if (adx15m?.trending) {
-    trendScore += 20;
-    const trendDir = adx15m.bullishTrend ? 'Alcista' : 'Bajista';
-    reasons.push(`💨 ADX ${trendDir}`);
-  }
-
-  // v5.0 NEW: SOTT Trend Confirmation (0-20)
-  // If SOTT is positive and aligned with signal, add bonus
-  if (sottSignal > 0 && (signalType === 'BUY' || !signalType)) {
-    trendScore += 20;
-    reasons.push(`🌊 SOTT Bullish (${sottValue.toFixed(2)})`);
-  } else if (sottSignal < 0 && (signalType === 'SELL_ALERT' || !signalType)) {
-    trendScore += 20;
-    reasons.push(`🌊 SOTT Bearish (${sottValue.toFixed(2)})`);
-  }
-
-  // v5.0 NEW: SOTT Divergence Warning (Deep Pullback Filter)
-  if (trend4h === 'BULLISH' && sottSignal < -0.2) {
-    if (signalType === 'BUY') {
-      reasons.unshift('⚠️ SOTT Weakness (< -0.2)');
-      // We don't block hard, but we flag it. Score needs to be high to overcome.
-    }
-  }
-
-
-  categoryScores.trend = Math.min(100, trendScore);
-
-  // === CATEGORY 3: STRUCTURE (0-100) ===
-  let structureScore = 0;
-
-  // Smart Money Concepts (0-60)
-  const smc = detectSmartMoneyConcepts(closedCandles15m, 100);
-  const nearbyBullishFVG = smc.fvgs.find(f => f.type === 'BULLISH' && currentPrice <= f.top * 1.002 && currentPrice >= f.bottom * 0.998);
-  const nearbyBullishOB = smc.orderBlocks.find(ob => ob.type === 'BULLISH' && currentPrice <= ob.top * 1.005 && currentPrice >= ob.bottom * 0.995);
-  const nearbyBearishFVG = smc.fvgs.find(f => f.type === 'BEARISH' && currentPrice >= f.bottom * 0.998 && currentPrice <= f.top * 1.002);
-  const nearbyBearishOB = smc.orderBlocks.find(ob => ob.type === 'BEARISH' && currentPrice >= ob.bottom * 0.995 && currentPrice <= ob.top * 1.005);
-
-  if (nearbyBullishOB && (signalType === 'BUY' || !signalType)) {
-    structureScore += 60;
-    reasons.unshift('🏦 Order Block Alcista');
-    if (!signalType) signalType = 'BUY';
-  } else if (nearbyBullishFVG && (signalType === 'BUY' || !signalType)) {
-    structureScore += 40;
-    reasons.unshift('🏦 FVG Alcista');
-    if (!signalType) signalType = 'BUY';
-  }
-
-  if (nearbyBearishOB && (signalType === 'SELL_ALERT' || !signalType)) {
-    structureScore += 60;
-    reasons.unshift('🏦 Order Block Bajista');
-    // v4.6 FIX: Hitting bearish OB in uptrend is expected resistance, not auto-sell
-    if (trend4h !== 'BULLISH') {
-      if (!signalType) signalType = 'SELL_ALERT';
-    }
-  } else if (nearbyBearishFVG && (signalType === 'SELL_ALERT' || !signalType)) {
-    structureScore += 40;
-    reasons.unshift('🏦 FVG Bajista');
-    // v4.6 FIX: Hitting bearish FVG in uptrend is expected resistance, not auto-sell
-    if (trend4h !== 'BULLISH') {
-      if (!signalType) signalType = 'SELL_ALERT';
-    }
-  }
-
-  // Bollinger Bands (0-15) - Only used for scoring/context, no longer a signal trigger
-  const bbPercent = bb15m ? (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower) : 0.5;
-  if (bbPercent < 0.1) {
-    structureScore += 15;
-    reasons.push('🏀 BB Inferior');
-  } else if (bbPercent > 0.9) {
-    if (trend4h !== 'BULLISH') {
-      structureScore += 15;
-      reasons.push('🎈 BB Superior');
-    } else {
-      reasons.push('🚀 BB Breakout Potential');
-    }
-  }
-
-  // Swing Structure Bands (0-15)
-  if (swingBands?.buy && (signalType === 'BUY' || !signalType)) {
-    structureScore += 15;
-    reasons.unshift('🎯 Swing Structure Buy');
-    if (!signalType) signalType = 'BUY';
-  }
-
-  categoryScores.structure = Math.min(100, structureScore);
-
-  // === CATEGORY 4: VOLUME & ORDER FLOW (0-100) ===
-  let volumeScore = 0;
-
-  // Volume Confirmation (0-50) - IMPROVED: Higher threshold
-  if (volumeRatio > 1.5) {
-    volumeScore += 50;
-    reasons.push(`📊 Vol x${volumeRatio.toFixed(1)}`);
-  } else if (volumeRatio > 1.2) {
-    volumeScore += 25;
-  }
-
-  // Order Flow Delta (0-30) - IMPROVED: Stronger directional requirement
-  const direction = signalType === 'BUY' ? 1 : signalType === 'SELL_ALERT' ? -1 : 0;
-  if (direction !== 0 && deltaRatio !== null) {
-    const aligned = direction === 1 ? deltaRatio > 0.1 : deltaRatio < -0.1; // IMPROVED: 0.1 threshold
-    if (aligned) {
-      volumeScore += 30;
-      reasons.push('📊 Order Flow Aligned');
-    }
-  }
-
-  // OBI (0-20)
-  if (direction !== 0 && obMetrics) {
-    const obiAligned = direction === 1 ? obMetrics.obi > 0.05 : obMetrics.obi < -0.05;
-    if (obiAligned) {
-      volumeScore += 20;
-      reasons.push('📚 OBI Favorable');
-    }
-  }
-
-  categoryScores.volume = Math.min(100, volumeScore);
-
-  // === CATEGORY 5: PATTERNS & DIVERGENCES (0-100) ===
-  let patternsScore = 0;
-
-  // Candlestick Patterns (0-50)
-  if (patterns.length > 0) {
-    const bestPattern = patterns.sort((a, b) => b.strength - a.strength)[0];
-    if (signalType === 'BUY' && bestPattern.type === 'BULLISH') {
-      patternsScore += 50;
-      reasons.unshift(`🕯️ ${bestPattern.name}`);
-    } else if (signalType === 'SELL_ALERT' && bestPattern.type === 'BEARISH') {
-      patternsScore += 50;
-      reasons.unshift(`🕯️ ${bestPattern.name}`);
-    }
-  }
-
-  // Divergences (0-50)
-  if (divergences.length > 0) {
-    const bestDiv = divergences.sort((a, b) => b.strength - a.strength)[0];
-    if ((bestDiv.type === 'BULLISH' && signalType === 'BUY') ||
-      (bestDiv.type === 'BEARISH' && signalType === 'SELL_ALERT')) {
-      patternsScore += 50;
-      reasons.unshift(`🔥 ${bestDiv.name}`);
-    }
-  }
-
-  categoryScores.patterns = Math.min(100, patternsScore);
-
-  // === CALCULATE FINAL SCORE ===
-  const quoteVol24h = ticker24h ? Number(ticker24h.quoteVolume) : null;
-  if (!quoteVol24h || !Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return null;
-
-  // --- SNIPER MODE FILTERS (MAX SECURITY) ---
-  const mtfAlignedTotal = reasons.includes('🌐 MTF_ALIGNED_TOTAL');
-  const sniperTrendOk = (signalType === 'BUY' && trend4h === 'BULLISH') || (signalType === 'SELL_ALERT' && trend4h === 'BEARISH');
-  const sniperRsiOk = (signalType === 'BUY' && rsi1h <= 63); // Toughened to 63 from 65
-
-  // --- AGGRESSIVE MODE FILTERS (FLEXIBILITY) ---
-  // Allow trend if it's compatible with signal or if no signal yet (to allow MSS/Sweep detection)
-  const isTrendPotentialBuy = trend4h === 'BULLISH' || trend4h === 'NEUTRAL';
-  const isTrendPotentialSell = trend4h === 'BEARISH' || trend4h === 'NEUTRAL';
-
-  const aggressiveTrendOk = signalType === 'BUY' ? isTrendPotentialBuy :
-    signalType === 'SELL_ALERT' ? isTrendPotentialSell :
-      trend4h !== 'DOWNTREND'; // Allow reaching MSS/Sweep if not a heavy downtrend
-
-  if (!aggressiveTrendOk) {
-    console.log(`[REJECT] ${symbol}: Aggressive Trend check failed (4H: ${trend4h}, Signal: ${signalType})`);
-    return null;
-  }
-
-  const aggressiveRsiOk = rsi1h <= 78;
-
-  if (signalType === 'BUY' && !aggressiveRsiOk) {
-    console.log(`[REJECT] ${symbol}: 1H RSI (${rsi1h.toFixed(1)}) too high even for Aggressive`);
-    return null;
-  }
-
-  // --- EXPERT VALIDATION LAYER (OBI/DELTA) ---
-  const expertVal = validateSignalExpert(symbol, signalType, volumeRatio, deltaRatio, obMetrics);
-  if (!expertVal.passed) {
-    console.log(`[REJECT] ${symbol}: Expert Validation failed: ${expertVal.reason}`);
-    return null;
-  }
-  reasons.push(`🛡️ Validado v4.5 (Conf: ${(expertVal.confidence * 100).toFixed(0)}%)`);
-
-  // Determine Mode based on Trend and RSI
-  // Sniper 2.0 requirements: MTF Total alignment + Volume 1.5x + Score 88+
-  const isSniperQuality = mtfAlignedTotal && sniperRsiOk && volumeRatio >= 1.5;
-  reasons.push(isSniperQuality ? '💎 MODO SNIPER' : '⚡ MODO AGRESIVO');
-
-  // Detect Market Regime - IMPROVED: Pass closes for EMA slope
+  const bull4h = !!(superTrend4h.bullish && currentPrice4h > ema50_4h);
+  const bull1h = !!(superTrend1h.bullish && currentPrice1h > ema21_1h && ema21_1h >= ema50_1h);
+  const bull15m = !!(superTrend15m.bullish && ema9_15m > ema21_15m && ema21_15m >= ema50_15m);
   const regime = detectMarketRegime(closedCandles15m, adx15m, closes15m);
-  reasons.push(`🌐 Regime: ${regime}`);
+  const btcRisk = btcContext?.status || 'UNKNOWN';
 
-  // === MSS DETECTION (HOISTED) ===
-  const mss = detectMarketStructureShift(closedCandles15m);
+  const rs4h = btcContext?.closes4h ? calculateRelativeStrength(closes4h, btcContext.closes4h, 12) : 0;
+  const rs1h = btcContext?.closes1h ? calculateRelativeStrength(closes1h, btcContext.closes1h, 6) : 0;
 
-  // SIMPLIFIED v4.0: Small fixed bonus for MSS
-  if (mss && mss.type === 'BULLISH_MSS' && (signalType === 'BUY' || !signalType)) {
-    // score += 10; // MOVED: Score added later to avoid premature boost
-    reasons.unshift('🔄 MSS (+10)');
-    if (!signalType) signalType = 'BUY';
-  } else if (mss && mss.type === 'BEARISH_MSS' && (signalType === 'SELL_ALERT' || !signalType)) {
-    if (!signalType) signalType = 'SELL_ALERT';
-  }
+  const bbPercent = bb15m.upper !== bb15m.lower
+    ? (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower)
+    : 0.5;
+  const distToEma9 = ema9_15m ? ((currentPrice - ema9_15m) / ema9_15m) * 100 : 0;
+  const distToEma21 = ema21_15m ? ((currentPrice - ema21_15m) / ema21_15m) * 100 : 0;
+  const distToEma50 = ema50_15m ? ((currentPrice - ema50_15m) / ema50_15m) * 100 : 0;
 
-  // === LIQUIDITY SWEEP DETECTION (HOISTED) ===
-  const sweep = detectLiquiditySweep(closedCandles15m);
-  let sweepConfirmed = false;
-
-  if (sweep && sweep.type === 'BULLISH_SWEEP' && (signalType === 'BUY' || !signalType)) {
-    sweepConfirmed = (mss || volumeRatio > 1.5);
-    reasons.unshift(sweepConfirmed ? '🧹 Sweep ✓' : '🧹 Sweep (⚠️)');
-    if (!signalType) signalType = 'BUY';
-  } else if (sweep && sweep.type === 'BEARISH_SWEEP' && (signalType === 'SELL_ALERT' || !signalType)) {
-    sweepConfirmed = (mss || volumeRatio > 1.5);
-    reasons.unshift(sweepConfirmed ? '🧹 Sweep ✓' : '🧹 Sweep (⚠️)');
-    if (!signalType) signalType = 'SELL_ALERT';
-  }
-
-  // v5.1 SOTT Unlock: Reduce requirements if conviction is extreme
-  let requirementsReduction = 0;
-  if (sottValue > 0.8 && sottSignal > 0.3) requirementsReduction = 10;
-  else if (sottSignal > 0.2) requirementsReduction = 5;
-
-  // === REGIME FILTERS v7.4 (Spot Long-Only Regime Scalper) ===
-  let MIN_QUALITY_SCORE = 68; // Lowered baseline 
-  let shadowOnlyRegimeReason = null;
-  const hasBullishStructure = !!mss || !!sweep;
-
-  // Capitulation Bounce Condition: BTC panic sell + oversold intraday + structure confirmed
-  const isCapitulationBounce =
-    btcContext?.status === 'GREEN' &&
-    btcContext?.rsi4h < 35 &&
-    rsi15m < 45 &&
-    hasBullishStructure;
-
-  if (regime === 'DOWNTREND') {
-    shadowOnlyRegimeReason = 'REGIME_SHADOW_ONLY (DOWNTREND live disabled)';
-    if (isCapitulationBounce) {
-      reasons.push('🧪 DOWNTREND (Capitulation Shadow)');
-      MIN_QUALITY_SCORE = 55; // Shadow monitor for extreme capitulation candidates
-    }
-    else if (btcContext?.status === 'GREEN' && trend4h === 'BULLISH') {
-      reasons.push('🟢 DOWNTREND (Pullback Support BTC-GREEN)');
-      MIN_QUALITY_SCORE = 60; // Rewarding green BTC pullbacks
-    }
-    else if (trend4h === 'BULLISH') {
-      reasons.push('📉 DOWNTREND (Pullback Opportunity)');
-      MIN_QUALITY_SCORE = alphaSignal ? 66 : 72; // Relaxed to allow dips
-    }
-    else if (rsi1h < 25 && volumeRatio > 1.8) {
-      reasons.push('🎯 DOWNTREND (Extreme Oversold Bounce)');
-      MIN_QUALITY_SCORE = 75;
-    }
-    else if (btcContext?.status === 'GREEN' && rsi15m < 45 && alphaSignal) {
-      reasons.push('🚀 DOWNTREND (Alpha Bounce)');
-      MIN_QUALITY_SCORE = 65; // Relaxed
-    }
-    else {
-      console.log(`[REJECT] ${symbol}: DOWNTREND regime - filters too tight`);
-      return null;
-    }
-  } else if (regime === 'TRANSITION') {
-    shadowOnlyRegimeReason = 'REGIME_SHADOW_ONLY (TRANSITION live disabled)';
-    if (isCapitulationBounce) {
-      reasons.push('🧪 TRANSITION (Capitulation Shadow)');
-      MIN_QUALITY_SCORE = 55;
-    } else {
-      // Keep legacy thresholding for shadow observation while live stays disabled
-      MIN_QUALITY_SCORE = alphaSignal ? 60 : 65; 
-    }
-  } else if (regime === 'TRENDING') {
-    MIN_QUALITY_SCORE = alphaSignal ? 60 : 65;
-  } else if (regime === 'HIGH_VOLATILITY') {
-    MIN_QUALITY_SCORE = 70;
-  } else if (regime === 'RANGING') {
-    MIN_QUALITY_SCORE = 60;
-  }
-
-  // === SIMPLIFIED FIXED WEIGHTS v4.0 ===
-  // No dynamic weight changes - easier to debug and optimize
-  const weights = {
-    momentum: 0.25,
-    trend: 0.30,
-    structure: 0.25,
-    volume: 0.15,
-    patterns: 0.05
+  const setupContext = {
+    bull4h,
+    bull1h,
+    bull15m,
+    regime,
+    rsi15m,
+    rsi1h,
+    volumeRatio,
+    deltaRatio,
+    obMetrics,
+    rs1h,
+    rs4h,
+    distToEma9,
+    distToEma21,
+    distToEma50,
+    currentPrice,
+    ema50_15m,
+    ema9_15m,
+    vwap15m,
+    bbPercent,
+    liquidityTier,
+    patterns,
+    divergences,
+    mss,
+    sweep,
+    atrPercent15m,
+    lastCandle,
+    ema50Slope1h,
+    range20
   };
 
-  let score = Math.round(
-    categoryScores.momentum * weights.momentum +
-    categoryScores.trend * weights.trend +
-    categoryScores.structure * weights.structure +
-    categoryScores.volume * weights.volume +
-    categoryScores.patterns * weights.patterns
-  );
+  const candidates = [
+    evaluateTrendPullbackModule(setupContext),
+    evaluateBreakoutModule(setupContext)
+  ]
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
 
-  // v5.1 SOTT Quality Bonus (applied to final score)
-  if (sottValue > 0.5) score += 5;
-  if (sottSignal > 0.2) score += 5;
+  if (!candidates.length) return null;
 
-  // v7.0 ALPHA BONUS: Reward decoupled assets
-  if (rs4h > 0.02) { score += 8; reasons.push('🚀 Alpha Fuerte vs BTC'); }
-  else if (rs4h > 0.01) { score += 4; reasons.push('📈 Outperforming BTC'); }
+  const bestCandidate = candidates[0];
+  const strongCategories = Object.values(bestCandidate.categoryScores).filter(v => v >= 60).length;
+  const requiredStrong = bestCandidate.module === 'BREAKOUT_CONTINUATION' ? 3 : 3;
 
-  // Count strong categories (>60%) - simplified confluence check
-  const strongCategories = Object.values(categoryScores).filter(s => s >= 60).length;
+  let requiredScore = bestCandidate.baseRequiredScore;
+  if (liquidityTier === 'MEDIUM') requiredScore += 4;
+  if (btcRisk === 'AMBER') requiredScore += bestCandidate.module === 'BREAKOUT_CONTINUATION' ? 8 : 6;
+  if (regime === 'HIGH_VOLATILITY') requiredScore += 2;
+  if (regime === 'TRANSITION' && bestCandidate.module === 'BREAKOUT_CONTINUATION') requiredScore += 4;
 
-  // Minimal confluence bonus (removed aggressive multipliers)
-  if (strongCategories >= 4) {
-    score += 5; // Small fixed bonus instead of percentage
-    reasons.push('🎯 CONFLUENCIA EXCEPCIONAL');
-  } else if (strongCategories >= 3) {
-    score += 3;
-    reasons.push('🎯 Alta Confluencia');
-  }
-
-  const scoreBeforeMomentum = score;
-
-  // === SELF-LEARNING: Momentum Adjustment from Signal Memory ===
-  // Audit v7.3.0: Disabled because statistically it adds 0 value
   if (momentumAdj) momentumAdj.adjustment = 0;
 
-  // Ensure score is non-negative before clamping
-  score = Math.max(0, score);
-
-  // === ENHANCED OVEREXTENSION AND PULLBACK FILTERS ===
-  const ema21 = ema21_15m;
-  const ema50 = ema50_15m;
-  const distToEma21 = ema21 ? (currentPrice - ema21) / ema21 * 100 : 0;
-  const distToEma50 = ema50 ? (currentPrice - ema50) / ema50 * 100 : 0;
-  const distToEma9 = ema9_15m ? (currentPrice - ema9_15m) / ema9_15m * 100 : 0;
   const shadowEntryMetrics = {
-    distToEma9: Number(distToEma9.toFixed(2)),
-    distToEma21: Number(distToEma21.toFixed(2)),
-    atrPercent: Number(atrPercent15m.toFixed(2)),
-    bbPercent: Number(bbPercent.toFixed(2))
+    distToEma9: roundMetric(distToEma9),
+    distToEma21: roundMetric(distToEma21),
+    distToEma50: roundMetric(distToEma50),
+    atrPercent: roundMetric(atrPercent15m),
+    bbPercent: roundMetric(bbPercent),
+    breakoutDistancePct: bestCandidate.breakoutDistancePct,
+    relativeStrength4h: roundMetric(rs4h, 4),
+    relativeStrength1h: roundMetric(rs1h, 4),
+    riskRewardRatio: roundMetric(bestCandidate.riskModel.realRR),
+    timeStopHours: bestCandidate.riskModel.timeStopHours
   };
+
   const shadowMetaBase = {
-    scoreBeforeMomentum,
-    momentumAdjustment: momentumAdj?.adjustment || 0,
-    sector: getSector(symbol)
+    scoreBeforeMomentum: bestCandidate.score,
+    momentumAdjustment: 0,
+    requiredScore,
+    requiredStrongCategories: requiredStrong,
+    sector: getSector(symbol),
+    module: bestCandidate.module,
+    entryArchetype: bestCandidate.entryArchetype,
+    liquidityTier,
+    expectedHoldingHours: bestCandidate.riskModel.timeStopHours,
+    riskModel: {
+      tpMultiplier: bestCandidate.riskModel.tpMultiplier,
+      slMultiplier: bestCandidate.riskModel.slMultiplier,
+      realRR: roundMetric(bestCandidate.riskModel.realRR),
+      timeStopHours: bestCandidate.riskModel.timeStopHours
+    },
+    shadowBenchmarkTpPct: bestCandidate.riskModel.tpPct,
+    shadowBenchmarkSlPct: bestCandidate.riskModel.slPct,
+    shadowBenchmarkVersion: `${ALGORITHM_VERSION}-${bestCandidate.module}`
   };
 
-  if (signalType === 'BUY') {
-    // 1. RSI/BB Overextension (Mystic Pulse update: strict BB limits to prevent overextended entries)
-    let strictBbLimit = 0.85;
-    if (regime === 'TRANSITION') strictBbLimit = 0.82;
-    if (regime === 'TRENDING') strictBbLimit = 0.55; // Audit v7.4.2: Tightened to avoid buying tops
+  const pushShadow = (rejectReason, overrideMeta = {}) => {
+    if (!shadowCollector || bestCandidate.score < 55) return;
 
-    if (bbPercent > strictBbLimit) {
-      console.log(`[REJECT] ${symbol}: Strict BB Overextension Block (BB: ${bbPercent.toFixed(2)}) - Limit: ${strictBbLimit}`);
-      return null;
-    }
-
-    if (rsi15m > 72) {
-      console.log(`[REJECT] ${symbol}: Overextended RSI(${rsi15m.toFixed(1)})`);
-      return null;
-    }
-
-    if (regime === 'TRENDING' && rsi15m > 68) {
-      console.log(`[REJECT] ${symbol}: Overextended RSI in TRENDING (${rsi15m.toFixed(1)} > 68)`);
-      return null;
-    }
-
-    // Retain isBreakout logic for subsequent filters
-    const isBreakout = (trend4h === 'BULLISH' || sottSignal > 0.4) && rsi15m < 85;
-
-    // 2. Distance to EMA21 - Standard filter
-    if (distToEma21 > 1.8) {
-      console.log(`[REJECT] ${symbol}: Dist to EMA21 too high (${distToEma21.toFixed(2)}%)`);
-      return null;
-    }
-
-    // 3. Distance to EMA9 - Chase filter
-    if (distToEma9 > 2.0 && !isBreakout) {
-      // Allow chasing a bit more in breakouts
-      console.log(`[REJECT] ${symbol}: Chase Filter - Dist to EMA9 too high (${distToEma9.toFixed(2)}%)`);
-      return null;
-    }
-
-    // === NEW: TRENDING REGIME PULLBACK FILTER ===
-    // In TRENDING regime, only buy strict pullbacks (near EMA21 or EMA50)
-    // Audit v7.4.2: Removed isBreakout exception, tightened distances
-    if (regime === 'TRENDING') {
-      const nearEMA21 = Math.abs(distToEma21) < 0.5;  // Within 0.5% of EMA21
-      const nearEMA50 = Math.abs(distToEma50) < 1.0;  // Within 1.0% of EMA50
-      const priceAboveEMA21 = distToEma21 > 0;        // Price above EMA21 (uptrend)
-      const priceAboveEMA50 = distToEma50 > 0;        // Price above EMA50 (uptrend)
-
-      // Must be in uptrend
-      if (!priceAboveEMA21 || !priceAboveEMA50) {
-        console.log(`[REJECT] ${symbol}: TRENDING but not in uptrend (EMA21: ${distToEma21.toFixed(2)}%, EMA50: ${distToEma50.toFixed(2)}%)`);
-        return null;
-      }
-
-      // Must be at strict pullback (near EMA21 or EMA50)
-      if (!nearEMA21 && !nearEMA50) {
-        console.log(`[REJECT] ${symbol}: TRENDING but no strict pullback to EMA21/50 (dist21: ${distToEma21.toFixed(2)}%, dist50: ${distToEma50.toFixed(2)}%)`);
-        return null;
-      }
-
-      if (nearEMA21) reasons.push('📉 Strict Pullback EMA21');
-      if (nearEMA50 && !nearEMA21) reasons.push('📉 Strict Pullback EMA50');
-    }
-
-    // === NEW: RANGING REGIME STRUCTURE FILTER ===
-    // In RANGING, require MSS or Sweep for entry
-    if (regime === 'RANGING') {
-      // Will check mss and sweep after they're calculated
-      // This is a placeholder - actual check comes later
-    }
-  }
-
-  if (signalType === 'SELL_ALERT') return null;
-
-  // === BTC CONTEXT FILTER v7.0 (NOW SUPPORTS DECOUPLING) ===
-  if (btcContext) {
-    if (btcContext.status === 'RED') {
-      const btcRedThreshold = alphaSignal ? 78 : 88; // Lower threshold if token is de-correlated (Alpha)
-      if (score < btcRedThreshold) {
-        console.log(`[REJECT] ${symbol}: BTC RED requires score ${btcRedThreshold}, got ${score}`);
-        if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
-          symbol,
-          score,
-          currentPrice,
-          regime,
-          `BTC_RED (score ${score} < ${btcRedThreshold})`,
-          btcContext,
-          shadowEntryMetrics,
-          categoryScores,
-          { ...shadowMetaBase, requiredScore: btcRedThreshold }
-        ));
-        return null;
-      }
-      reasons.push(alphaSignal ? '🔥 Alpha decoupling in BTC RED' : '⚠️ Mercado Macro Bajista (BTC Rojo)');
-    } else if (btcContext.status === 'AMBER') {
-      const btcAmberThreshold = alphaSignal ? 68 : 75; // Baseline 75 (was 78)
-      if (score < btcAmberThreshold) {
-        console.log(`[REJECT] ${symbol}: BTC AMBER requires score ${btcAmberThreshold}, got ${score}`);
-        if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
-          symbol,
-          score,
-          currentPrice,
-          regime,
-          `BTC_AMBER (score ${score} < ${btcAmberThreshold})`,
-          btcContext,
-          shadowEntryMetrics,
-          categoryScores,
-          { ...shadowMetaBase, requiredScore: btcAmberThreshold }
-        ));
-        return null;
-      }
-      reasons.push('⚠️ Precaución Macro (BTC Ambar)');
-    }
-  }
-
-  // [MOVED UP] MSS & Sweep detection moved before Regime checks
-
-  // Volume checks per mode
-  const sniperVolOk = volumeRatio >= 1.2;
-  const aggressiveVolOk = volumeRatio >= 0.8;
-  // v4.8 FIX: "Sunday Mode" / Low Volatility Handling
-  // Instead of hard reject < 0.8, we apply a penalty. 
-  // But we keep a hard floor at 0.3 to avoid "dead" coins.
-
-  if (volumeRatio < 0.3) { // Absolute floor
-    console.log(`[REJECT] ${symbol}: Volume DEAD (${volumeRatio.toFixed(2)})`);
-    return null;
-  }
-
-  if (!aggressiveVolOk) {
-    // Low Volume Penalty: Requires higher quality in other areas to pass
-    score -= 10;
-    reasons.push(`⚠️ Low Vol Penalty (-10)`);
-    // === AUDIT v7.4.2: Hard reject if penalty is steep AND volume is truly dead ===
-    // LTC LOSS (score 71→61, volRatio 0.69×) entered with dead volume and flash-stopped in 12min.
-    // If the penalty dropped the score AND volumeRatio is below 0.8, this is not a tradeable setup.
-    if (volumeRatio < 0.8) {
-      console.log(`[REJECT] ${symbol}: Low Vol hard reject (volRatio ${volumeRatio.toFixed(2)} < 0.8 with -10 penalty)`);
-      if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
-        symbol,
-        score,
-        currentPrice,
-        regime,
-        `LOW_VOL_HARD (volRatio ${volumeRatio.toFixed(2)})`,
-        btcContext,
-        { distToEma9: 0, distToEma21: 0, atrPercent: 0, bbPercent: 0 },
-        categoryScores,
-        { scoreBeforeMomentum: score + 10, momentumAdjustment: 0, sector: getSector(symbol) }
-      ));
-      return null;
-    }
-  }
-
-  // Directional volume check: volume must flow in signal direction
-  // BUY: net buying pressure (delta > 0). SELL: net selling pressure (delta < 0)
-  if (signalType === 'BUY' && deltaRatio !== null && deltaRatio < 0) {
-    console.log(`[REJECT] ${symbol}: BUY requires positive delta, got ${deltaRatio.toFixed(3)}`);
-    return null;
-  }
-  if (signalType === 'SELL_ALERT' && deltaRatio !== null && deltaRatio > 0) {
-    console.log(`[REJECT] ${symbol}: SELL requires negative delta, got ${deltaRatio.toFixed(3)}`);
-    return null;
-  }
-
-
-  // Final Score Clamping
-  score = Math.min(100, Math.max(0, score));
-
-  // --- FINAL MODE DETERMINATION ---
-  // A signal remains "SNIPER" only if IT PASSED ALL sniper filters
-  const isSniperTrendRsi = reasons.includes('💎 MODO SNIPER');
-  const isSniperVol = volumeRatio >= 1.5; // Upgraded from 1.2
-  const isSniperScore = score >= 88;
-
-  const finalMode = (isSniperTrendRsi && isSniperVol && isSniperScore) ? 'SNIPER' : 'AGGRESSIVE';
-
-  // Update internal tag
-  reasons.forEach((r, i) => {
-    if (r === '💎 MODO SNIPER' || r === '⚡ MODO AGRESIVO') reasons.splice(i, 1);
-  });
-  reasons.unshift(finalMode === 'SNIPER' ? '💎 SEGURIDAD SNIPER' : '⚡ MODO AGRESIVO');
-
-  // HIGH_VOLATILITY: Ultra strict
-  if (regime === 'HIGH_VOLATILITY') {
-    const passesVolatilityFilter =
-      score >= 90 &&
-      (mss || sweep) &&                       // Must have structure
-      volumeRatio > 1.5 &&                    // Strong volume required
-      btcRisk !== 'RED';
-
-    if (!passesVolatilityFilter) {
-      console.log(`[REJECT] ${symbol} (HighVol): score=${score}, structure=${!!(mss || sweep)}, btcRisk=${btcRisk}, volRatio=${volumeRatio.toFixed(2)}`);
-      return null;
-    }
-    reasons.push('✅ HIGH_VOL_FILTER_PASSED');
-  }
-
-  // TRENDING: Require pullback confirmation
-  if (regime === 'TRENDING') {
-    const hasStructure = mss || sweep;
-    const hasPullback = Math.abs(distToEma21) < 0.5 || Math.abs(distToEma50) < 1.0;
-
-    if (!hasStructure && !hasPullback) {
-      console.log(`[REJECT] ${symbol} (TRENDING): No structure or strict pullback (dist21: ${distToEma21.toFixed(2)}%)`);
-      return null;
-    }
-
-    if (hasStructure) reasons.push('✅ TREND_STRUCTURE');
-    if (hasPullback) reasons.push('✅ TREND_PULLBACK');
-  }
-
-  // RANGING: Require structure + buy cheap principle
-  if (regime === 'RANGING') {
-    // Don't buy in the upper part of the range
-    // === AUDIT v7.4.2: Tightened from 0.75 → 0.65 ===
-    // TAO LOSS (BB%=0.70) and LTC LOSS (BB%=0.71) entered overextended. All 6 WINs had BB% ≤ 0.37.
-    if (signalType === 'BUY' && bbPercent > 0.65) {
-      console.log(`[REJECT] ${symbol} (RANGING): BB% too high (${bbPercent.toFixed(2)})`);
-      return null;
-    }
-
-    // Require structure (Unless exceptionally high score)
-    if (!mss && !sweep && score < 85) {
-      console.log(`[REJECT] ${symbol} (RANGING): Sin MSS ni Sweep y score ${score} < 85`);
-      return null;
-    }
-  }
-
-  // === FIX v5.2a: TRANSITION BB Overextension Hard Filter ===
-  // Auditoría Feb-24: TRXUSDT entró con bbPercent=1.01 en régimen TRANSITION porque
-  // el path MSS/Sweep bypaseaba el filtro general de overextension (línea 2234).
-  // Mantenemos este gate explícito (con umbral más ajustado) como fail-safe final.
-  if (regime === 'TRANSITION' && signalType === 'BUY' && bbPercent > 0.82) {
-    console.log(`[REJECT] ${symbol} (TRANSITION): BB% overextended (${bbPercent.toFixed(2)} > 0.82) - entrada en zona de resistencia`);
-    return null;
-  }
-
-  // === AUDIT v7.1.0-FIX: TRANSITION Volume Inertia Hard Filter ===
-  // Auditoría Mar-12: El régimen TRANSITION tiene un WR del 25% (muy bajo).
-  // La mayoría de los fallos ocurren por entrar sin suficiente inercia real (fake breakouts).
-  // Endurecer el gate de volumen de 1.5 a 2.0 específicamente para TRANSITION.
-  if (regime === 'TRANSITION' && volumeRatio < 2.0) {
-    console.log(`[REJECT] ${symbol} (TRANSITION): Volume ratio ${volumeRatio.toFixed(2)} < 2.0 - inercia insuficiente para transición`);
-    return null;
-  }
-
-  // Final score check
-  if (score < MIN_QUALITY_SCORE) {
-    console.log(`[REJECT] ${symbol}: Score ${score} < ${MIN_QUALITY_SCORE} | SOTT: ${sottValue.toFixed(2)} (${sottSignal.toFixed(2)})`);
-    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
+    shadowCollector.push(recordShadowNearMiss(
       symbol,
-      score,
+      bestCandidate.score,
       currentPrice,
       regime,
-      `SCORE (${score} < ${MIN_QUALITY_SCORE})`,
+      rejectReason,
       btcContext,
       shadowEntryMetrics,
-      categoryScores,
-      { ...shadowMetaBase, requiredScore: MIN_QUALITY_SCORE }
+      bestCandidate.categoryScores,
+      { ...shadowMetaBase, ...overrideMeta }
     ));
+  };
+
+  if (btcRisk === 'RED') {
+    console.log(`[REJECT] ${symbol}: BTC RED - live long entries disabled for research-driven v8`);
+    pushShadow('BTC_RED_SHADOW_ONLY');
     return null;
   }
 
-  // Require visual confirmation for borderline scores
-  const hasVisualConfirmation = divergences.length > 0 || patterns.length > 0 || mss || sweep;
-  if (score < 80 && !hasVisualConfirmation) {
-    console.log(`[REJECT] ${symbol}: Score ${score} < 80 and no confirmation`);
+  if (regime === 'DOWNTREND') {
+    console.log(`[REJECT] ${symbol}: DOWNTREND remains shadow-only`);
+    pushShadow('REGIME_SHADOW_ONLY (DOWNTREND)');
     return null;
   }
 
-  // Minimum strong categories
-  const requiredStrong = (regime === 'TRENDING' || regime === 'HIGH_VOLATILITY') ? 3 : 2;
+  if (regime === 'TRANSITION' && bestCandidate.module !== 'BREAKOUT_CONTINUATION') {
+    console.log(`[REJECT] ${symbol}: TRANSITION only allows breakout continuation setups`);
+    pushShadow('REGIME_SHADOW_ONLY (TRANSITION non-breakout)');
+    return null;
+  }
+
+  if (bestCandidate.score < requiredScore) {
+    console.log(`[REJECT] ${symbol}: Score ${bestCandidate.score} < ${requiredScore}`);
+    pushShadow(`SCORE (${bestCandidate.score} < ${requiredScore})`);
+    return null;
+  }
+
   if (strongCategories < requiredStrong) {
     console.log(`[REJECT] ${symbol}: Strong Categories ${strongCategories} < ${requiredStrong}`);
-    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
-      symbol,
-      score,
-      currentPrice,
-      regime,
-      `STRONG_CAT (${strongCategories} < ${requiredStrong})`,
-      btcContext,
-      shadowEntryMetrics,
-      categoryScores,
-      { ...shadowMetaBase, requiredScore: MIN_QUALITY_SCORE, requiredStrongCategories: requiredStrong }
-    ));
+    pushShadow(`STRONG_CAT (${strongCategories} < ${requiredStrong})`);
     return null;
   }
 
-  // === FIX v5.2a: R:R Real Gate ===
-  // Auditoría Feb-24: El riskRewardRatio en entryMetrics era un ratio TEÓRICO fijo (e.g. 2.5/1.8)
-  // no relacionado con el ATR real del mercado. El trade TRXUSDT tuvo un R:R real de 1.39.
-  // Calculamos aquí el R:R real con los multiplicadores de ATR que se usan para TP y SL:
-  const tpMultiplier = regime === 'TRENDING' ? 4.5 : regime === 'HIGH_VOLATILITY' ? 2.5 : regime === 'TRANSITION' ? 3.2 : regime === 'DOWNTREND' ? 3.8 : 3.0;
-  const slMultiplier = regime === 'TRENDING' ? 2.2 : regime === 'HIGH_VOLATILITY' ? 1.0 : regime === 'TRANSITION' ? 1.6 : regime === 'DOWNTREND' ? 1.8 : 1.8;
-  const realRR = slMultiplier > 0 ? tpMultiplier / slMultiplier : 0;
-  if (realRR < 1.5) {
-    console.log(`[REJECT] ${symbol}: R:R real insuficiente (${realRR.toFixed(2)} < 1.50) para régimen ${regime}`);
+  if (bestCandidate.riskModel.realRR < 1.5) {
+    console.log(`[REJECT] ${symbol}: R:R real insuficiente (${bestCandidate.riskModel.realRR.toFixed(2)} < 1.50)`);
     return null;
   }
 
-  // === AUDIT v7.4.2: DOWNTREND subset DISABLED — returned to full shadow-only ===
-  // v7.4.1 reopened this subset but live results were 1W / 4L (20% WR) with 0% favorable move
-  // on all 4 LOSS trades. The shadow edge (51.9% WR) doesn't translate to live because the
-  // shadow benchmark (R:R 1.25:1) is much more lenient than the live R:R (2.11:1).
-  // Keeping as shadow-only until a tighter benchmark validates real edge.
-  // const allowLiveDowntrendSubset = false; // QUARANTINED
+  const score = Math.round(clamp(bestCandidate.score, 0, 100));
+  const finalMode = score >= 88 && liquidityTier !== 'MEDIUM' ? 'SNIPER' : 'AGGRESSIVE';
 
-  if (shadowOnlyRegimeReason) {
-    console.log(`[REJECT] ${symbol}: ${regime} configured as SHADOW_ONLY for live spot entries`);
-    if (shadowCollector && score >= 50) shadowCollector.push(recordShadowNearMiss(
-      symbol,
-      score,
-      currentPrice,
-      regime,
-      shadowOnlyRegimeReason,
-      btcContext,
-      shadowEntryMetrics,
-      categoryScores,
-      {
-        ...shadowMetaBase,
-        requiredScore: MIN_QUALITY_SCORE,
-        requiredStrongCategories: requiredStrong
-      }
-    ));
-    return null;
-  }
+  const relativeStrength = Math.max(rs1h, rs4h);
 
-  // === FINAL OUTPUT ===
-  if (score >= MIN_QUALITY_SCORE && reasons.length > 0 && signalType) {
-    return {
-      symbol,
-      price: currentPrice,
-      price1h: currentPrice1h,
-      score,
-      regime,
-      categoryScores,
-      strongCategories,
-      type: signalType,
-      rsi: rsi15m.toFixed(1),
-      rsi1h: rsi1h.toFixed(1),
-      stochRSI: stoch15m ? stoch15m.k.toFixed(1) : null,
-      macdBullish: macd15m.bullish,
-      macdBullish1h: macd1h.bullish,
-
-      hasSMC: !!(nearbyBullishOB || nearbyBullishFVG || nearbyBearishOB || nearbyBearishFVG),
-      smcSignal: nearbyBullishOB ? 'OB_BULL' : nearbyBearishOB ? 'OB_BEAR' : nearbyBullishFVG ? 'FVG_BULL' : nearbyBearishFVG ? 'FVG_BEAR' : null,
-      hasMSS: !!mss,
-      hasSweep: !!sweep,
-      superTrend: superTrend15m.bullish ? 'BULL' : 'BEAR',
-      superTrendFlipped: superTrend15m.flipped,
-      bbPosition: Math.round(bbPercent * 100),
-      bbUpper: bb15m.upper,
-      bbLower: bb15m.lower,
-      hasDivergence: divergences.length > 0,
-      hasPattern: patterns.length > 0,
-      volumeRatio: Number(volumeRatio.toFixed(2)),
-      volumeConfirmed: volumeRatio > 1.2,
-      spreadBps: Number(obMetrics.spreadBps.toFixed(1)),
-      depthQuoteTopN: Math.round(obMetrics.depthQuoteTopN),
-      obi: Number(obMetrics.obi.toFixed(3)),
-      deltaRatio: deltaRatio === null ? null : Number(deltaRatio.toFixed(3)),
-      atrPercent: Number(atrPercent15m.toFixed(2)),
-      vwap: vwap15m,
-      vwapDistance: vwap15m ? Number((((currentPrice - vwap15m) / vwap15m) * 100).toFixed(2)) : null,
-      // === ENHANCED SL/TP BASED ON REGIME ANALYSIS ===
-      // RANGING (75% WR): Standard targets work well
-      // TRANSITION (33% WR): Tighter targets - take profit quicker
-      // TRENDING (27% WR): Wider targets to capture trend, but strict entry
-      // HIGH_VOLATILITY (23% WR): Very tight targets - quick in/out
-      tp: signalType === 'BUY'
-        ? currentPrice * (1 + (atrPercent15m / 100) * (
-          // 🚀 OPTIMIZACIÓN MILLONARIA: Take Profit Agresivo
-          regime === 'TRENDING' ? 4.5 :       // Aumentado de 4.0 (mejor R:R)
-            regime === 'HIGH_VOLATILITY' ? 2.5 : // Aumentado de 2.0
-              regime === 'TRANSITION' ? 3.2 :    // Aumentado de 2.5
-                regime === 'DOWNTREND' ? 3.8 :  // TP más ambicioso en rebotes
-                  3.0  // RANGING — Aumentado de 2.0
-        ))
-        : currentPrice * (1 - (atrPercent15m / 100) * (
-          regime === 'TRENDING' ? 4.5 :
-            regime === 'HIGH_VOLATILITY' ? 2.5 :
-              regime === 'TRANSITION' ? 3.2 :
-                regime === 'DOWNTREND' ? 3.8 :
-                  3.0  // RANGING
-        )),
-      sl: signalType === 'BUY'
-        ? currentPrice * (1 - (atrPercent15m / 100) * (
-          // 🚀 OPTIMIZACIÓN MILLONARIA: Stop Loss Inteligente
-          regime === 'TRENDING' ? 2.2 :       // Reducido de 2.5 (mejor R:R)
-            regime === 'HIGH_VOLATILITY' ? 1.0 : // Reducido de 1.2
-              regime === 'TRANSITION' ? 1.6 :    // Reducido de 1.8
-                regime === 'DOWNTREND' ? 1.8 :  // SL más ajustado en bajistas
-                  1.8  // RANGING — Reducido de 2.0
-        ))
-        : currentPrice * (1 + (atrPercent15m / 100) * (
-          regime === 'TRENDING' ? 2.2 :
-            regime === 'HIGH_VOLATILITY' ? 1.0 :
-              regime === 'TRANSITION' ? 1.6 :
-                regime === 'DOWNTREND' ? 1.8 :
-                  1.8  // RANGING
-        )),
-      // Enhanced metrics for post-analysis
-      entryMetrics: {
-        distToEma9: Number(distToEma9.toFixed(2)),
-        distToEma21: Number(distToEma21.toFixed(2)),
-        distToEma50: Number(distToEma50.toFixed(2)),
-        atrPercent: Number(atrPercent15m.toFixed(2)),
-        bbPercent: Number((bbPercent || 0).toFixed(2)),
-        riskRewardRatio: Number(realRR.toFixed(2)) // FIX v5.2a: R:R real calculado a partir de multiplicadores ATR reales
-      },
-      scoreBeforeMomentum,
-      momentumAdjustment: momentumAdj?.adjustment || 0,
-      requiredScore: MIN_QUALITY_SCORE,
-      requiredStrongCategories: requiredStrong,
-      reasons,
-      mode: finalMode,
-      recommendedSize: calculateRecommendedSize(score, atrPercent15m, regime, !!mss, !!sweep, volumeRatio, rs4h),
-      btcContext // Include context in result
-    };
-  }
-
-  return null;
+  return {
+    symbol,
+    price: currentPrice,
+    price1h: currentPrice1h,
+    score,
+    regime,
+    categoryScores: bestCandidate.categoryScores,
+    strongCategories,
+    type: 'BUY',
+    rsi: rsi15m.toFixed(1),
+    rsi1h: rsi1h.toFixed(1),
+    stochRSI: stoch15m ? stoch15m.k.toFixed(1) : null,
+    macdBullish: !!macd15m?.bullish,
+    macdBullish1h: !!macd1h?.bullish,
+    hasSMC: false,
+    smcSignal: null,
+    hasMSS: bestCandidate.hasMSS,
+    hasSweep: bestCandidate.hasSweep,
+    superTrend: superTrend15m.bullish ? 'BULL' : 'BEAR',
+    superTrendFlipped: superTrend15m.flipped,
+    bbPosition: Math.round(bbPercent * 100),
+    bbUpper: bb15m.upper,
+    bbLower: bb15m.lower,
+    hasDivergence: bestCandidate.hasDivergence,
+    hasPattern: bestCandidate.hasPattern,
+    volumeRatio: roundMetric(volumeRatio),
+    volumeConfirmed: volumeRatio >= 1.0,
+    spreadBps: roundMetric(obMetrics.spreadBps, 1),
+    depthQuoteTopN: Math.round(obMetrics.depthQuoteTopN),
+    obi: roundMetric(obMetrics.obi, 3),
+    deltaRatio: deltaRatio === null ? null : roundMetric(deltaRatio, 3),
+    atrPercent: roundMetric(atrPercent15m),
+    vwap: vwap15m,
+    vwapDistance: vwap15m ? roundMetric(((currentPrice - vwap15m) / vwap15m) * 100) : null,
+    tp: currentPrice * (1 + bestCandidate.riskModel.tpPct),
+    sl: currentPrice * (1 - bestCandidate.riskModel.slPct),
+    entryMetrics: {
+      distToEma9: roundMetric(distToEma9),
+      distToEma21: roundMetric(distToEma21),
+      distToEma50: roundMetric(distToEma50),
+      atrPercent: roundMetric(atrPercent15m),
+      bbPercent: roundMetric(bbPercent),
+      riskRewardRatio: roundMetric(bestCandidate.riskModel.realRR),
+      relativeStrength4h: roundMetric(rs4h, 4),
+      relativeStrength1h: roundMetric(rs1h, 4),
+      breakoutDistancePct: bestCandidate.breakoutDistancePct,
+      timeStopHours: bestCandidate.riskModel.timeStopHours
+    },
+    scoreBeforeMomentum: score,
+    momentumAdjustment: 0,
+    requiredScore,
+    requiredStrongCategories: requiredStrong,
+    reasons: bestCandidate.reasons,
+    mode: finalMode,
+    recommendedSize: calculateRecommendedSize(score, atrPercent15m, regime, bestCandidate.module, liquidityTier, volumeRatio, relativeStrength),
+    btcContext,
+    module: bestCandidate.module,
+    entryArchetype: bestCandidate.entryArchetype,
+    liquidityTier,
+    expectedHoldingHours: bestCandidate.riskModel.timeStopHours,
+    riskModel: {
+      tpMultiplier: bestCandidate.riskModel.tpMultiplier,
+      slMultiplier: bestCandidate.riskModel.slMultiplier,
+      realRR: roundMetric(bestCandidate.riskModel.realRR),
+      timeStopHours: bestCandidate.riskModel.timeStopHours
+    }
+  };
 }
 
 // ==================== TELEGRAM ====================
@@ -3276,14 +2987,20 @@ async function sendTelegramNotification(signals, stats = null) {
 
   for (const sig of sortedSignals.slice(0, 5)) {
     let icon = '📊';
-    let typeEmoji = '';
-    if (sig.type === 'BUY') { icon = '🟢'; typeEmoji = '🛒 COMPRA'; }
-    else if (sig.type === 'SELL_ALERT') { icon = '🔴'; typeEmoji = '📤 VENTA'; }
-    else { typeEmoji = '👁️ VIGILAR'; }
+    let typeEmoji = '👁️ VIGILAR';
+    if (sig.type === 'BUY') {
+      icon = '🟢';
+      typeEmoji = '🛒 COMPRA';
+    }
 
-    // Symbol and Mode
+    const moduleLabel = sig.module === 'BREAKOUT_CONTINUATION'
+      ? '🚀 BREAKOUT'
+      : sig.module === 'TREND_PULLBACK'
+        ? '📉 PULLBACK'
+        : '📊 SETUP';
+
     const modeLabel = sig.mode === 'SNIPER' ? '💎 SNIPER' : '⚡ AGRESIVO';
-    message += `${icon} *${esc(sig.symbol)}* \\| ${esc(typeEmoji)} \\| ${esc(modeLabel)}\n`;
+    message += `${icon} *${esc(sig.symbol)}* \\| ${esc(typeEmoji)} \\| ${esc(moduleLabel)} \\| ${esc(modeLabel)}\n`;
 
     // Price & Levels
     if (Number.isFinite(sig.price)) {
@@ -3316,6 +3033,7 @@ async function sendTelegramNotification(signals, stats = null) {
     // Regime & Score
     const regimeIcon = sig.regime === 'TRENDING' ? '📈' : (sig.regime === 'RANGING' ? '↔️' : '⚠️');
     message += `${regimeIcon} Regime: ${esc(sig.regime)} \\| 🎯 Score: *${esc(sig.score)}*/100\n`;
+    if (sig.liquidityTier) message += `🏦 Liquidity: ${esc(sig.liquidityTier)}\n`;
     message += `💰 *Size Sugerido: ${esc(sig.recommendedSize)}%*\n`;
 
     if (sig.btcContext && sig.btcContext.status !== 'GREEN') {
@@ -3350,6 +3068,10 @@ async function sendTelegramNotification(signals, stats = null) {
       message += `🌀 ATR: ${esc(sig.atrPercent)}%`;
       if (sig.deltaRatio !== undefined && sig.deltaRatio !== null) message += ` \\| Δ: ${esc(sig.deltaRatio)}`;
       message += `\n`;
+    }
+
+    if (sig.expectedHoldingHours) {
+      message += `⏱️ Time Stop: ${esc(sig.expectedHoldingHours)}h\n`;
     }
 
     // Reasons
@@ -3564,6 +3286,14 @@ export async function runAnalysis(context) {
                 requiredScore: signal.requiredScore,
                 requiredStrongCategories: signal.requiredStrongCategories,
                 sector,
+                module: signal.module,
+                entryArchetype: signal.entryArchetype,
+                liquidityTier: signal.liquidityTier,
+                expectedHoldingHours: signal.expectedHoldingHours,
+                riskModel: signal.riskModel,
+                shadowBenchmarkTpPct: signal.riskModel ? (signal.tp - signal.price) / signal.price : undefined,
+                shadowBenchmarkSlPct: signal.riskModel ? (signal.price - signal.sl) / signal.price : undefined,
+                shadowBenchmarkVersion: signal.module ? `${ALGORITHM_VERSION}-${signal.module}` : ALGORITHM_VERSION,
                 blockedBySector: sector,
                 blockedBySymbol
               }
