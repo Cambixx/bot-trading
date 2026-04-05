@@ -6,43 +6,62 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v8.0.0 (Active)
-**Date:** Mar 30, 2026
-**Theme:** "RESEARCH-DRIVEN MODULAR RESET"
+## Current Version: v9.0.0 (Active)
+**Date:** Apr 5, 2026
+**Theme:** "EVIDENCE-FIRST THROUGHPUT RESET"
 
 ### Core Logic & Parameters:
-- **Runtime Version:** `v8.0.0-ResearchDriven`.
-- **Architecture Reset:** Se abandona el enfoque de `score soup` centrado en decenas de señales correlacionadas y filtros parcheados. El runtime ahora evalúa solo dos módulos `long-only`:
+- **Runtime Version:** `v9.0.0-EvidenceFirst`.
+- **Decision engine re-write:** Se conserva la capa operativa de Netlify/Blobs/Telegram, pero el motor de decisión se reescribe para quedar centrado solo en dos familias con mejor racional empírico para `spot long-only`:
   - `TREND_PULLBACK`
   - `BREAKOUT_CONTINUATION`
-- **Bias estructural:** Solo se buscan compras en activos líquidos con tendencia 4H/1H favorable, fortaleza relativa vs BTC y confirmación de volumen/order-flow.
-- **Regime simplification:** `DOWNTREND` vuelve a `shadow-only` completo. `TRANSITION` solo permite `BREAKOUT_CONTINUATION`; cualquier setup no-breakout en ese régimen se rechaza o queda para shadow.
-- **Liquidity-first:** Se añade clasificación `ELITE / HIGH / MEDIUM / LOW` usando volumen 24h, profundidad y spread. `LOW` queda fuera directamente.
-- **Shadow benchmark alignment:** Los near-misses ya no dependen solo del benchmark global por defecto; cuando existe un candidato válido rechazado, el `shadow` hereda el TP/SL porcentual real del módulo correspondiente.
-- **Time stop por setup:** El `stale exit` deja de ser fijo a 12h y pasa a leer `expectedHoldingHours` del setup (por ejemplo, breakout más corto, pullback más largo).
-- **Telemetry upgrade:** `history`, `shadow` y `autopsies` ahora conservan `module`, `entryArchetype`, `liquidityTier`, `expectedHoldingHours` y `riskModel`.
+- **Universe hardening:** Se excluyen wrappers/sintéticos no alineados con el objetivo del sistema (por ejemplo tokenized metals). También sube el sesgo hacia liquidez real: `MIN_DEPTH_QUOTE` por defecto a `90000`, `MIN_QUOTE_VOL_24H` por defecto a `8000000`.
+- **Regime simplification:** El runtime pasa a usar `TRENDING`, `RANGING`, `HIGH_VOL_BREAKOUT`, `TRANSITION` y `RISK_OFF`. `RISK_OFF` no opera live.
+- **BTC context simplificado:** El semáforo deja de depender de una mezcla de indicadores legacy; ahora actúa como contexto simple `GREEN / AMBER / RED`.
+- **Score simplificado:** Se elimina el `score soup` basado en MSS/FVG/sweeps/divergencias/patrones como eje. Cada módulo se puntúa con pocas piezas explicables:
+  - `trend`
+  - `location/expansion`
+  - `participation`
+  - `execution`
+- **Telemetry upgrade real:** `history`, `shadow` y `autopsies` ahora guardan también:
+  - `qualityBreakdown`
+  - `relativeStrengthSnapshot`
+  - `volumeLiquidityConfirmation`
+  - `rejectReasonCode`
+  - `mfePct`
+  - `maePct`
+- **Throughput instrumentation:** Cada run registra top rechazos agregados (`[THROUGHPUT] Rejects ...`) y cuántos candidatos llegó a producir cada módulo.
 
 ### Hypothesis / Goal:
-Construir un motor más robusto y defendible para `spot` intradía `long-only`, aunque al principio sacrifique frecuencia. La prioridad explícita pasa a ser: calidad de entrada, coherencia live/shadow, liquidez ejecutable y control del riesgo.
+Resolver el problema detectado en producción de `0 signals` repetidos durante decenas de ejecuciones seguidas sin caer de nuevo en el patrón de “bajar thresholds a ojo”. La nueva hipótesis es: menos filtros ornamentales, más rechazo explícito e información de throughput.
 
-### Initial Runtime Observation:
-- **Manual scan ejecutado el 30-Mar-2026 a las 22:00 UTC:** `40` símbolos analizados, `0` señales, `0` errores, `0` near-misses registrados.
-- Lectura provisional: la nueva arquitectura está funcionando y no rompe el runtime, pero podría haber quedado demasiado estricta para el estado actual de mercado o para el universo seleccionado.
+### Observed Runtime Context Before v9:
+- **Ventana observada en `persistent_logs.json`:** desde `2026-04-02 08:31:54 UTC` hasta `2026-04-05 08:30:43 UTC`.
+- **Ejecuciones observadas en esa ventana de 72h:** `211`.
+- **Promedio de símbolos analizados por run:** `33.28`.
+- **Resultados:** `0 signals`, `0 errors`.
+- **Lectura:** el problema dominante ya no parecía ser operativo. El motor estaba corriendo, pero casi no dejaba señales ni `shadow` útil reciente.
 
 ### Bug Found:
-- No se detectó bug de ejecución en el scan manual local. La siguiente duda ya no es técnica sino estratégica: si el throughput queda persistentemente en `0`, habrá que relajar reglas concretas sin reintroducir complejidad arbitraria.
+- **Desalineación entre intención y observabilidad:** el motor v8 seguía siendo más opaco de lo que aparentaba. Si un símbolo moría pronto en el pipeline, no quedaba claro qué gate lo bloqueó con más frecuencia.
+- **Sesgo de muestra engañoso:** `history.json` mostraba `2/4` wins, pero `2` de esas victorias provenían de `GOLD(PAXG)USDT` y `GOLD(XAUT)USDT`, que no encajan bien con el objetivo de un sistema de trading cripto spot intradía.
+- **Threshold global ignorado:** `SIGNAL_SCORE_THRESHOLD` existía en runtime pero no estaba guiando realmente el gating final del motor.
 
 ### Lesson Learned:
-- **La simplificación era necesaria.** El problema ya no parecía “falta de indicador”, sino demasiada lógica local sin edge demostrado.
-- **Mejor 0 señales limpias que señales malas por obligación.** Aun así, un sistema que nunca encuentra ni near-misses útiles tampoco aprende; hay que vigilar el throughput real.
-- **El benchmark shadow debe parecerse al live o miente.** Por eso v8 traspasa TP/SL reales del módulo al near-miss cuando existe setup válido.
+- **Un archivo “modular” puede seguir siendo conceptualmente barroco.** Dos módulos no bastan si cada uno depende de una docena de validaciones de herencia histórica.
+- **La ausencia total de señales durante 72h con mercado operativo no es una prueba de calidad; es una hipótesis que exige instrumentación.**
+- **Ganar con wrappers no valida el edge cripto.** Hay que evitar que activos fuera del dominio objetivo maquillen la lectura del sistema.
 
 ### Pending Hypotheses:
-1. ¿`TREND_PULLBACK` está demasiado estricto en `1H` o en proximidad a EMA21/EMA50?
-2. ¿`BREAKOUT_CONTINUATION` necesita una versión algo menos dura para mercados `TRANSITION` con BTC `GREEN`?
-3. ¿Conviene registrar también near-misses "proto-setup" para no perder aprendizaje cuando ningún módulo llega a candidato completo?
+1. ¿La nueva instrumentación de rechazos mostrará que el cuello de botella dominante está en `PULLBACK_LOCATION`, `BREAKOUT_VOLUME` o en el filtro de universo/liquidez?
+2. ¿`TRANSITION` merece seguir permitiendo solo `BREAKOUT_CONTINUATION` live o conviene convertirlo en shadow-only completo si su throughput sigue siendo improductivo?
+3. ¿La exclusión de wrappers mejorará la honestidad del dataset aunque empeore temporalmente el win rate observado?
 
 ---
+
+## Previous Version: v8.0.0
+**Date:** Mar 30, 2026
+**Theme:** "RESEARCH-DRIVEN MODULAR RESET"
 
 ## Previous Version: v7.4.2
 **Date:** Mar 29, 2026

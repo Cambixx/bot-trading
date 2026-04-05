@@ -14,6 +14,7 @@ import {
     getInternalStore,
     HISTORY_STORE_KEY,
     SHADOW_STORE_KEY,
+    SHADOW_ARCHIVE_STORE_KEY,
     AUTOPSY_STORE_KEY
 } from './scheduled-analysis.js';
 
@@ -69,7 +70,9 @@ async function generateDigest(context) {
 
     // Load all data stores
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
-    const shadows = await store.get(SHADOW_STORE_KEY, { type: 'json' }) || [];
+    const activeShadows = await store.get(SHADOW_STORE_KEY, { type: 'json' }) || [];
+    const archivedShadows = await store.get(SHADOW_ARCHIVE_STORE_KEY, { type: 'json' }) || [];
+    const shadows = [...archivedShadows, ...activeShadows];
     const autopsies = await store.get(AUTOPSY_STORE_KEY, { type: 'json' }) || [];
 
     // ==================== SECTION 1: Overall Performance ====================

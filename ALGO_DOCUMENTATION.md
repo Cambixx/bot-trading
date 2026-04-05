@@ -1,32 +1,33 @@
-# 🦅 Documentación del Algoritmo de Trading (v8.0.0 Research-Driven)
+# 🦅 Documentación del Algoritmo de Trading (v9.0.0 Evidence-First)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
 > ⚠️ **Regla de mantenimiento:** Cualquier cambio en `scheduled-analysis.js` debe reflejarse en este documento Y en `ALGORITHM_JOURNAL.md` antes de considerarse completo.
 
-> ℹ️ **Nota de transición:** Desde `v8.0.0-ResearchDriven`, el runtime cambió de una arquitectura basada en score heurístico multi-indicador a una arquitectura modular mucho más simple. Las secciones siguientes contienen todavía bastante contexto histórico de `v7.x`; cuando haya conflicto, manda siempre el bloque `Current Runtime Snapshot (v8.0.0)` de abajo.
+> ℹ️ **Nota de transición:** Desde `v9.0.0-EvidenceFirst`, el runtime ya no usa el viejo `score soup` como núcleo. Las secciones históricas de abajo siguen siendo útiles como contexto, pero cuando haya conflicto manda siempre el bloque `Current Runtime Snapshot (v9.0.0)` de abajo.
 
 ---
 
-## Current Runtime Snapshot (v8.0.0)
+## Current Runtime Snapshot (v9.0.0)
 
 ### Resumen
-- **Runtime Version:** `v8.0.0-ResearchDriven`
+- **Runtime Version:** `v9.0.0-EvidenceFirst`
 - **Estilo:** `spot`, `long-only`, intradía/day trading
-- **Filosofía:** menos indicadores, más liquidez, más fortaleza relativa, mejor alineación entre `shadow` y `live`
+- **Filosofía:** menos heurística, más explicabilidad, más liquidez ejecutable, mejor observabilidad de throughput y mejor separación entre `live`, `shadow` y activos realmente cripto
 
 ### Arquitectura activa
 - `TREND_PULLBACK`
-  - Busca pullbacks controlados en activos líquidos con tendencia favorable en `4H` y `1H`
-  - Requiere fortaleza relativa vs BTC, control de sobreextensión y reclaim local
+  - Busca pullbacks controlados cerca de `EMA21` / `VWAP` en activos líquidos con sesgo alcista `4H` y `1H`
+  - Puntúa solo cuatro dimensiones: `trend`, `location`, `participation`, `execution`
 - `BREAKOUT_CONTINUATION`
-  - Busca rupturas con expansión real de volumen y confirmación direccional
-  - Es el único módulo que puede operar en `TRANSITION`
+  - Busca ruptura reciente con expansión real de volumen, cierre fuerte y fortaleza relativa
+  - Es el módulo preferido para `HIGH_VOL_BREAKOUT` y el único permitido live en `TRANSITION`
 
 ### Filtros estructurales activos
 - Solo pares `USDT`
+- exclusión de wrappers/sintéticos no alineados con el objetivo cripto (`PAXG`, `XAUT`, símbolos con paréntesis, etc.)
 - `spread` y `depth` duros
-- filtro fuerte de volumen 24h
+- filtro duro de volumen 24h
 - clasificación de liquidez:
   - `ELITE`
   - `HIGH`
@@ -36,26 +37,37 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ### Regímenes activos
 - `TRENDING`: operativo
-- `RANGING`: operativo solo si el setup sigue siendo compatible con sesgo alcista
-- `HIGH_VOLATILITY`: operativo con reglas más estrictas
+- `RANGING`: operativo solo para pullbacks alcistas controlados
+- `HIGH_VOL_BREAKOUT`: operativo para rupturas con volumen real
 - `TRANSITION`: solo `BREAKOUT_CONTINUATION`
-- `DOWNTREND`: `shadow-only`
+- `RISK_OFF`: sin live
 
 ### Gestión de riesgo activa
 - Cada módulo define su propio:
   - `tpMultiplier`
   - `slMultiplier`
   - `expectedHoldingHours`
-- El `stale exit` ya no es fijo; usa `expectedHoldingHours` del setup cuando existe
+- El `stale exit` usa `expectedHoldingHours`
 - El benchmark de `shadow` hereda el TP/SL porcentual real del módulo cuando un candidato válido es rechazado
+- `history` y `autopsies` guardan también `mfePct` y `maePct`
 
 ### Telemetría activa
-Las señales, near-misses y autopsias ahora guardan también:
+Las señales, near-misses y autopsias guardan:
 - `module`
 - `entryArchetype`
 - `liquidityTier`
 - `expectedHoldingHours`
 - `riskModel`
+- `qualityBreakdown`
+- `relativeStrengthSnapshot`
+- `volumeLiquidityConfirmation`
+- `rejectReasonCode`
+
+### Throughput y auditoría
+- Cada run publica resúmenes agregados de rechazo:
+  - `[THROUGHPUT] Module candidates: ...`
+  - `[THROUGHPUT] Rejects: ...`
+- Objetivo: distinguir falta real de oportunidades vs. gates excesivamente duros sin tener que inferirlo a mano desde logs pobres
 
 ---
 
