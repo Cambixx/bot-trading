@@ -1,1 +1,76 @@
-[]
+[
+  {
+    "id": "1775565918804-ZECUSDT",
+    "symbol": "ZECUSDT",
+    "price": 266,
+    "tp": 273.310284890259,
+    "sl": 262.3448575548705,
+    "type": "BUY",
+    "time": 1775565918804,
+    "status": "CLOSED",
+    "score": 81,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "TREND_PULLBACK",
+    "entryArchetype": "Trend Pullback Continuation",
+    "liquidityTier": "MEDIUM",
+    "scoreBeforeMomentum": 81,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.52,
+      "realRR": 2,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "distToEma9": 0.03,
+      "distToEma21": 0.3,
+      "distToEma50": 1.41,
+      "atrPercent": 0.9,
+      "bbPercent": 0.48,
+      "breakoutDistancePct": -2.36,
+      "pullbackFromHigh20Pct": 2.36,
+      "riskRewardRatio": 2,
+      "timeStopHours": 14
+    },
+    "qualityBreakdown": {
+      "trend": 100,
+      "location": 58.5,
+      "participation": 90,
+      "execution": 71
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0109,
+      "rs4h": 0.0832,
+      "rs24h": 0.06
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.98,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.769,
+      "obiPass": true,
+      "spreadBps": 0.4,
+      "depthQuoteTopN": 124020,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.98,
+    "reasons": [
+      "Trend Pullback Continuation",
+      "Near EMA21 support",
+      "VWAP reclaim",
+      "Volume 1.98x",
+      "Relative strength vs BTC"
+    ],
+    "maxFavorable": 266,
+    "maxAdverse": 262.1,
+    "outcome": "LOSS"
+  }
+]

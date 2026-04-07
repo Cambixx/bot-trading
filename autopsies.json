@@ -1,1 +1,67 @@
-[]
+[
+  {
+    "id": "1775565918804-ZECUSDT",
+    "symbol": "ZECUSDT",
+    "outcome": "LOSS",
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "score": 81,
+    "sector": "OTHER",
+    "module": "TREND_PULLBACK",
+    "entryArchetype": "Trend Pullback Continuation",
+    "liquidityTier": "MEDIUM",
+    "scoreBeforeMomentum": 81,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.52,
+      "realRR": 2,
+      "timeStopHours": 14
+    },
+    "hoursOpen": 1.5,
+    "favorableMovePct": 0,
+    "adverseMovePct": 1.47,
+    "mfePct": 0,
+    "maePct": 1.47,
+    "entryMetrics": {
+      "distToEma9": 0.03,
+      "distToEma21": 0.3,
+      "distToEma50": 1.41,
+      "atrPercent": 0.9,
+      "bbPercent": 0.48,
+      "breakoutDistancePct": -2.36,
+      "pullbackFromHigh20Pct": 2.36,
+      "riskRewardRatio": 2,
+      "timeStopHours": 14
+    },
+    "qualityBreakdown": {
+      "trend": 100,
+      "location": 58.5,
+      "participation": 90,
+      "execution": 71
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0109,
+      "rs4h": 0.0832,
+      "rs24h": 0.06
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.98,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.769,
+      "obiPass": true,
+      "spreadBps": 0.4,
+      "depthQuoteTopN": 124020,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.98,
+    "closedAt": 1775571344523
+  }
+]
