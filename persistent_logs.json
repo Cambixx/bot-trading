@@ -1102,5 +1102,13 @@
   "[2026-04-07 09:15:13] [BTC-SEM] 🟢 GREEN: BTC trend supportive",
   "[2026-04-07 09:15:13] [RUN-275388] Performance Stats: {\"open\":0,\"wins\":0,\"losses\":0,\"bes\":0,\"staleExits\":0,\"winRate\":0}",
   "[2026-04-07 09:15:20] Analysis complete: 30 coins, 0 signals, 0 errors",
-  "[2026-04-07 09:15:20] [THROUGHPUT] Rejects: LIQUIDITY_TIER_LOW=8 | EXEC_SPREAD=8 | REGIME_RISK_OFF=5 | EXEC_DEPTH=5 | PULLBACK_DEPTH=1 | BREAKOUT_TREND_ALIGN=1 | PULLBACK_LOCATION=1 | ATR_FILTER=1"
+  "[2026-04-07 09:15:20] [THROUGHPUT] Rejects: LIQUIDITY_TIER_LOW=8 | EXEC_SPREAD=8 | REGIME_RISK_OFF=5 | EXEC_DEPTH=5 | PULLBACK_DEPTH=1 | BREAKOUT_TREND_ALIGN=1 | PULLBACK_LOCATION=1 | ATR_FILTER=1",
+  "[2026-04-07 09:30:19] --- DAY TRADE Analysis Started v9.0.0-EvidenceFirst ---",
+  "[2026-04-07 09:30:19] Execution ID: RUN-310767",
+  "[2026-04-07 09:30:19] Loaded 0 cooldown entries",
+  "[2026-04-07 09:30:19] [MEMORY] Loaded memory for 0 symbols",
+  "[2026-04-07 09:30:19] [BTC-SEM] 🟢 GREEN: BTC trend supportive",
+  "[2026-04-07 09:30:19] [RUN-310767] Performance Stats: {\"open\":0,\"wins\":0,\"losses\":0,\"bes\":0,\"staleExits\":0,\"winRate\":0}",
+  "[2026-04-07 09:30:28] Analysis complete: 30 coins, 0 signals, 0 errors",
+  "[2026-04-07 09:30:28] [THROUGHPUT] Rejects: LIQUIDITY_TIER_LOW=8 | EXEC_SPREAD=7 | EXEC_DEPTH=6 | REGIME_RISK_OFF=5 | PULLBACK_BB=2 | BREAKOUT_TREND_ALIGN=1 | ATR_FILTER=1"
 ]

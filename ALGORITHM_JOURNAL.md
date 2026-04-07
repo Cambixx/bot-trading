@@ -6,7 +6,42 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v9.0.0 (Active)
+## Current Version: v9.0.1 (Active)
+**Date:** Apr 7, 2026
+**Theme:** "EXECUTION GATE AUDIT"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v9.0.1-ExecutionAware`.
+- **Observed validation window:** `2026-04-05 09:31:19 UTC` to `2026-04-07 09:30:28 UTC`.
+- **Observed active-session runs in that window:** `139`, versus ~`136` expected runs once the `00:00-07:00 UTC` Asia block is excluded. Lectura: no hay evidencia fuerte de fallo operativo en el scheduler dentro de la sesión activa.
+- **Observed result in synced blobs:** `history.json = 0`, `shadow_trades.json = 0`, `shadow_trades_archive.json = 0`, `autopsies.json = 0`, `signal_memory.json = 0`.
+- **Dominant reject stack in the observed window:** `LIQUIDITY_TIER_LOW`, `EXEC_SPREAD`, `EXEC_DEPTH`, `REGIME_RISK_OFF`.
+- **Execution-depth measurement fix:** la profundidad deja de resumirse sobre `top 10` niveles y pasa a usar todo el snapshot ya descargado (`limit=20`), para no degradar majors por una vista truncada del libro.
+- **Execution gate relocation:** `EXEC_SPREAD`, `EXEC_DEPTH` y `LIQUIDITY_TIER_LOW` ya no matan el símbolo antes de evaluar módulos. Primero se calcula si existe un proto-setup razonable; después se decide si puede pasar a `live`. Así `shadow` puede capturar near-misses reales bloqueados por ejecutabilidad.
+- **Throughput funnel telemetry:** cada run añade `[THROUGHPUT] Stages ...` para mostrar cuántos símbolos sobreviven a `ORDERBOOK`, `LIQUIDITY_BASE`, `REGIME`, `MODULE`, `EXECUTION` y `SCORE`.
+- **Session observability fix:** las ejecuciones bloqueadas por `AVOID_ASIA_SESSION=true` ahora también se persisten en `persistent_logs`, para que la próxima auditoría pueda distinguir mejor entre runs esperados, runs observados y runs intencionalmente pausados.
+
+### Hypothesis / Goal:
+No hay evidencia suficiente para un rediseño completo dos días después de v9.0.0. La hipótesis más defendible es más estrecha: el problema dominante actual es de `throughput` y de observabilidad del gate de ejecución, no de invalidez estratégica de la baseline `trend pullback + breakout`.
+
+### Bug Found:
+- **Early hard gating nos dejaba sin aprendizaje.** Si un símbolo moría por `EXEC_SPREAD`, `EXEC_DEPTH` o `LIQUIDITY_TIER_LOW`, el runtime no llegaba a revelar si detrás había un candidato razonable que merecía `shadow`.
+- **La ventana reciente estaba infra-observable para auditorías de 72h.** Las pausas por sesión Asia no quedaban persistidas en los logs sincronizados, complicando la lectura de runs esperados vs. observados.
+- **La profundidad efectiva estaba sesgada por truncamiento.** El código pedía `20` niveles al exchange pero solo sumaba `10`, endureciendo artificialmente el filtro de profundidad.
+
+### Lesson Learned:
+- **Antes de bajar thresholds, hay que auditar la geometría del gate.** Un filtro correcto en principio puede ser demasiado duro en la práctica si mide mal la liquidez.
+- **Sin `shadow` ni funnel stages, “0 BUY” no enseña suficiente.** La falta de señales puede ser una decisión defendible o una asfixia del embudo; sin telemetría adicional no se puede separar bien.
+- **Un rediseño completo con `history/shadow/autopsies` vacíos sería convicción fabricada.** Primero toca mejorar la honestidad observacional del runtime actual.
+
+### Pending Hypotheses:
+1. ¿Cuántos near-misses empezará a registrar `shadow` ahora que el gate de ejecución se evalúa al final del funnel?
+2. ¿El cuello dominante seguirá estando en ejecución o migrará hacia `BREAKOUT_DISTANCE`, `PULLBACK_RS` o `SCORE_BELOW_FLOOR`?
+3. ¿La combinación `RISK_OFF + execution gates` sigue dejando throughput suficiente en majors líquidas durante sesiones Europa/EE. UU.?
+
+---
+
+## Previous Version: v9.0.0
 **Date:** Apr 5, 2026
 **Theme:** "EVIDENCE-FIRST THROUGHPUT RESET"
 

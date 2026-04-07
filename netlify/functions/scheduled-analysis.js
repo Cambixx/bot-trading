@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v9.0.0-EvidenceFirst';
+const ALGORITHM_VERSION = 'v9.0.1-ExecutionAware';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -105,17 +105,21 @@ function isProtectedSector(sector) {
   return sector && sector !== 'UNKNOWN' && sector !== 'OTHER';
 }
 
-function isTradingAllowed() {
-  if (!AVOID_ASIA_SESSION) return true;
-
-  const now = new Date();
+function getTradingSessionStatus(now = new Date()) {
   const utcHour = now.getUTCHours();
-  if (utcHour >= 0 && utcHour < 7) {
-    console.log(`[SESSION] Asia session detected (${utcHour}:00 UTC) - trading restricted`);
-    return false;
+  if (!AVOID_ASIA_SESSION) {
+    return { allowed: true, utcHour, reason: null };
   }
 
-  return true;
+  if (utcHour >= 0 && utcHour < 7) {
+    return {
+      allowed: false,
+      utcHour,
+      reason: `Asia session detected (${utcHour}:00 UTC) - trading restricted`
+    };
+  }
+
+  return { allowed: true, utcHour, reason: null };
 }
 
 function isNonCryptoWrapper(base) {
@@ -260,6 +264,11 @@ function clamp(value, min, max) {
 function countMetric(bucket, key) {
   if (!bucket || !key) return;
   bucket[key] = (bucket[key] || 0) + 1;
+}
+
+function formatPersistentLogEntry(message, date = new Date()) {
+  const timestamp = date.toISOString().replace('T', ' ').split('.')[0];
+  return `[${timestamp}] ${message}`;
 }
 
 function toSummaryPairs(bucket, limit = 8) {
@@ -801,6 +810,16 @@ async function savePersistentLogs(logs, context) {
   }
 }
 
+async function appendPersistentLogEntries(messages, context, date = new Date()) {
+  try {
+    const existingLogs = await loadPersistentLogs(context);
+    const nextLogs = messages.map(message => formatPersistentLogEntry(message, date));
+    await savePersistentLogs([...existingLogs, ...nextLogs], context);
+  } catch (error) {
+    console.error('[PLOG] Error appending:', error.message);
+  }
+}
+
 async function getKlines(symbol, interval = '15m', limit = 200) {
   const cacheKey = `${symbol}-${interval}-${limit}`;
   const cached = getCachedCandles(cacheKey);
@@ -1222,7 +1241,7 @@ function getRecentRangeLevels(candles, lookback = 20) {
   };
 }
 
-function calculateOrderBookMetrics(orderBook) {
+export function calculateOrderBookMetrics(orderBook) {
   if (!orderBook || !Array.isArray(orderBook.bids) || !Array.isArray(orderBook.asks) || !orderBook.bids.length || !orderBook.asks.length) return null;
 
   const [bestBidPrice] = orderBook.bids[0];
@@ -1231,8 +1250,9 @@ function calculateOrderBookMetrics(orderBook) {
 
   const mid = (bestAskPrice + bestBidPrice) / 2;
   const spreadBps = ((bestAskPrice - bestBidPrice) / mid) * 10000;
-  const topBids = orderBook.bids.slice(0, 10);
-  const topAsks = orderBook.asks.slice(0, 10);
+  // Use the full fetched snapshot so majors are not misclassified by a truncated top-of-book view.
+  const topBids = orderBook.bids.slice(0, 20);
+  const topAsks = orderBook.asks.slice(0, 20);
   const bidNotional = topBids.reduce((sum, [price, quantity]) => sum + (price * quantity), 0);
   const askNotional = topAsks.reduce((sum, [price, quantity]) => sum + (price * quantity), 0);
   const totalNotional = bidNotional + askNotional;
@@ -1245,11 +1265,19 @@ function calculateOrderBookMetrics(orderBook) {
   };
 }
 
-function classifyLiquidityTier(quoteVol24h, depthQuoteTopN, spreadBps) {
+export function classifyLiquidityTier(quoteVol24h, depthQuoteTopN, spreadBps) {
   if (quoteVol24h >= 50000000 && depthQuoteTopN >= 250000 && spreadBps <= 3) return 'ELITE';
   if (quoteVol24h >= 20000000 && depthQuoteTopN >= 150000 && spreadBps <= 5) return 'HIGH';
   if (quoteVol24h >= 8000000 && depthQuoteTopN >= 90000 && spreadBps <= MAX_SPREAD_BPS) return 'MEDIUM';
   return 'LOW';
+}
+
+export function getExecutionRejectCode(obMetrics, liquidityTier) {
+  if (!obMetrics) return 'ORDERBOOK_UNAVAILABLE';
+  if (obMetrics.spreadBps > MAX_SPREAD_BPS) return 'EXEC_SPREAD';
+  if (obMetrics.depthQuoteTopN < MIN_DEPTH_QUOTE) return 'EXEC_DEPTH';
+  if (liquidityTier === 'LOW') return 'LIQUIDITY_TIER_LOW';
+  return null;
 }
 
 function buildExecutionQuality(liquidityTier, spreadBps, depthQuoteTopN) {
@@ -1729,26 +1757,16 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     countMetric(analysisState?.rejectCounts, 'ORDERBOOK_UNAVAILABLE');
     return null;
   }
-  if (obMetrics.spreadBps > MAX_SPREAD_BPS) {
-    countMetric(analysisState?.rejectCounts, 'EXEC_SPREAD');
-    return null;
-  }
-  if (obMetrics.depthQuoteTopN < MIN_DEPTH_QUOTE) {
-    countMetric(analysisState?.rejectCounts, 'EXEC_DEPTH');
-    return null;
-  }
+  countMetric(analysisState?.stageCounts, 'ORDERBOOK_OK');
 
   const quoteVol24h = Number(ticker24h?.quoteVolume || 0);
   if (!Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) {
     countMetric(analysisState?.rejectCounts, 'LIQUIDITY_FLOOR');
     return null;
   }
+  countMetric(analysisState?.stageCounts, 'LIQUIDITY_BASE_OK');
 
   const liquidityTier = classifyLiquidityTier(quoteVol24h, obMetrics.depthQuoteTopN, obMetrics.spreadBps);
-  if (liquidityTier === 'LOW') {
-    countMetric(analysisState?.rejectCounts, 'LIQUIDITY_TIER_LOW');
-    return null;
-  }
 
   const closes15m = closedCandles15m.map(candle => candle.close);
   const closes1h = closedCandles1h.map(candle => candle.close);
@@ -1823,6 +1841,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     countMetric(analysisState?.rejectCounts, 'REGIME_RISK_OFF');
     return null;
   }
+  countMetric(analysisState?.stageCounts, 'REGIME_OK');
 
   const ctx = {
     symbol,
@@ -1875,6 +1894,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     countMetric(analysisState?.rejectCounts, pickPreferredReject(regime, pullbackResult, breakoutResult));
     return null;
   }
+  countMetric(analysisState?.stageCounts, 'MODULE_OK');
 
   const sortedCandidates = moduleCandidates.sort((a, b) => b.score - a.score);
   const bestCandidate = sortedCandidates[0];
@@ -1899,17 +1919,27 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
+  const executionRejectCode = getExecutionRejectCode(obMetrics, liquidityTier);
+  if (executionRejectCode) {
+    countMetric(analysisState?.rejectCounts, executionRejectCode);
+    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, executionRejectCode, btcContext, shadowCollector);
+    return null;
+  }
+  countMetric(analysisState?.stageCounts, 'EXECUTION_OK');
+
   if (bestCandidate.score < requiredScore) {
     countMetric(analysisState?.rejectCounts, 'SCORE_BELOW_FLOOR');
     buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, 'SCORE_BELOW_FLOOR', btcContext, shadowCollector);
     return null;
   }
+  countMetric(analysisState?.stageCounts, 'SCORE_OK');
 
   if (bestCandidate.riskModel.realRR < 1.5) {
     countMetric(analysisState?.rejectCounts, 'RISK_MODEL_RR');
     return null;
   }
 
+  countMetric(analysisState?.stageCounts, 'LIVE_SIGNAL');
   return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore);
 }
 
@@ -1984,9 +2014,16 @@ async function sendTelegramNotification(signals, stats = null) {
 }
 
 export async function runAnalysis(context) {
-  if (!isTradingAllowed()) {
-    console.log('[SESSION] Trading paused - Low liquidity session');
-    return { success: true, signals: 0, reason: 'Asia session - trading restricted' };
+  const sessionStatus = getTradingSessionStatus();
+  if (!sessionStatus.allowed) {
+    const sessionMessages = [
+      `--- DAY TRADE Analysis Skipped ${ALGORITHM_VERSION} ---`,
+      `[SESSION] ${sessionStatus.reason}`,
+      '[SESSION] Trading paused - Low liquidity session'
+    ];
+    sessionMessages.forEach(message => console.log(message));
+    await appendPersistentLogEntries(sessionMessages, context);
+    return { success: true, signals: 0, reason: 'Asia session - trading restricted', session: 'ASIA_BLOCKED' };
   }
 
   const canProceed = await acquireRunLock(context);
@@ -2017,7 +2054,8 @@ export async function runAnalysis(context) {
 
     const analysisState = {
       rejectCounts: {},
-      moduleCandidates: {}
+      moduleCandidates: {},
+      stageCounts: {}
     };
 
     const signalMemory = await loadSignalMemory(context);
@@ -2044,6 +2082,7 @@ export async function runAnalysis(context) {
     const topSymbols = tickers24h.length
       ? getTopSymbolsByOpportunity(tickers24h, QUOTE_ASSET, MAX_SYMBOLS, MIN_QUOTE_VOL_24H)
       : FALLBACK_SYMBOLS;
+    pLog(`[UNIVERSE] Selected ${topSymbols.length} symbols after opportunity ranking`);
 
     const histData = await updateSignalHistory(tickers24h, context, pLog);
     const stats = histData?.stats || { open: 0, wins: 0, losses: 0, bes: 0, staleExits: 0, winRate: 0 };
@@ -2156,7 +2195,9 @@ export async function runAnalysis(context) {
     pLog(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
 
     const moduleSummary = toSummaryPairs(analysisState.moduleCandidates);
+    const stageSummary = toSummaryPairs(analysisState.stageCounts);
     const rejectSummary = toSummaryPairs(analysisState.rejectCounts);
+    if (stageSummary.length) pLog(`[THROUGHPUT] Stages: ${stageSummary.join(' | ')}`);
     if (moduleSummary.length) pLog(`[THROUGHPUT] Module candidates: ${moduleSummary.join(' | ')}`);
     if (rejectSummary.length) pLog(`[THROUGHPUT] Rejects: ${rejectSummary.join(' | ')}`);
 

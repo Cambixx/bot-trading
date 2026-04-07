@@ -1,19 +1,20 @@
-# 🦅 Documentación del Algoritmo de Trading (v9.0.0 Evidence-First)
+# 🦅 Documentación del Algoritmo de Trading (v9.0.1 Execution-Aware)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
 > ⚠️ **Regla de mantenimiento:** Cualquier cambio en `scheduled-analysis.js` debe reflejarse en este documento Y en `ALGORITHM_JOURNAL.md` antes de considerarse completo.
 
-> ℹ️ **Nota de transición:** Desde `v9.0.0-EvidenceFirst`, el runtime ya no usa el viejo `score soup` como núcleo. Las secciones históricas de abajo siguen siendo útiles como contexto, pero cuando haya conflicto manda siempre el bloque `Current Runtime Snapshot (v9.0.0)` de abajo.
+> ℹ️ **Nota de transición:** Desde `v9.0.0-EvidenceFirst`, el runtime ya no usa el viejo `score soup` como núcleo. Las secciones históricas de abajo siguen siendo útiles como contexto, pero cuando haya conflicto manda siempre el bloque `Current Runtime Snapshot (v9.0.1)` de abajo.
 
 ---
 
-## Current Runtime Snapshot (v9.0.0)
+## Current Runtime Snapshot (v9.0.1)
 
 ### Resumen
-- **Runtime Version:** `v9.0.0-EvidenceFirst`
+- **Runtime Version:** `v9.0.1-ExecutionAware`
 - **Estilo:** `spot`, `long-only`, intradía/day trading
 - **Filosofía:** menos heurística, más explicabilidad, más liquidez ejecutable, mejor observabilidad de throughput y mejor separación entre `live`, `shadow` y activos realmente cripto
+- **Ajuste reciente:** el gate duro de ejecución se evalúa después de construir el mejor candidato del módulo para poder registrar `shadow` honesto cuando un proto-setup muere por `spread`, `depth` o `liquidity tier`
 
 ### Arquitectura activa
 - `TREND_PULLBACK`
@@ -27,6 +28,7 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 - Solo pares `USDT`
 - exclusión de wrappers/sintéticos no alineados con el objetivo cripto (`PAXG`, `XAUT`, símbolos con paréntesis, etc.)
 - `spread` y `depth` duros
+- la profundidad se mide sobre el snapshot completo descargado (`20` niveles por lado), no solo sobre `10`
 - filtro duro de volumen 24h
 - clasificación de liquidez:
   - `ELITE`
@@ -63,8 +65,14 @@ Las señales, near-misses y autopsias guardan:
 - `volumeLiquidityConfirmation`
 - `rejectReasonCode`
 
+Además, `persistent_logs` ahora persiste también:
+- runs bloqueados por sesión Asia
+- `[THROUGHPUT] Stages: ...`
+- `[UNIVERSE] Selected ...`
+
 ### Throughput y auditoría
 - Cada run publica resúmenes agregados de rechazo:
+  - `[THROUGHPUT] Stages: ...`
   - `[THROUGHPUT] Module candidates: ...`
   - `[THROUGHPUT] Rejects: ...`
 - Objetivo: distinguir falta real de oportunidades vs. gates excesivamente duros sin tener que inferirlo a mano desde logs pobres
@@ -228,13 +236,13 @@ El orden de evaluación para cada señal es:
 ## 7. Configuración (Variables de Entorno)
 
 ```bash
-MAX_SYMBOLS=50                # Top 50 monedas por Opportunity Score
+MAX_SYMBOLS=60                # Top monedas por Opportunity Score
 ALERT_COOLDOWN_MIN=240        # 4 horas entre señales del mismo par
 AVOID_ASIA_SESSION=true       # Bloquear 00:00-07:00 UTC
-MIN_QUOTE_VOL_24H=3000000     # Volumen 24h mínimo en USDT
+MIN_QUOTE_VOL_24H=8000000     # Volumen 24h mínimo en USDT
 SIGNAL_SCORE_THRESHOLD=65     # Threshold base (sobrescrito por umbral de régimen)
 MAX_SPREAD_BPS=8              # Spread máximo permitido
-MIN_DEPTH_QUOTE=75000         # Profundidad mínima del order book
+MIN_DEPTH_QUOTE=90000         # Profundidad mínima del order book
 ```
 
 ---
