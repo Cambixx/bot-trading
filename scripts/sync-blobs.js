@@ -16,9 +16,11 @@ import { getStore } from '@netlify/blobs';
 import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
+dotenv.config({ path: resolve(ROOT, '.env') });
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 
@@ -50,7 +52,9 @@ const ALIASES = {
 
 function getNetlifyToken() {
     // 1. Environment variable
-    if (process.env.NETLIFY_AUTH_TOKEN) return process.env.NETLIFY_AUTH_TOKEN;
+    if (process.env.NETLIFY_AUTH_TOKEN) {
+        return { token: process.env.NETLIFY_AUTH_TOKEN, source: 'NETLIFY_AUTH_TOKEN' };
+    }
 
     // 2. Netlify CLI config files (set by `netlify login`)
     const home = process.env.HOME || process.env.USERPROFILE;
@@ -63,16 +67,21 @@ function getNetlifyToken() {
         if (!existsSync(configPath)) continue;
         try {
             const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+
+            if (config.authId) {
+                return { token: config.authId, source: configPath + ' (authId)' };
+            }
+
             if (config.users) {
                 const userId = config.userId || Object.keys(config.users)[0];
                 if (userId && config.users[userId]?.auth?.token) {
-                    return config.users[userId].auth.token;
+                    return { token: config.users[userId].auth.token, source: configPath + ' (users.*.auth.token)' };
                 }
             }
         } catch { /* ignore */ }
     }
 
-    return null;
+    return { token: null, source: null };
 }
 
 function formatBytes(bytes) {
@@ -87,10 +96,57 @@ function formatCount(data) {
     return 'unknown structure';
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function describeError(error) {
+    const parts = [];
+    if (error?.message) parts.push(error.message);
+    if (error?.cause?.message && error.cause.message !== error.message) parts.push(`cause: ${error.cause.message}`);
+    if (error?.cause?.code) parts.push(`code: ${error.cause.code}`);
+    if (error?.name && error.name !== 'Error') parts.push(`name: ${error.name}`);
+    return parts.length ? parts.join(' | ') : 'Unknown error';
+}
+
+function isRetryableFetchError(error) {
+    const text = `${error?.message || ''} ${error?.cause?.message || ''}`.toLowerCase();
+    return text.includes('fetch failed')
+        || text.includes('timed out')
+        || text.includes('timeout')
+        || text.includes('socket')
+        || text.includes('econnreset')
+        || text.includes('enotfound')
+        || text.includes('eai_again')
+        || text.includes('network');
+}
+
+async function getBlobWithRetry(store, key, maxAttempts = 3) {
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const data = await store.get(key, { type: 'json' });
+            return { data, attempts: attempt };
+        } catch (error) {
+            lastError = error;
+            if (!isRetryableFetchError(error) || attempt === maxAttempts) {
+                break;
+            }
+
+            const delayMs = 400 * attempt;
+            console.log(`↻ retry ${attempt}/${maxAttempts - 1} in ${delayMs}ms (${describeError(error)})`);
+            await sleep(delayMs);
+        }
+    }
+
+    throw lastError;
+}
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function syncBlobs(filter) {
-    const token = getNetlifyToken();
+    const { token, source: tokenSource } = getNetlifyToken();
     if (!token) {
         console.error('❌ No Netlify auth token found.');
         console.error('   Run `netlify login` or set NETLIFY_AUTH_TOKEN env variable.');
@@ -122,6 +178,7 @@ async function syncBlobs(filter) {
     console.log(`  Store: ${STORE_NAME}`);
     console.log(`  Site:  ${SITE_ID}`);
     console.log(`  Targets: ${targets.length} blob(s)`);
+    console.log(`  Auth:  ${tokenSource || 'unknown source'}`);
     console.log('');
 
     let success = 0;
@@ -132,10 +189,10 @@ async function syncBlobs(filter) {
         process.stdout.write(`  ⏳ ${label.padEnd(20)} `);
 
         try {
-            const data = await store.get(key, { type: 'json' });
+            const { data, attempts } = await getBlobWithRetry(store, key);
 
             if (data === null || data === undefined) {
-                console.log('⚠️  Empty (blob not found)');
+                console.log(`⚠️  Empty (blob not found${attempts > 1 ? ` after ${attempts} attempts` : ''})`);
                 // Write empty structure
                 writeFileSync(filePath, '[]', 'utf-8');
                 success++;
@@ -147,10 +204,11 @@ async function syncBlobs(filter) {
 
             const size = formatBytes(Buffer.byteLength(json, 'utf-8'));
             const count = formatCount(data);
-            console.log(`✅ ${count} (${size}) → ${file}`);
+            const retryText = attempts > 1 ? ` after ${attempts} attempts` : '';
+            console.log(`✅ ${count} (${size}) → ${file}${retryText}`);
             success++;
         } catch (error) {
-            console.log(`❌ Error: ${error.message}`);
+            console.log(`❌ Error: ${describeError(error)}`);
             failed++;
         }
     }
