@@ -1,48 +1,49 @@
-# 🦅 Documentación del Algoritmo de Trading (v9.0.1 Execution-Aware)
+# 🦅 Documentación del Algoritmo de Trading (v9.1.0 GateRelax)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
 > ⚠️ **Regla de mantenimiento:** Cualquier cambio en `scheduled-analysis.js` debe reflejarse en este documento Y en `ALGORITHM_JOURNAL.md` antes de considerarse completo.
 
-> ℹ️ **Nota de transición:** Desde `v9.0.0-EvidenceFirst`, el runtime ya no usa el viejo `score soup` como núcleo. Las secciones históricas de abajo siguen siendo útiles como contexto, pero cuando haya conflicto manda siempre el bloque `Current Runtime Snapshot (v9.0.1)` de abajo.
+> ℹ️ **Nota de transición:** Desde `v9.1.0-GateRelax`, el sistema relaja la arquitectura de gates duros a favor de penalizaciones progresivas de calidad. `bull1h` ya no es hard gate en ningún módulo; pasa a ser factor de calidad (+15 trendQuality).
 
 ---
 
-## Current Runtime Snapshot (v9.0.1)
+## Current Runtime Snapshot (v9.1.0)
 
 ### Resumen
-- **Runtime Version:** `v9.0.1-ExecutionAware`
+- **Runtime Version:** `v9.1.0-GateRelax`
 - **Estilo:** `spot`, `long-only`, intradía/day trading
-- **Filosofía:** menos heurística, más explicabilidad, más liquidez ejecutable, mejor observabilidad de throughput y mejor separación entre `live`, `shadow` y activos realmente cripto
-- **Ajuste reciente:** el gate duro de ejecución se evalúa después de construir el mejor candidato del módulo para poder registrar `shadow` honesto cuando un proto-setup muere por `spread`, `depth` o `liquidity tier`
+- **Filosofía:** maximizar throughput manteniendo calidad vía scoring, no vía gates conjuntivos. Solo activos ELITE/HIGH para live.
+- **Ajuste principal:** el clasificador de régimen ya no requiere `bull4h AND price > EMA50` simultáneamente; ambos módulos aceptan `bull1h=false` con penalización de calidad
 
 ### Arquitectura activa
 - `TREND_PULLBACK`
-  - Busca pullbacks controlados cerca de `EMA21` / `VWAP` en activos líquidos con sesgo alcista `4H` y `1H`
-  - Puntúa solo cuatro dimensiones: `trend`, `location`, `participation`, `execution`
+  - Busca pullbacks controlados cerca de `EMA21` / `VWAP` en activos líquidos con sesgo alcista `4H`
+  - `bull1h` es factor de calidad (+15 trendQuality), no hard gate
+  - 6 former hard gates (bbPercent, pullbackDepth, RSI, rs1h, deltaRatio, reclaim) son ahora penalizaciones progresivas
+  - Puntúa cuatro dimensiones: `trend`, `location`, `participation`, `execution`
 - `BREAKOUT_CONTINUATION`
   - Busca ruptura reciente con expansión real de volumen, cierre fuerte y fortaleza relativa
-  - Es el módulo preferido para `HIGH_VOL_BREAKOUT` y el único permitido live en `TRANSITION`
+  - `bull1h` es factor de calidad (+15 trendQuality), no hard gate
+  - Gates relajados (volume, RSI, delta, RS) para mayor throughput
 
 ### Filtros estructurales activos
 - Solo pares `USDT`
-- exclusión de wrappers/sintéticos no alineados con el objetivo cripto (`PAXG`, `XAUT`, símbolos con paréntesis, etc.)
-- `spread` y `depth` duros
-- la profundidad se mide sobre el snapshot completo descargado (`20` niveles por lado), no solo sobre `10`
+- exclusión de wrappers/sintéticos no alineados con el objetivo cripto
+- `spread` y `depth` duros (gate de ejecución post-módulo)
 - filtro duro de volumen 24h
 - clasificación de liquidez:
-  - `ELITE`
-  - `HIGH`
-  - `MEDIUM`
-  - `LOW`
-- `LOW` queda fuera del runtime live
+  - `ELITE` → live ✅
+  - `HIGH` → live ✅
+  - `MEDIUM` → **shadow only** (v9.1.0)
+  - `LOW` → fuera del runtime
 
 ### Regímenes activos
-- `TRENDING`: operativo
-- `RANGING`: operativo solo para pullbacks alcistas controlados
-- `HIGH_VOL_BREAKOUT`: operativo para rupturas con volumen real
-- `TRANSITION`: solo `BREAKOUT_CONTINUATION`
-- `RISK_OFF`: sin live
+- `TRENDING`: ambos módulos live
+- `RANGING`: ambos módulos live
+- `HIGH_VOL_BREAKOUT`: solo `BREAKOUT_CONTINUATION` live
+- `TRANSITION`: **ambos módulos live** (v9.1.0, antes solo breakout)
+- `RISK_OFF`: sin live (requiere `!bull4h AND price < ema50_15m`, o BTC RED)
 
 ### Gestión de riesgo activa
 - Cada módulo define su propio:

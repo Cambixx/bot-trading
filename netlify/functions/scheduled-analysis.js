@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v9.0.1-ExecutionAware';
+const ALGORITHM_VERSION = 'v9.1.0-GateRelax';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1366,7 +1366,8 @@ function detectMarketRegime({
   btcRisk
 }) {
   if (btcRisk === 'RED') return 'RISK_OFF';
-  if (!bull4h || !Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m) || currentPrice < ema50_15m) return 'RISK_OFF';
+  if (!Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m)) return 'RISK_OFF';
+  if (!bull4h && currentPrice < ema50_15m) return 'RISK_OFF';
 
   const trending = bull4h && bull1h && Number.isFinite(adx15m) && adx15m >= 20;
   if (trending && atrPercentile >= 70) return 'HIGH_VOL_BREAKOUT';
@@ -1398,25 +1399,47 @@ function evaluateTrendPullbackModule(ctx) {
     emaSlope1h
   } = ctx;
 
-  if (!bull4h || !bull1h) return { rejectCode: 'PULLBACK_TREND_ALIGN' };
+  // === HARD GATES (essential only, v9.1.0) ===
+  if (!bull4h) return { rejectCode: 'PULLBACK_TREND_ALIGN' };
   if (!(regime === 'TRENDING' || regime === 'RANGING' || regime === 'TRANSITION')) return { rejectCode: 'PULLBACK_REGIME' };
   if (!Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m) || currentPrice <= ema50_15m) return { rejectCode: 'PULLBACK_BELOW_BASE' };
-  if (!Number.isFinite(distToEma21) || distToEma21 < -1.2 || distToEma21 > 0.8) return { rejectCode: 'PULLBACK_LOCATION' };
-  if (!Number.isFinite(pullbackFromHigh20Pct) || pullbackFromHigh20Pct < 0.2 || pullbackFromHigh20Pct > 2.8) return { rejectCode: 'PULLBACK_DEPTH' };
-  if (!Number.isFinite(bbPercent) || bbPercent < 0.18 || bbPercent > 0.72) return { rejectCode: 'PULLBACK_BB' };
-  if (!Number.isFinite(rsi15m) || !Number.isFinite(rsi1h) || rsi15m < 42 || rsi15m > 64 || rsi1h < 46 || rsi1h > 68) return { rejectCode: 'PULLBACK_RSI' };
-  if (rs4h <= 0 || rs1h < -0.002) return { rejectCode: 'PULLBACK_RS' };
-  if (!Number.isFinite(volumeRatio) || volumeRatio < 0.85) return { rejectCode: 'PULLBACK_VOLUME' };
-  if (deltaRatio !== null && deltaRatio < -0.08) return { rejectCode: 'PULLBACK_TAKER' };
-  if (!obMetrics || obMetrics.obi < -0.10) return { rejectCode: 'PULLBACK_ORDERBOOK' };
+  if (!Number.isFinite(distToEma21) || distToEma21 < -1.5 || distToEma21 > 1.0) return { rejectCode: 'PULLBACK_LOCATION' };
+  if (!Number.isFinite(volumeRatio) || volumeRatio < 0.70) return { rejectCode: 'PULLBACK_VOLUME' };
+  if (rs4h <= 0) return { rejectCode: 'PULLBACK_RS' };
+  if (!obMetrics || obMetrics.obi < -0.15) return { rejectCode: 'PULLBACK_ORDERBOOK' };
+
+  // === PROGRESSIVE QUALITY PENALTIES (v9.1.0: former hard gates become score factors) ===
+  let softPenalty = 0;
+  if (Number.isFinite(bbPercent)) {
+    if (bbPercent < 0.10 || bbPercent > 0.82) softPenalty += 18;
+    else if (bbPercent < 0.18 || bbPercent > 0.72) softPenalty += 8;
+    else if (bbPercent < 0.25 || bbPercent > 0.65) softPenalty += 3;
+  }
+  if (Number.isFinite(pullbackFromHigh20Pct)) {
+    if (pullbackFromHigh20Pct < 0.1 || pullbackFromHigh20Pct > 3.5) softPenalty += 18;
+    else if (pullbackFromHigh20Pct < 0.2 || pullbackFromHigh20Pct > 2.8) softPenalty += 8;
+    else if (pullbackFromHigh20Pct < 0.3 || pullbackFromHigh20Pct > 2.5) softPenalty += 3;
+  }
+  if (Number.isFinite(rsi15m)) {
+    if (rsi15m < 35 || rsi15m > 70) softPenalty += 18;
+    else if (rsi15m < 42 || rsi15m > 64) softPenalty += 5;
+  }
+  if (Number.isFinite(rsi1h)) {
+    if (rsi1h < 40 || rsi1h > 74) softPenalty += 12;
+    else if (rsi1h < 46 || rsi1h > 68) softPenalty += 3;
+  }
+  if (rs1h < -0.008) softPenalty += 10;
+  else if (rs1h < -0.002) softPenalty += 4;
+  if (deltaRatio !== null && deltaRatio < -0.15) softPenalty += 12;
+  else if (deltaRatio !== null && deltaRatio < -0.05) softPenalty += 4;
 
   const reclaimOk =
     (Number.isFinite(ema9_15m) && currentPrice >= ema9_15m * 0.995) ||
     (Number.isFinite(vwap15m) && currentPrice >= vwap15m * 0.998);
-  if (!reclaimOk) return { rejectCode: 'PULLBACK_RECLAIM' };
 
   const trendQuality = clamp(
-    58 +
+    48 +
+    (bull1h ? 15 : 0) +
     clamp(rs4h * 1600, 0, 18) +
     clamp(rs1h * 2200, -4, 12) +
     clamp(emaSlope1h * 12000, 0, 10) +
@@ -1427,16 +1450,17 @@ function evaluateTrendPullbackModule(ctx) {
 
   const locationQuality = clamp(
     100 -
-    Math.abs(distToEma21 - 0.05) * 60 -
-    Math.abs(bbPercent - 0.45) * 80 -
-    Math.abs(pullbackFromHigh20Pct - 1.0) * 18,
+    softPenalty -
+    Math.abs(distToEma21 - 0.05) * 50 -
+    Math.abs((bbPercent || 0.5) - 0.45) * 55 -
+    Math.abs((pullbackFromHigh20Pct || 1.0) - 1.0) * 14,
     0,
     100
   );
 
   const participationQuality = clamp(
     40 +
-    clamp((volumeRatio - 0.85) * 45, 0, 25) +
+    clamp((volumeRatio - 0.70) * 40, 0, 25) +
     (deltaRatio === null ? 8 : clamp((deltaRatio + 0.05) * 85, 0, 18)) +
     clamp((obMetrics.obi + 0.08) * 75, 0, 17),
     0,
@@ -1448,10 +1472,12 @@ function evaluateTrendPullbackModule(ctx) {
     trendQuality * 0.35 +
     locationQuality * 0.30 +
     participationQuality * 0.20 +
-    executionQuality * 0.15
+    executionQuality * 0.15 +
+    (reclaimOk ? 0 : -6)
   );
 
   const reasons = ['Trend Pullback Continuation'];
+  if (!bull1h) reasons.push('1H pullback (4H trend intact)');
   if (Math.abs(distToEma21) <= 0.35) reasons.push('Near EMA21 support');
   if (Number.isFinite(vwap15m) && currentPrice >= vwap15m) reasons.push('VWAP reclaim');
   if (volumeRatio >= 1.0) reasons.push(`Volume ${volumeRatio.toFixed(2)}x`);
@@ -1470,7 +1496,7 @@ function evaluateTrendPullbackModule(ctx) {
         execution: roundMetric(executionQuality, 1)
       },
       reasons,
-      minVolumeRatio: 0.85
+      minVolumeRatio: 0.70
     }
   };
 }
@@ -1498,24 +1524,25 @@ function evaluateBreakoutModule(ctx) {
     atrPercentile
   } = ctx;
 
-  if (!bull4h || !bull1h) return { rejectCode: 'BREAKOUT_TREND_ALIGN' };
+  // === HARD GATES (v9.1.0: bull1h moved to quality factor) ===
+  if (!bull4h) return { rejectCode: 'BREAKOUT_TREND_ALIGN' };
   if (!(regime === 'TRENDING' || regime === 'HIGH_VOL_BREAKOUT' || regime === 'TRANSITION')) return { rejectCode: 'BREAKOUT_REGIME' };
   if (!range20) return { rejectCode: 'BREAKOUT_RANGE' };
-  if (!Number.isFinite(breakoutDistancePct) || breakoutDistancePct < -0.15 || breakoutDistancePct > 1.2) return { rejectCode: 'BREAKOUT_DISTANCE' };
-  if (!Number.isFinite(candleStrength) || candleStrength < 0.65) return { rejectCode: 'BREAKOUT_CLOSE' };
-  if (!Number.isFinite(bbPercent) || bbPercent < 0.60 || bbPercent > 0.98) return { rejectCode: 'BREAKOUT_BB' };
-  if (!Number.isFinite(rsi15m) || !Number.isFinite(rsi1h) || rsi15m < 55 || rsi15m > 74 || rsi1h < 52 || rsi1h > 72) return { rejectCode: 'BREAKOUT_RSI' };
+  if (!Number.isFinite(breakoutDistancePct) || breakoutDistancePct < -0.2 || breakoutDistancePct > 1.5) return { rejectCode: 'BREAKOUT_DISTANCE' };
+  if (!Number.isFinite(candleStrength) || candleStrength < 0.60) return { rejectCode: 'BREAKOUT_CLOSE' };
+  if (!Number.isFinite(bbPercent) || bbPercent < 0.55 || bbPercent > 0.98) return { rejectCode: 'BREAKOUT_BB' };
+  if (!Number.isFinite(rsi15m) || !Number.isFinite(rsi1h) || rsi15m < 52 || rsi15m > 76 || rsi1h < 48 || rsi1h > 75) return { rejectCode: 'BREAKOUT_RSI' };
 
-  const minVolumeRatio = regime === 'TRANSITION' ? 1.8 : 1.4;
+  const minVolumeRatio = regime === 'TRANSITION' ? 1.5 : 1.2;
   if (!Number.isFinite(volumeRatio) || volumeRatio < minVolumeRatio) return { rejectCode: 'BREAKOUT_VOLUME' };
-  if (deltaRatio !== null && deltaRatio < 0) return { rejectCode: 'BREAKOUT_TAKER' };
-  if (!obMetrics || obMetrics.obi < -0.05) return { rejectCode: 'BREAKOUT_ORDERBOOK' };
-  if (rs4h <= 0 || rs1h < 0.003) return { rejectCode: 'BREAKOUT_RS' };
+  if (deltaRatio !== null && deltaRatio < -0.03) return { rejectCode: 'BREAKOUT_TAKER' };
+  if (!obMetrics || obMetrics.obi < -0.08) return { rejectCode: 'BREAKOUT_ORDERBOOK' };
+  if (rs4h <= 0 || rs1h < 0) return { rejectCode: 'BREAKOUT_RS' };
   if (!Number.isFinite(vwap15m) || currentPrice < vwap15m) return { rejectCode: 'BREAKOUT_VWAP' };
-  if (regime === 'TRANSITION' && liquidityTier === 'MEDIUM') return { rejectCode: 'BREAKOUT_TRANSITION_LIQ' };
 
   const trendQuality = clamp(
-    55 +
+    42 +
+    (bull1h ? 15 : 0) +
     clamp(rs4h * 1400, 0, 18) +
     clamp(rs1h * 1800, 0, 16) +
     clamp(emaSlope1h * 12000, 0, 11),
@@ -1550,6 +1577,7 @@ function evaluateBreakoutModule(ctx) {
   );
 
   const reasons = ['Breakout Continuation With Volume'];
+  if (!bull1h) reasons.push('1H breaking out (4H trend intact)');
   reasons.push(`Breakout ${breakoutDistancePct >= 0 ? '+' : ''}${breakoutDistancePct.toFixed(2)}%`);
   reasons.push(`Volume ${volumeRatio.toFixed(2)}x`);
   if (rs4h > 0.01 || rs1h > 0.008) reasons.push('Relative strength vs BTC');
@@ -1903,9 +1931,16 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
       ? new Set(['TREND_PULLBACK', 'BREAKOUT_CONTINUATION'])
       : regime === 'HIGH_VOL_BREAKOUT'
         ? new Set(['BREAKOUT_CONTINUATION'])
-        : new Set(['BREAKOUT_CONTINUATION']);
+        : new Set(['TREND_PULLBACK', 'BREAKOUT_CONTINUATION']);
 
   const requiredScore = getRequiredScore(bestCandidate, regime, liquidityTier, btcContext?.status || 'UNKNOWN');
+
+  // v9.1.0: MEDIUM liquidity → shadow only (prefer ELITE/HIGH for live signals)
+  if (liquidityTier === 'MEDIUM') {
+    countMetric(analysisState?.rejectCounts, 'LIQUIDITY_TIER_MEDIUM');
+    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, 'LIQUIDITY_TIER_MEDIUM', btcContext, shadowCollector);
+    return null;
+  }
 
   if (btcContext?.status === 'RED') {
     countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');

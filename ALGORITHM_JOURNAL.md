@@ -6,7 +6,34 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v9.0.1 (Active)
+## Current Version: v9.1.0 (Active)
+**Date:** Apr 7, 2026
+**Theme:** "GATE RELAXATION — THROUGHPUT OVER PERFECTION"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v9.1.0-GateRelax`.
+- **Diagnosed problem:** `REGIME_RISK_OFF` was killing 77-84% of the universe per run even with BTC GREEN. Triple redundancy in trend alignment (regime + pullback module + breakout module all requiring `bull4h AND bull1h`) made the conjunctive probability of passing all gates ~1%.
+- **Root cause:** `detectMarketRegime()` returned `RISK_OFF` whenever `!bull4h OR price < ema50_15m`, eliminating symbols in early recovery or temporary pullbacks. Both modules additionally required `bull1h`, which is logically contradictory for a pullback module (a pullback temporarily breaks 1H EMA alignment).
+- **Only trade in v9.0.x era:** ZECUSDT (MEDIUM, sector OTHER) → LOSS with 0% MFE. All CORE_LEADERS (BTC, ETH, SOL) were blocked by REGIME_RISK_OFF.
+
+### Changes Made:
+1. **Regime classifier relaxed:** `RISK_OFF` now requires BOTH `!bull4h AND price < ema50_15m` (was OR). Symbols with bull4h=true but temporarily below EMA50, or price above EMA50 without perfect 4H alignment, proceed to TRANSITION.
+2. **TREND_PULLBACK:** `bull1h` moved from hard gate to quality factor (+15 trendQuality). 6 former hard gates (bbPercent, pullbackDepth, RSI ranges, rs1h, deltaRatio, reclaim) converted to progressive quality penalties. Location/volume thresholds widened.
+3. **BREAKOUT_CONTINUATION:** Same `bull1h` → quality factor treatment. Gates relaxed (breakoutDistance, candleStrength, RSI, volume requirements, deltaRatio, rs1h). TRANSITION+MEDIUM block removed (handled globally).
+4. **MEDIUM liquidity → shadow only:** Live signals restricted to ELITE and HIGH tiers. MEDIUM goes to shadow with `LIQUIDITY_TIER_MEDIUM` reject code.
+5. **TRANSITION regime:** Now allows both TREND_PULLBACK and BREAKOUT_CONTINUATION live (was breakout-only).
+
+### Hypothesis / Goal:
+The strategy families (trend pullback + breakout) are correct per evidence (Liu & Tsyvinski 2021, Huang et al. SSRN 2024, Brauneis et al. 2024). The problem was gate architecture, not strategy selection. This version should generate significantly more signals (and shadows) for learning, while maintaining quality through the scoring system and requiring ELITE/HIGH liquidity for live signals.
+
+### Risk Assessment:
+- More throughput may include more false positives → mitigated by score floors (67+/70+) and liquidity restriction
+- Pullbacks without bull1h are inherently riskier → mitigated by -15 trendQuality penalty and score floor
+- Required monitoring: 72h window comparing REGIME_OK rate, MODULE_OK rate, shadow outcomes, and live win rate
+
+---
+
+## Previous Version: v9.0.1
 **Date:** Apr 7, 2026
 **Theme:** "EXECUTION GATE AUDIT"
 
