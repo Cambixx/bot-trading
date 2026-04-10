@@ -1,1 +1,372 @@
-[]
+[
+  {
+    "id": "shadow-1775776526295-ENAUSDT",
+    "symbol": "ENAUSDT",
+    "score": 66,
+    "scoreBeforeMomentum": 66,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "scoreGap": 1,
+    "price": 0.09108,
+    "regime": "TRENDING",
+    "atrPercent": 0.87,
+    "rejectReasonCode": "LIQUIDITY_TIER_LOW",
+    "rejectReason": "LIQUIDITY_TIER_LOW",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "TREND_PULLBACK",
+    "entryArchetype": "Trend Pullback Continuation",
+    "liquidityTier": "LOW",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.6,
+      "realRR": 2,
+      "timeStopHours": 14
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0033,
+      "rs4h": 0.0085,
+      "rs24h": 0.02
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.7,
+      "volumeRatio": 1.43,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.058,
+      "obiPass": true,
+      "spreadBps": 6.6,
+      "depthQuoteTopN": 362569,
+      "liquidityTier": "LOW"
+    },
+    "timestamp": 1775776526295,
+    "entryMetrics": {
+      "distToEma9": -0.77,
+      "distToEma21": -0.55,
+      "distToEma50": 0.66,
+      "atrPercent": 0.87,
+      "bbPercent": 0.21,
+      "breakoutDistancePct": -2.93,
+      "pullbackFromHigh20Pct": 2.93,
+      "riskRewardRatio": 2,
+      "timeStopHours": 14
+    },
+    "qualityBreakdown": {
+      "trend": 98.8,
+      "location": 18.7,
+      "participation": 83.4,
+      "execution": 63
+    },
+    "shadowBenchmark": {
+      "version": "v9.1.0-GateRelax-TREND_PULLBACK",
+      "tpPct": 0.027686411209734425,
+      "slPct": 0.013843205604867213
+    },
+    "maxFavorableMovePct": 0,
+    "maxAdverseMovePct": 0.75,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1775776527843-NEARUSDT",
+    "symbol": "NEARUSDT",
+    "score": 83,
+    "scoreBeforeMomentum": 83,
+    "momentumAdjustment": 0,
+    "requiredScore": 74,
+    "requiredStrongCategories": null,
+    "scoreGap": -9,
+    "price": 1.3672,
+    "regime": "TRANSITION",
+    "atrPercent": 0.71,
+    "rejectReasonCode": "LIQUIDITY_TIER_MEDIUM",
+    "rejectReason": "LIQUIDITY_TIER_MEDIUM",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "TREND_PULLBACK",
+    "entryArchetype": "Trend Pullback Continuation",
+    "liquidityTier": "MEDIUM",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.85,
+      "slMultiplier": 1.42,
+      "realRR": 2,
+      "timeStopHours": 10
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0143,
+      "rs4h": 0.0381,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.7,
+      "volumeRatio": 0.75,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.094,
+      "obiPass": true,
+      "spreadBps": 3.7,
+      "depthQuoteTopN": 382943,
+      "liquidityTier": "MEDIUM"
+    },
+    "timestamp": 1775776527843,
+    "entryMetrics": {
+      "distToEma9": -0.12,
+      "distToEma21": 0.14,
+      "distToEma50": 0.68,
+      "atrPercent": 0.71,
+      "bbPercent": 0.58,
+      "breakoutDistancePct": -1.5,
+      "pullbackFromHigh20Pct": 1.5,
+      "riskRewardRatio": 2,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 100,
+      "location": 81.1,
+      "participation": 63.2,
+      "execution": 71
+    },
+    "shadowBenchmark": {
+      "version": "v9.1.0-GateRelax-TREND_PULLBACK",
+      "tpPct": 0.020245527628783323,
+      "slPct": 0.010122763814391662
+    },
+    "maxFavorableMovePct": 0.12,
+    "maxAdverseMovePct": 0.75,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1775777414502-ENAUSDT",
+    "symbol": "ENAUSDT",
+    "score": 64,
+    "scoreBeforeMomentum": 64,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "scoreGap": 3,
+    "price": 0.09095,
+    "regime": "TRENDING",
+    "atrPercent": 0.87,
+    "rejectReasonCode": "LIQUIDITY_TIER_LOW",
+    "rejectReason": "LIQUIDITY_TIER_LOW",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "TREND_PULLBACK",
+    "entryArchetype": "Trend Pullback Continuation",
+    "liquidityTier": "LOW",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.6,
+      "realRR": 2,
+      "timeStopHours": 14
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0033,
+      "rs4h": 0.0085,
+      "rs24h": 0.02
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.7,
+      "volumeRatio": 1.4,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.188,
+      "obiPass": true,
+      "spreadBps": 6.6,
+      "depthQuoteTopN": 387397,
+      "liquidityTier": "LOW"
+    },
+    "timestamp": 1775777414502,
+    "entryMetrics": {
+      "distToEma9": -0.73,
+      "distToEma21": -0.63,
+      "distToEma50": 0.5,
+      "atrPercent": 0.87,
+      "bbPercent": 0.17,
+      "breakoutDistancePct": -3.07,
+      "pullbackFromHigh20Pct": 3.07,
+      "riskRewardRatio": 2,
+      "timeStopHours": 14
+    },
+    "qualityBreakdown": {
+      "trend": 98.8,
+      "location": 5.5,
+      "participation": 90,
+      "execution": 63
+    },
+    "shadowBenchmark": {
+      "version": "v9.1.0-GateRelax-TREND_PULLBACK",
+      "tpPct": 0.027705818211555763,
+      "slPct": 0.013852909105777881
+    },
+    "maxFavorableMovePct": 0,
+    "maxAdverseMovePct": 0.43,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1775777415962-NEARUSDT",
+    "symbol": "NEARUSDT",
+    "score": 84,
+    "scoreBeforeMomentum": 84,
+    "momentumAdjustment": 0,
+    "requiredScore": 74,
+    "requiredStrongCategories": null,
+    "scoreGap": -10,
+    "price": 1.3644,
+    "regime": "TRANSITION",
+    "atrPercent": 0.7,
+    "rejectReasonCode": "LIQUIDITY_TIER_MEDIUM",
+    "rejectReason": "LIQUIDITY_TIER_MEDIUM",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "TREND_PULLBACK",
+    "entryArchetype": "Trend Pullback Continuation",
+    "liquidityTier": "MEDIUM",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.85,
+      "slMultiplier": 1.42,
+      "realRR": 2,
+      "timeStopHours": 10
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0143,
+      "rs4h": 0.0381,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.7,
+      "volumeRatio": 0.73,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.561,
+      "obiPass": true,
+      "spreadBps": 2.9,
+      "depthQuoteTopN": 414141,
+      "liquidityTier": "MEDIUM"
+    },
+    "timestamp": 1775777415962,
+    "entryMetrics": {
+      "distToEma9": -0.26,
+      "distToEma21": -0.06,
+      "distToEma50": 0.46,
+      "atrPercent": 0.7,
+      "bbPercent": 0.46,
+      "breakoutDistancePct": -1.7,
+      "pullbackFromHigh20Pct": 1.7,
+      "riskRewardRatio": 2,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 100,
+      "location": 84.4,
+      "participation": 66.4,
+      "execution": 71
+    },
+    "shadowBenchmark": {
+      "version": "v9.1.0-GateRelax-TREND_PULLBACK",
+      "tpPct": 0.02004653588510613,
+      "slPct": 0.010023267942553066
+    },
+    "maxFavorableMovePct": 0.24,
+    "maxAdverseMovePct": 0.01,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1775778314965-NEARUSDT",
+    "symbol": "NEARUSDT",
+    "score": 85,
+    "scoreBeforeMomentum": 85,
+    "momentumAdjustment": 0,
+    "requiredScore": 74,
+    "requiredStrongCategories": null,
+    "scoreGap": -11,
+    "price": 1.3677,
+    "regime": "TRANSITION",
+    "atrPercent": 0.71,
+    "rejectReasonCode": "LIQUIDITY_TIER_MEDIUM",
+    "rejectReason": "LIQUIDITY_TIER_MEDIUM",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "TREND_PULLBACK",
+    "entryArchetype": "Trend Pullback Continuation",
+    "liquidityTier": "MEDIUM",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.85,
+      "slMultiplier": 1.42,
+      "realRR": 2,
+      "timeStopHours": 10
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0143,
+      "rs4h": 0.0381,
+      "rs24h": 0.02
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.7,
+      "volumeRatio": 2.51,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.014,
+      "obiPass": true,
+      "spreadBps": 3.7,
+      "depthQuoteTopN": 357239,
+      "liquidityTier": "MEDIUM"
+    },
+    "timestamp": 1775778314965,
+    "entryMetrics": {
+      "distToEma9": -0.01,
+      "distToEma21": 0.17,
+      "distToEma50": 0.67,
+      "atrPercent": 0.71,
+      "bbPercent": 0.58,
+      "breakoutDistancePct": -1.46,
+      "pullbackFromHigh20Pct": 1.46,
+      "riskRewardRatio": 2,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 100,
+      "location": 80.4,
+      "participation": 77.9,
+      "execution": 71
+    },
+    "shadowBenchmark": {
+      "version": "v9.1.0-GateRelax-TREND_PULLBACK",
+      "tpPct": 0.02032606442000149,
+      "slPct": 0.010163032210000745
+    },
+    "maxFavorableMovePct": null,
+    "maxAdverseMovePct": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  }
+]
