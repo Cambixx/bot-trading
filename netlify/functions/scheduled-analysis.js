@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v9.1.0-GateRelax';
+const ALGORITHM_VERSION = 'v9.1.2-24hOperation';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -22,7 +22,7 @@ const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 8000000;
 const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 240;
-const AVOID_ASIA_SESSION = (process.env.AVOID_ASIA_SESSION || 'true').toLowerCase() === 'true';
+const AVOID_ASIA_SESSION = (process.env.AVOID_ASIA_SESSION || 'false').toLowerCase() === 'true';
 
 export const COOLDOWN_STORE_KEY = 'signal-cooldowns';
 const COOLDOWN_EXPIRY_HOURS = 24;
@@ -1399,14 +1399,15 @@ function evaluateTrendPullbackModule(ctx) {
     emaSlope1h
   } = ctx;
 
-  // === HARD GATES (essential only, v9.1.0) ===
+  // === HARD GATES (essential only, v9.1.0 + v9.1.1 Location Fix) ===
   if (!bull4h) return { rejectCode: 'PULLBACK_TREND_ALIGN' };
   if (!(regime === 'TRENDING' || regime === 'RANGING' || regime === 'TRANSITION')) return { rejectCode: 'PULLBACK_REGIME' };
   if (!Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m) || currentPrice <= ema50_15m) return { rejectCode: 'PULLBACK_BELOW_BASE' };
   if (!Number.isFinite(distToEma21) || distToEma21 < -1.5 || distToEma21 > 1.0) return { rejectCode: 'PULLBACK_LOCATION' };
+  if (!Number.isFinite(bbPercent) || bbPercent > 0.75) return { rejectCode: 'PULLBACK_BB_HIGH' };
   if (!Number.isFinite(volumeRatio) || volumeRatio < 0.70) return { rejectCode: 'PULLBACK_VOLUME' };
   if (rs4h <= 0) return { rejectCode: 'PULLBACK_RS' };
-  if (!obMetrics || obMetrics.obi < -0.15) return { rejectCode: 'PULLBACK_ORDERBOOK' };
+  if (!obMetrics || obMetrics.obi < -0.10) return { rejectCode: 'PULLBACK_ORDERBOOK' };
 
   // === PROGRESSIVE QUALITY PENALTIES (v9.1.0: former hard gates become score factors) ===
   let softPenalty = 0;

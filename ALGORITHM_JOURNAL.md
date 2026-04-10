@@ -6,7 +6,37 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v9.1.0 (Active)
+## Current Version: v9.1.2 (Active)
+**Date:** Apr 10, 2026
+**Theme:** "24H OPERATION DEPLOYMENT"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v9.1.2-24hOperation`.
+- **Changes Made:** Disabled the `AVOID_ASIA_SESSION` block by default. The algorithm will now analyze the market and emit signals 24/7.
+- **Hypothesis / Goal:** User requested to remove the Asian session pause to maximize throughput and test edge during all market hours.
+- **Risk Assessment:** Asian session (00:00 - 07:00 UTC) historically has lower liquidity and higher frequency of fake breakouts. We rely heavily on the `LIQUIDITY_TIER` filter (ELITE/HIGH) to mitigate this.
+
+---
+
+## Previous Version: v9.1.1
+**Date:** Apr 10, 2026
+**Theme:** "QUALITY REFINEMENT — PULLBACK LOCATION & ORDERFLOW"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v9.1.1-QualityRefinement`.
+- **Diagnosed problem:** `v9.1.0` increased throughput successfully but the resulting `TREND_PULLBACK` signals resulted in an unacceptable `0% MFE` in 3 out of 4 trades. The algorithm bought toxic pullbacks that were either overextended at the upper band or had negative order book imbalance.
+- **Root cause:** The relaxation of hard gates into progressive quality penalties inadvertently created a "score soup" loophole. Perfect trend and execution scores (100) masked the fact that `bbPercent` was up to `0.86` (near the high, not a pullback) and `OBI` was negative. A pullback by definition cannot occur at the upper band edge with sellers dominating.
+
+### Changes Made:
+1. **Re-instated Location Gate:** `bbPercent > 0.75` is once again a hard gate for `TREND_PULLBACK`. This blocks buying local tops disguised as pullbacks.
+2. **Re-instated Orderflow Gate:** `obi < -0.10` is now a hard gate for `TREND_PULLBACK`. Buying a dip requires buyers to actually be present in the orderbook.
+
+### Hypothesis / Goal:
+Throughput was successfully restored in v9.1.0, but at the cost of structural logic. By re-instituting these two baseline filters specifically for pullbacks, we expect to maintain the increased signal frequency from the relaxed regime gates while drastically reducing the `0% MFE` (zero favorable move) false positives.
+
+---
+
+## Previous Version: v9.1.0
 **Date:** Apr 7, 2026
 **Theme:** "GATE RELAXATION — THROUGHPUT OVER PERFECTION"
 
