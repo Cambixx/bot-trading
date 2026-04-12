@@ -1,87 +1,14 @@
 {
-  "NEARUSDT": [
+  "ARBUSDT": [
     {
-      "score": 76,
-      "regime": "TRANSITION",
-      "timestamp": 1775771175139
-    },
-    {
-      "score": 83,
-      "regime": "TRANSITION",
-      "timestamp": 1775776527843
-    },
-    {
-      "score": 84,
-      "regime": "TRANSITION",
-      "timestamp": 1775777415962
-    },
-    {
-      "score": 85,
-      "regime": "TRANSITION",
-      "timestamp": 1775778314965
-    }
-  ],
-  "BLURUSDT": [
-    {
-      "score": 73,
-      "regime": "RANGING",
-      "timestamp": 1775773869642
-    },
-    {
-      "score": 73,
-      "regime": "RANGING",
-      "timestamp": 1775773881391
-    },
-    {
-      "score": 73,
-      "regime": "RANGING",
-      "timestamp": 1775774778175
-    },
-    {
-      "score": 68,
-      "regime": "RANGING",
-      "timestamp": 1775775792193
-    },
-    {
-      "score": 67,
-      "regime": "RANGING",
-      "timestamp": 1775775803904
-    }
-  ],
-  "TAOUSDT": [
-    {
-      "score": 80,
-      "regime": "TRANSITION",
-      "timestamp": 1775773871755
-    }
-  ],
-  "HYPEUSDT": [
-    {
-      "score": 81,
+      "score": 79,
       "regime": "TRENDING",
-      "timestamp": 1775773874109
+      "timestamp": 1775944832130
     },
     {
-      "score": 80,
+      "score": 78,
       "regime": "TRENDING",
-      "timestamp": 1775773884424
-    },
-    {
-      "score": 64,
-      "regime": "TRENDING",
-      "timestamp": 1775774781360
-    }
-  ],
-  "ENAUSDT": [
-    {
-      "score": 66,
-      "regime": "TRENDING",
-      "timestamp": 1775776526295
-    },
-    {
-      "score": 64,
-      "regime": "TRENDING",
-      "timestamp": 1775777414502
+      "timestamp": 1775945720556
     }
   ]
 }
