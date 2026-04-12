@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v9.1.2-24hOperation';
+const ALGORITHM_VERSION = 'v9.1.3-AsianVolumePremium';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1375,29 +1375,39 @@ function detectMarketRegime({
   if (bull4h && atrPercentile <= 45 && Number.isFinite(adx15m) && adx15m < 20 && Number.isFinite(ema21_15m) && currentPrice >= ema21_15m * 0.992) return 'RANGING';
   return 'TRANSITION';
 }
-
 function evaluateTrendPullbackModule(ctx) {
   const {
-    bull4h,
-    bull1h,
-    regime,
+    symbol,
+    utcHour,
     currentPrice,
     ema9_15m,
+    ema21_15m,
     ema50_15m,
     vwap15m,
+    distToEma9,
     distToEma21,
+    distToEma50,
     bbPercent,
-    pullbackFromHigh20Pct,
-    rsi15m,
-    rsi1h,
-    rs1h,
-    rs4h,
     volumeRatio,
     deltaRatio,
     obMetrics,
     liquidityTier,
+    bull4h,
+    bull1h,
+    regime,
+    rsi15m,
+    rsi1h,
+    rs1h,
+    rs4h,
+    rs24h,
+    atrPercent15m,
+    range20,
+    pullbackFromHigh20Pct,
     emaSlope1h
   } = ctx;
+
+  const isAsianSession = utcHour >= 0 && utcHour < 7;
+  const minVolumeRatio = isAsianSession ? 1.20 : 0.70;
 
   // === HARD GATES (essential only, v9.1.0 + v9.1.1 Location Fix) ===
   if (!bull4h) return { rejectCode: 'PULLBACK_TREND_ALIGN' };
@@ -1405,7 +1415,7 @@ function evaluateTrendPullbackModule(ctx) {
   if (!Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m) || currentPrice <= ema50_15m) return { rejectCode: 'PULLBACK_BELOW_BASE' };
   if (!Number.isFinite(distToEma21) || distToEma21 < -1.5 || distToEma21 > 1.0) return { rejectCode: 'PULLBACK_LOCATION' };
   if (!Number.isFinite(bbPercent) || bbPercent > 0.75) return { rejectCode: 'PULLBACK_BB_HIGH' };
-  if (!Number.isFinite(volumeRatio) || volumeRatio < 0.70) return { rejectCode: 'PULLBACK_VOLUME' };
+  if (!Number.isFinite(volumeRatio) || volumeRatio < minVolumeRatio) return { rejectCode: 'PULLBACK_VOLUME' };
   if (rs4h <= 0) return { rejectCode: 'PULLBACK_RS' };
   if (!obMetrics || obMetrics.obi < -0.10) return { rejectCode: 'PULLBACK_ORDERBOOK' };
 
@@ -1507,6 +1517,7 @@ function evaluateBreakoutModule(ctx) {
     bull4h,
     bull1h,
     regime,
+    utcHour,
     currentPrice,
     range20,
     breakoutDistancePct,
@@ -1525,6 +1536,10 @@ function evaluateBreakoutModule(ctx) {
     atrPercentile
   } = ctx;
 
+  const isAsianSession = utcHour >= 0 && utcHour < 7;
+  const baseBreakoutVolume = regime === 'TRANSITION' ? 1.5 : 1.2;
+  const minVolumeRatio = isAsianSession ? baseBreakoutVolume + 0.5 : baseBreakoutVolume;
+
   // === HARD GATES (v9.1.0: bull1h moved to quality factor) ===
   if (!bull4h) return { rejectCode: 'BREAKOUT_TREND_ALIGN' };
   if (!(regime === 'TRENDING' || regime === 'HIGH_VOL_BREAKOUT' || regime === 'TRANSITION')) return { rejectCode: 'BREAKOUT_REGIME' };
@@ -1533,8 +1548,6 @@ function evaluateBreakoutModule(ctx) {
   if (!Number.isFinite(candleStrength) || candleStrength < 0.60) return { rejectCode: 'BREAKOUT_CLOSE' };
   if (!Number.isFinite(bbPercent) || bbPercent < 0.55 || bbPercent > 0.98) return { rejectCode: 'BREAKOUT_BB' };
   if (!Number.isFinite(rsi15m) || !Number.isFinite(rsi1h) || rsi15m < 52 || rsi15m > 76 || rsi1h < 48 || rsi1h > 75) return { rejectCode: 'BREAKOUT_RSI' };
-
-  const minVolumeRatio = regime === 'TRANSITION' ? 1.5 : 1.2;
   if (!Number.isFinite(volumeRatio) || volumeRatio < minVolumeRatio) return { rejectCode: 'BREAKOUT_VOLUME' };
   if (deltaRatio !== null && deltaRatio < -0.03) return { rejectCode: 'BREAKOUT_TAKER' };
   if (!obMetrics || obMetrics.obi < -0.08) return { rejectCode: 'BREAKOUT_ORDERBOOK' };
@@ -1874,6 +1887,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   const ctx = {
     symbol,
+    utcHour: sessionStatus.utcHour,
     currentPrice,
     ema9_15m,
     ema21_15m,

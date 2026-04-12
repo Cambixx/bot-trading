@@ -6,9 +6,21 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v9.1.2 (Active)
-**Date:** Apr 10, 2026
-**Theme:** "24H OPERATION DEPLOYMENT"
+## Current Version: v9.1.3 (Active)
+**Date:** Apr 12, 2026
+**Theme:** "ASIAN VOLUME PREMIUM"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v9.1.3-AsianVolumePremium`.
+- **Changes Made:** Implemented a dynamic `minVolumeRatio` requirement based on the UTC hour. During the Asian session (00:00 - 07:00 UTC), the minimum volume required to validate signals increases significantly:
+    - `TREND_PULLBACK`: `0.70x` → `1.20x`
+    - `BREAKOUT_CONTINUATION` (Transition): `1.50x` → `2.00x`
+    - `BREAKOUT_CONTINUATION` (Other): `1.20x` → `1.70x`
+- **Hypothesis / Goal:** Since `v9.1.2` opened the gates to 24/7 trading by disabling the Asian session hard block, it exposed the system to the notoriously low-liquidity and fakeout-prone hours of the Asian session. By applying an "Asian Premium" to volume requirements, we allow genuine high-participation anomalies to be traded while filtering out the low-volume noise that typically traps intraday systems during the night.
+
+---
+
+## Previous Version: v9.1.2
 
 ### Core Logic & Parameters:
 - **Runtime Version:** `v9.1.2-24hOperation`.
