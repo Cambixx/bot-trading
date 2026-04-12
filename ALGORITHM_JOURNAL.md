@@ -6,7 +6,20 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v9.1.3 (Active)
+## Current Version: v10.0.0 (Active)
+**Date:** Apr 12, 2026
+**Theme:** "QUANTUM EDGE - PURE STRATEGY MODULES"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v10.0.0-QuantumEdge`.
+- **Changes Made:** A total architectural overhaul of the `scheduled-analysis.js` decision engine. Replaced the convoluted arbitrary mathematical "score soup" logic with two strict, professional edge trading models:
+    - `VCP_BREAKOUT`: Volatility Contraction Pattern (BB width in lowest 15%) combined with extreme explosive volume (>2.3x) and solid bid-side liquidity.
+    - `VWAP_PULLBACK`: Reclaim of the intraday Volume-Weighted Average Price on strongly trending tokens (high relative strength tracking).
+- **Hypothesis / Goal:** The old code was suffering from infinite iterative loops because of overlapping variables (EMA distances + BB percentages + subjective scores), hiding real edge under arbitrary numbers. The pure modules strategy expects to achieve over 55-60% WR by ruthlessly rejecting "okay" setups and only executing highly confirmed institutional maneuvers. Score now dictates position sizing instead of trade validity validation.
+
+---
+
+## Previous Version: v9.1.3
 **Date:** Apr 12, 2026
 **Theme:** "ASIAN VOLUME PREMIUM"
 

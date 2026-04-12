@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v9.1.3-AsianVolumePremium';
+const ALGORITHM_VERSION = 'v10.0.0-QuantumEdge';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -306,30 +306,14 @@ function buildRiskModel(regime, module, atrPercent, liquidityTier) {
   let slMultiplier = 1.5;
   let timeStopHours = 10;
 
-  if (module === 'TREND_PULLBACK') {
-    if (regime === 'TRENDING') {
-      tpMultiplier = 3.2;
-      slMultiplier = 1.6;
-      timeStopHours = 14;
-    } else if (regime === 'RANGING') {
-      tpMultiplier = 2.4;
-      slMultiplier = 1.4;
-      timeStopHours = 8;
-    }
-  } else if (module === 'BREAKOUT_CONTINUATION') {
-    if (regime === 'HIGH_VOL_BREAKOUT') {
-      tpMultiplier = 3.0;
-      slMultiplier = 1.5;
-      timeStopHours = 8;
-    } else if (regime === 'TRANSITION') {
-      tpMultiplier = 2.6;
-      slMultiplier = 1.4;
-      timeStopHours = 8;
-    } else {
-      tpMultiplier = 2.8;
-      slMultiplier = 1.5;
-      timeStopHours = 10;
-    }
+  if (module === 'VWAP_PULLBACK') {
+    tpMultiplier = 3.0;
+    slMultiplier = 1.4;
+    timeStopHours = 12;
+  } else if (module === 'VCP_BREAKOUT') {
+    tpMultiplier = 2.5; 
+    slMultiplier = 1.2;
+    timeStopHours = 6; 
   }
 
   if (liquidityTier === 'MEDIUM') {
@@ -1355,253 +1339,95 @@ function detectBTCContext(candles4h, candles1h, ticker24h) {
   };
 }
 
-function detectMarketRegime({
-  bull4h,
-  bull1h,
-  adx15m,
-  atrPercentile,
-  currentPrice,
-  ema21_15m,
-  ema50_15m,
-  btcRisk
-}) {
+function detectMarketRegime({ bull4h, atrPercentile, btcRisk }) {
   if (btcRisk === 'RED') return 'RISK_OFF';
-  if (!Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m)) return 'RISK_OFF';
-  if (!bull4h && currentPrice < ema50_15m) return 'RISK_OFF';
-
-  const trending = bull4h && bull1h && Number.isFinite(adx15m) && adx15m >= 20;
-  if (trending && atrPercentile >= 70) return 'HIGH_VOL_BREAKOUT';
-  if (trending) return 'TRENDING';
-  if (bull4h && atrPercentile <= 45 && Number.isFinite(adx15m) && adx15m < 20 && Number.isFinite(ema21_15m) && currentPrice >= ema21_15m * 0.992) return 'RANGING';
+  if (bull4h && atrPercentile >= 70) return 'HIGH_VOL_BREAKOUT';
+  if (bull4h) return 'TRENDING';
   return 'TRANSITION';
 }
-function evaluateTrendPullbackModule(ctx) {
-  const {
-    symbol,
-    utcHour,
-    currentPrice,
-    ema9_15m,
-    ema21_15m,
-    ema50_15m,
-    vwap15m,
-    distToEma9,
-    distToEma21,
-    distToEma50,
-    bbPercent,
-    volumeRatio,
-    deltaRatio,
-    obMetrics,
-    liquidityTier,
-    bull4h,
-    bull1h,
-    regime,
-    rsi15m,
-    rsi1h,
-    rs1h,
-    rs4h,
-    rs24h,
-    atrPercent15m,
-    range20,
-    pullbackFromHigh20Pct,
-    emaSlope1h
-  } = ctx;
 
-  const isAsianSession = utcHour >= 0 && utcHour < 7;
-  const minVolumeRatio = isAsianSession ? 1.20 : 0.70;
-
-  // === HARD GATES (essential only, v9.1.0 + v9.1.1 Location Fix) ===
-  if (!bull4h) return { rejectCode: 'PULLBACK_TREND_ALIGN' };
-  if (!(regime === 'TRENDING' || regime === 'RANGING' || regime === 'TRANSITION')) return { rejectCode: 'PULLBACK_REGIME' };
-  if (!Number.isFinite(currentPrice) || !Number.isFinite(ema50_15m) || currentPrice <= ema50_15m) return { rejectCode: 'PULLBACK_BELOW_BASE' };
-  if (!Number.isFinite(distToEma21) || distToEma21 < -1.5 || distToEma21 > 1.0) return { rejectCode: 'PULLBACK_LOCATION' };
-  if (!Number.isFinite(bbPercent) || bbPercent > 0.75) return { rejectCode: 'PULLBACK_BB_HIGH' };
-  if (!Number.isFinite(volumeRatio) || volumeRatio < minVolumeRatio) return { rejectCode: 'PULLBACK_VOLUME' };
-  if (rs4h <= 0) return { rejectCode: 'PULLBACK_RS' };
-  if (!obMetrics || obMetrics.obi < -0.10) return { rejectCode: 'PULLBACK_ORDERBOOK' };
-
-  // === PROGRESSIVE QUALITY PENALTIES (v9.1.0: former hard gates become score factors) ===
-  let softPenalty = 0;
-  if (Number.isFinite(bbPercent)) {
-    if (bbPercent < 0.10 || bbPercent > 0.82) softPenalty += 18;
-    else if (bbPercent < 0.18 || bbPercent > 0.72) softPenalty += 8;
-    else if (bbPercent < 0.25 || bbPercent > 0.65) softPenalty += 3;
+function calculateBBWidthHistory(closes, period = 20, stdDev = 2) {
+  if (!Array.isArray(closes) || closes.length < period * 2) return null;
+  const widths = [];
+  for(let i = closes.length - 100; i <= closes.length - 1; i++) {
+     if(i < period) continue;
+     const slice = closes.slice(i - period + 1, i + 1);
+     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
+     const variance = slice.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / period;
+     const sd = Math.sqrt(variance);
+     widths.push((2 * stdDev * sd) / mean);
   }
-  if (Number.isFinite(pullbackFromHigh20Pct)) {
-    if (pullbackFromHigh20Pct < 0.1 || pullbackFromHigh20Pct > 3.5) softPenalty += 18;
-    else if (pullbackFromHigh20Pct < 0.2 || pullbackFromHigh20Pct > 2.8) softPenalty += 8;
-    else if (pullbackFromHigh20Pct < 0.3 || pullbackFromHigh20Pct > 2.5) softPenalty += 3;
-  }
-  if (Number.isFinite(rsi15m)) {
-    if (rsi15m < 35 || rsi15m > 70) softPenalty += 18;
-    else if (rsi15m < 42 || rsi15m > 64) softPenalty += 5;
-  }
-  if (Number.isFinite(rsi1h)) {
-    if (rsi1h < 40 || rsi1h > 74) softPenalty += 12;
-    else if (rsi1h < 46 || rsi1h > 68) softPenalty += 3;
-  }
-  if (rs1h < -0.008) softPenalty += 10;
-  else if (rs1h < -0.002) softPenalty += 4;
-  if (deltaRatio !== null && deltaRatio < -0.15) softPenalty += 12;
-  else if (deltaRatio !== null && deltaRatio < -0.05) softPenalty += 4;
+  return widths;
+}
 
-  const reclaimOk =
-    (Number.isFinite(ema9_15m) && currentPrice >= ema9_15m * 0.995) ||
-    (Number.isFinite(vwap15m) && currentPrice >= vwap15m * 0.998);
+function evaluateVWAPPullbackModule(ctx) {
+  const { symbol, currentPrice, ema50_4h, ema21_4h, vwap15m, volumeRatio, obMetrics, liquidityTier, rs4h, rs1h, atrPercent15m, bull4h, btcRisk } = ctx;
+  
+  if (!bull4h) return { rejectCode: 'VWAP_TREND_ALIGN' };
+  if (!Number.isFinite(vwap15m) || currentPrice < vwap15m * 0.997) return { rejectCode: 'VWAP_BELOW' };
+  if (currentPrice > vwap15m * 1.015) return { rejectCode: 'VWAP_TOO_FAR' };
+  if (rs4h < 0.005) return { rejectCode: 'VWAP_NO_RS' }; 
+  if (volumeRatio < 1.1) return { rejectCode: 'VWAP_LOW_VOL' };
+  if (!obMetrics || obMetrics.obi < -0.05) return { rejectCode: 'VWAP_NEG_OBI' };
 
-  const trendQuality = clamp(
-    48 +
-    (bull1h ? 15 : 0) +
-    clamp(rs4h * 1600, 0, 18) +
-    clamp(rs1h * 2200, -4, 12) +
-    clamp(emaSlope1h * 12000, 0, 10) +
-    (regime === 'TRENDING' ? 5 : 0),
-    0,
-    100
-  );
-
-  const locationQuality = clamp(
-    100 -
-    softPenalty -
-    Math.abs(distToEma21 - 0.05) * 50 -
-    Math.abs((bbPercent || 0.5) - 0.45) * 55 -
-    Math.abs((pullbackFromHigh20Pct || 1.0) - 1.0) * 14,
-    0,
-    100
-  );
-
-  const participationQuality = clamp(
-    40 +
-    clamp((volumeRatio - 0.70) * 40, 0, 25) +
-    (deltaRatio === null ? 8 : clamp((deltaRatio + 0.05) * 85, 0, 18)) +
-    clamp((obMetrics.obi + 0.08) * 75, 0, 17),
-    0,
-    100
-  );
-
+  const trendQuality = clamp(50 + (rs4h * 1500) + (rs1h * 1000), 50, 100);
+  const participationQuality = clamp(40 + (volumeRatio * 20), 40, 100);
   const executionQuality = buildExecutionQuality(liquidityTier, obMetrics.spreadBps, obMetrics.depthQuoteTopN);
-  const score = Math.round(
-    trendQuality * 0.35 +
-    locationQuality * 0.30 +
-    participationQuality * 0.20 +
-    executionQuality * 0.15 +
-    (reclaimOk ? 0 : -6)
-  );
-
-  const reasons = ['Trend Pullback Continuation'];
-  if (!bull1h) reasons.push('1H pullback (4H trend intact)');
-  if (Math.abs(distToEma21) <= 0.35) reasons.push('Near EMA21 support');
-  if (Number.isFinite(vwap15m) && currentPrice >= vwap15m) reasons.push('VWAP reclaim');
-  if (volumeRatio >= 1.0) reasons.push(`Volume ${volumeRatio.toFixed(2)}x`);
-  if (rs4h > 0.01 || rs1h > 0.006) reasons.push('Relative strength vs BTC');
+  
+  const score = Math.round(trendQuality * 0.4 + participationQuality * 0.4 + executionQuality * 0.2);
+  
+  const reasons = ['Institutional VWAP Pullback'];
+  if (rs4h > 0.02) reasons.push(`Extreme Relative Strength vs BTC (+${(rs4h*100).toFixed(1)}%)`);
+  if (volumeRatio > 1.4) reasons.push(`Strong Volume Confirmation (${volumeRatio.toFixed(1)}x)`);
 
   return {
     candidate: {
-      module: 'TREND_PULLBACK',
-      entryArchetype: 'Trend Pullback Continuation',
+      module: 'VWAP_PULLBACK',
+      entryArchetype: 'Institutional VWAP Reclaim',
       score,
-      baseRequiredScore: Math.max(SIGNAL_SCORE_THRESHOLD + 2, 67),
+      baseRequiredScore: Math.max(SIGNAL_SCORE_THRESHOLD, 68),
       qualityBreakdown: {
         trend: roundMetric(trendQuality, 1),
-        location: roundMetric(locationQuality, 1),
+        expansion: 0,
         participation: roundMetric(participationQuality, 1),
         execution: roundMetric(executionQuality, 1)
       },
       reasons,
-      minVolumeRatio: 0.70
+      minVolumeRatio: 1.1
     }
   };
 }
 
-function evaluateBreakoutModule(ctx) {
-  const {
-    bull4h,
-    bull1h,
-    regime,
-    utcHour,
-    currentPrice,
-    range20,
-    breakoutDistancePct,
-    candleStrength,
-    rsi15m,
-    rsi1h,
-    bbPercent,
-    volumeRatio,
-    deltaRatio,
-    obMetrics,
-    rs1h,
-    rs4h,
-    liquidityTier,
-    vwap15m,
-    emaSlope1h,
-    atrPercentile
-  } = ctx;
-
-  const isAsianSession = utcHour >= 0 && utcHour < 7;
-  const baseBreakoutVolume = regime === 'TRANSITION' ? 1.5 : 1.2;
-  const minVolumeRatio = isAsianSession ? baseBreakoutVolume + 0.5 : baseBreakoutVolume;
-
-  // === HARD GATES (v9.1.0: bull1h moved to quality factor) ===
-  if (!bull4h) return { rejectCode: 'BREAKOUT_TREND_ALIGN' };
-  if (!(regime === 'TRENDING' || regime === 'HIGH_VOL_BREAKOUT' || regime === 'TRANSITION')) return { rejectCode: 'BREAKOUT_REGIME' };
-  if (!range20) return { rejectCode: 'BREAKOUT_RANGE' };
-  if (!Number.isFinite(breakoutDistancePct) || breakoutDistancePct < -0.2 || breakoutDistancePct > 1.5) return { rejectCode: 'BREAKOUT_DISTANCE' };
-  if (!Number.isFinite(candleStrength) || candleStrength < 0.60) return { rejectCode: 'BREAKOUT_CLOSE' };
-  if (!Number.isFinite(bbPercent) || bbPercent < 0.55 || bbPercent > 0.98) return { rejectCode: 'BREAKOUT_BB' };
-  if (!Number.isFinite(rsi15m) || !Number.isFinite(rsi1h) || rsi15m < 52 || rsi15m > 76 || rsi1h < 48 || rsi1h > 75) return { rejectCode: 'BREAKOUT_RSI' };
-  if (!Number.isFinite(volumeRatio) || volumeRatio < minVolumeRatio) return { rejectCode: 'BREAKOUT_VOLUME' };
-  if (deltaRatio !== null && deltaRatio < -0.03) return { rejectCode: 'BREAKOUT_TAKER' };
-  if (!obMetrics || obMetrics.obi < -0.08) return { rejectCode: 'BREAKOUT_ORDERBOOK' };
-  if (rs4h <= 0 || rs1h < 0) return { rejectCode: 'BREAKOUT_RS' };
-  if (!Number.isFinite(vwap15m) || currentPrice < vwap15m) return { rejectCode: 'BREAKOUT_VWAP' };
-
-  const trendQuality = clamp(
-    42 +
-    (bull1h ? 15 : 0) +
-    clamp(rs4h * 1400, 0, 18) +
-    clamp(rs1h * 1800, 0, 16) +
-    clamp(emaSlope1h * 12000, 0, 11),
-    0,
-    100
-  );
-
-  const expansionQuality = clamp(
-    82 -
-    Math.abs(breakoutDistancePct - 0.35) * 55 +
-    candleStrength * 15 +
-    (atrPercentile >= 70 ? 8 : 0),
-    0,
-    100
-  );
-
-  const participationQuality = clamp(
-    45 +
-    clamp((volumeRatio - minVolumeRatio) * 35, 0, 20) +
-    (deltaRatio === null ? 8 : clamp(deltaRatio * 70, 0, 15)) +
-    clamp((obMetrics.obi + 0.02) * 70, 0, 12),
-    0,
-    100
-  );
-
+function evaluateVCPBreakoutModule(ctx) {
+  const { closes15m, bbPercent, currentPrice, volumeRatio, obMetrics, liquidityTier, rs1h, rs4h, btcRisk, bb15m, regime } = ctx;
+  
+  const bbWidths = calculateBBWidthHistory(closes15m, 20, 2);
+  const currentWidth = bbWidths ? bbWidths[bbWidths.length - 1] : 1;
+  const rank = bbWidths ? bbWidths.filter(w => w <= currentWidth).length / bbWidths.length : 1;
+  
+  if (rank > 0.15) return { rejectCode: 'VCP_NOT_TIGHT' }; 
+  if (bbPercent < 0.90) return { rejectCode: 'VCP_NO_BREAKOUT' }; 
+  if (volumeRatio < 2.3) return { rejectCode: 'VCP_LOW_VOL' }; 
+  if (!obMetrics || obMetrics.obi < 0.05) return { rejectCode: 'VCP_NO_BID_SUPPORT' };
+  if (btcRisk === 'RED' || btcRisk === 'AMBER') return { rejectCode: 'VCP_BTC_RESISTANCE' };
+  
+  const trendQuality = clamp(50 + (rs1h * 1500), 50, 100);
+  const expansionQuality = clamp(100 - (rank * 100), 50, 100); 
+  const participationQuality = clamp(50 + ((volumeRatio - 2.0) * 15), 50, 100);
   const executionQuality = buildExecutionQuality(liquidityTier, obMetrics.spreadBps, obMetrics.depthQuoteTopN);
-  const score = Math.round(
-    trendQuality * 0.30 +
-    expansionQuality * 0.30 +
-    participationQuality * 0.25 +
-    executionQuality * 0.15
-  );
-
-  const reasons = ['Breakout Continuation With Volume'];
-  if (!bull1h) reasons.push('1H breaking out (4H trend intact)');
-  reasons.push(`Breakout ${breakoutDistancePct >= 0 ? '+' : ''}${breakoutDistancePct.toFixed(2)}%`);
-  reasons.push(`Volume ${volumeRatio.toFixed(2)}x`);
-  if (rs4h > 0.01 || rs1h > 0.008) reasons.push('Relative strength vs BTC');
+  
+  const score = Math.round(trendQuality * 0.2 + expansionQuality * 0.3 + participationQuality * 0.3 + executionQuality * 0.2);
+  
+  const reasons = ['Volatility Contraction (VCP) Breakout'];
+  reasons.push(`BB Width in bottom ${(rank*100).toFixed(1)}%`);
+  reasons.push(`Explosive Volume (${volumeRatio.toFixed(1)}x)`);
 
   return {
     candidate: {
-      module: 'BREAKOUT_CONTINUATION',
-      entryArchetype: 'Breakout Continuation With Volume',
+      module: 'VCP_BREAKOUT',
+      entryArchetype: 'Volatility Contraction Breakout',
       score,
-      baseRequiredScore: Math.max(SIGNAL_SCORE_THRESHOLD + 5, 70),
+      baseRequiredScore: Math.max(SIGNAL_SCORE_THRESHOLD, 68),
       qualityBreakdown: {
         trend: roundMetric(trendQuality, 1),
         expansion: roundMetric(expansionQuality, 1),
@@ -1609,14 +1435,14 @@ function evaluateBreakoutModule(ctx) {
         execution: roundMetric(executionQuality, 1)
       },
       reasons,
-      minVolumeRatio
+      minVolumeRatio: 2.3
     }
   };
 }
 
 function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, relativeStrength) {
   let size = 0.8;
-  if (module === 'BREAKOUT_CONTINUATION') size += 0.2;
+  if (module === 'VCP_BREAKOUT') size += 0.2;
   if (score >= 78) size += 0.4;
   if (score >= 84) size += 0.4;
   if (liquidityTier === 'ELITE') size += 0.7;
@@ -1636,15 +1462,12 @@ function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, 
 function getRequiredScore(candidate, regime, liquidityTier, btcRisk) {
   let required = candidate.baseRequiredScore;
   if (liquidityTier === 'MEDIUM') required += 3;
-  if (btcRisk === 'AMBER') required += candidate.module === 'BREAKOUT_CONTINUATION' ? 4 : 2;
+  if (btcRisk === 'AMBER') required += candidate.module === 'VCP_BREAKOUT' ? 4 : 2;
   if (regime === 'TRANSITION') required += 4;
   return required;
 }
 
 function pickPreferredReject(regime, pullbackResult, breakoutResult) {
-  if (regime === 'HIGH_VOL_BREAKOUT' || regime === 'TRANSITION') {
-    return breakoutResult?.rejectCode || pullbackResult?.rejectCode || 'NO_MODULE_MATCH';
-  }
   return pullbackResult?.rejectCode || breakoutResult?.rejectCode || 'NO_MODULE_MATCH';
 }
 
@@ -1870,12 +1693,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   const regime = detectMarketRegime({
     bull4h,
-    bull1h,
-    adx15m: adx15m?.adx ?? 0,
     atrPercentile,
-    currentPrice,
-    ema21_15m,
-    ema50_15m,
     btcRisk: btcContext?.status || 'UNKNOWN'
   });
 
@@ -1885,13 +1703,17 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   }
   countMetric(analysisState?.stageCounts, 'REGIME_OK');
 
+  const sessionStatus = getTradingSessionStatus();
   const ctx = {
     symbol,
     utcHour: sessionStatus.utcHour,
+    closes15m,
     currentPrice,
     ema9_15m,
     ema21_15m,
     ema50_15m,
+    ema21_4h,
+    ema50_4h,
     vwap15m,
     distToEma9,
     distToEma21,
@@ -1918,19 +1740,19 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     emaSlope1h
   };
 
-  const pullbackResult = evaluateTrendPullbackModule(ctx);
-  const breakoutResult = evaluateBreakoutModule(ctx);
+  const pullbackResult = evaluateVWAPPullbackModule(ctx);
+  const breakoutResult = evaluateVCPBreakoutModule(ctx);
   const moduleCandidates = [];
 
   if (pullbackResult.candidate) {
-    pullbackResult.candidate.riskModel = buildRiskModel(regime, 'TREND_PULLBACK', atrPercent15m, liquidityTier);
+    pullbackResult.candidate.riskModel = buildRiskModel(regime, 'VWAP_PULLBACK', atrPercent15m, liquidityTier);
     moduleCandidates.push(pullbackResult.candidate);
-    countMetric(analysisState?.moduleCandidates, 'TREND_PULLBACK');
+    countMetric(analysisState?.moduleCandidates, 'VWAP_PULLBACK');
   }
   if (breakoutResult.candidate) {
-    breakoutResult.candidate.riskModel = buildRiskModel(regime, 'BREAKOUT_CONTINUATION', atrPercent15m, liquidityTier);
+    breakoutResult.candidate.riskModel = buildRiskModel(regime, 'VCP_BREAKOUT', atrPercent15m, liquidityTier);
     moduleCandidates.push(breakoutResult.candidate);
-    countMetric(analysisState?.moduleCandidates, 'BREAKOUT_CONTINUATION');
+    countMetric(analysisState?.moduleCandidates, 'VCP_BREAKOUT');
   }
 
   if (!moduleCandidates.length) {
@@ -1941,12 +1763,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   const sortedCandidates = moduleCandidates.sort((a, b) => b.score - a.score);
   const bestCandidate = sortedCandidates[0];
-  const liveAllowed =
-    regime === 'TRENDING' || regime === 'RANGING'
-      ? new Set(['TREND_PULLBACK', 'BREAKOUT_CONTINUATION'])
-      : regime === 'HIGH_VOL_BREAKOUT'
-        ? new Set(['BREAKOUT_CONTINUATION'])
-        : new Set(['TREND_PULLBACK', 'BREAKOUT_CONTINUATION']);
+  const liveAllowed = new Set(['VWAP_PULLBACK', 'VCP_BREAKOUT']);
 
   const requiredScore = getRequiredScore(bestCandidate, regime, liquidityTier, btcContext?.status || 'UNKNOWN');
 
