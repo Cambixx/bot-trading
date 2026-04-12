@@ -2205,4 +2205,4 @@ const scheduledHandler = async (event, context) => {
   };
 };
 
-export const handler = schedule("*/15 * * * *", scheduledHandler);
+export const handler = schedule("0,15,30,45 * * * *", scheduledHandler);
