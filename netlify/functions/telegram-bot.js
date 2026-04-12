@@ -7,7 +7,7 @@ import {
     HISTORY_STORE_KEY,
     SHADOW_STORE_KEY,
     AUTOPSY_STORE_KEY
-} from './scheduled-analysis.js';
+} from './trader-bot.js';
 import { generateDigest } from './auto-digest.js';
 
 const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;

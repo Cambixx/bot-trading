@@ -166,7 +166,7 @@ async function start() {
   const startedAt = Date.now();
 
   try {
-    const { runAnalysis } = await import('../netlify/functions/scheduled-analysis.js');
+    const { runAnalysis } = await import('../netlify/functions/trader-bot.js');
     const result = await runAnalysis(context);
     const durationMs = Date.now() - startedAt;
     const enrichedResult = {

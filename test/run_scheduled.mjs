@@ -1,4 +1,4 @@
-import { handler } from '../netlify/functions/scheduled-analysis.js';
+import { handler } from '../netlify/functions/trader-bot.js';
 
 async function run() {
   console.log('Invoking scheduled-analysis handler (test)');

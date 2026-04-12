@@ -16,7 +16,7 @@ import {
     SHADOW_STORE_KEY,
     SHADOW_ARCHIVE_STORE_KEY,
     AUTOPSY_STORE_KEY
-} from './scheduled-analysis.js';
+} from './trader-bot.js';
 
 const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 

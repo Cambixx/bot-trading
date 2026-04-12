@@ -6,7 +6,7 @@ import {
   calculateOrderBookMetrics,
   classifyLiquidityTier,
   getExecutionRejectCode
-} from '../netlify/functions/scheduled-analysis.js';
+} from '../netlify/functions/trader-bot.js';
 
 function buildOrderBook(levels = 20, price = 100, quantity = 50) {
   return {
