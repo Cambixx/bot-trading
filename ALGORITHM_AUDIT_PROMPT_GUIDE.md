@@ -2,7 +2,7 @@
 
 > **Last Updated:** `2026-04-12`
 >
-> This guide is the **source of truth** for auditing and redesigning `netlify/functions/scheduled-analysis.js`. 
+> This guide is the **source of truth** for auditing and redesigning `netlify/functions/trader-bot.js`. 
 > If you are an AI reading this, you are instructed to execute a **ruthless, evidence-based evaluation** of the algorithm. We do not want iterative tweaks on failing logic. We want robust, statistically sound strategies.
 
 ---
@@ -47,7 +47,7 @@ When auditing or redesigning the algorithm, explicitly evaluate these specific s
 
 ## 🛠 Auditing the Algorithm
 
-If you are asked to audit `scheduled-analysis.js`, execute the following protocol:
+If you are asked to audit `trader-bot.js`, execute the following protocol:
 
 ### Step 1: Telemetry Data Assessment
 Read exactly what happened using the synchronized blobs:
@@ -72,7 +72,7 @@ When redesigning the algorithm:
 ---
 
 ## 🧪 Validating New Code (Post-Implementation)
-Always ensure that the new `scheduled-analysis.js`:
+Always ensure that the new `trader-bot.js`:
 1. Maintains strict `TELEGRAM` formatting for new indicators.
 2. Does NOT break the telemetry reporting (`history.json`).
 3. Handles Asian session liquidity adjustments properly.

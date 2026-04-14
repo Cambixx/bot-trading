@@ -1,8 +1,8 @@
-# Algorithm Tuning Journal (`scheduled-analysis.js`)
+# Algorithm Tuning Journal (`trader-bot.js`)
 
 This file tracks the evolution of the trading algorithm, the logic behind parameter changes, and the lessons learned from market behavior. 
 
-**Rule:** NEVER update `scheduled-analysis.js` without first reviewing past mistakes and logging the intended change here.
+**Rule:** NEVER update `trader-bot.js` without first reviewing past mistakes and logging the intended change here.
 
 ---
 
@@ -16,6 +16,7 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
     - `VCP_BREAKOUT`: Volatility Contraction Pattern (BB width in lowest 15%) combined with extreme explosive volume (>2.3x) and solid bid-side liquidity.
     - `VWAP_PULLBACK`: Reclaim of the intraday Volume-Weighted Average Price on strongly trending tokens (high relative strength tracking).
 - **Hypothesis / Goal:** The old code was suffering from infinite iterative loops because of overlapping variables (EMA distances + BB percentages + subjective scores), hiding real edge under arbitrary numbers. The pure modules strategy expects to achieve over 55-60% WR by ruthlessly rejecting "okay" setups and only executing highly confirmed institutional maneuvers. Score now dictates position sizing instead of trade validity validation.
+- **Infrastructure Patch (Apr 14):** Core file renamed from `scheduled-analysis.js` to `trader-bot.js` to bypass a persistent Netlify/AWS EventBridge scheduler lock. Cron expression updated to explicit `0,15,30,45 * * * *` to force trigger registration. Verified active and triggering correctly.
 
 ---
 
