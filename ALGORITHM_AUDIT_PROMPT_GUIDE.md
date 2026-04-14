@@ -1,81 +1,306 @@
-# 🚀 Quantum Algorithm Audit & Redesign Guide
+# Quantum Algorithm Audit & Redesign Guide
 
-> **Last Updated:** `2026-04-12`
+> **Last Updated:** `2026-04-14`
 >
-> This guide is the **source of truth** for auditing and redesigning `netlify/functions/trader-bot.js`. 
-> If you are an AI reading this, you are instructed to execute a **ruthless, evidence-based evaluation** of the algorithm. We do not want iterative tweaks on failing logic. We want robust, statistically sound strategies.
+> This document is the working guide for auditing and redesigning `netlify/functions/trader-bot.js`.
+> Use it when reviewing live behavior, diagnosing no-signal periods, or proposing algorithm changes.
+>
+> If this guide and the runtime disagree, **the code wins**. Update the guide after the code, not instead of the code.
 
 ---
 
-## 🎯 The Core Philosophy: "Pure Edge Over Score Soup"
+## 1. Objective
 
-For months, the algorithm relied on progressive "quality penalties" and "score soups"—combining RSI, EMA distances, BB%, and ADX into a single 0-100 score. **This approach fails because it obscures the actual edge.** A perfect score can hide a fatal flaw (like negative order flow or buying the top of a parabolic expansion).
+The goal is not to "make the bot trade more." The goal is to preserve and improve **real edge** in a `spot`, `long-only`, intraday system without regressing telemetry, execution safety, or observability.
 
-**From now on, we follow these non-negotiable principles:**
+This means:
 
-1. **Deterministic Edge, Not Ambiguous Scores:** A setup either exists or it doesn't. We use strict binary conditions to validate a setup, and use scoring *only* to rank valid setups and determine position sizing.
-2. **Cross-Sectional Relative Strength:** Only buy the leaders. If a token isn't outperforming BTC and its sector in the last 4H/24H, it's dead money.
-3. **Volume > Everything:** In crypto, price without volume is noise. Breakouts must feature extreme volume anomalies (e.g., > 250% of moving average). 
-4. **Order Flow Confirmation:** Spot long strategies must wait for strong bid-side liquidity. Negative Order Book Imbalance (OBI) immediately invalidates a setup.
-5. **No "Magic Numbers":** Avoid arbitrary thresholds like `RSI > 52`. Use mathematically sound concepts like Volatility Contraction (BB Width percentiles) and Volume-Weighted Average Price (VWAP) relationships.
-
----
-
-## 🔬 Approved Strategy Modules (State of the Art)
-
-When auditing or redesigning the algorithm, explicitly evaluate these specific setups. Do not invent complex heuristic models. Stick to what institutional traders use in crypto.
-
-### 1. VCP Breakout (Volatility Contraction Pattern)
-**Rationale:** Crypto assets consolidate in tight ranges (low volatility) before explosive directional moves. We want to catch the first candle of the expansion.
-- **Trigger:** Bollinger Band Width is in the bottom 10th percentile historically.
-- **Action:** Price breaks the upper band with an extreme volume spike (`volumeRatio > 2.5`).
-- **Filter:** Asset must have positive Relative Strength (RS) vs BTC. Orderbook imbalance must be heavily skewed to the bid side.
-
-### 2. Institutional VWAP Pullback
-**Rationale:** In a strong trend, institutional algorithms defend the VWAP. VWAP is the true "cost basis" of the session.
-- **Trigger:** Asset is in a strong uptrend (e.g., Daily/4H EMA alignment, strong RS vs BTC).
-- **Action:** Price pulls back to touch VWAP and reclaims it (closes above) with volume support.
-- **Filter:** Deep wicks (rejection) at VWAP are required. Cannot be in the Asian session dead zone.
-
-### 3. Mean Reversion from Extreme Deviation
-**Rationale:** Liquid assets stretch only so far before reverting to the mean.
-- **Trigger:** Price extends > 3 ATR beyond the 50 EMA on the 15m chart.
-- **Action:** Enter on the first candle that closes back inside the Bollinger Band with strong bullish order flow.
-- **Filter:** Only valid on highly liquid (ELITE) majors.
+1. **Evidence over intuition.** Every meaningful recommendation must be backed by `history.json`, `shadow_trades.json`, `autopsies.json`, `persistent_logs.json`, or direct runtime code.
+2. **Pure Edge Over Score Soup.** A setup is valid because it passes a deterministic module. Score is used to rank valid candidates and influence sizing, not to manufacture trades from weak evidence.
+3. **Production safety matters.** A "better strategy" that breaks logs, blobs, scheduler behavior, or Telegram payloads is not an improvement.
+4. **Current production logic and experimental ideas are separate.** Do not describe a research idea as if it were already active in live trading.
 
 ---
 
-## 🛠 Auditing the Algorithm
+## 2. Current Runtime Baseline (`v10.0.0-QuantumEdge`)
 
-If you are asked to audit `trader-bot.js`, execute the following protocol:
+Before auditing, anchor yourself to what is actually live today.
 
-### Step 1: Telemetry Data Assessment
-Read exactly what happened using the synchronized blobs:
-1. `history.json` & `autopsies.json`: Identify exactly why recent Live trades lost or won. Did they hit Stop Loss instantly? Were they stale exits?
-2. `shadow_trades.json`: Analyze the near-misses. Were there setups that would have won but were blocked by an overly aggressive filter?
-3. `persistent_logs.json`: Verify that the scheduler actually ran and didn't crash.
+### Active live modules
 
-### Step 2: The "72-Hour No Signal" Protocol
-If the system has fired 0 live signals in 72 hours, do **not** just say "the market was bad." Find out *why*.
-- Was the `LIQUIDITY_TIER` filter too strict?
-- Were we rejecting everything due to `EXEC_SPREAD`?
-- Was the `REGIME` classifier falsely locking the market in `RISK_OFF`?
-Identify the exact bottleneck using the log output (`[THROUGHPUT] Rejects:`).
+#### `VWAP_PULLBACK`
+- Requires `bull4h = true`.
+- Requires price to be above VWAP reclaim zone:
+  - `currentPrice >= vwap15m * 0.997`
+  - `currentPrice <= vwap15m * 1.015`
+- Requires `rs4h >= 0.005`.
+- Requires `volumeRatio >= 1.1`.
+- Requires `OBI >= -0.05`.
+- Produces a scored candidate only after those hard gates pass.
 
-### Step 3: Redesign & Deployment
-When redesigning the algorithm:
-1. **Remove Legacy Code:** Strip out unused functions, old score penalties, and deprecated regime variables.
-2. **Implement Pure Modules:** Rewrite the module evaluators to use strict Boolean gates for validation and pure scaling combinations for ranking.
-3. **Log the Reasons:** Ensure every signal explicitly states its "reasons" (e.g., `["Massive VCP Breakout", "Volume 3.5x", "Strong OBI Support"]`).
-4. **Enforce Shadow Testing:** If introducing a new high-risk module (like Mean Reversion), set it to **shadow-only** initially.
+#### `VCP_BREAKOUT`
+- Requires Bollinger Band Width rank in the bottom `15%` of recent history.
+- Requires breakout state: `bbPercent >= 0.90`.
+- Requires `volumeRatio >= 2.3`.
+- Requires `OBI >= 0.05`.
+- Requires BTC risk context to be neither `AMBER` nor `RED`.
+- Produces a scored candidate only after those hard gates pass.
+
+### Runtime gates outside the modules
+
+- `BTC_RED` blocks live trading completely.
+- `MEDIUM` liquidity is **shadow-only**.
+- Execution quality still matters after a module passes:
+  - spread gate
+  - depth gate
+  - order book sanity
+- Required score can increase based on:
+  - `btcRisk`
+  - `regime`
+  - `liquidityTier`
+
+### Important implication
+
+The runtime currently supports **two live modules only**:
+
+1. `VWAP_PULLBACK`
+2. `VCP_BREAKOUT`
+
+`Mean Reversion` is **not** an active live module today. If proposed, treat it as an experiment and start it in **shadow-only** mode.
 
 ---
 
-## 🧪 Validating New Code (Post-Implementation)
-Always ensure that the new `trader-bot.js`:
-1. Maintains strict `TELEGRAM` formatting for new indicators.
-2. Does NOT break the telemetry reporting (`history.json`).
-3. Handles Asian session liquidity adjustments properly.
-4. Actually returns the correct entry/tp/sl prices.
+## 3. Audit Philosophy
 
-If you understand this guide, proceed to completely obliterate the old logic and write the strongest algorithm possible. No mercy to failing strategies.
+When reviewing the algorithm, follow these rules:
+
+1. **Do not confuse throughput with quality.** More signals are only good if the extra signals preserve or improve expectancy.
+2. **Do not confuse silence with discipline.** If there are no signals for 72 hours, prove whether the market was truly poor or whether the funnel is choking good setups.
+3. **Do not relax gates blindly.** A filter may be correct even if it feels "too strict." The question is whether it rejects profitable setups too often in shadow and telemetry.
+4. **Do not hide logic inside scores.** If a condition is structurally required, make it a gate, not a soft penalty.
+5. **Do not remove observability to simplify code.** Reject reasons, stage counts, shadow near-misses, and trade autopsies are part of the trading system.
+
+---
+
+## 4. Source Data Map
+
+Use the synced local files for forensic work. They are mirrors of the Netlify Blobs stores.
+
+| Local File | Blob Key | Main Use |
+| --- | --- | --- |
+| `history.json` | `signal-history-v2` | Live signal history and outcome tracking |
+| `autopsies.json` | `trade-autopsies-v1` | Closed-trade diagnosis with MFE/MAE and metadata |
+| `shadow_trades.json` | `shadow-trades-v1` | Current near-misses and blocked candidates |
+| `shadow_trades_archive.json` | `shadow-trades-archive-v1` | Historical shadow outcomes |
+| `persistent_logs.json` | `persistent-logs-v1` | Runtime evidence, throughput, scheduler health |
+| `signal_memory.json` | `signal-memory-v1` | Momentum memory and symbol-level state |
+
+### High-value fields to inspect
+
+- `module`
+- `reasons`
+- `qualityBreakdown`
+- `relativeStrengthSnapshot`
+- `volumeLiquidityConfirmation`
+- `rejectReasonCode`
+- `riskModel`
+- `requiredScore`
+- `mfePct`
+- `maePct`
+
+---
+
+## 5. Required Audit Protocol
+
+If asked to audit `trader-bot.js`, do the following in order.
+
+### Step 1. Confirm the active runtime
+
+Verify these before making claims:
+
+- `ALGORITHM_VERSION`
+- active module evaluators
+- `liveAllowed` set
+- score floor logic
+- liquidity restrictions
+- BTC context restrictions
+
+If the code and docs disagree, note the mismatch explicitly.
+
+### Step 2. Read the latest operating window
+
+Use at least the most recent `72h` window, or a longer one if the sample is too thin.
+
+Quantify:
+
+- number of observed runs
+- number of module candidates by module
+- top reject reasons
+- number of live signals
+- number of shadow candidates
+- win/loss/stale-exit mix
+- MFE/MAE profile by module
+
+Do not summarize this as "market bad" without numbers.
+
+### Step 3. Diagnose the primary bottleneck
+
+Use `[THROUGHPUT]` logs to determine where the funnel collapses:
+
+- universe selection
+- regime / BTC context
+- module validation
+- execution quality
+- score floor / ranking
+- operational issue
+
+Your answer should identify the dominant failure mode, not just list several possible causes.
+
+### Step 4. Audit live trades
+
+For recent wins and losses, determine whether the problem came from:
+
+- bad entry geometry
+- weak order flow / execution
+- overextension
+- insufficient relative strength
+- poor exit design
+- market context mismatch
+
+Use `autopsies.json` and `history.json` together. A loss is more informative when paired with:
+
+- `reasons`
+- `qualityBreakdown`
+- `entryMetrics`
+- `volumeLiquidityConfirmation`
+- `mfePct`
+- `maePct`
+
+### Step 5. Audit blocked opportunities
+
+Use `shadow_trades.json` and `shadow_trades_archive.json` to answer:
+
+- Which reject codes are blocking setups that later worked?
+- Which reject codes are correctly filtering junk?
+- Are we rejecting for the right reason, but too early?
+- Are we using a good module but with the wrong geometry?
+
+Do not recommend threshold reductions unless shadow evidence shows systematic false negatives.
+
+### Step 6. Propose the smallest high-leverage change
+
+Every recommendation must include:
+
+- the exact problem
+- the exact mechanism causing it
+- the proposed code-level change
+- the expected effect
+- the main risk of the change
+- how it will be validated
+
+Prefer one strong fix over five speculative tweaks.
+
+---
+
+## 6. Approved Change Types
+
+The following are usually valid redesign directions:
+
+1. **Threshold calibration**
+   - Example: a hard gate is directionally correct but measurably too strict.
+2. **Module geometry correction**
+   - Example: a pullback module is buying too far from VWAP, or a breakout module is firing without real compression.
+3. **Execution gate correction**
+   - Example: spread/depth logic is blocking viable majors or allowing toxic microstructure.
+4. **Ranking / sizing refinement**
+   - Example: score is ordering valid candidates poorly, even though gating is correct.
+5. **Telemetry upgrades**
+   - Example: missing reject codes or missing context prevent trustworthy audits.
+
+The following are **not** valid by default:
+
+- adding vague "confidence" bonuses
+- reintroducing blended heuristic score soup
+- loosening multiple gates at once without attribution
+- promoting a brand-new module straight to live
+- removing logs because they are noisy
+
+---
+
+## 7. Guardrails for New Modules
+
+New ideas are welcome, but they are not live until proven.
+
+If proposing a new module such as mean reversion:
+
+1. Start it as **shadow-only**.
+2. Give it its own explicit reject codes and reasons.
+3. Keep its risk model separate from the live modules if needed.
+4. Validate it across multiple sessions, not a single anecdotal run.
+5. Compare it against the current modules using actual shadow outcomes, not intuition.
+
+Do not describe an experimental module as "approved" unless it has already been integrated into the runtime and documented elsewhere.
+
+---
+
+## 8. Definition of Done for a Redesign
+
+A redesign is only complete if all of the following remain true:
+
+1. `history.json`, `autopsies.json`, `shadow_trades.json`, and `persistent_logs.json` still update correctly.
+2. `[THROUGHPUT] Stages`, `[THROUGHPUT] Module candidates`, and `[THROUGHPUT] Rejects` remain readable and useful.
+3. Signals still include human-readable `reasons`.
+4. Entry, TP, SL, `requiredScore`, `riskModel`, and `qualityBreakdown` remain coherent.
+5. Telegram formatting is not broken.
+6. Shadow-only flows still work for blocked or experimental candidates.
+7. The change is reflected in:
+   - `ALGO_DOCUMENTATION.md`
+   - `ALGORITHM_JOURNAL.md`
+
+If code changes are made, validate them with the project's available checks whenever relevant, such as:
+
+- `npm run build`
+- `npm run test`
+- `npm run lint`
+
+---
+
+## 9. Required Audit Output Format
+
+When delivering an audit, structure the answer like this:
+
+### A. Observed Facts
+- What the runtime is actually doing now.
+- What the data shows in the latest operating window.
+
+### B. Primary Bottleneck
+- The single most important reason performance or throughput is failing.
+
+### C. Live Trade Diagnosis
+- What the recent wins/losses reveal about entry quality and exit quality.
+
+### D. Shadow Evidence
+- Which blocked setups look promising.
+- Which filters are correctly rejecting noise.
+
+### E. Proposed Change
+- Exact code-level adjustment.
+- Why it addresses the bottleneck.
+- Main tradeoff or risk.
+
+### F. Validation Plan
+- What metrics or files must improve after deployment.
+- What would falsify the hypothesis.
+
+---
+
+## 10. Final Rule
+
+Do not optimize for narrative elegance. Optimize for a bot that:
+
+- explains its decisions
+- preserves real edge
+- rejects weak setups on purpose
+- leaves enough evidence behind to prove whether a change helped or hurt
+
+Ruthless is good. Blind is not.
