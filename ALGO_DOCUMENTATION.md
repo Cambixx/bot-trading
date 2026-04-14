@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v10.0.0 QuantumEdge)
+# 🦅 Documentación del Algoritmo de Trading (v10.1.0 QuantumEdge)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,10 +8,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v10.0.0)
+## Current Runtime Snapshot (v10.1.0)
 
 ### Resumen
-- **Runtime Version:** `v10.0.0-QuantumEdge`
+- **Runtime Version:** `v10.1.0-QuantumEdge`
 - **File Core:** `trader-bot.js` (anteriormente `scheduled-analysis.js`)
 - **Estilo:** `spot`, `long-only`, intradía/day trading
 - **Filosofía:** "Pure Edge Over Score Soup". Se eliminan las penalizaciones progresivas. Los requisitos son puertas binarias (Booleans) duras.
@@ -34,10 +34,12 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
   - `AMBER`: Requiere +4/+2 puntos extra de Score para entrar live.
   - `GREEN`: Operación normal.
 
-### Filtros de Liquidez
+### Filtros de Liquidez (v10.1.0 Update)
 - `ELITE` / `HIGH` → Live ✅
-- `MEDIUM` → **Shadow Only**
-- `LOW` → Rechazo inmediato.
+- `MEDIUM` + `VWAP_PULLBACK` → Live ✅ (score floor +3)
+- `MEDIUM` + `VCP_BREAKOUT` → Shadow Only
+- `LOW` + `depthQuoteTopN >= $200k` + `VWAP_PULLBACK` → Live ✅ (0.5x sizing, `promotedFromLow` flag)
+- `LOW` (below depth floor) → Shadow / Reject
 
 ---
 
@@ -96,6 +98,13 @@ graph TD
 
 ## 5. Changelog Reciente
 
+### v10.1.0-QuantumEdge (14 Abr 2026)
+- **Depth-Floor Promotion:** Candidatos `VWAP_PULLBACK` con `liquidityTier=LOW` pero `depthQuoteTopN >= $200k` ahora pueden operar live con sizing reducido al 50%. Se trackean con flag `promotedFromLow`.
+- **MEDIUM-Tier Live para VWAP_PULLBACK:** `MEDIUM` ya no es shadow-only para `VWAP_PULLBACK`. Score floor +3 se mantiene como penalización.
+- **VWAP_TOO_FAR Regime-Aware:** El techo de distancia al VWAP se amplía de 1.5% a 2.0% exclusivamente en régimen `TRENDING` confirmado. Non-TRENDING mantiene 1.5%.
+- **Throughput:** Nuevo stage counter `PROMOTED_LOW` en logs `[THROUGHPUT]`.
+- **Evidencia:** Basado en auditoría de 125 runs / 33 shadow trades resueltos. Los 7 shadow wins estaban en VWAP_PULLBACK (WR 33.3% en LOW con depth > $200k vs 0% en thin coins < $36k).
+
 ### v10.0.0-QuantumEdge (14 Abr 2026)
 - **Rename:** `scheduled-analysis.js` → `trader-bot.js`.
 - **Scheduler Fix:** Cambio de cron a `0,15,30,45 * * * *` para forzar registro en infraestructura Netlify.
@@ -104,4 +113,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v10.0.0 — 14 Abril 2026**
+**Documentación actualizada v10.1.0 — 14 Abril 2026**

@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v10.0.0-QuantumEdge';
+const ALGORITHM_VERSION = 'v10.1.0-QuantumEdge';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -355,6 +355,7 @@ async function recordSignalHistory(signal, context) {
       module: signal.module || null,
       entryArchetype: signal.entryArchetype || null,
       liquidityTier: signal.liquidityTier || null,
+      promotedFromLow: signal.promotedFromLow || false,
       scoreBeforeMomentum: signal.scoreBeforeMomentum ?? signal.score,
       momentumAdjustment: signal.momentumAdjustment || 0,
       requiredScore: signal.requiredScore || null,
@@ -1361,11 +1362,13 @@ function calculateBBWidthHistory(closes, period = 20, stdDev = 2) {
 }
 
 function evaluateVWAPPullbackModule(ctx) {
-  const { symbol, currentPrice, ema50_4h, ema21_4h, vwap15m, volumeRatio, obMetrics, liquidityTier, rs4h, rs1h, atrPercent15m, bull4h, btcRisk } = ctx;
+  const { symbol, currentPrice, ema50_4h, ema21_4h, vwap15m, volumeRatio, obMetrics, liquidityTier, rs4h, rs1h, atrPercent15m, bull4h, btcRisk, regime } = ctx;
   
   if (!bull4h) return { rejectCode: 'VWAP_TREND_ALIGN' };
   if (!Number.isFinite(vwap15m) || currentPrice < vwap15m * 0.997) return { rejectCode: 'VWAP_BELOW' };
-  if (currentPrice > vwap15m * 1.015) return { rejectCode: 'VWAP_TOO_FAR' };
+  // v10.1.0: Widen VWAP ceiling to 2% in confirmed TRENDING regime
+  const vwapCeiling = regime === 'TRENDING' ? 1.020 : 1.015;
+  if (currentPrice > vwap15m * vwapCeiling) return { rejectCode: 'VWAP_TOO_FAR' };
   if (rs4h < 0.005) return { rejectCode: 'VWAP_NO_RS' }; 
   if (volumeRatio < 1.1) return { rejectCode: 'VWAP_LOW_VOL' };
   if (!obMetrics || obMetrics.obi < -0.05) return { rejectCode: 'VWAP_NEG_OBI' };
@@ -1440,7 +1443,7 @@ function evaluateVCPBreakoutModule(ctx) {
   };
 }
 
-function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, relativeStrength) {
+function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, relativeStrength, promotedFromLow = false) {
   let size = 0.8;
   if (module === 'VCP_BREAKOUT') size += 0.2;
   if (score >= 78) size += 0.4;
@@ -1456,6 +1459,8 @@ function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, 
   else if (atrPct > 1.5) size *= 0.8;
 
   if (regime === 'HIGH_VOL_BREAKOUT' || regime === 'TRANSITION') size *= 0.8;
+  // v10.1.0: Half sizing for depth-floor promoted LOW-tier trades
+  if (promotedFromLow) size *= 0.5;
   return clamp(size, 0.5, 3.5).toFixed(1);
 }
 
@@ -1524,7 +1529,7 @@ function buildCandidateShadow(symbol, candidate, ctx, requiredScore, rejectReaso
   ));
 }
 
-function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredScore) {
+function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredScore, promotedFromLow = false) {
   const relativeStrengthSnapshot = buildRelativeStrengthSnapshot(ctx.rs1h, ctx.rs4h, ctx.rs24h);
   const volumeLiquidityConfirmation = buildVolumeLiquidityConfirmation(
     ctx.volumeRatio,
@@ -1578,12 +1583,14 @@ function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredS
       ctx.regime,
       candidate.module,
       ctx.liquidityTier,
-      Math.max(ctx.rs1h, ctx.rs4h)
+      Math.max(ctx.rs1h, ctx.rs4h),
+      promotedFromLow
     ),
     btcContext,
     module: candidate.module,
     entryArchetype: candidate.entryArchetype,
     liquidityTier: ctx.liquidityTier,
+    promotedFromLow,
     expectedHoldingHours: candidate.riskModel.timeStopHours,
     riskModel: {
       tpMultiplier: candidate.riskModel.tpMultiplier,
@@ -1767,8 +1774,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
 
   const requiredScore = getRequiredScore(bestCandidate, regime, liquidityTier, btcContext?.status || 'UNKNOWN');
 
-  // v9.1.0: MEDIUM liquidity → shadow only (prefer ELITE/HIGH for live signals)
-  if (liquidityTier === 'MEDIUM') {
+  // v10.1.0: Allow MEDIUM-tier VWAP_PULLBACK to proceed to live evaluation
+  if (liquidityTier === 'MEDIUM' && bestCandidate.module !== 'VWAP_PULLBACK') {
     countMetric(analysisState?.rejectCounts, 'LIQUIDITY_TIER_MEDIUM');
     buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, 'LIQUIDITY_TIER_MEDIUM', btcContext, shadowCollector);
     return null;
@@ -1787,10 +1794,20 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   }
 
   const executionRejectCode = getExecutionRejectCode(obMetrics, liquidityTier);
-  if (executionRejectCode) {
+  // v10.1.0: Depth-floor promotion — allow VWAP_PULLBACK LOW-tier candidates
+  // with depthQuoteTopN >= $200k to trade live at reduced sizing
+  const isDepthFloorPromotion = (
+    executionRejectCode === 'LIQUIDITY_TIER_LOW' &&
+    bestCandidate.module === 'VWAP_PULLBACK' &&
+    obMetrics.depthQuoteTopN >= 200000
+  );
+  if (executionRejectCode && !isDepthFloorPromotion) {
     countMetric(analysisState?.rejectCounts, executionRejectCode);
     buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, executionRejectCode, btcContext, shadowCollector);
     return null;
+  }
+  if (isDepthFloorPromotion) {
+    countMetric(analysisState?.stageCounts, 'PROMOTED_LOW');
   }
   countMetric(analysisState?.stageCounts, 'EXECUTION_OK');
 
@@ -1807,7 +1824,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   }
 
   countMetric(analysisState?.stageCounts, 'LIVE_SIGNAL');
-  return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore);
+  return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore, isDepthFloorPromotion);
 }
 
 async function sendTelegramNotification(signals, stats = null) {

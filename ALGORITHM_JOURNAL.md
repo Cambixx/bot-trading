@@ -6,7 +6,63 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v10.0.0 (Active)
+## Current Version: v10.1.0 (Active)
+**Date:** Apr 14, 2026
+**Theme:** "DEPTH-FLOOR PROMOTION — EVIDENCE-BASED FUNNEL UNBLOCK"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v10.1.0-QuantumEdge`.
+- **Changes Made:** Three surgical modifications based on quantitative audit of 125 runs / 33 resolved shadow trades over a 32-hour operating window.
+
+### Audit Evidence (32h window: Apr 12 21:40 → Apr 14 05:46):
+- **125 runs, ZERO live signals.** Module candidates were generated in 33 cycles but ALL were blocked post-module by `LIQUIDITY_TIER_LOW` (17), `EXEC_SPREAD` (9), `EXEC_DEPTH` (8), `LIQUIDITY_TIER_MEDIUM` (6).
+- **Shadow pool: 7W / 26L (21.2% WR).** Net negative overall — filters were broadly correct.
+- **But discriminating by reject reason:** `LIQUIDITY_TIER_LOW` shadows showed 33.3% WR (5W/10L) — just above breakeven for 2.14 RR.
+- **All 7 wins were `VWAP_PULLBACK`** (0-for-4 on VCP_BREAKOUT).
+- **Depth discriminates:** 5 of 7 winners had `depthQuoteTopN >= $200k`. The 10 ULTIMAUSDT serial losers all had `depth < $36k`.
+- **HYPEUSDT** (3W/1L, 75% WR) and **WLDUSDT** (2W/0L, 100% WR) showed genuine edge in the shadow pool.
+
+### Changes Made:
+1. **Depth-Floor Promotion (PRIMARY):**
+   - `VWAP_PULLBACK` candidates with `liquidityTier=LOW` but `depthQuoteTopN >= $200,000` can now trade live.
+   - Position sizing reduced to 0.5x for promoted trades.
+   - Tracked via `promotedFromLow: true` flag in signal history.
+   - Throughput logged as `PROMOTED_LOW` stage counter.
+   - **Expected impact:** Would have allowed 5 of 7 shadow winners live while blocking all 10 ULTIMAUSDT losers.
+
+2. **MEDIUM-Tier Live for VWAP_PULLBACK:**
+   - `MEDIUM` liquidity tier no longer forces shadow-only for `VWAP_PULLBACK` candidates.
+   - `VCP_BREAKOUT` remains shadow-only at MEDIUM tier (0% WR evidence).
+   - Score floor +3 penalty for MEDIUM tier is preserved (from `getRequiredScore`).
+   - **Expected impact:** 6 additional candidates that were MEDIUM+VWAP_PULLBACK can now reach live evaluation.
+
+3. **VWAP_TOO_FAR Regime-Aware Ceiling:**
+   - In confirmed `TRENDING` regime (bull4h = true, not risk-off), VWAP proximity ceiling widened from 1.5% to 2.0%.
+   - Non-TRENDING regimes retain the strict 1.5% ceiling.
+   - **Expected impact:** Reduces the 447 `VWAP_TOO_FAR` rejects observed during extended trending sessions. The module still requires bull4h, rs4h > 0.005, volumeRatio > 1.1, and positive OBI.
+
+### Hypothesis / Goal:
+The v10.0.0 modules are correct strategic tools — they found setups. The problem was a structural chokepoint in post-module execution gates that killed 100% of candidates for 32+ hours. This version surgically opens three controlled pathways while maintaining all module-level quality gates, ATR-based risk management, and BTC context protection. The half-sizing on promoted LOW-tier trades limits downside exposure during validation.
+
+### Risk Assessment:
+- **Small sample:** 7 shadow wins is not statistically significant. The 33.3% WR on LOW-tier could be lucky.
+- **Execution risk:** Real fills on LOW-tier coins may underperform shadow benchmarks due to slippage.
+- **Mitigation:** 0.5x position sizing + `promotedFromLow` tracking for isolated performance analysis.
+
+### Falsification Criteria:
+- If first 10 `promotedFromLow` live trades show WR ≤ 20%, disable the depth-floor exception.
+- If real execution slippage exceeds 30bps consistently on promoted trades, tighten depth floor to $300k.
+- If MAE avg on promoted trades exceeds 1.5%, the entries are structurally weak and the exception should be reverted.
+
+### Pending Hypotheses:
+1. Will the depth-floor at $200k correctly separate tradeable LOW-tier coins from thin-book garbage?
+2. Will MEDIUM-tier VWAP_PULLBACK trades match the win profile of HIGH-tier equivalents?
+3. Does the 2% VWAP ceiling in TRENDING produce entries with better or worse MFE than the 1.5% window?
+4. Is `VWAP_TREND_ALIGN` (45.6% of all rejects) the next bottleneck to investigate if throughput remains low?
+
+---
+
+## Previous Version: v10.0.0
 **Date:** Apr 12, 2026
 **Theme:** "QUANTUM EDGE - PURE STRATEGY MODULES"
 
