@@ -9,9 +9,17 @@
 
 ---
 
-## 1. Objective
+## 1. Objective & AI Directives
 
-The goal is not to "make the bot trade more." The goal is to preserve and improve **real edge** in a `spot`, `long-only`, intraday system without regressing telemetry, execution safety, or observability.
+This document is the absolute source of truth for auditing the algorithm. 
+
+**🤖 DIRECTIVES FOR THE AI ASSISTANT ACTING AS AUDITOR:**
+- **DO NOT hallucinate data.** If the user does not provide the JSON blobs for the target bot, halt the audit and ask for them.
+- **DO NOT mix bot data.** Always explicitly identify whether the provided data belongs to Bot 1 (`QuantumEdge`) or Bot 2 (`Knife Catcher`).
+- **Be ruthless.** Do not flatter the user's algorithm. If the data shows an edge is failing, state it mathematically.
+- **Calculate before speaking.** Before proposing a fix, you must calculate and present the current Win Rate, MFE (Maximum Favorable Excursion) average, MAE average, and total throughput for the specific module being analyzed.
+
+The overall goal is not to "make the bot trade more." The goal is to preserve and improve **real edge** without regressing telemetry, execution safety, or observability.
 
 This means:
 
@@ -103,18 +111,15 @@ Use the synced local files for forensic work. They are mirrors of the Netlify Bl
 | `knife_shadow_trades.json`| `knife-shadow-trades-v1` | Bot 2: Blocked candidates |
 | `knife_persistent_logs.json`| `knife-persistent-logs-v1` | Bot 2: Runtime evidence |
 
-### High-value fields to inspect
+### High-value fields to cross-reference (The "Why" Data)
 
-- `module`
-- `reasons`
-- `qualityBreakdown`
-- `relativeStrengthSnapshot`
-- `volumeLiquidityConfirmation`
-- `rejectReasonCode`
-- `riskModel`
-- `requiredScore`
-- `mfePct`
-- `maePct`
+To find hidden edge or broken filters, you MUST cross-reference outcomes (`WOULD_WIN`/`LOSS`) with these embedded metrics:
+
+- `qualityBreakdown`: Are we losing when `participation` is < 60 but `trend` is 100? This implies high-trend low-volume setups are traps.
+- `relativeStrengthSnapshot`: Are `VWAP_PULLBACK` trades failing when `rs1h` < 0? 
+- `volumeLiquidityConfirmation`: Is `obi` (Order Book Imbalance) predictive of execution slippage or immediate MAE?
+- `rejectReasonCode`: Find the reject code with the highest counts of `WOULD_WIN` outcomes in shadow data. This is where throughput is unnecessarily choked.
+- `mfePct` & `maePct`: (Maximum Favorable/Adverse Excursion). If a loss has an `mfePct` of +1.2% before hitting the stop loss, the exit geometry is flawed, not necessarily the entry. If a loss has `0% mfePct` (never went in our favor), the entry timing is completely wrong.
 
 ---
 
@@ -139,17 +144,17 @@ If the code and docs disagree, note the mismatch explicitly.
 
 Use at least the most recent `72h` window, or a longer one if the sample is too thin.
 
-Quantify:
+Quantify specifically:
 
-- number of observed runs
-- number of module candidates by module
-- top reject reasons
-- number of live signals
-- number of shadow candidates
-- win/loss/stale-exit mix
-- MFE/MAE profile by module
+- Total runs in the window.
+- Number of module candidates isolated by their parent `module`.
+- Top `rejectReasonCode` frequencies (**Critical:** If one reject code accounts for >50% of blocks, flag it).
+- Live signals executed: Win / Loss / Breakeven / Stale.
+- Shadow candidates evaluated (Excluding PENDING/EXPIRED).
+- Shadow Win Rate (`WOULD_WIN` / (`WOULD_WIN` + `WOULD_LOSE`)).
+- Average `mfePct` by module.
 
-Do not summarize this as "market bad" without numbers.
+Do not summarize this as "market conditions were poor" without backing it up with the specific deterioration of the `btcRisk` or `atrPercentile`.
 
 ### Step 3. Diagnose the primary bottleneck
 
@@ -277,19 +282,22 @@ If code changes are made, validate them with the project's available checks when
 
 When delivering an audit, structure the answer like this:
 
-### A. Observed Facts
-- What the runtime is actually doing now.
-- What the data shows in the latest operating window.
+### A. Data Window Summary (Quantitative)
+- Data span (e.g., 48 hours).
+- Which Bot the data belongs to (Bot 1 or Bot 2).
+- Total runs observed vs Expected.
+- `[Table]` Live Trades: Outcomes, Win Rate, Avg MFE, Avg MAE.
+- `[Table]` Shadow Trades: Sample size, Win Rate, Top Reject Reason.
 
 ### B. Primary Bottleneck
-- The single most important reason performance or throughput is failing.
+- The single most restrictive gate causing funnel collapse, backed by run-counts.
 
 ### C. Live Trade Diagnosis
-- What the recent wins/losses reveal about entry quality and exit quality.
+- What the recent wins/losses reveal. (Use exact MFE/MAE numbers to prove if entries are overextended or exits are too tight).
 
-### D. Shadow Evidence
-- Which blocked setups look promising.
-- Which filters are correctly rejecting noise.
+### D. Shadow Evidence (Dark Edge)
+- Which specific `rejectReasonCode` filtered setups that went on to `WOULD_WIN`. 
+- Calculation of whether promoting that cohort to live would yield a +EV outcome (using the Bot's benchmark R:R).
 
 ### E. Proposed Change
 - Exact code-level adjustment.
