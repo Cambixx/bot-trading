@@ -22,9 +22,12 @@ This means:
 
 ---
 
-## 2. Current Runtime Baseline (`v10.0.0-QuantumEdge`)
+## 2. Current Runtime Baseline
 
-Before auditing, anchor yourself to what is actually live today.
+Before auditing, anchor yourself to what is actually live today. The architecture now runs **two independent Netlify Functions** scheduled 5 minutes apart to capture different market anomalies without API collisions.
+
+### Bot 1: QuantumEdge (`v10.1.0`, `trader-bot.js`)
+*Scope: Short-term trend following and momentum breakouts.*
 
 ### Active live modules
 
@@ -59,14 +62,18 @@ Before auditing, anchor yourself to what is actually live today.
   - `regime`
   - `liquidityTier`
 
+### Bot 2: Knife Catcher (`v1.0.0`, `knife-catcher.js`)
+*Scope: Extreme mean reversion and capitulation.*
+
+#### `KNIFE_CATCHER`
+- Requires pure panic: `bbPercent <= -0.04` (4% below lower Bollinger Band).
+- Requires extreme oversold: `rsi15m <= 25`.
+- Requires volume absorption climax: `volumeRatio >= 4.0x`.
+- Aggressive Risk Model: TP 3.5x ATR, SL 1.0x ATR, 4h Time Stop.
+
 ### Important implication
 
-The runtime currently supports **two live modules only**:
-
-1. `VWAP_PULLBACK`
-2. `VCP_BREAKOUT`
-
-`Mean Reversion` is **not** an active live module today. If proposed, treat it as an experiment and start it in **shadow-only** mode.
+If proposing changes, specify *which* bot architecture you are editing. A `Mean Reversion` module belongs in `knife-catcher.js`, while a `Breakout` belongs in `trader-bot.js`.
 
 ---
 
@@ -88,12 +95,13 @@ Use the synced local files for forensic work. They are mirrors of the Netlify Bl
 
 | Local File | Blob Key | Main Use |
 | --- | --- | --- |
-| `history.json` | `signal-history-v2` | Live signal history and outcome tracking |
-| `autopsies.json` | `trade-autopsies-v1` | Closed-trade diagnosis with MFE/MAE and metadata |
-| `shadow_trades.json` | `shadow-trades-v1` | Current near-misses and blocked candidates |
-| `shadow_trades_archive.json` | `shadow-trades-archive-v1` | Historical shadow outcomes |
-| `persistent_logs.json` | `persistent-logs-v1` | Runtime evidence, throughput, scheduler health |
-| `signal_memory.json` | `signal-memory-v1` | Momentum memory and symbol-level state |
+| `history.json` | `signal-history-v2` | Bot 1: Live signal history |
+| `autopsies.json` | `trade-autopsies-v1` | Bot 1: Closed-trade diagnosis |
+| `shadow_trades.json` | `shadow-trades-v1` | Bot 1: Blocked candidates |
+| `persistent_logs.json` | `persistent-logs-v1` | Bot 1: Runtime evidence |
+| `knife_history.json` | `knife-history-v1` | Bot 2: Live signal history |
+| `knife_shadow_trades.json`| `knife-shadow-trades-v1` | Bot 2: Blocked candidates |
+| `knife_persistent_logs.json`| `knife-persistent-logs-v1` | Bot 2: Runtime evidence |
 
 ### High-value fields to inspect
 

@@ -13,11 +13,13 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 ### Resumen
 - **Runtime Version:** `v10.1.0-QuantumEdge`
 - **File Core:** `trader-bot.js` (anteriormente `scheduled-analysis.js`)
-- **Estilo:** `spot`, `long-only`, intradía/day trading
-- **Filosofía:** "Pure Edge Over Score Soup". Se eliminan las penalizaciones progresivas. Los requisitos son puertas binarias (Booleans) duras.
-- **Ajuste principal:** Implementación de los módulos `VCP_BREAKOUT` y `VWAP_PULLBACK`.
+- **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
+- **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, Extreme Mean Reversion / Capitulation (`knife-catcher.js`).
+- **Filosofía:** Módulos deterministas puros con bases de datos (Netlify Blobs) totalmente aisladas.
 
 ### Arquitectura de Módulos Activa
+
+#### Bot 1: QuantumEdge (`trader-bot.js`)
 - **`VCP_BREAKOUT` (Volatility Contraction Pattern)**
   - **Origen:** Mark Minervini / Conceptos Institucionales.
   - **Lógica:** Busca una contracción de volatilidad extrema (BB Width en el percentil inferior 15%) seguida de una expansión explosiva.
@@ -25,6 +27,11 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 - **`VWAP_PULLBACK` (Institutional Reclaim)**
   - **Lógica:** Defensa del VWAP intradía en activos con fuerte tendencia y fortaleza relativa (RS).
   - **Gates Duros:** Cierre por encima de VWAP, mechas de rechazo inferiores (reclaim), RS positiva fuerte.
+
+#### Bot 2: Knife Catcher (`knife-catcher.js`)
+- **`KNIFE_CATCHER` (Flash Crash Reversion)**
+  - **Lógica:** Compra pánicos extremos y liquidaciones donde existe un clímax de volumen de absorción.
+  - **Gates Duros:** Precio 4% por debajo de la Banda Bollinger inferior (`bbPercent <= -0.04`), RSI 15m <= 25, y Volumen > 4.0x.
 
 ### Clasificación de Riesgo & Regímenes
 - **`RISK_OFF`:** Bloqueo total si `BTC 4H` está bajista o BTC Status es `RED`.
@@ -47,11 +54,14 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 El bot opera como un ecosistema serverless interconectado:
 
-- **Netlify Functions:**
-  - `trader-bot`: Ejecuta el análisis automático en las marcas `0,15,30,45` de cada hora.
+- **Netlify Functions Paralelas:**
+  - `trader-bot`: Bot 1 (QuantumEdge). Corre en los minutos `0,15,30,45`.
+  - `knife-catcher`: Bot 2 (Mean Reversion). Corre en los minutos `5,20,35,50` para evitar rate-limits de MEXC.
   - `auto-digest`: Genera el reporte diario a las **09:00 UTC**.
   - `telegram-bot`: Interfaz de comandos.
-- **Netlify Blobs**: Persistencia de `history.json`, `shadow_trades.json`, `persistent_logs.json`, etc.
+- **Netlify Blobs (Aislados):**
+  - **Bot 1:** Usa llaves como `signal-history-v2`, `shadow-trades-v1`.
+  - **Bot 2:** Usa llaves específicas como `knife-history-v1`, `knife-shadow-trades-v1`.
 
 ---
 
@@ -88,15 +98,22 @@ graph TD
 
 | Módulo | SL Base | TP Base | Ratio R:R |
 |--------|---------|---------|-----------|
-| `VCP_BREAKOUT` | 1.8x ATR | 4.0x ATR | 2.22:1 |
-| `VWAP_PULLBACK` | 2.0x ATR | 3.5x ATR | 1.75:1 |
+| `VCP_BREAKOUT` (Bot 1) | 1.8x ATR | 4.0x ATR | 2.22:1 |
+| `VWAP_PULLBACK` (Bot 1) | 2.0x ATR | 3.5x ATR | 1.75:1 |
+| `KNIFE_CATCHER` (Bot 2) | 1.0x ATR | 3.5x ATR | 3.50:1 |
 
-- **Time Stop:** Cada módulo define sus horas de espera (Stale Exit) antes de cerrar un trade que no se mueve.
+- **Time Stop:** Cada módulo define sus horas de espera. `KNIFE_CATCHER` cierra a las 4h si no rebota, mientras que Bot 1 espera entre 6h y 12h.
 - **ATR Dynamic:** Si el ATR % es muy alto (>2.5%), el tamaño de posición se reduce un 35% automáticamente.
 
 ---
 
 ## 5. Changelog Reciente
+
+### Multi-Bot Architecture (15 Abr 2026)
+- **Implementación Paralela:** Creación de `knife-catcher.js` como segunda Netlify Function paralela.
+- **Descorrelación:** El nuevo bot busca operaciones de "Deep Value / Flash Crash" exclusivas, completamente opuestas a los breakouts/pullbacks del Bot 1.
+- **Offsets de Schedule:** Ejecución separada 5 minutos (`trader-bot` en 0,15; `knife-catcher` en 5,20) para distribuir la carga de API hacia MEXC HTTPS endpoints.
+- **Storage Aislado:** Mapeo de bases de datos independientes en Netlify Blobs (`knife-*`) sincronizables vía CLI.
 
 ### v10.1.0-QuantumEdge (14 Abr 2026)
 - **Depth-Floor Promotion:** Candidatos `VWAP_PULLBACK` con `liquidityTier=LOW` pero `depthQuoteTopN >= $200k` ahora pueden operar live con sizing reducido al 50%. Se trackean con flag `promotedFromLow`.

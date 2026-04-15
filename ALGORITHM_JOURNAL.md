@@ -6,7 +6,25 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v10.1.0 (Active)
+## Current Version: v1.0.0 (Knife Catcher) & v10.1.0 (Quantum)
+**Date:** Apr 15, 2026
+**Theme:** "PARALLEL ARCHITECTURE - UNCORRELATED EDGE"
+
+### Core Logic & Parameters:
+- **Architecture Change:** Instead of stuffing Mean Reversion logic into a trend-following bot (leading to complex code and `score soup` regressions), the system was split into a **Multi-Bot Topology**. 
+- **Bot 1 (`trader-bot.js`):** Continues running `v10.1.0-QuantumEdge` checking 15m/1h/4h for high momentum breakouts and VWAP pullbacks at min. `0,15,30,45`.
+- **Bot 2 (`knife-catcher.js`):** Spawned as `v1.0.0-KnifeCatcher` running at min. `5,20,35,50`. Pure extreme mean reversion. Hunts exclusively for:
+    - Drops reaching 4% completely below the lower BB (`bbPercent <= -0.04`).
+    - Severe oversold state (`rsi15m < 25`).
+    - Massive capitulation volume (`volumeRatio > 4`).
+- **Risk Model:** The Knife Catcher uses an extremely tight SL (1.0x ATR) because valid flush-rebotes recover rapidly. The TP is wide (3.5x ATR), providing a 3.5:1 reward ratio. Time stop is ruthlessly short (4 hours).
+
+### Hypothesis / Goal:
+The main system inherently dies during extreme market sell-offs (BTC RED block) or ranges. By having a parallel bot that ONLY wakes up during violent flushes, we can capture high-R:R opportunities when the primary bot is safely on the sidelines. We use isolated Netlify Blob storage (`knife-history`, `knife-shadows`) and an offset cron-job so Netlify metrics, shadow backtests, and MEXC API limits never collide.
+
+---
+
+## Previous Version: v10.1.0 (Active)
 **Date:** Apr 14, 2026
 **Theme:** "DEPTH-FLOOR PROMOTION — EVIDENCE-BASED FUNNEL UNBLOCK"
 

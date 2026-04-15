@@ -13,7 +13,8 @@ function parseArgs(argv) {
     siteID: process.env.SITE_ID || process.env.NETLIFY_SITE_ID || DEFAULT_SITE_ID,
     telegramEnabled: null,
     json: false,
-    help: false
+    help: false,
+    bot: 'trader'
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -26,6 +27,11 @@ function parseArgs(argv) {
 
     if (arg === '--json') {
       options.json = true;
+      continue;
+    }
+
+    if (arg === '--knife') {
+      options.bot = 'knife';
       continue;
     }
 
@@ -77,6 +83,7 @@ Options:
   --env-file <path>    Load a specific .env file
   --site-id <id>       Override Netlify site ID
   --json               Print the final result as JSON only
+  --knife              Run the Knife Catcher algorithm instead of Trader Bot
   --help, -h           Show this help
 
 Notes:
@@ -126,6 +133,7 @@ function printPreflight(options, envPath, context) {
   console.log('Manual analysis preflight');
   console.log(`- env file: ${envPath || 'not found'}`);
   console.log(`- site ID: ${options.siteID}`);
+  console.log(`- bot algorithm: ${options.bot === 'knife' ? 'Knife Catcher' : 'QuantumEdge Trader'}`);
   console.log(`- token available: ${context.token ? 'yes' : 'no'}`);
   console.log(`- TELEGRAM_ENABLED: ${process.env.TELEGRAM_ENABLED ?? 'unset'}`);
   console.log(`- QUOTE_ASSET: ${process.env.QUOTE_ASSET || 'USDT'}`);
@@ -166,8 +174,15 @@ async function start() {
   const startedAt = Date.now();
 
   try {
-    const { runAnalysis } = await import('../netlify/functions/trader-bot.js');
-    const result = await runAnalysis(context);
+    let runBot;
+    if (options.bot === 'knife') {
+      const mod = await import('../netlify/functions/knife-catcher.js');
+      runBot = mod.runAnalysis;
+    } else {
+      const mod = await import('../netlify/functions/trader-bot.js');
+      runBot = mod.runAnalysis;
+    }
+    const result = await runBot(context);
     const durationMs = Date.now() - startedAt;
     const enrichedResult = {
       ...result,

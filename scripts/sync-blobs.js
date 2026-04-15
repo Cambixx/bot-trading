@@ -35,6 +35,12 @@ const BLOB_MAP = [
     { key: 'shadow-trades-archive-v1', file: 'shadow_trades_archive.json', label: 'Shadow Archive' },
     { key: 'signal-memory-v1', file: 'signal_memory.json', label: 'Signal Memory' },
     { key: 'trade-autopsies-v1', file: 'autopsies.json', label: 'Trade Autopsies' },
+    { key: 'knife-history-v1', file: 'knife_history.json', label: 'Knife History' },
+    { key: 'knife-persistent-logs-v1', file: 'knife_persistent_logs.json', label: 'Knife Logs' },
+    { key: 'knife-shadow-trades-v1', file: 'knife_shadow_trades.json', label: 'Knife Shadows' },
+    { key: 'knife-shadow-archive-v1', file: 'knife_shadow_archive.json', label: 'Knife Archive' },
+    { key: 'knife-signal-memory-v1', file: 'knife_signal_memory.json', label: 'Knife Memory' },
+    { key: 'knife-trade-autopsies-v1', file: 'knife_autopsies.json', label: 'Knife Autopsies' },
 ];
 
 // Short aliases for CLI filtering
@@ -46,6 +52,13 @@ const ALIASES = {
     memory: 'signal-memory-v1',
     autopsy: 'trade-autopsies-v1',
     autopsies: 'trade-autopsies-v1',
+    knifehistory: 'knife-history-v1',
+    knifelogs: 'knife-persistent-logs-v1',
+    knifeshadow: 'knife-shadow-trades-v1',
+    knifearchive: 'knife-shadow-archive-v1',
+    knifememory: 'knife-signal-memory-v1',
+    knifeautopsy: 'knife-trade-autopsies-v1',
+    knifeautopsies: 'knife-trade-autopsies-v1',
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
