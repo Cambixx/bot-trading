@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v10.1.0-QuantumEdge';
+const ALGORITHM_VERSION = 'v10.2.0-QuantumEdge';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1362,7 +1362,7 @@ function calculateBBWidthHistory(closes, period = 20, stdDev = 2) {
 }
 
 function evaluateVWAPPullbackModule(ctx) {
-  const { symbol, currentPrice, ema50_4h, ema21_4h, vwap15m, volumeRatio, obMetrics, liquidityTier, rs4h, rs1h, atrPercent15m, bull4h, btcRisk, regime } = ctx;
+  const { symbol, currentPrice, ema50_4h, ema21_4h, vwap15m, volumeRatio, obMetrics, liquidityTier, rs4h, rs1h, atrPercent15m, bull4h, btcRisk, regime, rsi15m } = ctx;
   
   if (!bull4h) return { rejectCode: 'VWAP_TREND_ALIGN' };
   if (!Number.isFinite(vwap15m) || currentPrice < vwap15m * 0.997) return { rejectCode: 'VWAP_BELOW' };
@@ -1372,6 +1372,10 @@ function evaluateVWAPPullbackModule(ctx) {
   if (rs4h < 0.005) return { rejectCode: 'VWAP_NO_RS' }; 
   if (volumeRatio < 1.1) return { rejectCode: 'VWAP_LOW_VOL' };
   if (!obMetrics || obMetrics.obi < -0.05) return { rejectCode: 'VWAP_NEG_OBI' };
+  
+  // v10.2.0: Prevent falling knifes with 0% MFE by requiring short-term bounce/support
+  if (rsi15m < 45) return { rejectCode: 'VWAP_FALLING_KNIFE' };
+  if (rs1h < 0) return { rejectCode: 'VWAP_WEAK_MOMENTUM' };
 
   const trendQuality = clamp(50 + (rs4h * 1500) + (rs1h * 1000), 50, 100);
   const participationQuality = clamp(40 + (volumeRatio * 20), 40, 100);
@@ -1413,6 +1417,8 @@ function evaluateVCPBreakoutModule(ctx) {
   if (volumeRatio < 2.3) return { rejectCode: 'VCP_LOW_VOL' }; 
   if (!obMetrics || obMetrics.obi < 0.05) return { rejectCode: 'VCP_NO_BID_SUPPORT' };
   if (btcRisk === 'RED' || btcRisk === 'AMBER') return { rejectCode: 'VCP_BTC_RESISTANCE' };
+  // v10.2.0: Structural fakeout protection - ensure asset is outperforming BTC on 1H
+  if (rs1h < 0) return { rejectCode: 'VCP_WEAK_MOMENTUM' };
   
   const trendQuality = clamp(50 + (rs1h * 1500), 50, 100);
   const expansionQuality = clamp(100 - (rank * 100), 50, 100); 

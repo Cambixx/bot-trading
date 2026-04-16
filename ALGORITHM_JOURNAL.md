@@ -6,7 +6,21 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v1.0.0 (Knife Catcher) & v10.1.0 (Quantum)
+## Current Version: v10.2.0 (Quantum) & v1.0.0 (Knife Catcher)
+**Date:** Apr 16, 2026
+**Theme:** "KNIFE CATCHER DEFENSE - MFE 0% FIX"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v10.2.0-QuantumEdge`.
+- **Changes Made:** Inserted structural confirmation gates to prevent buying falling knives.
+    - `VWAP_PULLBACK`: Added `rsi15m < 45` rejection (VWAP_FALLING_KNIFE) and `rs1h < 0` rejection (VWAP_WEAK_MOMENTUM).
+    - `VCP_BREAKOUT`: Added `rs1h < 0` rejection (VCP_WEAK_MOMENTUM).
+- **Audit Evidence:** 10 out of the latest 11 losses from `VWAP_PULLBACK` had exactly `0.00%` MFE (Maximum Favorable Excursion), meaning trades were absorbing immediate drawdown without any bounce. This indicated the module was buying the fall *into* VWAP rather than the bounce *off* VWAP.
+- **Hypothesis / Goal:** The structural gates will discard poor setups before execution. While throughput will slightly drop, the quality of `VWAP_PULLBACK` setups should rise, eliminating the 0% MFE streak and turning the system +EV, as the rejected shadow trades natively held a +EV profile on the 2.1:1 real R:R base.
+
+---
+
+## Previous Version: v1.0.0 (Knife Catcher) & v10.1.0 (Quantum)
 **Date:** Apr 15, 2026
 **Theme:** "PARALLEL ARCHITECTURE - UNCORRELATED EDGE"
 

@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v10.1.0 QuantumEdge)
+# 🦅 Documentación del Algoritmo de Trading (v10.2.0 QuantumEdge)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,10 +8,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v10.1.0)
+## Current Runtime Snapshot (v10.2.0)
 
 ### Resumen
-- **Runtime Version:** `v10.1.0-QuantumEdge`
+- **Runtime Version:** `v10.2.0-QuantumEdge`
 - **File Core:** `trader-bot.js` (anteriormente `scheduled-analysis.js`)
 - **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
 - **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, Extreme Mean Reversion / Capitulation (`knife-catcher.js`).
@@ -26,7 +26,7 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
   - **Gates Duros:** Volume Ratio > 2.3x, OBI > 0.05 (Bid support), RS vs BTC positiva.
 - **`VWAP_PULLBACK` (Institutional Reclaim)**
   - **Lógica:** Defensa del VWAP intradía en activos con fuerte tendencia y fortaleza relativa (RS).
-  - **Gates Duros:** Cierre por encima de VWAP, mechas de rechazo inferiores (reclaim), RS positiva fuerte.
+  - **Gates Duros:** Cierre por encima de VWAP, mechas de rechazo inferiores (reclaim), RS positiva fuerte. **Desde v10.2.0:** RSI15m >= 45 y RS1H >= 0 para evitar *falling knifes* sin soporte de corto plazo.
 
 #### Bot 2: Knife Catcher (`knife-catcher.js`)
 - **`KNIFE_CATCHER` (Flash Crash Reversion)**
@@ -109,6 +109,11 @@ graph TD
 
 ## 5. Changelog Reciente
 
+### v10.2.0-QuantumEdge (16 Abr 2026)
+- **Zero MFE Protection:** Añadido `VWAP_FALLING_KNIFE` (RSI15m < 45) y `VWAP_WEAK_MOMENTUM` (RS1H < 0) en `VWAP_PULLBACK` para prevenir compras directas en caída sin soporte estructural.
+- **Fakeout Protection:** Añadido `VCP_WEAK_MOMENTUM` (RS1H < 0) en `VCP_BREAKOUT` para asegurar outperform contra BTC.
+- **Evidencia:** Auditoría reveló una severa fuga de capital en `VWAP_PULLBACK` con 10 pérdidas promediando `0.00%` MFE (cero favorabilidad) indicando ausencia de rebote.
+
 ### Multi-Bot Architecture (15 Abr 2026)
 - **Implementación Paralela:** Creación de `knife-catcher.js` como segunda Netlify Function paralela.
 - **Descorrelación:** El nuevo bot busca operaciones de "Deep Value / Flash Crash" exclusivas, completamente opuestas a los breakouts/pullbacks del Bot 1.
@@ -130,4 +135,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v10.1.0 — 14 Abril 2026**
+**Documentación actualizada v10.2.0 — 16 Abril 2026**
