@@ -1,33 +1,9 @@
 {
-  "LINKUSDT": [
+  "LTCUSDT": [
     {
-      "score": 68,
+      "score": 75,
       "regime": "TRENDING",
-      "timestamp": 1776140185880
-    },
-    {
-      "score": 76,
-      "regime": "TRENDING",
-      "timestamp": 1776141039844
-    },
-    {
-      "score": 76,
-      "regime": "TRENDING",
-      "timestamp": 1776141052532
-    }
-  ],
-  "ENAUSDT": [
-    {
-      "score": 79,
-      "regime": "TRENDING",
-      "timestamp": 1776140188015
-    }
-  ],
-  "WLDUSDT": [
-    {
-      "score": 83,
-      "regime": "HIGH_VOL_BREAKOUT",
-      "timestamp": 1776145578768
+      "timestamp": 1776334578234
     }
   ]
 }
