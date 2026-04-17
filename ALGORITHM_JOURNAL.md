@@ -6,7 +6,27 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v10.2.0 (Quantum) & v1.0.0 (Knife Catcher)
+## Current Version: v11.0.0 (QuantumEdge) & v1.0.0 (Knife Catcher)
+**Date:** Apr 17, 2026
+**Theme:** "MOMENTUM & FLOW UPGRADE - SECTOR ROTATION & MULTI-DELTA"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v11.0.0-QuantumEdge`.
+- **Changes Made:** 
+    - **Trailing Stops (Break-Even):** Activated a sliding break-even stop logic. Once an asset reaches 50% of the distance to the TP, the SL is dynamically moved to +0.1% for risk-free trades.
+    - **Sector Rotation Bonus:** Core-leading assets (like BTC, ETH, SOL) receive a `+0.8` opportunity score bump, aligning entries with sector-wide outperformance.
+    - **VWAP Anchor Calibration:** Expanded the VWAP rolling anchor from 50 (12.5h) to 96 (24h) periods, ensuring a full daily session is used to find institutional bounds.
+    - **Multi-Candle Cumulative Delta:** Implemented a `calculateMultiCandleDelta` function (looking back 3 periods) to ensure sustained taker buying pressure exists before entering breakouts or pullbacks.
+    - **Regime-Aware Risk Adjustments:** Widen TP and tighten time-stops in `HIGH_VOL_BREAKOUT`; tightened SL in `TRANSITION` (0.9x). Max ATR expanded limits slightly (1.2x) for ELITE liquidity tokens.
+    - **Signal Memory Momentum:** Past trade memory is now weighed. A symbol with recent high scores gets a momentum adjustment (up to +3), and a symbol with constantly low scores gets penalized (up to -3).
+    - **Module Quality Adjustments:**
+        - `VWAP_PULLBACK`: Added hard rejections for declining 1H EMA, lacking ADX trend structure (ADX < 16), and overbought RSI (>72). Added point bonuses for 'sweet spot' momentum (RSI 50-65), ADX trend strength, multi-candle taker delta, and 4H+1H alignment.
+        - `VCP_BREAKOUT`: Added rejections for lacking ADX bases (<14) and weak multi-candle taker delta (<0.05). Refined score weights: trend (30%), expansion (25%), participation (30%), and execution (15%), giving more weight to execution metrics and momentum.
+- **Hypothesis / Goal:** Ensure that entries are backed by structural taker-buying pressure rather than just algorithmic threshold crossings. With sliding trailing stops, we intend to protect trades that perform well early on but fade out, significantly boosting the strategy's overall expected value.
+
+---
+
+## Previous Version: v10.2.0 (Quantum) & v1.0.0 (Knife Catcher)
 **Date:** Apr 16, 2026
 **Theme:** "KNIFE CATCHER DEFENSE - MFE 0% FIX"
 

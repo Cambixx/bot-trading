@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v10.2.0 QuantumEdge)
+# 🦅 Documentación del Algoritmo de Trading (v11.0.0 QuantumEdge)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,10 +8,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v10.2.0)
+## Current Runtime Snapshot (v11.0.0)
 
 ### Resumen
-- **Runtime Version:** `v10.2.0-QuantumEdge`
+- **Runtime Version:** `v11.0.0-QuantumEdge`
 - **File Core:** `trader-bot.js` (anteriormente `scheduled-analysis.js`)
 - **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
 - **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, Extreme Mean Reversion / Capitulation (`knife-catcher.js`).
@@ -23,10 +23,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 - **`VCP_BREAKOUT` (Volatility Contraction Pattern)**
   - **Origen:** Mark Minervini / Conceptos Institucionales.
   - **Lógica:** Busca una contracción de volatilidad extrema (BB Width en el percentil inferior 15%) seguida de una expansión explosiva.
-  - **Gates Duros:** Volume Ratio > 2.3x, OBI > 0.05 (Bid support), RS vs BTC positiva.
+  - **Gates Duros:** Volume Ratio > 2.3x, OBI > 0.05 (Bid support), RS vs BTC positiva. **Desde v11.0.0:** ADX > 14 obligatorio para base pre-breakout y filtro Multi-Candle Delta > 0.05 forzando compra taker agresiva en la expansión.
 - **`VWAP_PULLBACK` (Institutional Reclaim)**
   - **Lógica:** Defensa del VWAP intradía en activos con fuerte tendencia y fortaleza relativa (RS).
-  - **Gates Duros:** Cierre por encima de VWAP, mechas de rechazo inferiores (reclaim), RS positiva fuerte. **Desde v10.2.0:** RSI15m >= 45 y RS1H >= 0 para evitar *falling knifes* sin soporte de corto plazo.
+  - **Gates Duros:** Cierre por encima de VWAP, mechas de rechazo inferiores (reclaim), RS positiva fuerte. **Desde v10.2.0:** RSI15m >= 45 y RS1H >= 0 para evitar *falling knifes* sin soporte de corto plazo. **Desde v11.0.0:** Anchor de 24h (96x15m). Rechazos duros si EMA 1H declina, si ADX < 16 (falta de tendencia), o si RSI > 72 (sobrecompra). Bonificaciones por Multi-Candle Delta fuerte.
 
 #### Bot 2: Knife Catcher (`knife-catcher.js`)
 - **`KNIFE_CATCHER` (Flash Crash Reversion)**
@@ -102,12 +102,21 @@ graph TD
 | `VWAP_PULLBACK` (Bot 1) | 2.0x ATR | 3.5x ATR | 1.75:1 |
 | `KNIFE_CATCHER` (Bot 2) | 1.0x ATR | 3.5x ATR | 3.50:1 |
 
-- **Time Stop:** Cada módulo define sus horas de espera. `KNIFE_CATCHER` cierra a las 4h si no rebota, mientras que Bot 1 espera entre 6h y 12h.
-- **ATR Dynamic:** Si el ATR % es muy alto (>2.5%), el tamaño de posición se reduce un 35% automáticamente.
+- **Time Stop:** Cada módulo define sus horas de espera. `KNIFE_CATCHER` cierra a las 4h si no rebota, mientras que Bot 1 espera entre 6h y 12h. En v11.0.0, `HIGH_VOL_BREAKOUT` usa un time stop más apretado (reducido en 2h).
+- **ATR Dynamic:** Si el ATR % es muy alto (>2.5%), el tamaño de posición se reduce un 35% automáticamente. Los tokens con liquidez `ELITE` relajan este límite en un 20% (v11).
+- **Break-Even Stop (Añadido en v11.0.0):** Cuando un trade en Bot 1 alcanza el 50% de la distancia hacia su Take Profit, el Stop Loss se mueve automáticamente a Break-Even + 0.1%.
+- **Regime Stops:** En transición (`TRANSITION`), el Stop Loss se aprieta al 0.9x del multiplicador base.
 
 ---
 
 ## 5. Changelog Reciente
+
+### v11.0.0-QuantumEdge (17 Abr 2026)
+- **Multi-Candle Delta:** Cuantificación del volumen *taker* continuo en las últimas 3 velas. Elimina rebotes y expansiones que no estén forzados por compras de mercado agresivas.
+- **Signal Momentum Memory:** Ajustes automáticos de score basados en el rendimiento reciente del token (+3 pts para constante fuerza; -3 para debilidad frecuente).
+- **VWAP Tuning:** El periodo base cambió de 50 barras a 96 barras (24h rodantes en 15m) mejorando la absorción institucional de sesión completa.
+- **Break-Even System:** Asegura ganancias en señales que avanzan hasta +50% del TP moviendo automáticamente el `SL = entry + 0.1%`.
+- **Sector Rotation Bonus:** +0.8 en score de oportunidad para activos `isCoreLeader` (BTC, ETH, SOL) reflejando alfa sectorial.
 
 ### v10.2.0-QuantumEdge (16 Abr 2026)
 - **Zero MFE Protection:** Añadido `VWAP_FALLING_KNIFE` (RSI15m < 45) y `VWAP_WEAK_MOMENTUM` (RS1H < 0) en `VWAP_PULLBACK` para prevenir compras directas en caída sin soporte estructural.
@@ -135,4 +144,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v10.2.0 — 16 Abril 2026**
+**Documentación actualizada v11.0.0 — 17 Abril 2026**

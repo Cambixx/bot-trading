@@ -1,0 +1,441 @@
+commit bad2df6eaad5f7e7177c115206bbe62ffaa1c61d
+Author: Carlos Rábago <carlosmiguel40@gmail.com>
+Date:   Fri Apr 17 16:42:14 2026 +0200
+
+    feat: upgrade to v11.0.0 with sector rotation bonuses, multi-candle delta analysis, break-even trailing stops, and refined VWAP entry filters.
+
+diff --git a/netlify/functions/trader-bot.js b/netlify/functions/trader-bot.js
+index 9dfb170..a2f826e 100644
+--- a/netlify/functions/trader-bot.js
++++ b/netlify/functions/trader-bot.js
+@@ -6,7 +6,7 @@
+ import { schedule } from "@netlify/functions";
+ import { getStore } from "@netlify/blobs";
+ 
+-const ALGORITHM_VERSION = 'v10.2.0-QuantumEdge';
++const ALGORITHM_VERSION = 'v11.0.0-QuantumEdge';
+ console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
+ 
+ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+@@ -311,9 +311,20 @@ function buildRiskModel(regime, module, atrPercent, liquidityTier) {
+     slMultiplier = 1.4;
+     timeStopHours = 12;
+   } else if (module === 'VCP_BREAKOUT') {
+-    tpMultiplier = 2.5; 
++    tpMultiplier = 2.5;
+     slMultiplier = 1.2;
+-    timeStopHours = 6; 
++    timeStopHours = 6;
++  }
++
++  // v11.0.0: HIGH_VOL_BREAKOUT provides more room to run — widen TP, tighten time stop
++  if (regime === 'HIGH_VOL_BREAKOUT') {
++    tpMultiplier *= 1.25;
++    timeStopHours = Math.max(timeStopHours - 2, 4);
++  }
++
++  // v11.0.0: TRANSITION regime — tighter SL to cut losers fast
++  if (regime === 'TRANSITION') {
++    slMultiplier *= 0.9;
+   }
+ 
+   if (liquidityTier === 'MEDIUM') {
+@@ -468,6 +479,18 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
+           item.outcome = 'LOSS';
+           updated = true;
+           await recordTradeAutopsy(item, context);
++        } else if (item.tp && item.sl && !item.trailingStopActive) {
++          // v11.0.0: Move SL to break-even once price reaches 50% of the way to TP
++          const halfwayToTP = entryPrice + (item.tp - entryPrice) * 0.5;
++          if (currentPrice >= halfwayToTP) {
++            const newSL = entryPrice * 1.001; // BE + 0.1% buffer for fees
++            if (newSL > item.sl) {
++              item.sl = newSL;
++              item.trailingStopActive = true;
++              updated = true;
++              pLog(`[TRAIL_BE] ${item.symbol}: SL moved to break-even at $${newSL.toFixed(6)}`);
++            }
++          }
+         }
+       } else {
+         if (currentPrice < item.maxFavorable) item.maxFavorable = currentPrice;
+@@ -494,10 +517,11 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
+ 
+       if (item.status === 'OPEN' && hoursOpen > staleExitHours && favorableMove < 0.003) {
+         item.status = 'CLOSED';
+-        item.outcome = 'STALE_EXIT';
++        // v11.0.0: Classify stale exits with some favorable movement as BREAK_EVEN, not STALE_EXIT
++        item.outcome = favorableMove >= 0.001 ? 'BREAK_EVEN' : 'STALE_EXIT';
+         updated = true;
+         await recordTradeAutopsy(item, context);
+-        pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move ${(favorableMove * 100).toFixed(2)}%`);
++        pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, outcome=${item.outcome}, favorable=${(favorableMove * 100).toFixed(2)}%`);
+       } else if (item.status === 'OPEN' && Date.now() - item.time > 48 * 3600 * 1000) {
+         item.status = 'EXPIRED';
+         updated = true;
+@@ -906,8 +930,12 @@ function getTopSymbolsByOpportunity(tickers, quoteAsset, limit, minQuoteVolume)
+       const priceChange = Number(ticker.priceChangePercent || 0);
+       const volatility = low > 0 ? ((high - low) / low) * 100 : 0;
+       const rs24h = priceChange - btcChange;
++      const sector = SECTOR_MAP[base] || 'OTHER';
++      // v11.0.0: Sector rotation bonus — assets outperforming their sector peers get a boost
++      const isCoreLeader = CORE_LEADERS.includes(base);
++      const sectorBonus = isCoreLeader ? 0.8 : 0;
+       const liquidityScore = Math.log10(Math.max(quoteVolume, 1));
+-      const opportunityScore = (liquidityScore * 0.5) + (clamp(rs24h, -15, 15) * 0.3) + (clamp(volatility, 0, 25) * 0.2);
++      const opportunityScore = (liquidityScore * 0.5) + (clamp(rs24h, -15, 15) * 0.3) + (clamp(volatility, 0, 25) * 0.2) + sectorBonus;
+ 
+       return {
+         symbol: ticker.symbol,
+@@ -1083,6 +1111,22 @@ function calculateVWAP(candles, lookback = 50) {
+   return volume > 0 ? pv / volume : null;
+ }
+ 
++// v11.0.0: Multi-candle cumulative delta — measures sustained taker buy pressure across N candles
++function calculateMultiCandleDelta(candles, lookback = 3) {
++  if (!Array.isArray(candles) || candles.length < lookback) return null;
++  const slice = candles.slice(-lookback);
++  let totalBuy = 0;
++  let totalVol = 0;
++  for (const candle of slice) {
++    if (!Number.isFinite(candle.takerBuyBaseVolume) || !Number.isFinite(candle.volume) || candle.volume <= 0) return null;
++    totalBuy += candle.takerBuyBaseVolume;
++    totalVol += candle.volume;
++  }
++  if (totalVol <= 0) return null;
++  const buyRatio = totalBuy / totalVol;
++  return 2 * buyRatio - 1; // normalized -1 to +1
++}
++
+ function calculateBollingerBands(closes, period = 20, stdDev = 2) {
+   if (!Array.isArray(closes) || closes.length < period) return null;
+   const slice = closes.slice(-period);
+@@ -1350,42 +1394,75 @@ function detectMarketRegime({ bull4h, atrPercentile, btcRisk }) {
+ function calculateBBWidthHistory(closes, period = 20, stdDev = 2) {
+   if (!Array.isArray(closes) || closes.length < period * 2) return null;
+   const widths = [];
+-  for(let i = closes.length - 100; i <= closes.length - 1; i++) {
+-     if(i < period) continue;
+-     const slice = closes.slice(i - period + 1, i + 1);
+-     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
+-     const variance = slice.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / period;
+-     const sd = Math.sqrt(variance);
+-     widths.push((2 * stdDev * sd) / mean);
++  for (let i = closes.length - 100; i <= closes.length - 1; i++) {
++    if (i < period) continue;
++    const slice = closes.slice(i - period + 1, i + 1);
++    const mean = slice.reduce((sum, value) => sum + value, 0) / period;
++    const variance = slice.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / period;
++    const sd = Math.sqrt(variance);
++    widths.push((2 * stdDev * sd) / mean);
+   }
+   return widths;
+ }
+ 
+ function evaluateVWAPPullbackModule(ctx) {
+-  const { symbol, currentPrice, ema50_4h, ema21_4h, vwap15m, volumeRatio, obMetrics, liquidityTier, rs4h, rs1h, atrPercent15m, bull4h, btcRisk, regime, rsi15m } = ctx;
+-  
++  const { symbol, currentPrice, ema50_4h, ema21_4h, vwap15m, volumeRatio, obMetrics, liquidityTier, rs4h, rs1h, atrPercent15m, bull4h, bull1h, btcRisk, regime, rsi15m, adx15m, emaSlope1h, multiDelta } = ctx;
++
+   if (!bull4h) return { rejectCode: 'VWAP_TREND_ALIGN' };
+   if (!Number.isFinite(vwap15m) || currentPrice < vwap15m * 0.997) return { rejectCode: 'VWAP_BELOW' };
++
+   // v10.1.0: Widen VWAP ceiling to 2% in confirmed TRENDING regime
+   const vwapCeiling = regime === 'TRENDING' ? 1.020 : 1.015;
+   if (currentPrice > vwap15m * vwapCeiling) return { rejectCode: 'VWAP_TOO_FAR' };
+-  if (rs4h < 0.005) return { rejectCode: 'VWAP_NO_RS' }; 
++  if (rs4h < 0.005) return { rejectCode: 'VWAP_NO_RS' };
+   if (volumeRatio < 1.1) return { rejectCode: 'VWAP_LOW_VOL' };
+   if (!obMetrics || obMetrics.obi < -0.05) return { rejectCode: 'VWAP_NEG_OBI' };
+-  
+-  // v10.2.0: Prevent falling knifes with 0% MFE by requiring short-term bounce/support
++
++  // v10.2.0: Prevent falling knives with 0% MFE by requiring short-term bounce/support
+   if (rsi15m < 45) return { rejectCode: 'VWAP_FALLING_KNIFE' };
+   if (rs1h < 0) return { rejectCode: 'VWAP_WEAK_MOMENTUM' };
+ 
++  // v11.0.0: Reject declining 1H EMA slope — avoid topping patterns
++  if (Number.isFinite(emaSlope1h) && emaSlope1h < -0.002) return { rejectCode: 'VWAP_EMA_DECLINING' };
++
++  // v11.0.0: Require minimum trend structure via ADX
++  if (adx15m && Number.isFinite(adx15m.adx) && adx15m.adx < 16) return { rejectCode: 'VWAP_NO_TREND_STRUCTURE' };
++
++  // v11.0.0: RSI overbought guard — entering >72 risks immediate rejection
++  if (rsi15m > 72) return { rejectCode: 'VWAP_RSI_OB' };
++
+   const trendQuality = clamp(50 + (rs4h * 1500) + (rs1h * 1000), 50, 100);
+   const participationQuality = clamp(40 + (volumeRatio * 20), 40, 100);
+   const executionQuality = buildExecutionQuality(liquidityTier, obMetrics.spreadBps, obMetrics.depthQuoteTopN);
+-  
+-  const score = Math.round(trendQuality * 0.4 + participationQuality * 0.4 + executionQuality * 0.2);
+-  
++
++  let score = Math.round(trendQuality * 0.4 + participationQuality * 0.4 + executionQuality * 0.2);
++
++  // v11.0.0: RSI sweet spot bonus — reward 50-65 range (momentum without overbought)
++  if (rsi15m >= 50 && rsi15m <= 65) score += 3;
++
++  // v11.0.0: bull1h alignment bonus — intermediate-term confirmation
++  if (bull1h) score += 2;
++
++  // v11.0.0: ADX trend strength bonus
++  if (adx15m && Number.isFinite(adx15m.adx)) {
++    if (adx15m.adx >= 30) score += 4;
++    else if (adx15m.adx >= 22) score += 2;
++  }
++
++  // v11.0.0: Sustained taker buying pressure bonus (multi-candle delta)
++  if (Number.isFinite(multiDelta) && multiDelta > 0.15) score += 3;
++
++  // v11.0.0: Positive 1H EMA slope bonus
++  if (Number.isFinite(emaSlope1h) && emaSlope1h > 0.003) score += 2;
++
++  score = clamp(score, 0, 100);
++
+   const reasons = ['Institutional VWAP Pullback'];
+-  if (rs4h > 0.02) reasons.push(`Extreme Relative Strength vs BTC (+${(rs4h*100).toFixed(1)}%)`);
++  if (rs4h > 0.02) reasons.push(`Extreme Relative Strength vs BTC (+${(rs4h * 100).toFixed(1)}%)`);
+   if (volumeRatio > 1.4) reasons.push(`Strong Volume Confirmation (${volumeRatio.toFixed(1)}x)`);
++  if (bull1h) reasons.push('Multi-TF Trend Alignment (4H+1H)');
++  if (adx15m && adx15m.adx >= 22) reasons.push(`ADX Trend Confirmed (${adx15m.adx.toFixed(1)})`);
++  if (Number.isFinite(multiDelta) && multiDelta > 0.15) reasons.push(`Sustained Taker Buying (Δ${(multiDelta * 100).toFixed(0)}%)`);
+ 
+   return {
+     candidate: {
+@@ -1406,30 +1483,51 @@ function evaluateVWAPPullbackModule(ctx) {
+ }
+ 
+ function evaluateVCPBreakoutModule(ctx) {
+-  const { closes15m, bbPercent, currentPrice, volumeRatio, obMetrics, liquidityTier, rs1h, rs4h, btcRisk, bb15m, regime } = ctx;
+-  
++  const { closes15m, bbPercent, currentPrice, volumeRatio, obMetrics, liquidityTier, rs1h, rs4h, btcRisk, bb15m, regime, adx15m, multiDelta } = ctx;
++
+   const bbWidths = calculateBBWidthHistory(closes15m, 20, 2);
+   const currentWidth = bbWidths ? bbWidths[bbWidths.length - 1] : 1;
+   const rank = bbWidths ? bbWidths.filter(w => w <= currentWidth).length / bbWidths.length : 1;
+-  
+-  if (rank > 0.15) return { rejectCode: 'VCP_NOT_TIGHT' }; 
+-  if (bbPercent < 0.90) return { rejectCode: 'VCP_NO_BREAKOUT' }; 
+-  if (volumeRatio < 2.3) return { rejectCode: 'VCP_LOW_VOL' }; 
++
++  if (rank > 0.15) return { rejectCode: 'VCP_NOT_TIGHT' };
++  if (bbPercent < 0.90) return { rejectCode: 'VCP_NO_BREAKOUT' };
++  if (volumeRatio < 2.3) return { rejectCode: 'VCP_LOW_VOL' };
+   if (!obMetrics || obMetrics.obi < 0.05) return { rejectCode: 'VCP_NO_BID_SUPPORT' };
+   if (btcRisk === 'RED' || btcRisk === 'AMBER') return { rejectCode: 'VCP_BTC_RESISTANCE' };
+-  // v10.2.0: Structural fakeout protection - ensure asset is outperforming BTC on 1H
++  // v10.2.0: Structural fakeout protection — ensure asset is outperforming BTC on 1H
+   if (rs1h < 0) return { rejectCode: 'VCP_WEAK_MOMENTUM' };
+-  
+-  const trendQuality = clamp(50 + (rs1h * 1500), 50, 100);
+-  const expansionQuality = clamp(100 - (rank * 100), 50, 100); 
++
++  // v11.0.0: ADX should be expanding or at least present for true breakouts
++  if (adx15m && Number.isFinite(adx15m.adx) && adx15m.adx < 14) return { rejectCode: 'VCP_NO_ADX_BASE' };
++
++  // v11.0.0: Breakouts need real taker demand — reject soft delta
++  if (Number.isFinite(multiDelta) && multiDelta < 0.05) return { rejectCode: 'VCP_WEAK_TAKER_DELTA' };
++
++  // v11.0.0: Rebalanced weights — more weight on trend and participation, less on execution tier
++  const trendQuality = clamp(50 + (rs1h * 1500) + (rs4h * 800), 50, 100);
++  const expansionQuality = clamp(100 - (rank * 100), 50, 100);
+   const participationQuality = clamp(50 + ((volumeRatio - 2.0) * 15), 50, 100);
+   const executionQuality = buildExecutionQuality(liquidityTier, obMetrics.spreadBps, obMetrics.depthQuoteTopN);
+-  
+-  const score = Math.round(trendQuality * 0.2 + expansionQuality * 0.3 + participationQuality * 0.3 + executionQuality * 0.2);
+-  
++
++  let score = Math.round(trendQuality * 0.30 + expansionQuality * 0.25 + participationQuality * 0.30 + executionQuality * 0.15);
++
++  // v11.0.0: ADX expansion bonus — confirms breakout is genuine
++  if (adx15m && Number.isFinite(adx15m.adx)) {
++    if (adx15m.adx >= 28) score += 4;
++    else if (adx15m.adx >= 20) score += 2;
++  }
++
++  // v11.0.0: Strong sustained taker buying during contraction breakout is a premium signal
++  if (Number.isFinite(multiDelta) && multiDelta > 0.25) score += 4;
++  else if (Number.isFinite(multiDelta) && multiDelta > 0.10) score += 2;
++
++  score = clamp(score, 0, 100);
++
+   const reasons = ['Volatility Contraction (VCP) Breakout'];
+-  reasons.push(`BB Width in bottom ${(rank*100).toFixed(1)}%`);
++  reasons.push(`BB Width in bottom ${(rank * 100).toFixed(1)}%`);
+   reasons.push(`Explosive Volume (${volumeRatio.toFixed(1)}x)`);
++  if (adx15m && adx15m.adx >= 20) reasons.push(`ADX Breakout Expansion (${adx15m.adx.toFixed(1)})`);
++  if (Number.isFinite(multiDelta) && multiDelta > 0.10) reasons.push(`Taker Buy Pressure (Δ${(multiDelta * 100).toFixed(0)}%)`);
+ 
+   return {
+     candidate: {
+@@ -1535,7 +1633,7 @@ function buildCandidateShadow(symbol, candidate, ctx, requiredScore, rejectReaso
+   ));
+ }
+ 
+-function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredScore, promotedFromLow = false) {
++function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredScore, promotedFromLow = false, signalMemory = null) {
+   const relativeStrengthSnapshot = buildRelativeStrengthSnapshot(ctx.rs1h, ctx.rs4h, ctx.rs24h);
+   const volumeLiquidityConfirmation = buildVolumeLiquidityConfirmation(
+     ctx.volumeRatio,
+@@ -1545,10 +1643,24 @@ function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredS
+     candidate.minVolumeRatio
+   );
+ 
++  // v11.0.0: Signal memory momentum adjustment
++  // If the last N recent scores for this symbol were consistently high (mean ≥ 72),
++  // boost by up to +3 pts. If consistently low (mean < 60), penalise by up to -3 pts.
++  let momentumAdjustment = 0;
++  if (signalMemory && Array.isArray(signalMemory[symbol]) && signalMemory[symbol].length >= 2) {
++    const recentScores = signalMemory[symbol].map(entry => entry.score);
++    const meanRecent = recentScores.reduce((s, v) => s + v, 0) / recentScores.length;
++    if (meanRecent >= 72) momentumAdjustment = 3;
++    else if (meanRecent >= 65) momentumAdjustment = 1;
++    else if (meanRecent < 60) momentumAdjustment = -3;
++    else if (meanRecent < 65) momentumAdjustment = -1;
++  }
++  const finalScore = Math.round(clamp(candidate.score + momentumAdjustment, 0, 100));
++
+   return {
+     symbol,
+     price: ctx.currentPrice,
+-    score: Math.round(clamp(candidate.score, 0, 100)),
++    score: finalScore,
+     regime: ctx.regime,
+     type: 'BUY',
+     rsi: ctx.rsi15m.toFixed(1),
+@@ -1560,6 +1672,7 @@ function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredS
+     depthQuoteTopN: Math.round(ctx.obMetrics.depthQuoteTopN),
+     obi: roundMetric(ctx.obMetrics.obi, 3),
+     deltaRatio: ctx.deltaRatio === null ? null : roundMetric(ctx.deltaRatio, 3),
++    multiDelta: ctx.multiDelta === null ? null : roundMetric(ctx.multiDelta, 3),
+     atrPercent: roundMetric(ctx.atrPercent15m),
+     vwap: ctx.vwap15m,
+     vwapDistance: ctx.vwap15m ? roundMetric(((ctx.currentPrice - ctx.vwap15m) / ctx.vwap15m) * 100) : null,
+@@ -1574,17 +1687,19 @@ function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredS
+       breakoutDistancePct: roundMetric(ctx.breakoutDistancePct, 2),
+       pullbackFromHigh20Pct: roundMetric(ctx.pullbackFromHigh20Pct, 2),
+       riskRewardRatio: roundMetric(candidate.riskModel.realRR),
+-      timeStopHours: candidate.riskModel.timeStopHours
++      timeStopHours: candidate.riskModel.timeStopHours,
++      adx: ctx.adx15m ? roundMetric(ctx.adx15m.adx, 1) : null,
++      multiDelta: ctx.multiDelta === null ? null : roundMetric(ctx.multiDelta, 3)
+     },
+     qualityBreakdown: candidate.qualityBreakdown,
+     scoreBeforeMomentum: candidate.score,
+-    momentumAdjustment: 0,
++    momentumAdjustment,
+     requiredScore,
+     requiredStrongCategories: null,
+     reasons: candidate.reasons,
+-    mode: candidate.score >= requiredScore + 8 ? 'PRIORITY' : 'STANDARD',
++    mode: finalScore >= requiredScore + 8 ? 'PRIORITY' : 'STANDARD',
+     recommendedSize: calculateRecommendedSize(
+-      candidate.score,
++      finalScore,
+       ctx.atrPercent15m,
+       ctx.regime,
+       candidate.module,
+@@ -1610,7 +1725,7 @@ function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredS
+   };
+ }
+ 
+-function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
++function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null, signalMemory = null) {
+   const baseAsset = normalizeBaseAsset(symbol);
+   if (isNonCryptoWrapper(baseAsset)) {
+     countMetric(analysisState?.rejectCounts, 'UNIVERSE_NON_CRYPTO');
+@@ -1667,7 +1782,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
+   const atr15m = calculateATR(closedCandles15m, 14);
+   const atrPercent15m = atr15m && currentPrice > 0 ? (atr15m / currentPrice) * 100 : null;
+   const atrPercentile = calculateVolatilityPercentile(closedCandles15m, 14);
+-  const vwap15m = calculateVWAP(closedCandles15m, 50);
++  const vwap15m = calculateVWAP(closedCandles15m, 96); // v11.0.0: 96×15m = 24h rolling anchor
+   const volumeSMA15m = calculateVolumeSMA(closedCandles15m, 20);
+   const currentVolume15m = closedCandles15m[closedCandles15m.length - 1].volume;
+   const volumeRatio = volumeSMA15m ? currentVolume15m / volumeSMA15m : 1;
+@@ -1677,7 +1792,9 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
+     countMetric(analysisState?.rejectCounts, 'INDICATOR_GAP');
+     return null;
+   }
+-  if (atrPercent15m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) {
++  // v11.0.0: ELITE liquidity assets can tolerate slightly higher ATR (less slippage risk)
++  const effectiveMaxATR = liquidityTier === 'ELITE' ? MAX_ATR_PCT * 1.2 : MAX_ATR_PCT;
++  if (atrPercent15m < MIN_ATR_PCT || atrPercent15m > effectiveMaxATR) {
+     countMetric(analysisState?.rejectCounts, 'ATR_FILTER');
+     return null;
+   }
+@@ -1687,6 +1804,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
+   const totalBaseVol = Number(lastCandle.volume);
+   const buyRatio = takerBuyBase !== null && totalBaseVol > 0 ? takerBuyBase / totalBaseVol : null;
+   const deltaRatio = buyRatio === null ? null : (2 * buyRatio - 1);
++  // v11.0.0: Sustained 3-candle delta for confirmed taker buying pressure
++  const multiDelta = calculateMultiCandleDelta(closedCandles15m, 3);
+ 
+   const bull4h = Number.isFinite(ema21_4h) && Number.isFinite(ema50_4h) && currentPrice4h > ema21_4h && ema21_4h > ema50_4h;
+   const bull1h = Number.isFinite(ema21_1h) && Number.isFinite(ema50_1h) && currentPrice1h > ema21_1h && ema21_1h > ema50_1h;
+@@ -1750,7 +1869,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
+     pullbackFromHigh20Pct,
+     breakoutDistancePct,
+     candleStrength,
+-    emaSlope1h
++    emaSlope1h,
++    adx15m,       // v11.0.0: ADX trend strength
++    multiDelta,   // v11.0.0: 3-candle sustained taker delta
++    bull1h        // v11.0.0: intermediate-term trend alignment
+   };
+ 
+   const pullbackResult = evaluateVWAPPullbackModule(ctx);
+@@ -1830,7 +1952,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
+   }
+ 
+   countMetric(analysisState?.stageCounts, 'LIVE_SIGNAL');
+-  return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore, isDepthFloorPromotion);
++  return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore, isDepthFloorPromotion, signalMemory);
+ }
+ 
+ async function sendTelegramNotification(signals, stats = null) {
+@@ -1852,17 +1974,22 @@ async function sendTelegramNotification(signals, stats = null) {
+   message += `_${esc(`${ALGORITHM_VERSION} • Spot long-only intraday`)}_\n\n`;
+ 
+   for (const signal of [...signals].sort((a, b) => b.score - a.score).slice(0, 5)) {
+-    const moduleLabel = signal.module === 'BREAKOUT_CONTINUATION' ? '🚀 BREAKOUT' : '📉 PULLBACK';
++    const moduleLabel = signal.module === 'VCP_BREAKOUT' ? '🚀 BREAKOUT' : '📉 PULLBACK';
+     const priceStr = signal.price < 1 ? signal.price.toFixed(6) : signal.price.toFixed(2);
+     const tpStr = signal.tp < 1 ? signal.tp.toFixed(6) : signal.tp.toFixed(2);
+     const slStr = signal.sl < 1 ? signal.sl.toFixed(6) : signal.sl.toFixed(2);
++    const rrStr = signal.riskModel?.realRR ? signal.riskModel.realRR.toFixed(2) : '—';
++    const momentumStr = signal.momentumAdjustment > 0 ? `▲+${signal.momentumAdjustment}` : signal.momentumAdjustment < 0 ? `▼${signal.momentumAdjustment}` : '';
+ 
+     message += `🟢 *${esc(signal.symbol)}* \\| ${esc(moduleLabel)} \\| ${esc(signal.mode)}\n`;
+-    message += `💰 *$${esc(priceStr)}* \\| 🎯 TP ${esc(tpStr)} \\| 🛡️ SL ${esc(slStr)}\n`;
+-    message += `📈 Regime: ${esc(signal.regime)} \\| 🎯 Score: *${esc(signal.score)}*/100\n`;
+-    message += `🏦 Liquidity: ${esc(signal.liquidityTier)} \\| 📚 Spread: ${esc(signal.spreadBps)} bps\n`;
++    message += `💰 *$${esc(priceStr)}* \\| 🎯 TP ${esc(tpStr)} \\| 🛡️ SL ${esc(slStr)} \\| R:R ${esc(rrStr)}\n`;
++    message += `📈 Regime: ${esc(signal.regime)} \\| Score: *${esc(signal.score)}*/100${momentumStr ? ` ${esc(momentumStr)}` : ''}\n`;
++    message += `🏦 Liquidity: ${esc(signal.liquidityTier)} \\| Spread: ${esc(signal.spreadBps)} bps \\| OBI: ${esc(signal.obi)}\n`;
+     message += `📊 Vol: ${esc(signal.volumeRatio)}x \\| RS 1h/4h: ${esc(signal.relativeStrengthSnapshot?.rs1h)}/${esc(signal.relativeStrengthSnapshot?.rs4h)}\n`;
+-    message += `🌀 ATR: ${esc(signal.atrPercent)}% \\| Size: ${esc(signal.recommendedSize)}% \\| Time stop: ${esc(signal.expectedHoldingHours)}h\n`;
++    message += `🌀 ATR: ${esc(signal.atrPercent)}% \\| Size: ${esc(signal.recommendedSize)}% \\| Stop: ${esc(signal.expectedHoldingHours)}h\n`;
++    if (signal.entryMetrics?.adx) {
++      message += `📐 ADX: ${esc(signal.entryMetrics.adx)} \\| VWAP dist: ${esc(signal.vwapDistance)}%\n`;
++    }
+     if (Array.isArray(signal.reasons) && signal.reasons.length) {
+       message += `💡 _${esc(signal.reasons.join(' • '))}_\n`;
+     }
+@@ -2013,7 +2140,8 @@ export async function runAnalysis(context) {
+           tickersBySymbol.get(symbol) || null,
+           btcContext,
+           analysisState,
+-          shadowCandidates
++          shadowCandidates,
++          signalMemory
+         );
+ 
+         let signalAccepted = false;
+@@ -2228,4 +2356,4 @@ const scheduledHandler = async (event, context) => {
+   };
+ };
+ 
+-export const handler = schedule("0,15,30,45 * * * *", scheduledHandler);
++export const handler = schedule("0,15,30,45 * * * *", scheduledHandler);
+\ No newline at end of file
