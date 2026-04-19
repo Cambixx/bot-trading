@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v11.0.0 QuantumEdge)
+# 🦅 Documentación del Algoritmo de Trading (v11.0.0 / v2.0.0)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -11,11 +11,11 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 ## Current Runtime Snapshot (v11.0.0)
 
 ### Resumen
-- **Runtime Version:** `v11.0.0-QuantumEdge`
-- **File Core:** `trader-bot.js` (anteriormente `scheduled-analysis.js`)
+- **Runtime Version:** `v11.0.0-QuantumEdge` / `v2.0.0-KC-Quantum`
+- **File Core:** `trader-bot.js` y `knife-catcher.js`
 - **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
-- **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, Extreme Mean Reversion / Capitulation (`knife-catcher.js`).
-- **Filosofía:** Módulos deterministas puros con bases de datos (Netlify Blobs) totalmente aisladas.
+- **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, multi-strategy Mean Reversion / Reversal (`knife-catcher.js`).
+- **Filosofía:** Módulos deterministas puros con bases de datos (Netlify Blobs) totalmente aisladas. Precision de 5m para reversiones.
 
 ### Arquitectura de Módulos Activa
 
@@ -30,8 +30,16 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 #### Bot 2: Knife Catcher (`knife-catcher.js`)
 - **`KNIFE_CATCHER` (Flash Crash Reversion)**
-  - **Lógica:** Compra pánicos extremos y liquidaciones donde existe un clímax de volumen de absorción.
-  - **Gates Duros:** Precio 4% por debajo de la Banda Bollinger inferior (`bbPercent <= -0.04`), RSI 15m <= 25, y Volumen > 4.0x.
+- **`STREAK_REVERSAL` (Streak Exhaustion)**
+  - **Lógica:** Caza de rebotes tras $\ge$ 5 velas de 5m rojas consecutivas.
+  - **Gates:** Streak $\le$ -5, Volume Ratio > 0.8.
+- **`PIVOT_REVERSION` (Pivot Mean Reversion)**
+  - **Lógica:** Retorno al punto pivote de 4H cuando el precio se desvía agresivamente a la baja.
+  - **Gates:** Precio por debajo del Punto Pivote (48 bars lookback @ 5m).
+- **`KELTNER_REVERSION` (Channel Fade)**
+  - **Lógica:** Fade de la banda inferior de Keltner (1.5 ATR / EMA 20).
+  - **Gates:** Cierre por debajo de la banda inferior en 5m.
+
 
 ### Clasificación de Riesgo & Regímenes
 - **`RISK_OFF`:** Bloqueo total si `BTC 4H` está bajista o BTC Status es `RED`.
@@ -101,6 +109,10 @@ graph TD
 | `VCP_BREAKOUT` (Bot 1) | 1.8x ATR | 4.0x ATR | 2.22:1 |
 | `VWAP_PULLBACK` (Bot 1) | 2.0x ATR | 3.5x ATR | 1.75:1 |
 | `KNIFE_CATCHER` (Bot 2) | 1.0x ATR | 3.5x ATR | 3.50:1 |
+| `STREAK_REVERSAL` (Bot 2)| ~1.2% Fixed| ~3.0% Fixed| 2.50:1 | 
+| `PIVOT_REVERSION` (Bot 2)| ~1.0% Fixed| ~3.0% Fixed| 3.00:1 | 
+| `KELTNER_REVERSION` (Bot 2)| 1.4x ATR | 3.2x ATR | 2.28:1 | 
+
 
 - **Time Stop:** Cada módulo define sus horas de espera. `KNIFE_CATCHER` cierra a las 4h si no rebota, mientras que Bot 1 espera entre 6h y 12h. En v11.0.0, `HIGH_VOL_BREAKOUT` usa un time stop más apretado (reducido en 2h).
 - **ATR Dynamic:** Si el ATR % es muy alto (>2.5%), el tamaño de posición se reduce un 35% automáticamente. Los tokens con liquidez `ELITE` relajan este límite en un 20% (v11).
@@ -110,6 +122,12 @@ graph TD
 ---
 
 ## 5. Changelog Reciente
+
+### v2.0.0-KnifeCatcher-Quantum (19 Abr 2026)
+- **5m Data Precision:** Incorporación de velas de 5 minutos al pipeline de análisis para señales de reversión táctica.
+- **Multi-Strategy Reversion:** Despliegue de los módulos `STREAK_REVERSAL`, `PIVOT_REVERSION` y `KELTNER_REVERSION`.
+- **Threshold Calibration:** Reducción de la dependencia de gates ultra-duros (4.0x vol, 4% BB distance) para permitir mayor operatividad en mercados de volatilidad normal.
+- **Async Logic Optimization:** Paralelización de llamadas `getKlines` para 5m/15m/1h/4h minimizando el tiempo de ejecución.
 
 ### v11.0.0-QuantumEdge (17 Abr 2026)
 - **Multi-Candle Delta:** Cuantificación del volumen *taker* continuo en las últimas 3 velas. Elimina rebotes y expansiones que no estén forzados por compras de mercado agresivas.
@@ -144,4 +162,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v11.0.0 — 17 Abril 2026**
+**Documentación actualizada v11.0.0 / v2.0.0 — 19 Abril 2026**

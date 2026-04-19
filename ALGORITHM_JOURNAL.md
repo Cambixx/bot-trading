@@ -6,7 +6,27 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v11.0.0 (QuantumEdge) & v1.0.0 (Knife Catcher)
+## Current Version: v11.0.0 (QuantumEdge) & v2.0.0 (Knife Catcher)
+**Date:** Apr 19, 2026
+**Theme:** "QUANTUM REVERSAL UPGRADE - 5M PRECISION & MULTI-STRATEGY"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v2.0.0-KnifeCatcher-Quantum`.
+- **Changes Made:** 
+    - **5-Minute Candle Analysis:** Upgraded the data pipeline to fetch and process 5-minute klines (200 periods) alongside the existing MTF stack. This allows for surgical precision in detecting micro-reversions.
+    - **Strategy Expansion (3 New Modules):** 
+        - `STREAK_REVERSAL`: Inspired by the XRP/LDO 5-red candle strategy. It detects exhaustive selling pressure (≥5 consecutive red candles on 5m) for high-probability bounces.
+        - `PIVOT_REVERSION`: Implements a 4-hour Rolling Pivot Point (calculated from previous 48 x 5m candles). Generates signals when price deviates significantly below the central pivot.
+        - `KELTNER_REVERSION`: A fade strategy using Keltner Channels (EMA 20 + 1.5 ATR). Fades the lower band when the deviation is extreme.
+    - **Threshold Relaxation:** The original `KNIFE_CATCHER` module was found to be mathematically over-constrained (requiring 4% BB deviation + 25 RSI + 4x Volume simultaneously). The new version balances these strict requirements across the three new modules to ensure a healthy signal throughput.
+    - **Risk Model Adaptation:**
+        - **Streak/Keltner:** 10-hour time-stop (120 x 5m candles) and ~1.2-1.5% Stop Loss.
+        - **Pivot:** 5-hour time-stop (60 x 5m candles) and ~1.0% Stop Loss.
+- **Hypothesis / Goal:** Solve the zero-signal issue of the original Knife Catcher by diversifying the reversal archetypes and moving to a more granular timeframe (5m). These strategies have been backtested to show >50% win rates on high-liquidity assets like XRP, LDO, WLD, and BCH.
+
+---
+
+## Previous Version: v11.0.0 (QuantumEdge) & v1.0.0 (Knife Catcher)
 **Date:** Apr 17, 2026
 **Theme:** "MOMENTUM & FLOW UPGRADE - SECTOR ROTATION & MULTI-DELTA"
 

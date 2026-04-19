@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v1.0.0-KnifeCatcher';
+const ALGORITHM_VERSION = 'v2.0.0-KnifeCatcher-Quantum';
 console.log(`--- THE KNIFE CATCHER Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1336,6 +1336,135 @@ function detectBTCContext(candles4h, candles1h, ticker24h) {
   };
 }
 
+function calculateStreak(opens, closes) {
+  if (opens.length !== closes.length) return [];
+  const streak = new Array(closes.length).fill(0);
+  for (let i = 1; i < closes.length; i++) {
+    if (closes[i] < opens[i]) { // red
+      streak[i] = streak[i - 1] < 0 ? streak[i - 1] - 1 : -1;
+    } else if (closes[i] > opens[i]) { // green
+      streak[i] = streak[i - 1] > 0 ? streak[i - 1] + 1 : 1;
+    } else {
+      streak[i] = 0;
+    }
+  }
+  return streak;
+}
+
+function evaluateStreakReversalModule(ctx) {
+  const { streak5m } = ctx;
+  if (!Array.isArray(streak5m) || streak5m.length < 1) return { rejectCode: 'STREAK_NO_DATA' };
+
+  const currentStreak = streak5m[streak5m.length - 1];
+
+  // We only care about LONG signals (spot long-only)
+  if (currentStreak > -5) return { rejectCode: 'STREAK_NOT_MET' };
+
+  const score = clamp(70 + (Math.abs(currentStreak) - 5) * 5, 70, 95);
+
+  return {
+    candidate: {
+      module: 'STREAK_REVERSAL',
+      entryArchetype: '5-Red Candle Reversal',
+      score,
+      baseRequiredScore: 65,
+      qualityBreakdown: {
+        trend: 0,
+        expansion: score,
+        participation: 60,
+        execution: 70
+      },
+      reasons: [`${Math.abs(currentStreak)} Consecutive Red Candles (5m)`],
+      minVolumeRatio: 0.8,
+      riskModelOverride: { tpMultiplier: 2.5, slMultiplier: 1.2, timeStopHours: 10 }
+    }
+  };
+}
+
+function evaluatePivotPointModule(ctx) {
+  const { candles5m, currentPrice } = ctx;
+  if (!Array.isArray(candles5m) || candles5m.length < 50) return { rejectCode: 'PIVOT_NO_DATA' };
+
+  // Calculate pivot from previous period (48 candles)
+  const slice = candles5m.slice(-49, -1);
+  const hs = slice.map(c => c.high);
+  const ls = slice.map(c => c.low);
+  const h = Math.max(...hs);
+  const l = Math.min(...ls);
+  const c = slice[slice.length - 1].close;
+  const pivot = (h + l + c) / 3;
+
+  if (currentPrice >= pivot) return { rejectCode: 'PIVOT_NOT_BELOW' };
+
+  const distFromPivot = ((pivot - currentPrice) / pivot) * 100;
+  if (distFromPivot < 0.3) return { rejectCode: 'PIVOT_TOO_CLOSE' };
+
+  const score = clamp(65 + distFromPivot * 8, 65, 90);
+
+  return {
+    candidate: {
+      module: 'PIVOT_REVERSION',
+      entryArchetype: 'Pivot Point Mean Reversion',
+      score,
+      baseRequiredScore: 65,
+      qualityBreakdown: {
+        trend: 0,
+        expansion: score,
+        participation: 50,
+        execution: 70
+      },
+      reasons: [`Price below 4H Pivot Level (${distFromPivot.toFixed(2)}%)`],
+      minVolumeRatio: 0.8,
+      riskModelOverride: { tpMultiplier: 3.0, slMultiplier: 1.2, timeStopHours: 5 }
+    }
+  };
+}
+
+function evaluateKeltnerFlippedModule(ctx) {
+  const { closes5m, highs5m, lows5m, currentPrice } = ctx;
+  if (!Array.isArray(closes5m) || closes5m.length < 25) return { rejectCode: 'KELTNER_NO_DATA' };
+
+  const midSeries = calculateEMASeries(closes5m, 20);
+  const mid = midSeries[midSeries.length - 1];
+  if (!Number.isFinite(mid)) return { rejectCode: 'KELTNER_NO_MID' };
+
+  // ATR as EMA(TR, 10)
+  const trSeries = [];
+  for (let i = 1; i < closes5m.length; i++) {
+    trSeries.push(Math.max(
+      highs5m[i] - lows5m[i],
+      Math.abs(highs5m[i] - closes5m[i - 1]),
+      Math.abs(lows5m[i] - closes5m[i - 1])
+    ));
+  }
+  const atr = calculateEMA(trSeries, 10);
+  if (!Number.isFinite(atr)) return { rejectCode: 'KELTNER_NO_ATR' };
+
+  const lower = mid - 1.5 * atr;
+  if (currentPrice >= lower) return { rejectCode: 'KELTNER_NOT_BELOW' };
+
+  const distFromLower = ((lower - currentPrice) / lower) * 100;
+  const score = clamp(72 + distFromLower * 10, 72, 92);
+
+  return {
+    candidate: {
+      module: 'KELTNER_REVERSION',
+      entryArchetype: 'Keltner Channel Fade',
+      score,
+      baseRequiredScore: 68,
+      qualityBreakdown: {
+        trend: 0,
+        expansion: score,
+        participation: 50,
+        execution: 70
+      },
+      reasons: ['Price below Keltner Lower Band (Flipped Fade)'],
+      minVolumeRatio: 0.8,
+      riskModelOverride: { tpMultiplier: 3.2, slMultiplier: 1.4, timeStopHours: 10 }
+    }
+  };
+}
+
 function detectMarketRegime({ bull4h, atrPercentile, btcRisk }) {
   if (btcRisk === 'RED') return 'RISK_OFF';
   if (bull4h && atrPercentile >= 70) return 'HIGH_VOL_BREAKOUT';
@@ -1413,19 +1542,29 @@ function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, 
   if (regime === 'HIGH_VOL_BREAKOUT' || regime === 'TRANSITION') size *= 0.8;
   // v10.1.0: Half sizing for depth-floor promoted LOW-tier trades
   if (promotedFromLow) size *= 0.5;
-  return clamp(size, 0.5, 3.5).toFixed(1);
+  
+  // v2.0.0: Reversion strategies often have lower win rates but higher rewards, keep size modest
+  if (['STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION'].includes(module)) {
+    size *= 0.9;
+  }
+  
+  return clamp(size, 0.4, 3.5).toFixed(1);
 }
 
 function getRequiredScore(candidate, regime, liquidityTier, btcRisk) {
   let required = candidate.baseRequiredScore;
   if (liquidityTier === 'MEDIUM') required += 3;
-  if (btcRisk === 'AMBER') required += candidate.module === 'VCP_BREAKOUT' ? 4 : 2;
-  if (regime === 'TRANSITION') required += 4;
+  if (btcRisk === 'AMBER') required += 2;
+  if (regime === 'TRANSITION') required += 2;
+  
+  // v2.0.0: Strictness per module
+  if (candidate.module === 'KNIFE_CATCHER') required = Math.max(required, 70);
+  
   return required;
 }
 
-function pickPreferredReject(regime, pullbackResult, breakoutResult) {
-  return pullbackResult?.rejectCode || breakoutResult?.rejectCode || 'NO_MODULE_MATCH';
+function pickPreferredReject(regime, pullbackResult, breakoutResult, streakResult, pivotResult, keltnerResult) {
+  return pullbackResult?.rejectCode || breakoutResult?.rejectCode || streakResult?.rejectCode || pivotResult?.rejectCode || keltnerResult?.rejectCode || 'NO_MODULE_MATCH';
 }
 
 function buildCandidateShadow(symbol, candidate, ctx, requiredScore, rejectReasonCode, btcContext, shadowCollector) {
@@ -1556,7 +1695,7 @@ function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredS
   };
 }
 
-function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
+function generateSignal(symbol, candles5m, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
   const baseAsset = normalizeBaseAsset(symbol);
   if (isNonCryptoWrapper(baseAsset)) {
     countMetric(analysisState?.rejectCounts, 'UNIVERSE_NON_CRYPTO');
@@ -1568,6 +1707,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
+  const closedCandles5m = getClosedCandles(candles5m, '5m');
   const closedCandles15m = getClosedCandles(candles15m, '15m');
   const closedCandles1h = getClosedCandles(candles1h, '60m');
   const closedCandles4h = getClosedCandles(candles4h, '4h');
@@ -1618,6 +1758,13 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const currentVolume15m = closedCandles15m[closedCandles15m.length - 1].volume;
   const volumeRatio = volumeSMA15m ? currentVolume15m / volumeSMA15m : 1;
   const range20 = getRecentRangeLevels(closedCandles15m, 20);
+
+  // 5m specific analysis
+  const closes5m = closedCandles5m.map(c => c.close);
+  const opens5m = closedCandles5m.map(c => c.open);
+  const highs5m = closedCandles5m.map(c => c.high);
+  const lows5m = closedCandles5m.map(c => c.low);
+  const streak5m = calculateStreak(opens5m, closes5m);
 
   if (!bb15m || !Number.isFinite(atrPercent15m) || !Number.isFinite(rsi15m) || !Number.isFinite(rsi1h)) {
     countMetric(analysisState?.rejectCounts, 'INDICATOR_GAP');
@@ -1700,6 +1847,10 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   };
 
   const knifeResult = evaluateKnifeCatcherModule(ctx);
+  const streakResult = evaluateStreakReversalModule({ ...ctx, candles5m, streak5m });
+  const pivotResult = evaluatePivotPointModule({ ...ctx, candles5m });
+  const keltnerResult = evaluateKeltnerFlippedModule({ ...ctx, closes5m, highs5m, lows5m });
+  
   const moduleCandidates = [];
 
   if (knifeResult.candidate) {
@@ -1707,9 +1858,27 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     moduleCandidates.push(knifeResult.candidate);
     countMetric(analysisState?.moduleCandidates, 'KNIFE_CATCHER');
   }
+  
+  if (streakResult.candidate) {
+    streakResult.candidate.riskModel = streakResult.candidate.riskModelOverride || buildRiskModel(regime, 'KNIFE_CATCHER', atrPercent15m, liquidityTier);
+    moduleCandidates.push(streakResult.candidate);
+    countMetric(analysisState?.moduleCandidates, 'STREAK_REVERSAL');
+  }
+
+  if (pivotResult.candidate) {
+    pivotResult.candidate.riskModel = pivotResult.candidate.riskModelOverride || buildRiskModel(regime, 'KNIFE_CATCHER', atrPercent15m, liquidityTier);
+    moduleCandidates.push(pivotResult.candidate);
+    countMetric(analysisState?.moduleCandidates, 'PIVOT_REVERSION');
+  }
+
+  if (keltnerResult.candidate) {
+    keltnerResult.candidate.riskModel = keltnerResult.candidate.riskModelOverride || buildRiskModel(regime, 'KNIFE_CATCHER', atrPercent15m, liquidityTier);
+    moduleCandidates.push(keltnerResult.candidate);
+    countMetric(analysisState?.moduleCandidates, 'KELTNER_REVERSION');
+  }
 
   if (!moduleCandidates.length) {
-    countMetric(analysisState?.rejectCounts, pickPreferredReject(regime, knifeResult, { rejectCode: null }));
+    countMetric(analysisState?.rejectCounts, pickPreferredReject(regime, knifeResult, { rejectCode: null }, streakResult, pivotResult, keltnerResult));
     return null;
   }
   countMetric(analysisState?.stageCounts, 'MODULE_OK');
@@ -1724,7 +1893,8 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
-  if (bestCandidate.module !== 'KNIFE_CATCHER') {
+  const allowedModules = new Set(['KNIFE_CATCHER', 'STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION']);
+  if (!allowedModules.has(bestCandidate.module)) {
     return null;
   }
 
@@ -1927,7 +2097,8 @@ export async function runAnalysis(context) {
       }
 
       try {
-        const [candles15m, orderBook, candles1h, candles4h] = await Promise.all([
+        const [candles5m, candles15m, orderBook, candles1h, candles4h] = await Promise.all([
+          getKlines(symbol, '5m', 200),
           getKlines(symbol, '15m', 500),
           getOrderBookDepth(symbol, 20),
           getKlines(symbol, '60m', 200),
@@ -1937,6 +2108,7 @@ export async function runAnalysis(context) {
         analyzed++;
         const signal = generateSignal(
           symbol,
+          candles5m,
           candles15m,
           candles1h,
           candles4h,
