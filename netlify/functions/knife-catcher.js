@@ -1957,13 +1957,13 @@ async function sendTelegramNotification(signals, stats = null) {
     message += `🩸🔪 *THE KNIFE CATCHER* 🔪🩸\n\n`;
     message += `*${esc(signal.symbol)}* M15\n`;
     message += `*Context:* ${riskType} BTC \\| Regime: ${esc(signal.regime)}\n\n`;
-    message += `*Score:* ${Math.round(signal.score)}/100 \\| Volume: ${(signal.volumeRatio || 0).toFixed(1)}x\n`;
+    message += `*Score:* ${esc(Math.round(signal.score))}/100 \\| Volume: ${esc((signal.volumeRatio || 0).toFixed(1))}x\n`;
     message += `*Entry:* ${esc(formatPrice(signal.price))}\n`;
     message += `*Target:* ${esc(formatPrice(signal.tp))}\n`;
     message += `*Stop:* ${esc(formatPrice(signal.sl))}\n\n`;
     message += `🏦 Liquidity: ${esc(signal.liquidityTier)} \\| 📚 Spread: ${esc(signal.spreadBps)} bps\n`;
-    message += `📊 Vol: ${esc(signal.volumeRatio)}x \\| RS 1h/4h: ${esc(signal.relativeStrengthSnapshot?.rs1h)}/${esc(signal.relativeStrengthSnapshot?.rs4h)}\n`;
-    message += `🌀 ATR: ${esc(signal.atrPercent)}% \\| Size: ${esc(signal.recommendedSize)}% \\| Time stop: ${esc(signal.expectedHoldingHours)}h\n`;
+    message += `📊 Vol: ${esc(roundMetric(signal.volumeRatio, 1))}x \\| RS 1h/4h: ${esc(roundMetric(signal.relativeStrengthSnapshot?.rs1h, 3))}/${esc(roundMetric(signal.relativeStrengthSnapshot?.rs4h, 3))}\n`;
+    message += `🌀 ATR: ${esc(roundMetric(signal.atrPercent, 2))}% \\| Size: ${esc(signal.recommendedSize)}% \\| Time stop: ${esc(signal.expectedHoldingHours)}h\n`;
     if (Array.isArray(signal.reasons) && signal.reasons.length) {
       message += `💡 _${esc(signal.reasons.join(' • '))}_\n`;
     }
