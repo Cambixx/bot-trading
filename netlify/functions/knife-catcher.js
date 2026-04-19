@@ -301,7 +301,7 @@ function buildVolumeLiquidityConfirmation(volumeRatio, deltaRatio, obMetrics, li
   };
 }
 
-function buildRiskModel(regime, module, atrPercent, liquidityTier) {
+function buildRiskModel(regime, module, atrPercent, liquidityTier, override = null) {
   let tpMultiplier = 3.0;
   let slMultiplier = 1.5;
   let timeStopHours = 10;
@@ -310,6 +310,13 @@ function buildRiskModel(regime, module, atrPercent, liquidityTier) {
     tpMultiplier = 3.5;
     slMultiplier = 1.0;
     timeStopHours = 4;
+  }
+
+  // Apply overrides if provided
+  if (override) {
+    if (override.tpMultiplier !== undefined) tpMultiplier = override.tpMultiplier;
+    if (override.slMultiplier !== undefined) slMultiplier = override.slMultiplier;
+    if (override.timeStopHours !== undefined) timeStopHours = override.timeStopHours;
   }
 
   if (liquidityTier === 'MEDIUM') {
@@ -1860,19 +1867,19 @@ function generateSignal(symbol, candles5m, candles15m, candles1h, candles4h, ord
   }
   
   if (streakResult.candidate) {
-    streakResult.candidate.riskModel = streakResult.candidate.riskModelOverride || buildRiskModel(regime, 'KNIFE_CATCHER', atrPercent15m, liquidityTier);
+    streakResult.candidate.riskModel = buildRiskModel(regime, 'STREAK_REVERSAL', atrPercent15m, liquidityTier, streakResult.candidate.riskModelOverride);
     moduleCandidates.push(streakResult.candidate);
     countMetric(analysisState?.moduleCandidates, 'STREAK_REVERSAL');
   }
 
   if (pivotResult.candidate) {
-    pivotResult.candidate.riskModel = pivotResult.candidate.riskModelOverride || buildRiskModel(regime, 'KNIFE_CATCHER', atrPercent15m, liquidityTier);
+    pivotResult.candidate.riskModel = buildRiskModel(regime, 'PIVOT_REVERSION', atrPercent15m, liquidityTier, pivotResult.candidate.riskModelOverride);
     moduleCandidates.push(pivotResult.candidate);
     countMetric(analysisState?.moduleCandidates, 'PIVOT_REVERSION');
   }
 
   if (keltnerResult.candidate) {
-    keltnerResult.candidate.riskModel = keltnerResult.candidate.riskModelOverride || buildRiskModel(regime, 'KNIFE_CATCHER', atrPercent15m, liquidityTier);
+    keltnerResult.candidate.riskModel = buildRiskModel(regime, 'KELTNER_REVERSION', atrPercent15m, liquidityTier, keltnerResult.candidate.riskModelOverride);
     moduleCandidates.push(keltnerResult.candidate);
     countMetric(analysisState?.moduleCandidates, 'KELTNER_REVERSION');
   }
