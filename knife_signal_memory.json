@@ -1,1 +1,130 @@
-{}
+{
+  "CALCIFYUSDT": [
+    {
+      "score": 92,
+      "regime": "TRANSITION",
+      "timestamp": 1776761458570
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776762311548
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776763216882
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776764116625
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776765069912
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776765930572
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776766832039
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776767731673
+    }
+  ],
+  "PSAIUSDT": [
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776761457986
+    },
+    {
+      "score": 90,
+      "regime": "TRANSITION",
+      "timestamp": 1776762311346
+    },
+    {
+      "score": 79.72392638036806,
+      "regime": "TRANSITION",
+      "timestamp": 1776763216647
+    },
+    {
+      "score": 68.46820809248543,
+      "regime": "TRANSITION",
+      "timestamp": 1776764116413
+    },
+    {
+      "score": 83.23107569721111,
+      "regime": "TRANSITION",
+      "timestamp": 1776765069706
+    }
+  ],
+  "TRIAUSDT": [
+    {
+      "score": 70.77228812522934,
+      "regime": "TRENDING",
+      "timestamp": 1776761458996
+    },
+    {
+      "score": 69.89536164484159,
+      "regime": "TRENDING",
+      "timestamp": 1776763217299
+    },
+    {
+      "score": 68.03661075058173,
+      "regime": "TRENDING",
+      "timestamp": 1776764117053
+    },
+    {
+      "score": 73.43240593209946,
+      "regime": "TRENDING",
+      "timestamp": 1776765070323
+    },
+    {
+      "score": 70.10868230381926,
+      "regime": "TRENDING",
+      "timestamp": 1776765930995
+    },
+    {
+      "score": 72.96906545432742,
+      "regime": "TRENDING",
+      "timestamp": 1776766832549
+    },
+    {
+      "score": 69.06041099281991,
+      "regime": "TRENDING",
+      "timestamp": 1776767732152
+    }
+  ],
+  "MYXUSDT": [
+    {
+      "score": 72.35186892101974,
+      "regime": "TRANSITION",
+      "timestamp": 1776761458787
+    },
+    {
+      "score": 79.06681180924389,
+      "regime": "TRANSITION",
+      "timestamp": 1776762311744
+    },
+    {
+      "score": 74.88593155893534,
+      "regime": "TRANSITION",
+      "timestamp": 1776763217089
+    },
+    {
+      "score": 69.06410044605984,
+      "regime": "TRANSITION",
+      "timestamp": 1776764116835
+    }
+  ]
+}

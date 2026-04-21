@@ -1,16 +1,1 @@
-{
-  "BONKUSDT": [
-    {
-      "score": 81,
-      "regime": "TRENDING",
-      "timestamp": 1776428199525
-    }
-  ],
-  "FILUSDT": [
-    {
-      "score": 80,
-      "regime": "HIGH_VOL_BREAKOUT",
-      "timestamp": 1776435347604
-    }
-  ]
-}
+{}

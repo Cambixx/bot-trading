@@ -134,22 +134,35 @@ function isRetryableFetchError(error) {
         || text.includes('network');
 }
 
-async function getBlobWithRetry(store, key, maxAttempts = 3) {
+async function getBlobWithRetry(store, key, maxAttempts = 6) {
     let lastError = null;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
+            // Increase internal timeout window by using a fresh fetch configuration if possible, 
+            // though @netlify/blobs usually relies on global defaults.
             const data = await store.get(key, { type: 'json' });
             return { data, attempts: attempt };
         } catch (error) {
             lastError = error;
+            
+            const isTimeout = error.message?.includes('timeout') || error.cause?.message?.includes('timeout');
+            
+            // If it's not a retryable error or we've hit the limit, stop
             if (!isRetryableFetchError(error) || attempt === maxAttempts) {
                 break;
             }
 
-            const delayMs = 400 * attempt;
-            console.log(`↻ retry ${attempt}/${maxAttempts - 1} in ${delayMs}ms (${describeError(error)})`);
+            // Exponential backoff: 1s, 2s, 4s, 8s, 16s...
+            const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 15000);
+            const errorDesc = describeError(error);
+            
+            console.log(`\n    ↻ Retry ${attempt}/${maxAttempts - 1} in ${delayMs}ms...`);
+            console.log(`      原因: ${errorDesc}`);
+            
             await sleep(delayMs);
+            // After a timeout, maybe the network needs a moment
+            if (isTimeout) await sleep(1000); 
         }
     }
 

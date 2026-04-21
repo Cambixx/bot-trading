@@ -1,1 +1,1846 @@
-[]
+[
+  {
+    "id": "1776626442966-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2300.1,
+    "tp": null,
+    "sl": null,
+    "type": "BUY",
+    "time": 1776626442966,
+    "status": "CLOSED",
+    "score": 69,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 68.66988358506093,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": null,
+      "timeStopHours": 5
+    },
+    "entryMetrics": {
+      "distToEma9": -0.09,
+      "distToEma21": -0.5,
+      "distToEma50": -0.91,
+      "atrPercent": 0.42,
+      "bbPercent": 0.25,
+      "breakoutDistancePct": -1.84,
+      "pullbackFromHigh20Pct": 1.84,
+      "riskRewardRatio": null,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 68.66988358506093,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0031,
+      "rs4h": -0.02,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.98,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.009,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 255872,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.98,
+    "reasons": [
+      "Price below 4H Pivot Level (0.46%)"
+    ],
+    "maxFavorable": 2300.1,
+    "maxAdverse": 2298.6,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776630944606-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.4144,
+    "tp": 1.4304607073263367,
+    "sl": 1.4079757170694656,
+    "type": "BUY",
+    "time": 1776630944606,
+    "status": "CLOSED",
+    "score": 67,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "HIGH",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 67.40601503759397,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "entryMetrics": {
+      "distToEma9": -0.18,
+      "distToEma21": -0.42,
+      "distToEma50": -0.7,
+      "atrPercent": 0.38,
+      "bbPercent": 0.22,
+      "breakoutDistancePct": -1.71,
+      "pullbackFromHigh20Pct": 1.71,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 67.40601503759397,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0002,
+      "rs4h": -0.0117,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.1,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.018,
+      "obiPass": true,
+      "spreadBps": 0.7,
+      "depthQuoteTopN": 746295,
+      "liquidityTier": "HIGH"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.1,
+    "reasons": [
+      "Price below 4H Pivot Level (0.30%)"
+    ],
+    "maxFavorable": 1.415,
+    "maxAdverse": 1.4021,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776632742169-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3308,
+    "tp": 0.333226447037081,
+    "sl": 0.32973842942127707,
+    "type": "BUY",
+    "time": 1776632742169,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.99608531419828,
+    "momentumAdjustment": 0,
+    "requiredScore": 71,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.33,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.37,
+      "distToEma21": -0.52,
+      "distToEma50": -0.37,
+      "atrPercent": 0.24,
+      "bbPercent": 0.05,
+      "breakoutDistancePct": -1.72,
+      "pullbackFromHigh20Pct": 1.72,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.99608531419828,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0059,
+      "rs4h": 0.0405,
+      "rs24h": 0.02
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.14,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.159,
+      "obiPass": false,
+      "spreadBps": 3,
+      "depthQuoteTopN": 2874288,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.14,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 0.3308,
+    "maxAdverse": 0.3296,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776636343255-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "price": 620.51,
+    "tp": 624.1978695531229,
+    "sl": 618.739822614501,
+    "type": "BUY",
+    "time": 1776636343255,
+    "status": "CLOSED",
+    "score": 70,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "STREAK_REVERSAL",
+    "entryArchetype": "5-Red Candle Reversal",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 70,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.38,
+      "slMultiplier": 1.14,
+      "realRR": 2.08,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.2,
+      "distToEma21": -0.28,
+      "distToEma50": -0.41,
+      "atrPercent": 0.25,
+      "bbPercent": 0.15,
+      "breakoutDistancePct": -0.78,
+      "pullbackFromHigh20Pct": 0.78,
+      "riskRewardRatio": 2.08,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 70,
+      "participation": 60,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0078,
+      "rs4h": -0.0038,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.89,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.16,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 101705,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.89,
+    "reasons": [
+      "5 Consecutive Red Candles (5m)"
+    ],
+    "maxFavorable": 620.51,
+    "maxAdverse": 616.22,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776636343646-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.09385,
+    "tp": 0.09483777657389351,
+    "sl": 0.09337586724453112,
+    "type": "BUY",
+    "time": 1776636343646,
+    "status": "CLOSED",
+    "score": 70,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "STREAK_REVERSAL",
+    "entryArchetype": "5-Red Candle Reversal",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 70,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.38,
+      "slMultiplier": 1.14,
+      "realRR": 2.08,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.3,
+      "distToEma21": -0.47,
+      "distToEma50": -0.67,
+      "atrPercent": 0.44,
+      "bbPercent": -0.02,
+      "breakoutDistancePct": -1.2,
+      "pullbackFromHigh20Pct": 1.2,
+      "riskRewardRatio": 2.08,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 70,
+      "participation": 60,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0048,
+      "rs4h": -0.0221,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.33,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.274,
+      "obiPass": false,
+      "spreadBps": 1.1,
+      "depthQuoteTopN": 1416316,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.33,
+    "reasons": [
+      "5 Consecutive Red Candles (5m)"
+    ],
+    "maxFavorable": 0.09385,
+    "maxAdverse": 0.09301,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776640845610-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 74027.83,
+    "tp": 74797.29348379282,
+    "sl": 73720.04460648287,
+    "type": "BUY",
+    "time": 1776640845610,
+    "status": "CLOSED",
+    "score": 67,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 67.4895237047852,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "entryMetrics": {
+      "distToEma9": -0.31,
+      "distToEma21": -0.73,
+      "distToEma50": -1.25,
+      "atrPercent": 0.35,
+      "bbPercent": 0.09,
+      "breakoutDistancePct": -1.39,
+      "pullbackFromHigh20Pct": 1.39,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 67.4895237047852,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.27,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.677,
+      "obiPass": false,
+      "spreadBps": 0,
+      "depthQuoteTopN": 825719,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.27,
+    "reasons": [
+      "Price below 4H Pivot Level (0.31%)"
+    ],
+    "maxFavorable": 74220.03,
+    "maxAdverse": 74027.83,
+    "outcome": "STALE_EXIT"
+  },
+  {
+    "id": "1776640846201-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 83.59,
+    "tp": 84.89702690217378,
+    "sl": 83.01817573029898,
+    "type": "BUY",
+    "time": 1776640846201,
+    "status": "CLOSED",
+    "score": 72,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "HIGH",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.33763190047134,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.4,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.66,
+      "distToEma21": -1.28,
+      "distToEma50": -1.84,
+      "atrPercent": 0.49,
+      "bbPercent": 0.03,
+      "breakoutDistancePct": -2.29,
+      "pullbackFromHigh20Pct": 2.29,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.33763190047134,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0061,
+      "rs4h": -0.0111,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.8,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.076,
+      "obiPass": true,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 2901542,
+      "liquidityTier": "HIGH"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.8,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 85.03,
+    "maxAdverse": 83.59,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776641727464-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2263.87,
+    "tp": 2293.9319909555516,
+    "sl": 2251.8452036177796,
+    "type": "BUY",
+    "time": 1776641727464,
+    "status": "CLOSED",
+    "score": 68,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 68.05442939198905,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "entryMetrics": {
+      "distToEma9": -0.34,
+      "distToEma21": -0.84,
+      "distToEma50": -1.59,
+      "atrPercent": 0.44,
+      "bbPercent": 0.13,
+      "breakoutDistancePct": -1.78,
+      "pullbackFromHigh20Pct": 1.78,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 68.05442939198905,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0016,
+      "rs4h": -0.0218,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.1,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.503,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 469723,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.1,
+    "reasons": [
+      "Price below 4H Pivot Level (0.38%)"
+    ],
+    "maxFavorable": 2268.58,
+    "maxAdverse": 2263.87,
+    "outcome": "STALE_EXIT"
+  },
+  {
+    "id": "1776658850926-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.09411,
+    "tp": 0.09488142012618428,
+    "sl": 0.09373971833943154,
+    "type": "BUY",
+    "time": 1776658850926,
+    "status": "CLOSED",
+    "score": 70,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "STREAK_REVERSAL",
+    "entryArchetype": "5-Red Candle Reversal",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 70,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.38,
+      "slMultiplier": 1.14,
+      "realRR": 2.08,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": 0.09,
+      "distToEma21": 0.2,
+      "distToEma50": 0.09,
+      "atrPercent": 0.35,
+      "bbPercent": 0.7,
+      "breakoutDistancePct": -0.24,
+      "pullbackFromHigh20Pct": 0.24,
+      "riskRewardRatio": 2.08,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 70,
+      "participation": 60,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0041,
+      "rs4h": -0.0161,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.28,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.031,
+      "obiPass": true,
+      "spreadBps": 1.1,
+      "depthQuoteTopN": 2026662,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.28,
+    "reasons": [
+      "5 Consecutive Red Candles (5m)"
+    ],
+    "maxFavorable": 0.09495,
+    "maxAdverse": 0.09375,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776662413695-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2273.21,
+    "tp": 2296.6624655232627,
+    "sl": 2262.9495463335725,
+    "type": "BUY",
+    "time": 1776662413695,
+    "status": "CLOSED",
+    "score": 72,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.20949121712417,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.4,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.3,
+      "distToEma21": -0.32,
+      "distToEma50": -0.65,
+      "atrPercent": 0.32,
+      "bbPercent": 0.04,
+      "breakoutDistancePct": -0.92,
+      "pullbackFromHigh20Pct": 0.92,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.20949121712417,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0014,
+      "rs4h": -0.0181,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.21,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.794,
+      "obiPass": false,
+      "spreadBps": 0,
+      "depthQuoteTopN": 466544,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.21,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 2305,
+    "maxAdverse": 2273.21,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776663313680-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 74138.21,
+    "tp": 74737.61980621664,
+    "sl": 73875.96820978024,
+    "type": "BUY",
+    "time": 1776663313680,
+    "status": "CLOSED",
+    "score": 74,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 73.53319049744846,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.4,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.37,
+      "distToEma21": -0.4,
+      "distToEma50": -0.62,
+      "atrPercent": 0.25,
+      "bbPercent": -0.05,
+      "breakoutDistancePct": -0.82,
+      "pullbackFromHigh20Pct": 0.82,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 73.53319049744846,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.01,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.691,
+      "obiPass": true,
+      "spreadBps": 0.1,
+      "depthQuoteTopN": 960370,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.01,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 74769.99,
+    "maxAdverse": 74138.21,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776664238025-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "price": 617.61,
+    "tp": 621.2773121459051,
+    "sl": 616.0055509361665,
+    "type": "BUY",
+    "time": 1776664238025,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 73.04282433100425,
+    "momentumAdjustment": 0,
+    "requiredScore": 73,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.33,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.31,
+      "distToEma21": -0.4,
+      "distToEma50": -0.51,
+      "atrPercent": 0.2,
+      "bbPercent": -0.12,
+      "breakoutDistancePct": -0.83,
+      "pullbackFromHigh20Pct": 0.83,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 73.04282433100425,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0025,
+      "rs4h": -0.003,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.8,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.165,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 131769,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.8,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 622.16,
+    "maxAdverse": 617.61,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776665123236-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.3992,
+    "tp": 1.4123785629269459,
+    "sl": 1.3939285748292216,
+    "type": "BUY",
+    "time": 1776665123237,
+    "status": "CLOSED",
+    "score": 68,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "HIGH",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 67.60252178662168,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "entryMetrics": {
+      "distToEma9": -0.27,
+      "distToEma21": -0.43,
+      "distToEma50": -0.73,
+      "atrPercent": 0.31,
+      "bbPercent": 0.04,
+      "breakoutDistancePct": -0.99,
+      "pullbackFromHigh20Pct": 0.99,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 67.60252178662168,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0043,
+      "rs4h": -0.0123,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.74,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.18,
+      "obiPass": true,
+      "spreadBps": 0.7,
+      "depthQuoteTopN": 743783,
+      "liquidityTier": "HIGH"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.74,
+    "reasons": [
+      "Price below 4H Pivot Level (0.33%)"
+    ],
+    "maxFavorable": 1.4136,
+    "maxAdverse": 1.3992,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776674147568-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3296,
+    "tp": 0.331746980329065,
+    "sl": 0.32866069610603404,
+    "type": "BUY",
+    "time": 1776674147568,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 73.09468466765419,
+    "momentumAdjustment": 0,
+    "requiredScore": 71,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.33,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.35,
+      "distToEma21": -0.48,
+      "distToEma50": -0.5,
+      "atrPercent": 0.21,
+      "bbPercent": -0.09,
+      "breakoutDistancePct": -1.02,
+      "pullbackFromHigh20Pct": 1.02,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 73.09468466765419,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0099,
+      "rs4h": 0.0235,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.59,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.06,
+      "obiPass": false,
+      "spreadBps": 3,
+      "depthQuoteTopN": 1383389,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.59,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 0.3304,
+    "maxAdverse": 0.3286,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776682274571-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2308.97,
+    "tp": 2333.192390062192,
+    "sl": 2297.3432527701475,
+    "type": "BUY",
+    "time": 1776682274571,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "STREAK_REVERSAL",
+    "entryArchetype": "5-Red Candle Reversal",
+    "liquidityTier": "HIGH",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 75,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.5,
+      "slMultiplier": 1.2,
+      "realRR": 2.08,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": 0.06,
+      "distToEma21": 0.42,
+      "distToEma50": 0.67,
+      "atrPercent": 0.42,
+      "bbPercent": 0.71,
+      "breakoutDistancePct": -1.03,
+      "pullbackFromHigh20Pct": 1.03,
+      "riskRewardRatio": 2.08,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 75,
+      "participation": 60,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0046,
+      "rs4h": -0.0073,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.52,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.252,
+      "obiPass": false,
+      "spreadBps": 0,
+      "depthQuoteTopN": 236619,
+      "liquidityTier": "HIGH"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.52,
+    "reasons": [
+      "6 Consecutive Red Candles (5m)"
+    ],
+    "maxFavorable": 2316.16,
+    "maxAdverse": 2284.45,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776683151295-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.4144,
+    "tp": 1.4293626402073403,
+    "sl": 1.4072179327004768,
+    "type": "BUY",
+    "time": 1776683151295,
+    "status": "CLOSED",
+    "score": 70,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "STREAK_REVERSAL",
+    "entryArchetype": "5-Red Candle Reversal",
+    "liquidityTier": "HIGH",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 70,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.5,
+      "slMultiplier": 1.2,
+      "realRR": 2.08,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.26,
+      "distToEma21": -0.06,
+      "distToEma50": 0.09,
+      "atrPercent": 0.42,
+      "bbPercent": 0.46,
+      "breakoutDistancePct": -1.27,
+      "pullbackFromHigh20Pct": 1.27,
+      "riskRewardRatio": 2.08,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 70,
+      "participation": 60,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0006,
+      "rs4h": 0.0048,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.12,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.023,
+      "obiPass": true,
+      "spreadBps": 1.4,
+      "depthQuoteTopN": 891512,
+      "liquidityTier": "HIGH"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.12,
+    "reasons": [
+      "5 Consecutive Red Candles (5m)"
+    ],
+    "maxFavorable": 1.4317,
+    "maxAdverse": 1.4133,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776698452182-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2292.54,
+    "tp": 2331.4769827968785,
+    "sl": 2276.9652068812484,
+    "type": "BUY",
+    "time": 1776698452182,
+    "status": "CLOSED",
+    "score": 68,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 67.87435421200108,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "entryMetrics": {
+      "distToEma9": -0.45,
+      "distToEma21": -0.54,
+      "distToEma50": -0.36,
+      "atrPercent": 0.57,
+      "bbPercent": -0.04,
+      "breakoutDistancePct": -1.44,
+      "pullbackFromHigh20Pct": 1.44,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 67.87435421200108,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0076,
+      "rs4h": -0.0105,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.75,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.831,
+      "obiPass": true,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 530354,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.75,
+    "reasons": [
+      "Price below 4H Pivot Level (0.36%)"
+    ],
+    "maxFavorable": 2334.09,
+    "maxAdverse": 2292.54,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776698453128-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 84.84,
+    "tp": 86.15132288681947,
+    "sl": 84.31547084527222,
+    "type": "BUY",
+    "time": 1776698453128,
+    "status": "OPEN",
+    "score": 68,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "HIGH",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 67.56912352157914,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "entryMetrics": {
+      "distToEma9": -0.31,
+      "distToEma21": -0.3,
+      "distToEma50": -0.12,
+      "atrPercent": 0.52,
+      "bbPercent": 0.06,
+      "breakoutDistancePct": -1.13,
+      "pullbackFromHigh20Pct": 1.13,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 67.56912352157914,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0032,
+      "rs4h": -0.0065,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.45,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.113,
+      "obiPass": false,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 1730813,
+      "liquidityTier": "HIGH"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.45,
+    "reasons": [
+      "Price below 4H Pivot Level (0.32%)"
+    ],
+    "maxFavorable": 86.12,
+    "maxAdverse": 84.84
+  },
+  {
+    "id": "1776720014464-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 76000.39,
+    "tp": 76676.10808309332,
+    "sl": 75676.04532011521,
+    "type": "BUY",
+    "time": 1776720014464,
+    "status": "CLOSED",
+    "score": 70,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "STREAK_REVERSAL",
+    "entryArchetype": "5-Red Candle Reversal",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 70,
+    "momentumAdjustment": 0,
+    "requiredScore": 65,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 2.5,
+      "slMultiplier": 1.2,
+      "realRR": 2.08,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.24,
+      "distToEma21": -0.02,
+      "distToEma50": 0.48,
+      "atrPercent": 0.36,
+      "bbPercent": 0.49,
+      "breakoutDistancePct": -0.73,
+      "pullbackFromHigh20Pct": 0.73,
+      "riskRewardRatio": 2.08,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 70,
+      "participation": 60,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.72,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.387,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 484304,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.72,
+    "reasons": [
+      "5 Consecutive Red Candles (5m)"
+    ],
+    "maxFavorable": 76000.39,
+    "maxAdverse": 75623.45,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776721815497-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2317.4,
+    "tp": 2351.9065615492186,
+    "sl": 2302.303379322217,
+    "type": "BUY",
+    "time": 1776721815497,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.56609387918171,
+    "momentumAdjustment": 0,
+    "requiredScore": 68,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.4,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.35,
+      "distToEma21": -0.27,
+      "distToEma50": 0.08,
+      "atrPercent": 0.47,
+      "bbPercent": 0.3,
+      "breakoutDistancePct": -1.25,
+      "pullbackFromHigh20Pct": 1.25,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.56609387918171,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0028,
+      "rs4h": -0.0159,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.47,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.602,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 352068,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.47,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 2317.4,
+    "maxAdverse": 2301.73,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776727220721-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "price": 628.19,
+    "tp": 632.0167509697654,
+    "sl": 626.5157964507276,
+    "type": "BUY",
+    "time": 1776727220721,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.6318224049998,
+    "momentumAdjustment": 0,
+    "requiredScore": 71,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.33,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.21,
+      "distToEma21": -0.22,
+      "distToEma50": 0,
+      "atrPercent": 0.2,
+      "bbPercent": -0.2,
+      "breakoutDistancePct": -0.6,
+      "pullbackFromHigh20Pct": 0.6,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.6318224049998,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0018,
+      "rs4h": -0.0066,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.8,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.572,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 155628,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.8,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 632.67,
+    "maxAdverse": 628.19,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776727221354-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.09515,
+    "tp": 0.09609344804910416,
+    "sl": 0.09473724147851693,
+    "type": "BUY",
+    "time": 1776727221354,
+    "status": "CLOSED",
+    "score": 74,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 73.7128166433186,
+    "momentumAdjustment": 0,
+    "requiredScore": 71,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.33,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.41,
+      "distToEma21": -0.33,
+      "distToEma50": -0.01,
+      "atrPercent": 0.33,
+      "bbPercent": -0.11,
+      "breakoutDistancePct": -0.97,
+      "pullbackFromHigh20Pct": 0.97,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 73.7128166433186,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0036,
+      "rs4h": -0.0002,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.36,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.203,
+      "obiPass": true,
+      "spreadBps": 1.1,
+      "depthQuoteTopN": 1675723,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.36,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 0.0952,
+    "maxAdverse": 0.09473,
+    "outcome": "LOSS"
+  },
+  {
+    "id": "1776738944688-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3282,
+    "tp": 0.32948026322646384,
+    "sl": 0.32763988483842205,
+    "type": "BUY",
+    "time": 1776738944688,
+    "status": "OPEN",
+    "score": 72,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "MEDIUM",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.0838793884484,
+    "momentumAdjustment": 0,
+    "requiredScore": 71,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.04,
+      "slMultiplier": 1.33,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.1,
+      "distToEma21": -0.1,
+      "distToEma50": -0.13,
+      "atrPercent": 0.13,
+      "bbPercent": 0.14,
+      "breakoutDistancePct": -0.33,
+      "pullbackFromHigh20Pct": 0.33,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.0838793884484,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0057,
+      "rs4h": -0.002,
+      "rs24h": -0.03
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.68,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.041,
+      "obiPass": true,
+      "spreadBps": 3,
+      "depthQuoteTopN": 1686106,
+      "liquidityTier": "MEDIUM"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.68,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 0.3291,
+    "maxAdverse": 0.3282
+  },
+  {
+    "id": "1776739870102-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 75606.85,
+    "tp": 76241.96951867943,
+    "sl": 75328.98521057775,
+    "type": "BUY",
+    "time": 1776739870102,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.77897392267184,
+    "momentumAdjustment": 0,
+    "requiredScore": 68,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.4,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.31,
+      "distToEma21": -0.38,
+      "distToEma50": -0.24,
+      "atrPercent": 0.26,
+      "bbPercent": 0.02,
+      "breakoutDistancePct": -0.84,
+      "pullbackFromHigh20Pct": 0.84,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.77897392267184,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.21,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.066,
+      "obiPass": false,
+      "spreadBps": 0,
+      "depthQuoteTopN": 631993,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.21,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 76291.99,
+    "maxAdverse": 75541.54,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776740733670-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.4219,
+    "tp": 1.4333163358467504,
+    "sl": 1.4169053530670466,
+    "type": "BUY",
+    "time": 1776740733670,
+    "status": "CLOSED",
+    "score": 72,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "HIGH",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.04946675320991,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.4,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.2,
+      "distToEma21": -0.28,
+      "distToEma50": -0.25,
+      "atrPercent": 0.25,
+      "bbPercent": 0.12,
+      "breakoutDistancePct": -0.68,
+      "pullbackFromHigh20Pct": 0.68,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.04946675320991,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0007,
+      "rs4h": -0.0081,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 0.76,
+      "volumePass": false,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.505,
+      "obiPass": true,
+      "spreadBps": 1.4,
+      "depthQuoteTopN": 1287633,
+      "liquidityTier": "HIGH"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 0.76,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 1.4384,
+    "maxAdverse": 1.4202,
+    "outcome": "WIN"
+  },
+  {
+    "id": "1776741656821-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2303.96,
+    "tp": 2325.5982608113727,
+    "sl": 2294.4932608950244,
+    "type": "BUY",
+    "time": 1776741656821,
+    "status": "CLOSED",
+    "score": 72,
+    "regime": "TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "KELTNER_REVERSION",
+    "entryArchetype": "Keltner Channel Fade",
+    "liquidityTier": "ELITE",
+    "promotedFromLow": false,
+    "scoreBeforeMomentum": 72.24053486565421,
+    "momentumAdjustment": 0,
+    "requiredScore": 70,
+    "requiredStrongCategories": null,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "tpMultiplier": 3.2,
+      "slMultiplier": 1.4,
+      "realRR": 2.29,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "distToEma9": -0.32,
+      "distToEma21": -0.48,
+      "distToEma50": -0.49,
+      "atrPercent": 0.29,
+      "bbPercent": -0.01,
+      "breakoutDistancePct": -1.04,
+      "pullbackFromHigh20Pct": 1.04,
+      "riskRewardRatio": 2.29,
+      "timeStopHours": 10
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 72.24053486565421,
+      "participation": 50,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0009,
+      "rs4h": -0.0155,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.77,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.267,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 267016,
+      "liquidityTier": "ELITE"
+    },
+    "rejectReasonCode": null,
+    "volumeRatio": 1.77,
+    "reasons": [
+      "Price below Keltner Lower Band (Flipped Fade)"
+    ],
+    "maxFavorable": 2327.53,
+    "maxAdverse": 2303.96,
+    "outcome": "WIN"
+  }
+]
