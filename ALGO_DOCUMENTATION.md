@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v11.0.0 / v2.0.0)
+# 🦅 Documentación del Algoritmo de Trading (v11.1.0 / v2.1.0)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,10 +8,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v11.0.0)
+## Current Runtime Snapshot (v11.1.0)
 
 ### Resumen
-- **Runtime Version:** `v11.0.0-QuantumEdge` / `v2.0.0-KC-Quantum`
+- **Runtime Version:** `v11.1.0-QuantumEdge` / `v2.1.0-KC-Quantum`
 - **File Core:** `trader-bot.js` y `knife-catcher.js`
 - **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
 - **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, multi-strategy Mean Reversion / Reversal (`knife-catcher.js`).
@@ -32,7 +32,7 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 - **`KNIFE_CATCHER` (Flash Crash Reversion)**
 - **`STREAK_REVERSAL` (Streak Exhaustion)**
   - **Lógica:** Caza de rebotes tras $\ge$ 5 velas de 5m rojas consecutivas.
-  - **Gates:** Streak $\le$ -5, Volume Ratio > 0.8.
+  - **Gates:** Streak $\le$ -5, **Volume Ratio >= 0.8x (hard gate desde v2.1.0)**. Rechaza con `STREAK_LOW_VOL` si volumen insuficiente.
 - **`PIVOT_REVERSION` (Pivot Mean Reversion)**
   - **Lógica:** Retorno al punto pivote de 4H cuando el precio se desvía agresivamente a la baja.
   - **Gates:** Precio por debajo del Punto Pivote (48 bars lookback @ 5m).
@@ -123,6 +123,14 @@ graph TD
 
 ## 5. Changelog Reciente
 
+### v2.1.0-KnifeCatcher-Quantum (21 Abr 2026)
+- **[H1] STREAK Volume Hard Gate:** `STREAK_REVERSAL` ahora requiere `volumeRatio >= 0.8x` como gate duro. Rechaza con `STREAK_LOW_VOL`. Auditoría reveló que 3/4 losses de STREAK tenían volumePass=false (ratios 0.33x–0.72x).
+- **[H2] TRENDING Regime Penalty:** Módulos de mean reversion (`STREAK`, `PIVOT`, `KELTNER`) requieren +5 puntos extra en régimen `TRENDING`. Auditoría mostró WR TRENDING=33.3% vs TRANSITION=73.3%.
+- **Evidencia:** Basado en auditoría de 24 trades live (13W/9L, WR=59.1%). KELTNER destacó con +1.19R de expectativa (n=12). STREAK marginal a +0.03R (n=6).
+
+### v11.1.0-QuantumEdge (21 Abr 2026)
+- **[H3] MultiDelta Pipeline Diagnostics:** Logging diagnóstico para identificar por qué `multiDelta` devuelve `null` en todos los trades. Auditoría confirmó que los 7 autopsies y 6 shadows tienen `multiDelta: null`, anulando la protección anti-falling-knife.
+
 ### v2.0.0-KnifeCatcher-Quantum (19 Abr 2026)
 - **5m Data Precision:** Incorporación de velas de 5 minutos al pipeline de análisis para señales de reversión táctica.
 - **Multi-Strategy Reversion:** Despliegue de los módulos `STREAK_REVERSAL`, `PIVOT_REVERSION` y `KELTNER_REVERSION`.
@@ -162,4 +170,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v11.0.0 / v2.0.0 — 19 Abril 2026**
+**Documentación actualizada v11.1.0 / v2.1.0 — 21 Abril 2026**

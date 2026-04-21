@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v11.0.0-QuantumEdge';
+const ALGORITHM_VERSION = 'v11.1.0-QuantumEdge';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1806,6 +1806,20 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
   const deltaRatio = buyRatio === null ? null : (2 * buyRatio - 1);
   // v11.0.0: Sustained 3-candle delta for confirmed taker buying pressure
   const multiDelta = calculateMultiCandleDelta(closedCandles15m, 3);
+
+  // v11.1.0 [H3]: Diagnostic logging for multiDelta pipeline.
+  // Audit found multiDelta=null in ALL 7 autopsies and ALL 6 shadow trades.
+  // Log raw taker data from last 3 candles to identify if API provides the field.
+  if (multiDelta === null) {
+    const diagSlice = closedCandles15m.slice(-3);
+    const diagData = diagSlice.map((c, i) => ({
+      idx: i,
+      vol: c.volume,
+      takerBuyBase: c.takerBuyBaseVolume,
+      hasTaker: c.takerBuyBaseVolume !== null && c.takerBuyBaseVolume !== undefined
+    }));
+    console.log(`[DIAGNOSTICS] ${symbol} multiDelta=null | Raw taker data:`, JSON.stringify(diagData));
+  }
 
   const bull4h = Number.isFinite(ema21_4h) && Number.isFinite(ema50_4h) && currentPrice4h > ema21_4h && ema21_4h > ema50_4h;
   const bull1h = Number.isFinite(ema21_1h) && Number.isFinite(ema50_1h) && currentPrice1h > ema21_1h && ema21_1h > ema50_1h;

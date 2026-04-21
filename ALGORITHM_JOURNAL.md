@@ -6,7 +6,57 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v11.0.0 (QuantumEdge) & v2.0.0 (Knife Catcher)
+## Current Version: v11.1.0 (QuantumEdge) & v2.1.0 (Knife Catcher)
+**Date:** Apr 21, 2026
+**Theme:** "AUDIT-DRIVEN SURGICAL FIXES — VOLUME GATE, REGIME PENALTY, DELTA DIAGNOSTICS"
+
+### Core Logic & Parameters:
+- **Runtime Versions:** `v11.1.0-QuantumEdge` / `v2.1.0-KnifeCatcher-Quantum`.
+- **Audit Window:** Apr 17–21, 2026 (~92 hours, ~375 runs per bot).
+- **Data Basis:** Bot 1: 7 autopsies, 6 shadow archive. Bot 2: 24 autopsies (13W/9L/2S), 30 active shadows.
+
+### Changes Made:
+
+#### [H1] STREAK_REVERSAL Volume Hard Gate (knife-catcher.js)
+- **Problem:** STREAK_REVERSAL showed 33.3% WR (2W/4L), +0.03R expectancy. 3 of 4 losses had `volumePass=false` (vol ratios 0.33x–0.72x).
+- **Fix:** Added hard volume gate in `evaluateStreakReversalModule()`. Rejects with `STREAK_LOW_VOL` if `volumeRatio < 0.8x`.
+- **Expected Effect:** Removes 3 of 4 STREAK losses (saves ~3R). Also removes 1 lucky STREAK win (DOGE 0.28x). Net positive.
+- **Falsification:** If STREAK shadow shows `STREAK_LOW_VOL` blocking >60% WOULD_WIN with n≥10, relax to 0.6x.
+
+#### [H2] TRENDING Regime Score Floor +5 (knife-catcher.js)
+- **Problem:** TRENDING regime showed 33.3% WR (2W/4L, +0.10R) vs TRANSITION at 73.3% (11W/4L, +1.42R). Mean reversion structurally underperforms in trending markets.
+- **Fix:** Added `required += 5` in `getRequiredScore()` when regime is TRENDING and module is a mean-reversion type (STREAK/PIVOT/KELTNER).
+- **Expected Effect:** Raises bar for TRENDING entries, filtering marginal setups. TRENDING volume may drop to near-zero (acceptable for MR bot).
+- **Falsification:** If TRENDING shadows show >65% WOULD_WIN for SCORE_BELOW_FLOOR candidates, revert the +5.
+
+#### [H3] MultiDelta Pipeline Diagnostics (trader-bot.js)
+- **Problem:** `multiDelta` field is `null` in ALL 7 autopsies and ALL 6 shadow archive entries. The v11.0.0 anti-falling-knife taker delta feature is completely non-functional. 60% of losses had 0% MFE.
+- **Fix:** Added diagnostic logging after `calculateMultiCandleDelta()` call. Logs raw `takerBuyBaseVolume` from last 3 candles when multiDelta returns null.
+- **Expected Effect:** First deployment will reveal whether MEXC API provides taker data or not. No trading behavior change.
+- **Next Step:** If API does provide data, fix the field mapping. If not, document limitation and consider alternative delta computation.
+
+### Key Audit Metrics:
+
+| Bot | n_decisive | WR | Expectancy | Status |
+|-----|-----------|------|-----------|--------|
+| Bot 1 (QuantumEdge) | 7 | 28.6% | −0.10R | ⚠️ Negative (low-n) |
+| Bot 2 (Knife Catcher) | 22 | 59.1% | +0.72R | ✅ Positive edge |
+
+| Module | n | WR | Exp (R) | Verdict |
+|--------|---|------|---------|---------|
+| KELTNER_REVERSION | 12 | 66.7% | +1.19R | ✅ Strong |
+| PIVOT_REVERSION | 4 | 75.0% | +1.63R | 📊 Directional |
+| STREAK_REVERSAL | 6 | 33.3% | +0.03R | ⚠️ Fixed in H1 |
+
+### Validation Criteria:
+- **H1:** STREAK WR ≥ 50% over next 10 decisive, or shadow confirms gate is correct.
+- **H2:** TRENDING regime expectancy ≥ +0.2R, or zero TRENDING signals (acceptable).
+- **H3:** `multiDelta` field shows non-null values in next 10 signals.
+- **Check at:** 14 calendar days or 10 decisive trades per module.
+
+---
+
+## Previous Version: v11.0.0 (QuantumEdge) & v2.0.0 (Knife Catcher)
 **Date:** Apr 19, 2026
 **Theme:** "QUANTUM REVERSAL UPGRADE - 5M PRECISION & MULTI-STRATEGY"
 

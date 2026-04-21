@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v2.0.0-KnifeCatcher-Quantum';
+const ALGORITHM_VERSION = 'v2.1.0-KnifeCatcher-Quantum';
 console.log(`--- THE KNIFE CATCHER Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1359,13 +1359,21 @@ function calculateStreak(opens, closes) {
 }
 
 function evaluateStreakReversalModule(ctx) {
-  const { streak5m } = ctx;
+  const { streak5m, volumeRatio } = ctx;
   if (!Array.isArray(streak5m) || streak5m.length < 1) return { rejectCode: 'STREAK_NO_DATA' };
 
   const currentStreak = streak5m[streak5m.length - 1];
 
   // We only care about LONG signals (spot long-only)
   if (currentStreak > -5) return { rejectCode: 'STREAK_NOT_MET' };
+
+  // v2.1.0 [H1]: Hard gate — STREAK_REVERSAL requires volume confirmation.
+  // Audit found 3/4 STREAK losses had volumePass=false (ratios 0.33x–0.72x).
+  // Module-specific minVolumeRatio = 0.8x.
+  const minVolumeRatio = 0.8;
+  if (!Number.isFinite(volumeRatio) || volumeRatio < minVolumeRatio) {
+    return { rejectCode: 'STREAK_LOW_VOL' };
+  }
 
   const score = clamp(70 + (Math.abs(currentStreak) - 5) * 5, 70, 95);
 
@@ -1382,7 +1390,7 @@ function evaluateStreakReversalModule(ctx) {
         execution: 70
       },
       reasons: [`${Math.abs(currentStreak)} Consecutive Red Candles (5m)`],
-      minVolumeRatio: 0.8,
+      minVolumeRatio,
       riskModelOverride: { tpMultiplier: 2.5, slMultiplier: 1.2, timeStopHours: 10 }
     }
   };
@@ -1566,6 +1574,13 @@ function getRequiredScore(candidate, regime, liquidityTier, btcRisk) {
   
   // v2.0.0: Strictness per module
   if (candidate.module === 'KNIFE_CATCHER') required = Math.max(required, 70);
+  
+  // v2.1.0 [H2]: TRENDING regime penalty for mean-reversion modules.
+  // Audit found TRENDING WR=33.3% (2W/4L) vs TRANSITION WR=73.3% (11W/4L).
+  // Mean reversion structurally underperforms when price doesn't mean-revert.
+  if (regime === 'TRENDING' && ['STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION'].includes(candidate.module)) {
+    required += 5;
+  }
   
   return required;
 }
