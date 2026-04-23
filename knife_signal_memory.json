@@ -1,130 +1,90 @@
 {
-  "CALCIFYUSDT": [
+  "TRADOORUSDT": [
     {
-      "score": 92,
+      "score": 69.52371506175638,
       "regime": "TRANSITION",
-      "timestamp": 1776761458570
+      "timestamp": 1776950486975
     },
     {
-      "score": 90,
+      "score": 68.37705991487502,
       "regime": "TRANSITION",
-      "timestamp": 1776762311548
+      "timestamp": 1776951347969
     },
     {
-      "score": 90,
+      "score": 77.98854749703523,
       "regime": "TRANSITION",
-      "timestamp": 1776763216882
+      "timestamp": 1776954047174
     },
     {
-      "score": 90,
+      "score": 76.25605082256425,
       "regime": "TRANSITION",
-      "timestamp": 1776764116625
+      "timestamp": 1776954927057
     },
     {
-      "score": 90,
+      "score": 71.06749568281019,
       "regime": "TRANSITION",
-      "timestamp": 1776765069912
+      "timestamp": 1776955874412
+    }
+  ],
+  "STRKUSDT": [
+    {
+      "score": 78.6783733826246,
+      "regime": "TRENDING",
+      "timestamp": 1776950487601
     },
     {
-      "score": 90,
-      "regime": "TRANSITION",
-      "timestamp": 1776765930572
-    },
-    {
-      "score": 90,
-      "regime": "TRANSITION",
-      "timestamp": 1776766832039
-    },
-    {
-      "score": 90,
-      "regime": "TRANSITION",
-      "timestamp": 1776767731673
+      "score": 77.0978319574108,
+      "regime": "TRENDING",
+      "timestamp": 1776951348771
     }
   ],
   "PSAIUSDT": [
     {
       "score": 90,
-      "regime": "TRANSITION",
-      "timestamp": 1776761457986
+      "regime": "HIGH_VOL_BREAKOUT",
+      "timestamp": 1776951347583
     },
     {
-      "score": 90,
-      "regime": "TRANSITION",
-      "timestamp": 1776762311346
-    },
-    {
-      "score": 79.72392638036806,
-      "regime": "TRANSITION",
-      "timestamp": 1776763216647
-    },
-    {
-      "score": 68.46820809248543,
-      "regime": "TRANSITION",
-      "timestamp": 1776764116413
-    },
-    {
-      "score": 83.23107569721111,
-      "regime": "TRANSITION",
-      "timestamp": 1776765069706
+      "score": 80,
+      "regime": "HIGH_VOL_BREAKOUT",
+      "timestamp": 1776952228652
     }
   ],
   "TRIAUSDT": [
     {
-      "score": 70.77228812522934,
+      "score": 78.38317757009351,
+      "regime": "HIGH_VOL_BREAKOUT",
+      "timestamp": 1776952229999
+    },
+    {
+      "score": 70.90543823584386,
+      "regime": "HIGH_VOL_BREAKOUT",
+      "timestamp": 1776953161174
+    },
+    {
+      "score": 75.61781474904195,
+      "regime": "HIGH_VOL_BREAKOUT",
+      "timestamp": 1776954048010
+    },
+    {
+      "score": 76.50219400616183,
+      "regime": "HIGH_VOL_BREAKOUT",
+      "timestamp": 1776954927983
+    },
+    {
+      "score": 72.97540296282504,
+      "regime": "HIGH_VOL_BREAKOUT",
+      "timestamp": 1776955875254
+    },
+    {
+      "score": 72.07898658718331,
       "regime": "TRENDING",
-      "timestamp": 1776761458996
+      "timestamp": 1776956768354
     },
     {
-      "score": 69.89536164484159,
+      "score": 72.07898658718331,
       "regime": "TRENDING",
-      "timestamp": 1776763217299
-    },
-    {
-      "score": 68.03661075058173,
-      "regime": "TRENDING",
-      "timestamp": 1776764117053
-    },
-    {
-      "score": 73.43240593209946,
-      "regime": "TRENDING",
-      "timestamp": 1776765070323
-    },
-    {
-      "score": 70.10868230381926,
-      "regime": "TRENDING",
-      "timestamp": 1776765930995
-    },
-    {
-      "score": 72.96906545432742,
-      "regime": "TRENDING",
-      "timestamp": 1776766832549
-    },
-    {
-      "score": 69.06041099281991,
-      "regime": "TRENDING",
-      "timestamp": 1776767732152
-    }
-  ],
-  "MYXUSDT": [
-    {
-      "score": 72.35186892101974,
-      "regime": "TRANSITION",
-      "timestamp": 1776761458787
-    },
-    {
-      "score": 79.06681180924389,
-      "regime": "TRANSITION",
-      "timestamp": 1776762311744
-    },
-    {
-      "score": 74.88593155893534,
-      "regime": "TRANSITION",
-      "timestamp": 1776763217089
-    },
-    {
-      "score": 69.06410044605984,
-      "regime": "TRANSITION",
-      "timestamp": 1776764116835
+      "timestamp": 1776956776172
     }
   ]
 }
