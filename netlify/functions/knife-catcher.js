@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v2.1.0-KnifeCatcher-Quantum';
+const ALGORITHM_VERSION = 'v2.1.1-KnifeCatcher-Quantum';
 console.log(`--- THE KNIFE CATCHER Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1568,6 +1568,7 @@ function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, 
 
 function getRequiredScore(candidate, regime, liquidityTier, btcRisk) {
   let required = candidate.baseRequiredScore;
+  const meanReversionModules = new Set(['STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION']);
   if (liquidityTier === 'MEDIUM') required += 3;
   if (btcRisk === 'AMBER') required += 2;
   if (regime === 'TRANSITION') required += 2;
@@ -1578,7 +1579,14 @@ function getRequiredScore(candidate, regime, liquidityTier, btcRisk) {
   // v2.1.0 [H2]: TRENDING regime penalty for mean-reversion modules.
   // Audit found TRENDING WR=33.3% (2W/4L) vs TRANSITION WR=73.3% (11W/4L).
   // Mean reversion structurally underperforms when price doesn't mean-revert.
-  if (regime === 'TRENDING' && ['STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION'].includes(candidate.module)) {
+  if (regime === 'TRENDING' && meanReversionModules.has(candidate.module)) {
+    required += 5;
+  }
+
+  // v2.1.1 [H4]: HIGH_VOL_BREAKOUT penalty for mean-reversion modules.
+  // Apr 21-23 audit showed HIGH_VOL_BREAKOUT expectancy at -0.18R (4W/12L)
+  // versus TRANSITION at +1.05R (4W/3L) in knife_autopsies.json.
+  if (regime === 'HIGH_VOL_BREAKOUT' && meanReversionModules.has(candidate.module)) {
     required += 5;
   }
   
@@ -1950,7 +1958,6 @@ function generateSignal(symbol, candles5m, candles15m, candles1h, candles4h, ord
     return null;
   }
 
-  countMetric(analysisState?.stageCounts, 'LIVE_SIGNAL');
   return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore, isDepthFloorPromotion);
 }
 
@@ -2186,6 +2193,8 @@ export async function runAnalysis(context) {
               selectedSectorLeaders.set(sector, symbol);
             }
 
+            // Count only signals that survive sector correlation and are persisted.
+            countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
             await recordSignalHistory(signal, context);
             signals.push(signal);
             signalAccepted = true;

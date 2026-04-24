@@ -6,7 +6,37 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v11.1.0 (QuantumEdge) & v2.1.0 (Knife Catcher)
+## Current Version: v11.1.1 (QuantumEdge) & v2.1.1 (Knife Catcher)
+**Date:** Apr 24, 2026
+**Theme:** "REGIME HARDENING & TELEMETRY ALIGNMENT"
+
+### Core Logic & Parameters:
+- **Runtime Versions:** `v11.1.1-QuantumEdge` / `v2.1.1-KnifeCatcher-Quantum`.
+- **Audit Window:** Apr 21–23, 2026 (~51 hours, 205-206 runs per bot).
+- **Data Basis:** Bot 1: 0 autopsies, 2 resolved shadows, 206 observed runs. Bot 2: 29 autopsies (9W/18L/2S), 517 resolved shadows.
+
+### Changes Made:
+
+#### [H4] HIGH_VOL_BREAKOUT Regime Score Floor +5 (knife-catcher.js)
+- **Problem:** Bot 2 mean-reversion modules underperformed sharply in `HIGH_VOL_BREAKOUT`: 25.0% WR (4W/12L), `-0.18R` expectancy, and 75.0% zero-MFE losses. `TRANSITION` was the opposite at 57.1% WR (4W/3L), `+1.05R`.
+- **Fix:** Added `required += 5` in `getRequiredScore()` when regime is `HIGH_VOL_BREAKOUT` and module is `STREAK_REVERSAL`, `PIVOT_REVERSION`, or `KELTNER_REVERSION`.
+- **Expected Effect:** Filters marginal mean-reversion entries during violent trend-expansion conditions while preserving `KNIFE_CATCHER` and healthy `TRANSITION` behavior.
+- **Falsification:** If the next 20 decisive Bot 2 trades still leave overall expectancy below `+0.10R`, this penalty did not fix the live edge problem.
+
+#### [T1] Accepted `LIVE_SIGNAL` Telemetry (trader-bot.js / knife-catcher.js)
+- **Problem:** `[THROUGHPUT] LIVE_SIGNAL` was incrementing inside `generateSignal()` before sector-correlation filtering and before persistence, overstating accepted live signals in both bots.
+- **Fix:** Moved `LIVE_SIGNAL` counting to the acceptance path immediately before `recordSignalHistory()`, after sector dedupe passes.
+- **Expected Effect:** Throughput logs now match actual accepted/persisted live signals, making future audits trustworthy without changing trading behavior.
+- **Falsification:** If future runs still show `LIVE_SIGNAL` counts above persisted history growth for the same window, there is another telemetry mismatch downstream.
+
+### Validation Criteria:
+- **H4:** `HIGH_VOL_BREAKOUT` expectancy improves from `-0.18R` to `>= 0R`, or Bot 2 overall expectancy improves to `>= +0.25R`.
+- **T1:** `[THROUGHPUT] LIVE_SIGNAL` increments should now line up with accepted history entries instead of pre-sector candidates.
+- **Check at:** 14 calendar days or 20 decisive Bot 2 trades.
+
+---
+
+## Previous Version: v11.1.0 (QuantumEdge) & v2.1.0 (Knife Catcher)
 **Date:** Apr 21, 2026
 **Theme:** "AUDIT-DRIVEN SURGICAL FIXES — VOLUME GATE, REGIME PENALTY, DELTA DIAGNOSTICS"
 

@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v11.1.0-QuantumEdge';
+const ALGORITHM_VERSION = 'v11.1.1-QuantumEdge';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1885,8 +1885,7 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     candleStrength,
     emaSlope1h,
     adx15m,       // v11.0.0: ADX trend strength
-    multiDelta,   // v11.0.0: 3-candle sustained taker delta
-    bull1h        // v11.0.0: intermediate-term trend alignment
+    multiDelta    // v11.0.0: 3-candle sustained taker delta
   };
 
   const pullbackResult = evaluateVWAPPullbackModule(ctx);
@@ -1965,7 +1964,6 @@ function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, tic
     return null;
   }
 
-  countMetric(analysisState?.stageCounts, 'LIVE_SIGNAL');
   return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore, isDepthFloorPromotion, signalMemory);
 }
 
@@ -2203,6 +2201,8 @@ export async function runAnalysis(context) {
               selectedSectorLeaders.set(sector, symbol);
             }
 
+            // Count only signals that survive sector correlation and are persisted.
+            countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
             await recordSignalHistory(signal, context);
             signals.push(signal);
             signalAccepted = true;

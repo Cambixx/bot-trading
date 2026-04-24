@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v11.1.0 / v2.1.0)
+# 🦅 Documentación del Algoritmo de Trading (v11.1.1 / v2.1.1)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,10 +8,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v11.1.0)
+## Current Runtime Snapshot (v11.1.1)
 
 ### Resumen
-- **Runtime Version:** `v11.1.0-QuantumEdge` / `v2.1.0-KC-Quantum`
+- **Runtime Version:** `v11.1.1-QuantumEdge` / `v2.1.1-KnifeCatcher-Quantum`
 - **File Core:** `trader-bot.js` y `knife-catcher.js`
 - **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
 - **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, multi-strategy Mean Reversion / Reversal (`knife-catcher.js`).
@@ -48,6 +48,9 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
   - `RED`: Bloqueo total (Shadow Only).
   - `AMBER`: Requiere +4/+2 puntos extra de Score para entrar live.
   - `GREEN`: Operación normal.
+- **Penalización de Régimen (Bot 2, v2.1.1):**
+  - `TRENDING`: `STREAK_REVERSAL`, `PIVOT_REVERSION` y `KELTNER_REVERSION` requieren `+5` puntos extra en el score mínimo.
+  - `HIGH_VOL_BREAKOUT`: esos mismos módulos requieren otros `+5` puntos extra, porque el audit live mostró expectativa negativa en expansión de volatilidad.
 
 ### Filtros de Liquidez (v10.1.0 Update)
 - `ELITE` / `HIGH` → Live ✅
@@ -128,6 +131,13 @@ graph TD
 - **[H2] TRENDING Regime Penalty:** Módulos de mean reversion (`STREAK`, `PIVOT`, `KELTNER`) requieren +5 puntos extra en régimen `TRENDING`. Auditoría mostró WR TRENDING=33.3% vs TRANSITION=73.3%.
 - **Evidencia:** Basado en auditoría de 24 trades live (13W/9L, WR=59.1%). KELTNER destacó con +1.19R de expectativa (n=12). STREAK marginal a +0.03R (n=6).
 
+### v2.1.1-KnifeCatcher-Quantum (24 Abr 2026)
+- **[H4] HIGH_VOL_BREAKOUT Regime Penalty:** `STREAK_REVERSAL`, `PIVOT_REVERSION` y `KELTNER_REVERSION` requieren `+5` puntos extra en `HIGH_VOL_BREAKOUT`. Auditoría live del 21-23 Abr mostró `-0.18R` de expectativa en ese régimen frente a `+1.05R` en `TRANSITION`.
+- **Telemetry Alignment:** `[THROUGHPUT] LIVE_SIGNAL` ahora cuenta solo señales realmente aceptadas y persistidas, no candidatos pre-sector.
+
+### v11.1.1-QuantumEdge (24 Abr 2026)
+- **Telemetry Alignment:** `[THROUGHPUT] LIVE_SIGNAL` pasa a registrarse después del filtro `SECTOR_CORRELATION` y antes de `recordSignalHistory()`, alineando la métrica con la realidad operativa.
+
 ### v11.1.0-QuantumEdge (21 Abr 2026)
 - **[H3] MultiDelta Pipeline Diagnostics:** Logging diagnóstico para identificar por qué `multiDelta` devuelve `null` en todos los trades. Auditoría confirmó que los 7 autopsies y 6 shadows tienen `multiDelta: null`, anulando la protección anti-falling-knife.
 
@@ -170,4 +180,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v11.1.0 / v2.1.0 — 21 Abril 2026**
+**Documentación actualizada v11.1.1 / v2.1.1 — 24 Abril 2026**
