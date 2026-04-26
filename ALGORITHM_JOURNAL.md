@@ -6,7 +6,44 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v11.1.1 (QuantumEdge) & v2.1.1 (Knife Catcher)
+## Current Version: v11.1.2 (QuantumEdge) & v2.1.2 (Knife Catcher)
+**Date:** Apr 26, 2026
+**Theme:** "EXIT ACCOUNTING FIX & FORENSIC TELEMETRY"
+
+### Core Logic & Parameters:
+- **Runtime Versions:** `v11.1.2-QuantumEdge` / `v2.1.2-KnifeCatcher-Quantum`.
+- **Audit Window:** Apr 24–26, 2026 (~58.5 hours, 235 observed Bot 1 runs).
+- **Data Basis:** Bot 1: 9 autopsies (2W/7L), 3 resolved shadows, 235 observed runs with 0% gaps. Bot 2: 22 autopsies (6W/14L/2S), telemetry schema review.
+
+### Changes Made:
+
+#### [H5] Trailing Stop Outcome Repair (trader-bot.js)
+- **Problem:** Audit found a Bot 1 trade (`LTCUSDT`) with `trailingStopActive=true`, stop moved above entry, `maePct=0`, and yet `outcome=LOSS`. That is a telemetry lie, not a real losing trade.
+- **Fix:** Stop-hit exits now call a dedicated classifier. If a BUY trade has `trailingStopActive=true`, `sl >= entry`, and the observed stop-hit price is still `>= entry`, the outcome is recorded as `BREAK_EVEN` with `exitReason=TRAIL_BE_STOP`. Gap-through cases still remain `LOSS`.
+- **Expected Effect:** Loss counts and expectancy stop being artificially depressed by protected trades that never traded below entry after the stop was advanced.
+- **Falsification:** Any future trade with `trailingStopActive=true` and `exitPrice >= entry` still recorded as `LOSS` means the fix failed.
+
+#### [T2] Exit Forensics Telemetry (trader-bot.js)
+- **Problem:** `history.json` and `autopsies.json` did not persist `exitPrice` or `exitReason`, forcing audits to infer whether a stop was a true loss, a break-even save, or a stale time-stop.
+- **Fix:** Exit records now persist `exitPrice`, `exitReason`, `closedAt`, and explicit `trailingStopActive` state in both history and autopsy payloads.
+- **Expected Effect:** Future audits can distinguish `TAKE_PROFIT`, `STOP_LOSS`, `TRAIL_BE_STOP`, `TRAIL_STOP_GAP_LOSS`, and time-stop outcomes directly from stored data.
+- **Falsification:** If a closed trade is missing any of those fields in the next deployment window, the telemetry upgrade is incomplete.
+
+#### [T3] Knife Catcher Exit Telemetry Parity (knife-catcher.js)
+- **Problem:** `knife_history.json` and `knife_autopsies.json` also lacked `exitPrice` and `exitReason`, making Bot 2 forensic review asymmetrical with Bot 1 even though 22 Bot 2 autopsies already existed.
+- **Fix:** Added explicit close-time telemetry for `TAKE_PROFIT`, `STOP_LOSS`, and `TIME_STOP_STALE_EXIT` in Bot 2. No signal-generation, risk-model, or gate logic was changed.
+- **Expected Effect:** Bot 2 audits can now segment exits by actual closure mechanism without inferring from raw price paths.
+- **Falsification:** If any newly closed Bot 2 trade is missing `exitPrice`, `exitReason`, or `closedAt`, parity was not achieved.
+
+### Validation Criteria:
+- **H5:** Zero trades with `trailingStopActive=true` and `exitPrice >= entry` should be labeled `LOSS`.
+- **T2:** Every newly closed Bot 1 trade should contain `exitPrice`, `exitReason`, and `closedAt` in both history and autopsy records.
+- **T3:** Every newly closed Bot 2 trade should contain `exitPrice`, `exitReason`, and `closedAt` in both history and autopsy records.
+- **Check at:** 14 calendar days or 20 decisive trades per bot.
+
+---
+
+## Previous Version: v11.1.1 (QuantumEdge) & v2.1.1 (Knife Catcher)
 **Date:** Apr 24, 2026
 **Theme:** "REGIME HARDENING & TELEMETRY ALIGNMENT"
 

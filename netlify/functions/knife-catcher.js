@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v2.1.1-KnifeCatcher-Quantum';
+const ALGORITHM_VERSION = 'v2.1.2-KnifeCatcher-Quantum';
 console.log(`--- THE KNIFE CATCHER Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -266,6 +266,15 @@ function countMetric(bucket, key) {
   bucket[key] = (bucket[key] || 0) + 1;
 }
 
+export function closeTradeWithTelemetry(item, outcome, exitReason, exitPrice, closedAt = Date.now()) {
+  item.status = 'CLOSED';
+  item.outcome = outcome;
+  item.exitReason = exitReason || null;
+  item.exitPrice = Number.isFinite(exitPrice) ? exitPrice : null;
+  item.closedAt = closedAt;
+  return item;
+}
+
 function formatPersistentLogEntry(message, date = new Date()) {
   const timestamp = date.toISOString().replace('T', ' ').split('.')[0];
   return `[${timestamp}] ${message}`;
@@ -373,7 +382,11 @@ async function recordSignalHistory(signal, context) {
       volumeRatio: signal.volumeRatio || null,
       reasons: signal.reasons || [],
       maxFavorable: signal.price,
-      maxAdverse: signal.price
+      maxAdverse: signal.price,
+      trailingStopActive: false,
+      exitPrice: null,
+      exitReason: null,
+      closedAt: null
     });
 
     await store.setJSON(HISTORY_STORE_KEY, history.slice(-200));
@@ -388,7 +401,8 @@ async function recordTradeAutopsy(item, context) {
     const autopsies = await store.get(AUTOPSY_STORE_KEY, { type: 'json' }) || [];
 
     const entryPrice = item.price || item.entry;
-    const hoursOpen = (Date.now() - item.time) / 3600000;
+    const exitTimestamp = Number.isFinite(item.closedAt) ? item.closedAt : Date.now();
+    const hoursOpen = (exitTimestamp - item.time) / 3600000;
     const maxFav = Number.isFinite(item.maxFavorable) ? item.maxFavorable : entryPrice;
     const maxAdv = Number.isFinite(item.maxAdverse) ? item.maxAdverse : entryPrice;
     const favorableMove = item.type === 'BUY'
@@ -426,7 +440,10 @@ async function recordTradeAutopsy(item, context) {
       volumeLiquidityConfirmation: item.volumeLiquidityConfirmation || null,
       rejectReasonCode: item.rejectReasonCode || null,
       volumeRatio: item.volumeRatio || null,
-      closedAt: Date.now()
+      trailingStopActive: item.trailingStopActive === true,
+      exitPrice: Number.isFinite(item.exitPrice) ? item.exitPrice : null,
+      exitReason: item.exitReason || null,
+      closedAt: exitTimestamp
     });
 
     await store.setJSON(AUTOPSY_STORE_KEY, autopsies.slice(-200));
@@ -462,13 +479,11 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
         if (currentPrice < item.maxAdverse) item.maxAdverse = currentPrice;
 
         if (currentPrice >= item.tp) {
-          item.status = 'CLOSED';
-          item.outcome = 'WIN';
+          closeTradeWithTelemetry(item, 'WIN', 'TAKE_PROFIT', currentPrice);
           updated = true;
           await recordTradeAutopsy(item, context);
         } else if (currentPrice <= item.sl) {
-          item.status = 'CLOSED';
-          item.outcome = 'LOSS';
+          closeTradeWithTelemetry(item, 'LOSS', 'STOP_LOSS', currentPrice);
           updated = true;
           await recordTradeAutopsy(item, context);
         }
@@ -477,13 +492,11 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
         if (currentPrice > item.maxAdverse) item.maxAdverse = currentPrice;
 
         if (currentPrice <= item.tp) {
-          item.status = 'CLOSED';
-          item.outcome = 'WIN';
+          closeTradeWithTelemetry(item, 'WIN', 'TAKE_PROFIT', currentPrice);
           updated = true;
           await recordTradeAutopsy(item, context);
         } else if (currentPrice >= item.sl) {
-          item.status = 'CLOSED';
-          item.outcome = 'LOSS';
+          closeTradeWithTelemetry(item, 'LOSS', 'STOP_LOSS', currentPrice);
           updated = true;
           await recordTradeAutopsy(item, context);
         }
@@ -496,8 +509,7 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
         : (entryPrice - (item.maxFavorable || entryPrice)) / entryPrice;
 
       if (item.status === 'OPEN' && hoursOpen > staleExitHours && favorableMove < 0.003) {
-        item.status = 'CLOSED';
-        item.outcome = 'STALE_EXIT';
+        closeTradeWithTelemetry(item, 'STALE_EXIT', 'TIME_STOP_STALE_EXIT', currentPrice);
         updated = true;
         await recordTradeAutopsy(item, context);
         pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move ${(favorableMove * 100).toFixed(2)}%`);

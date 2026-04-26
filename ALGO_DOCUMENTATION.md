@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v11.1.1 / v2.1.1)
+# 🦅 Documentación del Algoritmo de Trading (v11.1.2 / v2.1.2)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,10 +8,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v11.1.1)
+## Current Runtime Snapshot (v11.1.2)
 
 ### Resumen
-- **Runtime Version:** `v11.1.1-QuantumEdge` / `v2.1.1-KnifeCatcher-Quantum`
+- **Runtime Version:** `v11.1.2-QuantumEdge` / `v2.1.2-KnifeCatcher-Quantum`
 - **File Core:** `trader-bot.js` y `knife-catcher.js`
 - **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
 - **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, multi-strategy Mean Reversion / Reversal (`knife-catcher.js`).
@@ -39,6 +39,7 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 - **`KELTNER_REVERSION` (Channel Fade)**
   - **Lógica:** Fade de la banda inferior de Keltner (1.5 ATR / EMA 20).
   - **Gates:** Cierre por debajo de la banda inferior en 5m.
+- **Exit Telemetry (v2.1.2):** Bot 2 no usa trailing stop a break-even. Sus cierres siguen siendo `TAKE_PROFIT`, `STOP_LOSS` o `TIME_STOP_STALE_EXIT`, pero ahora quedan persistidos con `exitPrice`, `exitReason` y `closedAt` para auditoría.
 
 
 ### Clasificación de Riesgo & Regímenes
@@ -109,8 +110,8 @@ graph TD
 
 | Módulo | SL Base | TP Base | Ratio R:R |
 |--------|---------|---------|-----------|
-| `VCP_BREAKOUT` (Bot 1) | 1.8x ATR | 4.0x ATR | 2.22:1 |
-| `VWAP_PULLBACK` (Bot 1) | 2.0x ATR | 3.5x ATR | 1.75:1 |
+| `VCP_BREAKOUT` (Bot 1) | 1.2x ATR | 2.5x ATR | 2.08:1 |
+| `VWAP_PULLBACK` (Bot 1) | 1.4x ATR | 3.0x ATR | 2.14:1 |
 | `KNIFE_CATCHER` (Bot 2) | 1.0x ATR | 3.5x ATR | 3.50:1 |
 | `STREAK_REVERSAL` (Bot 2)| ~1.2% Fixed| ~3.0% Fixed| 2.50:1 | 
 | `PIVOT_REVERSION` (Bot 2)| ~1.0% Fixed| ~3.0% Fixed| 3.00:1 | 
@@ -120,11 +121,20 @@ graph TD
 - **Time Stop:** Cada módulo define sus horas de espera. `KNIFE_CATCHER` cierra a las 4h si no rebota, mientras que Bot 1 espera entre 6h y 12h. En v11.0.0, `HIGH_VOL_BREAKOUT` usa un time stop más apretado (reducido en 2h).
 - **ATR Dynamic:** Si el ATR % es muy alto (>2.5%), el tamaño de posición se reduce un 35% automáticamente. Los tokens con liquidez `ELITE` relajan este límite en un 20% (v11).
 - **Break-Even Stop (Añadido en v11.0.0):** Cuando un trade en Bot 1 alcanza el 50% de la distancia hacia su Take Profit, el Stop Loss se mueve automáticamente a Break-Even + 0.1%.
+- **Exit Telemetry (v11.1.2):** Si ese stop movido se ejecuta con el precio todavía por encima de la entrada, el cierre se clasifica como `BREAK_EVEN` con `exitReason=TRAIL_BE_STOP` en vez de `LOSS`. Si hay gap por debajo de la entrada, sigue contando como `LOSS`.
 - **Regime Stops:** En transición (`TRANSITION`), el Stop Loss se aprieta al 0.9x del multiplicador base.
 
 ---
 
 ## 5. Changelog Reciente
+
+### v11.1.2-QuantumEdge (26 Abr 2026)
+- **Trailing Break-Even Exit Classification:** Los stops movidos por `trailingStopActive` ya no pueden cerrar como `LOSS` si el precio de salida sigue `>= entry`. Ahora se registran como `BREAK_EVEN`.
+- **Exit Telemetry Upgrade:** `history.json` y `autopsies.json` incluyen `exitPrice`, `exitReason`, `closedAt` y el estado explícito de `trailingStopActive` para auditoría forense fiable.
+
+### v2.1.2-KnifeCatcher-Quantum (26 Abr 2026)
+- **Exit Telemetry Upgrade:** `knife_history.json` y `knife_autopsies.json` ahora persisten `exitPrice`, `exitReason`, `closedAt` y `trailingStopActive=false` explícito en cada cierre.
+- **No Strategy Geometry Change:** No se alteraron módulos, score floors ni risk models de Bot 2; el cambio es exclusivamente de observabilidad y forensics.
 
 ### v2.1.0-KnifeCatcher-Quantum (21 Abr 2026)
 - **[H1] STREAK Volume Hard Gate:** `STREAK_REVERSAL` ahora requiere `volumeRatio >= 0.8x` como gate duro. Rechaza con `STREAK_LOW_VOL`. Auditoría reveló que 3/4 losses de STREAK tenían volumePass=false (ratios 0.33x–0.72x).
@@ -180,4 +190,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v11.1.1 / v2.1.1 — 24 Abril 2026**
+**Documentación actualizada v11.1.2 / v2.1.2 — 26 Abril 2026**

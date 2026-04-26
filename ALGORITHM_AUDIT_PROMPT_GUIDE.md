@@ -1,7 +1,7 @@
 # Quantum Algorithm Audit & Redesign Guide
 
-> **Version:** `2.0.0`
-> **Last Updated:** `2026-04-18`
+> **Version:** `2.1.0`
+> **Last Updated:** `2026-04-26`
 > **Applies To:** `netlify/functions/trader-bot.js` (Bot 1: QuantumEdge) and `netlify/functions/knife-catcher.js` (Bot 2: Knife Catcher)
 >
 > This document is the working guide for auditing, diagnosing, and redesigning both trading algorithms.
@@ -45,7 +45,7 @@ Before auditing anything, anchor to the current deployed state. If you are revie
 
 ### 2.1 Bot 1: QuantumEdge (`trader-bot.js`)
 
-**Current version:** `v11.0.0-QuantumEdge`
+**Current version:** `v11.1.2-QuantumEdge`
 **Scope:** Short-term trend following and momentum breakouts on spot long-only.
 **Schedule:** Every 15 minutes (`0,15,30,45 * * * *`).
 
@@ -121,11 +121,18 @@ Risk model: TP = `atrPct × 2.5`, SL = `atrPct × 1.2`, time stop = 6h (adjusted
 
 ### 2.2 Bot 2: Knife Catcher (`knife-catcher.js`)
 
-**Current version:** `v1.0.0`
-**Scope:** Extreme mean reversion and capitulation buying.
+**Current version:** `v2.1.2-KnifeCatcher-Quantum`
+**Scope:** Multi-strategy mean reversion and capitulation/reversion buying.
 **Schedule:** Every 15 minutes, offset 5 minutes from Bot 1.
 
-#### Active Live Module: `KNIFE_CATCHER`
+#### Active Live Modules
+
+- `KNIFE_CATCHER`
+- `STREAK_REVERSAL`
+- `PIVOT_REVERSION`
+- `KELTNER_REVERSION`
+
+#### `KNIFE_CATCHER`
 
 | Gate | Condition |
 |------|-----------|
@@ -136,6 +143,7 @@ Risk model: TP = `atrPct × 2.5`, SL = `atrPct × 1.2`, time stop = 6h (adjusted
 Risk model: TP = `atrPct × 3.5`, SL = `atrPct × 1.0`, time stop = 4h.
 
 **Important:** KNIFE_CATCHER is intentionally aggressive. Short time stop + tight SL is by design to avoid bag-holding during dead cat bounces. Do not compare its SL tightness to Bot 1's as if it were a flaw.
+**Exit telemetry note:** Bot 2 does not use a break-even trailing stop. From `v2.1.2`, closures must persist `exitPrice`, `exitReason`, and `closedAt`.
 
 ### 2.3 Dual-Bot Interaction Rules
 
@@ -191,15 +199,18 @@ A valid change must satisfy all three:
 | `persistent_logs.json` | `persistent-logs-v1` | Bot 1 | Runtime log stream |
 | `signal_memory.json` | `signal-memory-v1` | Bot 1 | Per-symbol recent score history |
 | `knife_history.json` | `knife-history-v1` | Bot 2 | Live signal history |
+| `knife_autopsies.json` | `knife-trade-autopsies-v1` | Bot 2 | Closed-trade forensics with MFE/MAE |
 | `knife_shadow_trades.json` | `knife-shadow-trades-v1` | Bot 2 | Active near-misses |
+| `knife_shadow_archive.json` | `knife-shadow-archive-v1` | Bot 2 | Resolved near-misses (WOULD_WIN/WOULD_LOSE) |
 | `knife_persistent_logs.json` | `knife-persistent-logs-v1` | Bot 2 | Runtime log stream |
 
 ### 4.2 Minimum Required Files for a Complete Audit
 
 You cannot perform a valid audit without at minimum:
-- `persistent_logs.json` (for funnel throughput numbers)
-- `autopsies.json` (for live trade outcomes with MFE/MAE)
-- `shadow_trades_archive.json` (for dark edge discovery)
+
+- **Bot 1:** `persistent_logs.json`, `autopsies.json`, `shadow_trades_archive.json`
+- **Bot 2:** `knife_persistent_logs.json`, `knife_autopsies.json`, `knife_shadow_archive.json`
+- **Both bots:** both complete file sets above, kept explicitly separated in the analysis
 
 If any of these is missing, state which is absent and what conclusions cannot be drawn without it.
 
@@ -527,9 +538,23 @@ WR=55%, avg win = 0.8R, avg loss = 1.0R → Expectancy = 0.55 × 0.8 − 0.45 ×
 | Promoting a new module directly to live | Must pass shadow-only validation first (see Section 8) |
 | Removing reject codes or log entries | Destroys audit trail permanently |
 | Changing thresholds based on < 10 trades | Noise disguised as signal |
-| Modifying both bots in the same deployment | Cannot isolate causality if outcomes change |
+| Modifying both bots in the same deployment without a dual-bot exception record | Cannot isolate causality if outcomes change, unless the deployment is intentionally structured for separation |
 | Removing the run lock mechanism | Risk of concurrent execution and blob corruption |
 | Hardcoding thresholds that were previously env-configurable | Reduces operational flexibility without benefit |
+
+### 7.3 Dual-Bot Exception Policy
+
+Modifying both bots in the same deployment is allowed **only** if all of the following are true:
+
+1. The change is either:
+   - a shared **telemetry / observability / safety** fix that does not loosen live entry criteria, or
+   - two **bot-specific** changes backed by separate datasets, separate root-cause statements, and separate validation criteria.
+2. The audit output labels every change by target bot and never mixes Bot 1 and Bot 2 metrics in the same performance claim.
+3. The deployment plan includes **separate falsification criteria per bot**.
+4. Documentation and journal entries explicitly state that both bots changed in the same deployment and why that was acceptable.
+5. If either bot’s change affects trade selection, score floors, or risk geometry, the other bot’s concurrent change must be limited to telemetry/safety only.
+
+If these conditions are not met, default back to single-bot deployments.
 
 ---
 
@@ -567,6 +592,7 @@ Before deploying any code change, verify all of the following:
 - [ ] `shadow_trades.json` records near-misses with non-null `score`, `price`, `rejectReasonCode`
 - [ ] `persistent_logs.json` still writes `[THROUGHPUT]` lines on every run
 - [ ] `signal_memory.json` receives entries for both signal and near-miss symbols
+- [ ] `knife_history.json`, `knife_autopsies.json`, `knife_shadow_trades.json`, and `knife_persistent_logs.json` still update correctly if Bot 2 was touched
 
 ### Telegram
 - [ ] Message sends without errors for both module types
@@ -596,6 +622,11 @@ npm run test  # if test suite exists
 node --check netlify/functions/trader-bot.js
 node --check netlify/functions/knife-catcher.js
 ```
+
+### Dual-Bot Deployment Checks
+- [ ] Each bot touched in the deployment has its own version bump and changelog/journal note
+- [ ] Each bot touched in the deployment has bot-specific validation metrics and falsification criteria
+- [ ] Any cross-bot shared change is limited to telemetry, observability, or execution safety
 
 ---
 
