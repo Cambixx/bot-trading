@@ -246,6 +246,9 @@ async function analyzeSymbol(symbol) {
         if (macd.hist > macd.histPrev && macd.hist > 0) { score += 20; reasons.push("MACD Momentum"); }
         if (multiDelta > 0.15) { score += 5; reasons.push("Presión Taker Positiva"); }
 
+        // Log el score final para visibilidad en Netlify
+        console.log(`[Análisis] Score: ${score}/100`);
+
         if (score >= 70) {
             return {
                 symbol,
@@ -280,9 +283,10 @@ export async function runAnalysis(context) {
         const signals = [];
         
         for (const candidate of candidates.slice(0, 40)) {
+            console.log(`- Analizando ${candidate.symbol}...`);
             const signal = await analyzeSymbol(candidate.symbol);
             if (signal) {
-                console.log(`¡SEÑAL! ${signal.symbol} Score: ${signal.score}`);
+                console.log(`  ¡SEÑAL! Score: ${signal.score}`);
                 await sendTelegramSignal(signal);
                 await saveSignalToHistory(signal, context);
                 signals.push(signal);
