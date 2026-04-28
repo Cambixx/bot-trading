@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v2.1.2-KnifeCatcher-Quantum';
+const ALGORITHM_VERSION = 'v2.2.0-KnifeCatcher-Quantum';
 console.log(`--- THE KNIFE CATCHER Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1935,8 +1935,29 @@ function generateSignal(symbol, candles5m, candles15m, candles1h, candles4h, ord
     return null;
   }
 
-  const allowedModules = new Set(['KNIFE_CATCHER', 'STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION']);
-  if (!allowedModules.has(bestCandidate.module)) {
+  // v2.2.0 [H1]: P0 audit finding — shadow KELTNER, KNIFE, PIVOT modules.
+  // KELTNER_REVERSION: 0W/4L, -1.0R, 75% zero-MFE (knife_autopsies.json, 2026-04-26 to 2026-04-28).
+  // KNIFE_CATCHER: 0W/1L, 100% zero-MFE. PIVOT_REVERSION: 0W/1L, entered with volumePass=false.
+  // Only STREAK_REVERSAL is positive: 2W/1L, +1.054R.
+  // Shadow archive (107 resolved): 11.2% WOULD_WIN — gates are saving money.
+  const liveAllowed = new Set(['STREAK_REVERSAL']);
+  const shadowOnlyModules = new Set(['KNIFE_CATCHER', 'PIVOT_REVERSION', 'KELTNER_REVERSION']);
+  
+  if (shadowOnlyModules.has(bestCandidate.module)) {
+    countMetric(analysisState?.rejectCounts, `MODULE_SHADOW_ONLY_${bestCandidate.module}`);
+    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, `MODULE_SHADOW_ONLY`, btcContext, shadowCollector);
+    return null;
+  }
+  
+  if (!liveAllowed.has(bestCandidate.module)) {
+    return null;
+  }
+  
+  // v2.2.0 [H3]: Block TRANSITION regime for all Bot 2 modules.
+  // Audit: TRANSITION 4 trades, 0 wins, -1.0R expectancy. Mean reversion has no stable mean to revert to in TRANSITION.
+  if (regime === 'TRANSITION') {
+    countMetric(analysisState?.rejectCounts, 'TRANSITION_REGIME_BLOCK');
+    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, 'TRANSITION_REGIME_BLOCK', btcContext, shadowCollector);
     return null;
   }
 

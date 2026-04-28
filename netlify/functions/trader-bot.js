@@ -6,7 +6,7 @@
 import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-const ALGORITHM_VERSION = 'v11.1.2-QuantumEdge';
+const ALGORITHM_VERSION = 'v11.2.0-QuantumEdge';
 console.log(`--- DAY TRADE Analysis Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -897,8 +897,10 @@ async function getKlines(symbol, interval = '15m', limit = 200) {
       closeTime,
       quoteVolume: Number(candle[7]),
       trades: candle[8] ? Number(candle[8]) : 0,
-      takerBuyBaseVolume: candle[9] ? Number(candle[9]) : null,
-      takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : null
+      // v11.2.0 [H2]: Fix — candle[9] can be 0 (valid) but falsy in JS.
+      // Previous code: candle[9] ? Number(candle[9]) : null — this made 0 → null.
+      takerBuyBaseVolume: candle[9] !== undefined && candle[9] !== null && candle[9] !== '' ? Number(candle[9]) : null,
+      takerBuyQuoteVolume: candle[10] !== undefined && candle[10] !== null && candle[10] !== '' ? Number(candle[10]) : null
     };
   }).filter(validateCandle);
 
@@ -1152,14 +1154,35 @@ function calculateMultiCandleDelta(candles, lookback = 3) {
   const slice = candles.slice(-lookback);
   let totalBuy = 0;
   let totalVol = 0;
+  let hasTakerData = true;
   for (const candle of slice) {
-    if (!Number.isFinite(candle.takerBuyBaseVolume) || !Number.isFinite(candle.volume) || candle.volume <= 0) return null;
+    if (!Number.isFinite(candle.takerBuyBaseVolume) || !Number.isFinite(candle.volume) || candle.volume <= 0) {
+      hasTakerData = false;
+      break;
+    }
     totalBuy += candle.takerBuyBaseVolume;
     totalVol += candle.volume;
   }
-  if (totalVol <= 0) return null;
-  const buyRatio = totalBuy / totalVol;
-  return 2 * buyRatio - 1; // normalized -1 to +1
+  if (hasTakerData && totalVol > 0) {
+    const buyRatio = totalBuy / totalVol;
+    return 2 * buyRatio - 1; // normalized -1 to +1
+  }
+  // v11.2.0 [H2]: Fallback — price-action based delta when taker data unavailable.
+  // Uses close-vs-open ratio across lookback candles as directional proxy.
+  // Positive = net bullish candles, negative = net bearish candles.
+  let bullishVolume = 0;
+  let bearishVolume = 0;
+  for (const candle of slice) {
+    if (!Number.isFinite(candle.close) || !Number.isFinite(candle.open) || !Number.isFinite(candle.volume)) return null;
+    if (candle.close >= candle.open) {
+      bullishVolume += candle.volume;
+    } else {
+      bearishVolume += candle.volume;
+    }
+  }
+  const total = bullishVolume + bearishVolume;
+  if (total <= 0) return null;
+  return 2 * (bullishVolume / total) - 1; // normalized -1 to +1, same scale
 }
 
 function calculateBollingerBands(closes, period = 20, stdDev = 2) {
