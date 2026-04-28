@@ -6,9 +6,38 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-### Current Version: v11.2.0 (QuantumEdge) & v2.2.0 (Knife Catcher)
+### Current Version: v12.0.0 (Quantum Sniper)
 **Date:** Apr 28, 2026
-**Theme:** "P0 AUDIT REMEDIATION — MODULE SHADOW, MULTIDELTA FIX, REGIME BLOCK"
+**Theme:** "QUANTUM SNIPER V12 — SMC + ML + SQUEEZE MOMENTUM"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v12.0.0-QuantumSniper`.
+- **Strategy:** High-confluence sniper entry (Score ≥ 70/100).
+- **Modules Integrated:**
+  - **SMC (Smart Money Concepts):** Structural BOS (Break of Structure) + Order Block identification.
+  - **ML (Machine Learning):** Gaussian Process Regression (GPR) based trend direction.
+  - **Squeeze Momentum:** Volatility expansion/compression triggers (TTM Squeeze style).
+  - **MACD Custom:** Momentum confirmation using multi-timeframe alignment.
+- **Risk Model:** Dynamic Swing-Low based Stop Loss. Reward-to-Risk ratio target ≥ 2.0.
+
+### Changes Made:
+#### [H1] Total Architecture Rebuild (trader-bot.js)
+- **Problem:** Legacy versions (v11.x) were suffering from "score soup" and fragile momentum triggers, resulting in negative or marginal expectancy.
+- **Fix:** Replaced the entire decision engine with a multi-module confluence system. A trade is only considered if the aggregate score from SMC, ML, Squeeze, and MACD exceeds 70/100.
+- **Expected Effect:** Drastic reduction in signal frequency ("Sniper" mode) in exchange for high-probability, institutional-grade setups.
+- **Falsification:** If signals are too rare (less than 1 per 72h in trending markets), the 70/100 threshold may be too restrictive.
+
+#### [H2] Institutional Structure Gating (SMC)
+- **Logic:** Only assets showing a recent Break of Structure (BOS) and trading near a valid Order Block (OB) are prioritized.
+- **Benefit:** Aligns the bot with "Smart Money" flow instead of just retail indicators.
+
+#### [H3] Volatility Compression Filtering (Squeeze)
+- **Logic:** Uses Bollinger Bands vs Keltner Channels to identify periods of compression (low volatility) followed by expansion (high volatility).
+- **Benefit:** Ensures entries occur at the start of a move, not at the end of an overextended rally.
+
+---
+
+### Previous Version: v11.2.0 (QuantumEdge) & v2.2.0 (Knife Catcher)
 
 ### Core Logic & Parameters:
 - **Runtime Versions:** `v11.2.0-QuantumEdge` / `v2.2.0-KnifeCatcher-Quantum`.

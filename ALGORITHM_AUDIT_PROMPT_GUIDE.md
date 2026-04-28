@@ -1,7 +1,7 @@
 # Quantum Algorithm Audit & Redesign Guide
 
-> **Version:** `2.1.0`
-> **Last Updated:** `2026-04-26`
+> **Version:** `4.0.0-QuantumSniper`
+> **Last Updated:** `2026-04-28`
 > **Applies To:** `netlify/functions/trader-bot.js` (Bot 1: QuantumEdge) and `netlify/functions/knife-catcher.js` (Bot 2: Knife Catcher)
 >
 > This document is the working guide for auditing, diagnosing, and redesigning both trading algorithms.
@@ -43,56 +43,43 @@ This means:
 
 Before auditing anything, anchor to the current deployed state. If you are reviewing code that has been recently updated, explicitly note the version delta and what changed.
 
-### 2.1 Bot 1: QuantumEdge (`trader-bot.js`)
+### 2.1 Bot 1: Quantum Sniper (`trader-bot.js`)
 
-**Current version:** `v11.1.2-QuantumEdge`
-**Scope:** Short-term trend following and momentum breakouts on spot long-only.
+**Current version:** `v12.0.0-QuantumSniper`
+**Scope:** High-confluence institutional setups (SMC, ML, Volatility, Momentum).
 **Schedule:** Every 15 minutes (`0,15,30,45 * * * *`).
 
 #### Active Live Modules
 
-##### `VWAP_PULLBACK`
-Hard gates (all must pass, in order):
+##### `CONFLUENCE_SNIPER`
+A signal is only considered if the aggregate score (confluence) is $\ge$ 70/100.
 
-| Gate | Condition | Reject Code |
-|------|-----------|-------------|
-| Trend alignment | `bull4h = true` | `VWAP_TREND_ALIGN` |
-| Price above VWAP floor | `currentPrice >= vwap15m * 0.997` | `VWAP_BELOW` |
-| Price below VWAP ceiling | `currentPrice <= vwap15m * (1.015 or 1.020 in TRENDING)` | `VWAP_TOO_FAR` |
-| 4H relative strength | `rs4h >= 0.005` | `VWAP_NO_RS` |
-| Volume confirmation | `volumeRatio >= 1.1` | `VWAP_LOW_VOL` |
-| Order book imbalance | `OBI >= -0.05` | `VWAP_NEG_OBI` |
-| RSI not falling knife | `rsi15m >= 45` | `VWAP_FALLING_KNIFE` |
-| 1H relative strength | `rs1h >= 0` | `VWAP_WEAK_MOMENTUM` |
-| 1H EMA slope | `emaSlope1h >= -0.002` | `VWAP_EMA_DECLINING` |
-| ADX trend structure | `adx15m.adx >= 16` (if available) | `VWAP_NO_TREND_STRUCTURE` |
-| RSI overbought guard | `rsi15m <= 72` | `VWAP_RSI_OB` |
+| Module | Purpose | Weight/Gate |
+|--------|---------|-------------|
+| **SMC (Smart Money)** | Market Structure | **Hard Gate:** BOS (Break of Structure) within last 5 bars OR price near Order Block (OB). |
+| **ML Trend (GPR)** | Directional Bias | **Hard Gate:** ML Slope must be positive (GPR Trend > 0). |
+| **Squeeze Momentum** | Volatility State | **Hard Gate:** Must NOT be in a "black squeeze" (BB inside KC without expansion). |
+| **MACD Custom** | Momentum Confirmation | **Hard Gate:** MACD Histogram > 0 and crossing up. |
 
-Scoring weights: `trend × 0.4 + participation × 0.4 + execution × 0.2`
+**Score Distribution (Max 100):**
+- **SMC Strength:** 30 pts (Alignment with OB/BOS)
+- **ML Confidence:** 25 pts (Strength of GPR slope)
+- **Squeeze Intensity:** 25 pts (Expansion magnitude)
+- **Momentum (MACD):** 20 pts (Multi-timeframe alignment)
 
-Score bonuses (additive, applied after base): RSI 50–65 (+3), `bull1h` (+2), ADX ≥ 22 (+2), ADX ≥ 30 (+4), `multiDelta > 0.15` (+3), positive `emaSlope1h > 0.003` (+2).
+**Risk Model (v12.0.0):**
+- **Stop Loss:** Dynamic. Set at recent Swing Low (0.5% buffer).
+- **Take Profit:** Reward-to-Risk (RR) target of 2.0x (dynamic based on volatility).
+- **Time Stop:** 12 hours.
 
-Risk model: TP = `atrPct × 3.0`, SL = `atrPct × 1.4`, time stop = 12h (adjusted by regime).
+#### Runtime Gates Outside the Modules
 
-##### `VCP_BREAKOUT`
-Hard gates (all must pass, in order):
-
-| Gate | Condition | Reject Code |
-|------|-----------|-------------|
-| BB compression | BB Width rank ≤ bottom 15% | `VCP_NOT_TIGHT` |
-| Breakout state | `bbPercent >= 0.90` | `VCP_NO_BREAKOUT` |
-| Volume explosion | `volumeRatio >= 2.3` | `VCP_LOW_VOL` |
-| Bid support | `OBI >= 0.05` | `VCP_NO_BID_SUPPORT` |
-| BTC context | not `AMBER` or `RED` | `VCP_BTC_RESISTANCE` |
-| 1H relative strength | `rs1h >= 0` | `VCP_WEAK_MOMENTUM` |
-| ADX base | `adx15m.adx >= 14` (if available) | `VCP_NO_ADX_BASE` |
-| Taker delta | `multiDelta >= 0.05` (if available) | `VCP_WEAK_TAKER_DELTA` |
-
-Scoring weights: `trend × 0.30 + expansion × 0.25 + participation × 0.30 + execution × 0.15`
-
-Score bonuses: ADX ≥ 20 (+2), ADX ≥ 28 (+4), `multiDelta > 0.10` (+2), `multiDelta > 0.25` (+4).
-
-Risk model: TP = `atrPct × 2.5`, SL = `atrPct × 1.2`, time stop = 6h (adjusted by regime).
+| Gate | Effect |
+|------|--------|
+| `BTC_RED` | Blocks ALL live signals via `REGIME_RISK_OFF`. |
+| `TRANSITION` Regime | **Hard Block** (Added v12.0.0). No trading allowed in this regime. |
+| `LOW` Liquidity | Blocked unless 24h Vol > $2M or depth floor met. |
+| Score < 70 | `SCORE_BELOW_FLOOR` — Signal is discarded or shadowed. |
 
 #### Runtime Gates Outside the Modules
 
@@ -121,29 +108,23 @@ Risk model: TP = `atrPct × 2.5`, SL = `atrPct × 1.2`, time stop = 6h (adjusted
 
 ### 2.2 Bot 2: Knife Catcher (`knife-catcher.js`)
 
-**Current version:** `v2.1.2-KnifeCatcher-Quantum`
-**Scope:** Multi-strategy mean reversion and capitulation/reversion buying.
-**Schedule:** Every 15 minutes, offset 5 minutes from Bot 1.
+**Current version:** `v2.2.0-KnifeCatcher-Quantum`
+**Scope:** Multi-strategy mean reversion and reversal.
 
 #### Active Live Modules
 
-- `KNIFE_CATCHER`
-- `STREAK_REVERSAL`
-- `PIVOT_REVERSION`
-- `KELTNER_REVERSION`
+- **`STREAK_REVERSAL`**: ONLY live module. Reversion after ≥ 5 red candles.
+- **`SHADOW_ONLY`**: `KNIFE_CATCHER`, `PIVOT_REVERSION`, `KELTNER_REVERSION`.
 
-#### `KNIFE_CATCHER`
+#### `STREAK_REVERSAL` (Live)
 
 | Gate | Condition |
 |------|-----------|
-| Extreme oversold price | `bbPercent <= -0.04` (4% below lower Bollinger Band) |
-| RSI capitulation | `rsi15m <= 25` |
-| Volume climax | `volumeRatio >= 4.0x` |
+| Streak Length | `streak <= -5` |
+| Volume Ratio | `volumeRatio >= 0.8x` |
+| Regime Check | Must NOT be `TRANSITION` or `HIGH_VOL_BREAKOUT`. |
 
-Risk model: TP = `atrPct × 3.5`, SL = `atrPct × 1.0`, time stop = 4h.
-
-**Important:** KNIFE_CATCHER is intentionally aggressive. Short time stop + tight SL is by design to avoid bag-holding during dead cat bounces. Do not compare its SL tightness to Bot 1's as if it were a flaw.
-**Exit telemetry note:** Bot 2 does not use a break-even trailing stop. From `v2.1.2`, closures must persist `exitPrice`, `exitReason`, and `closedAt`.
+Risk model: TP = `atrPct × 1.5`, SL = `atrPct × 1.2`, time stop = 2h.
 
 ### 2.3 Dual-Bot Interaction Rules
 

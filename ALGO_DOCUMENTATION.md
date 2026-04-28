@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v11.1.2 / v2.1.2)
+# 🦅 Documentación del Algoritmo de Trading (v12.0.0 / v2.2.0)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,25 +8,30 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v11.1.2)
+## Current Runtime Snapshot (v12.0.0)
 
 ### Resumen
-- **Runtime Version:** `v11.1.2-QuantumEdge` / `v2.1.2-KnifeCatcher-Quantum`
+- **Runtime Version:** `v12.0.0-QuantumSniper` / `v2.2.0-KnifeCatcher-Quantum`
 - **File Core:** `trader-bot.js` y `knife-catcher.js`
-- **Estilo Bot 1 (QuantumEdge):** `spot`, `long-only`, Momentum / Trend following (`trader-bot.js`).
+- **Estilo Bot 1 (Quantum Sniper):** `spot`, `long-only`, High-Confluence Sniper (`trader-bot.js`).
 - **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, multi-strategy Mean Reversion / Reversal (`knife-catcher.js`).
-- **Filosofía:** Módulos deterministas puros con bases de datos (Netlify Blobs) totalmente aisladas. Precision de 5m para reversiones.
+- **Filosofía:** Sistema de confluencia institucional (Score ≥ 70) integrando SMC, ML, Volatilidad y Momentum.
 
 ### Arquitectura de Módulos Activa
 
-#### Bot 1: QuantumEdge (`trader-bot.js`)
-- **`VCP_BREAKOUT` (Volatility Contraction Pattern)**
-  - **Origen:** Mark Minervini / Conceptos Institucionales.
-  - **Lógica:** Busca una contracción de volatilidad extrema (BB Width en el percentil inferior 15%) seguida de una expansión explosiva.
-  - **Gates Duros:** Volume Ratio > 2.3x, OBI > 0.05 (Bid support), RS vs BTC positiva. **Desde v11.0.0:** ADX > 14 obligatorio para base pre-breakout y filtro Multi-Candle Delta > 0.05 forzando compra taker agresiva en la expansión.
-- **`VWAP_PULLBACK` (Institutional Reclaim)**
-  - **Lógica:** Defensa del VWAP intradía en activos con fuerte tendencia y fortaleza relativa (RS).
-  - **Gates Duros:** Cierre por encima de VWAP, mechas de rechazo inferiores (reclaim), RS positiva fuerte. **Desde v10.2.0:** RSI15m >= 45 y RS1H >= 0 para evitar *falling knifes* sin soporte de corto plazo. **Desde v11.0.0:** Anchor de 24h (96x15m). Rechazos duros si EMA 1H declina, si ADX < 16 (falta de tendencia), o si RSI > 72 (sobrecompra). Bonificaciones por Multi-Candle Delta fuerte.
+#### Bot 1: Quantum Sniper (`trader-bot.js`)
+- **`CONFLUENCE_SNIPER` (Multi-Indicator Edge)**
+  - **Módulo SMC:** Detecta *Break of Structure* (BOS) y *Order Blocks* (OB). Prioriza entradas en zonas de liquidez institucional.
+  - **Módulo ML Trend:** Usa *Gaussian Process Regression* (GPR) para predecir la dirección de la tendencia con suavizado avanzado.
+  - **Módulo Squeeze:** Identifica compresión de volatilidad (BB < KC) para capturar el inicio de expansiones explosivas.
+  - **Módulo MACD Custom:** Filtro de momentum en temporalidades alineadas.
+  - **Gate de Confluencia:** Requiere un Score Agregado ≥ 70/100 para emitir señal.
+
+#### Bot 2: Knife Catcher (`knife-catcher.js`)
+- **`STREAK_REVERSAL` (Streak Exhaustion)**
+  - **Lógica:** Caza de rebotes tras ≥ 5 velas de 5m rojas consecutivas.
+  - **Gates:** Streak ≤ -5, Volume Ratio >= 0.8x.
+- **`SHADOW_ONLY_MODULES` (v2.2.0):** `KNIFE_CATCHER`, `PIVOT_REVERSION` y `KELTNER_REVERSION` están en modo shadow-only por baja expectativa reciente.
 
 #### Bot 2: Knife Catcher (`knife-catcher.js`)
 - **`KNIFE_CATCHER` (Flash Crash Reversion)**
@@ -127,6 +132,19 @@ graph TD
 ---
 
 ## 5. Changelog Reciente
+
+### v12.0.0-QuantumSniper (28 Abr 2026)
+- **Quantum Sniper Overhaul:** Reconstrucción total del motor de decisión de Bot 1.
+- **SMC Integration:** Implementación de Smart Money Concepts (BOS + Order Blocks) para alineación institucional.
+- **ML Trend Analysis:** Incorporación de regresión ML (GPR) para detección de tendencia robusta.
+- **Squeeze Momentum:** Detección de volatilidad comprimida vs expandida para "sniper entries".
+- **Dynamic Risk Model:** Stop Loss basado en Swing Lows recientes en lugar de porcentajes fijos o ATR puro.
+- **Score Confluence:** Umbral de ejecución elevado a 70/100 para máxima precisión.
+
+### v2.2.0-KnifeCatcher-Quantum (28 Abr 2026)
+- **P0 Audit Remediation:** Shadow-only para módulos `KNIFE_CATCHER`, `PIVOT_REVERSION` y `KELTNER_REVERSION` debido a expectativa negativa.
+- **Regime Hardening:** Bloqueo total de operaciones en régimen `TRANSITION`.
+- **STREAK_REVERSAL Priority:** Mantenido como único módulo live tras demostrar edge de +1.05R.
 
 ### v11.1.2-QuantumEdge (26 Abr 2026)
 - **Trailing Break-Even Exit Classification:** Los stops movidos por `trailingStopActive` ya no pueden cerrar como `LOSS` si el precio de salida sigue `>= entry`. Ahora se registran como `BREAK_EVEN`.
