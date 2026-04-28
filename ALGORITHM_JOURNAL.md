@@ -6,7 +6,51 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-## Current Version: v11.1.2 (QuantumEdge) & v2.1.2 (Knife Catcher)
+### Current Version: v11.2.0 (QuantumEdge) & v2.2.0 (Knife Catcher)
+**Date:** Apr 28, 2026
+**Theme:** "P0 AUDIT REMEDIATION — MODULE SHADOW, MULTIDELTA FIX, REGIME BLOCK"
+
+### Core Logic & Parameters:
+- **Runtime Versions:** `v11.2.0-QuantumEdge` / `v2.2.0-KnifeCatcher-Quantum`.
+- **Audit Window:** Apr 26–28, 2026, using Quantum Algorithm Audit v3.0.0 protocol.
+- **Data Basis:** Bot 2: 10 decisive trades (2W/8L), 107 resolved shadow archive entries. Bot 1: 2 decisive trades (insufficient for module changes), 13 live signals with multiDelta=null globally.
+
+### Changes Made:
+
+#### [H1] P0: Shadow KELTNER, KNIFE, PIVOT Modules (knife-catcher.js)
+- **Problem:** Bot 2 triggered 3 P0 Kill Checks (K1, K2, K5). Overall expectancy: `-0.384R` (n=10). Module breakdown:
+  - `KELTNER_REVERSION`: 0W/4L, -1.0R expectancy, 75% zero-MFE rate.
+  - `KNIFE_CATCHER`: 0W/1L, 100% zero-MFE rate.
+  - `PIVOT_REVERSION`: 0W/1L, entered with volumePass=false AND obiPass=false (execution gate bypass bug).
+  - `STREAK_REVERSAL`: 2W/1L, +1.054R expectancy (only positive module).
+- **Fix:** `KELTNER_REVERSION`, `KNIFE_CATCHER`, and `PIVOT_REVERSION` now route to shadow-only via `liveAllowed` set. `STREAK_REVERSAL` is the sole live module. Shadowed candidates are tracked with `MODULE_SHADOW_ONLY_<name>` reject codes for continued data collection.
+- **Shadow Archive Validation:** 107 resolved shadows show 11.2% WOULD_WIN rate → gates are correctly filtering poor setups.
+- **Expected Effect:** Immediate halt of capital hemorrhage from -1.0R modules while preserving the +1.054R STREAK_REVERSAL edge.
+- **Falsification:** If STREAK_REVERSAL expectancy drops below +0.3R over next 10 decisive trades, it should also be shadowed.
+
+#### [H2] P1: Fix multiDelta Null Bug (trader-bot.js)
+- **Problem:** `multiDelta` field returned `null` in ALL autopsies and ALL shadow trades. The v11.0.0 anti-falling-knife taker delta filter was completely non-functional. Two root causes identified:
+  1. **Parser bug:** `candle[9] ? Number(candle[9]) : null` treats `0` (a valid value) as falsy → assigns null.
+  2. **No fallback:** When MEXC API omits `takerBuyBaseVolume`, the function returns null with no alternative.
+- **Fix:** (a) Changed parser to explicit null/undefined/empty-string check. (b) Added price-action delta fallback: when taker data is unavailable, computes directional pressure from close-vs-open × volume across the lookback window. Same -1 to +1 scale.
+- **Expected Effect:** `multiDelta` will populate on every signal. VWAP_PULLBACK and VCP_BREAKOUT modules will now correctly apply the taker buying pressure filter, blocking falling-knife entries.
+- **Falsification:** If multiDelta is still null in any of the next 20 signals, the MEXC API is not returning data AND the fallback has a bug.
+
+#### [H3] P1: Block TRANSITION Regime (knife-catcher.js)
+- **Problem:** All 4 Bot 2 trades in `TRANSITION` regime resulted in losses (-1.0R expectancy). Mean-reversion strategies structurally require a stable mean to revert to; TRANSITION (by definition) lacks one.
+- **Fix:** Added `TRANSITION_REGIME_BLOCK` check that shadows any TRANSITION candidate before execution gates. Combined with the existing `RISK_OFF` block, Bot 2 now only trades in `TRENDING` and `HIGH_VOL_BREAKOUT` regimes (with existing +5 score penalties for both).
+- **Expected Effect:** Removes the 4 TRANSITION losses (-4.0R total) from the expected distribution.
+- **Falsification:** If TRANSITION shadow trades show >50% WOULD_WIN over n≥15, the block is overly conservative and should be relaxed.
+
+### Validation Criteria:
+- **H1:** Bot 2 overall expectancy ≥ +0.3R over next 10 decisive trades (STREAK_REVERSAL only).
+- **H2:** `multiDelta` shows non-null values in 100% of next 20 Bot 1 signals.
+- **H3:** Zero TRANSITION live trades. Shadow data collection continues for future rehabilitation analysis.
+- **Check at:** 14 calendar days or 10 decisive trades per bot.
+
+---
+
+## Previous Version: v11.1.2 (QuantumEdge) & v2.1.2 (Knife Catcher) 
 **Date:** Apr 26, 2026
 **Theme:** "EXIT ACCOUNTING FIX & FORENSIC TELEMETRY"
 
