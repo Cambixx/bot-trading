@@ -1,1 +1,372 @@
-[]
+[
+  {
+    "id": "shadow-1777475159169-PSAIUSDT",
+    "symbol": "PSAIUSDT",
+    "score": 90,
+    "scoreBeforeMomentum": 90,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "scoreGap": -23,
+    "price": 0.0001264,
+    "regime": "TRANSITION",
+    "atrPercent": 5.69,
+    "rejectReasonCode": "MODULE_SHADOW_ONLY",
+    "rejectReason": "MODULE_SHADOW_ONLY",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "LOW",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.2126,
+      "rs4h": -0.487,
+      "rs24h": -0.4
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.06,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.192,
+      "obiPass": false,
+      "spreadBps": 253,
+      "depthQuoteTopN": 932,
+      "liquidityTier": "LOW"
+    },
+    "timestamp": 1777475159169,
+    "entryMetrics": {
+      "distToEma9": -8.05,
+      "distToEma21": -12.57,
+      "distToEma50": -18.39,
+      "atrPercent": 5.69,
+      "bbPercent": -0.03,
+      "breakoutDistancePct": -24.27,
+      "pullbackFromHigh20Pct": 24.27,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 90,
+      "participation": 50,
+      "execution": 70
+    },
+    "shadowBenchmark": {
+      "version": "v2.2.0-KnifeCatcher-Quantum-PIVOT_REVERSION",
+      "tpPct": 0.1707748044645872,
+      "slPct": 0.06830992178583488
+    },
+    "maxFavorableMovePct": 9.57,
+    "maxAdverseMovePct": 2.53,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1777476077162-PSAIUSDT",
+    "symbol": "PSAIUSDT",
+    "score": 90,
+    "scoreBeforeMomentum": 90,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "scoreGap": -23,
+    "price": 0.0001274,
+    "regime": "TRANSITION",
+    "atrPercent": 5.91,
+    "rejectReasonCode": "MODULE_SHADOW_ONLY",
+    "rejectReason": "MODULE_SHADOW_ONLY",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "LOW",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.2126,
+      "rs4h": -0.487,
+      "rs24h": -0.42
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.2,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.276,
+      "obiPass": false,
+      "spreadBps": 163.7,
+      "depthQuoteTopN": 1164,
+      "liquidityTier": "LOW"
+    },
+    "timestamp": 1777476077162,
+    "entryMetrics": {
+      "distToEma9": -5.95,
+      "distToEma21": -10.92,
+      "distToEma50": -17.17,
+      "atrPercent": 5.91,
+      "bbPercent": 0.06,
+      "breakoutDistancePct": -23.67,
+      "pullbackFromHigh20Pct": 23.67,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 90,
+      "participation": 50,
+      "execution": 70
+    },
+    "shadowBenchmark": {
+      "version": "v2.2.0-KnifeCatcher-Quantum-PIVOT_REVERSION",
+      "tpPct": 0.1771793892667693,
+      "slPct": 0.07087175570670771
+    },
+    "maxFavorableMovePct": 8.71,
+    "maxAdverseMovePct": 3.3,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1777476089258-PSAIUSDT",
+    "symbol": "PSAIUSDT",
+    "score": 90,
+    "scoreBeforeMomentum": 90,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "scoreGap": -23,
+    "price": 0.0001274,
+    "regime": "TRANSITION",
+    "atrPercent": 5.91,
+    "rejectReasonCode": "MODULE_SHADOW_ONLY",
+    "rejectReason": "MODULE_SHADOW_ONLY",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "LOW",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.2126,
+      "rs4h": -0.487,
+      "rs24h": -0.42
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.2,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.585,
+      "obiPass": true,
+      "spreadBps": 785.5,
+      "depthQuoteTopN": 844,
+      "liquidityTier": "LOW"
+    },
+    "timestamp": 1777476089258,
+    "entryMetrics": {
+      "distToEma9": -5.95,
+      "distToEma21": -10.92,
+      "distToEma50": -17.17,
+      "atrPercent": 5.91,
+      "bbPercent": 0.06,
+      "breakoutDistancePct": -23.67,
+      "pullbackFromHigh20Pct": 23.67,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 90,
+      "participation": 50,
+      "execution": 70
+    },
+    "shadowBenchmark": {
+      "version": "v2.2.0-KnifeCatcher-Quantum-PIVOT_REVERSION",
+      "tpPct": 0.1771793892667693,
+      "slPct": 0.07087175570670771
+    },
+    "maxFavorableMovePct": 8.71,
+    "maxAdverseMovePct": 3.3,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1777476927753-PSAIUSDT",
+    "symbol": "PSAIUSDT",
+    "score": 90,
+    "scoreBeforeMomentum": 90,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "scoreGap": -23,
+    "price": 0.0001316,
+    "regime": "TRANSITION",
+    "atrPercent": 5.59,
+    "rejectReasonCode": "MODULE_SHADOW_ONLY",
+    "rejectReason": "MODULE_SHADOW_ONLY",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "LOW",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.2126,
+      "rs4h": -0.487,
+      "rs24h": -0.4
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.1,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": -0.153,
+      "obiPass": false,
+      "spreadBps": 115.4,
+      "depthQuoteTopN": 1055,
+      "liquidityTier": "LOW"
+    },
+    "timestamp": 1777476927753,
+    "entryMetrics": {
+      "distToEma9": -2.29,
+      "distToEma21": -7.31,
+      "distToEma50": -13.95,
+      "atrPercent": 5.59,
+      "bbPercent": 0.19,
+      "breakoutDistancePct": -19.26,
+      "pullbackFromHigh20Pct": 19.26,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 90,
+      "participation": 50,
+      "execution": 70
+    },
+    "shadowBenchmark": {
+      "version": "v2.2.0-KnifeCatcher-Quantum-PIVOT_REVERSION",
+      "tpPct": 0.16774017830201002,
+      "slPct": 0.067096071320804
+    },
+    "maxFavorableMovePct": 5.24,
+    "maxAdverseMovePct": 6.38,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "shadow-1777477837672-PSAIUSDT",
+    "symbol": "PSAIUSDT",
+    "score": 90,
+    "scoreBeforeMomentum": 90,
+    "momentumAdjustment": 0,
+    "requiredScore": 67,
+    "requiredStrongCategories": null,
+    "scoreGap": -23,
+    "price": 0.0001305,
+    "regime": "TRANSITION",
+    "atrPercent": 5.37,
+    "rejectReasonCode": "MODULE_SHADOW_ONLY",
+    "rejectReason": "MODULE_SHADOW_ONLY",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "PIVOT_REVERSION",
+    "entryArchetype": "Pivot Point Mean Reversion",
+    "liquidityTier": "LOW",
+    "blockedBySector": null,
+    "blockedBySymbol": null,
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "tpMultiplier": 3,
+      "slMultiplier": 1.2,
+      "realRR": 2.5,
+      "timeStopHours": 5
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.2126,
+      "rs4h": -0.487,
+      "rs24h": -0.4
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.8,
+      "volumeRatio": 1.07,
+      "volumePass": true,
+      "deltaRatio": null,
+      "deltaPass": null,
+      "obi": 0.181,
+      "obiPass": true,
+      "spreadBps": 234.4,
+      "depthQuoteTopN": 1085,
+      "liquidityTier": "LOW"
+    },
+    "timestamp": 1777477837672,
+    "entryMetrics": {
+      "distToEma9": -2.5,
+      "distToEma21": -7.4,
+      "distToEma50": -14.18,
+      "atrPercent": 5.37,
+      "bbPercent": 0.2,
+      "breakoutDistancePct": -19.94,
+      "pullbackFromHigh20Pct": 19.94,
+      "riskRewardRatio": 2.5,
+      "timeStopHours": 5
+    },
+    "qualityBreakdown": {
+      "trend": 0,
+      "expansion": 90,
+      "participation": 50,
+      "execution": 70
+    },
+    "shadowBenchmark": {
+      "version": "v2.2.0-KnifeCatcher-Quantum-PIVOT_REVERSION",
+      "tpPct": 0.16101253258843934,
+      "slPct": 0.06440501303537574
+    },
+    "maxFavorableMovePct": 6.13,
+    "maxAdverseMovePct": 5.59,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  }
+]
