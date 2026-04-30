@@ -244,12 +244,12 @@ async function analyzeSymbol(symbol) {
         if (smc.inDiscountZone) { score += 10; reasons.push("Zona de Descuento"); }
         if (sqz.sqzOff && sqz.isBullish) { score += 25; reasons.push("Squeeze Fire (Alcista)"); }
         if (macd.hist > macd.histPrev && macd.hist > 0) { score += 20; reasons.push("MACD Momentum"); }
-        if (multiDelta > 0.15) { score += 5; reasons.push("Presión Taker Positiva"); }
+        if (multiDelta > 0.25) { score += 5; reasons.push("Presión Taker Positiva"); }
 
         // Log el score final para visibilidad en Netlify
         console.log(`[Análisis] Score: ${score}/100`);
 
-        if (score >= 70) {
+        if (score >= 82) {
             return {
                 symbol,
                 price: candles[candles.length - 1].close,
@@ -276,10 +276,18 @@ export async function runAnalysis(context) {
 
         const candidates = tickers.filter(t => 
             t.symbol.endsWith(QUOTE_ASSET) && 
-            parseFloat(t.quoteVolume) > MIN_QUOTE_VOL_24H
+            parseFloat(t.quoteVolume) > MIN_QUOTE_VOL_24H &&
+            t.symbol !== `USDC${QUOTE_ASSET}`
         );
         
         console.log(`Analizando ${candidates.length} activos con volumen >$${(MIN_QUOTE_VOL_24H/1000000).toFixed(1)}M...`);
+        
+        const store = await getInternalStore(context);
+        const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
+        const closed = history.filter(h => h.status === 'CLOSED');
+        const wins = closed.filter(h => h.outcome === 'WIN').length;
+        const currentWinRate = closed.length > 0 ? (wins / closed.length * 100).toFixed(1) : '0.0';
+
         const signals = [];
         
         for (const candidate of candidates.slice(0, 40)) {
@@ -287,7 +295,7 @@ export async function runAnalysis(context) {
             const signal = await analyzeSymbol(candidate.symbol);
             if (signal) {
                 console.log(`  ¡SEÑAL! Score: ${signal.score}`);
-                await sendTelegramSignal(signal);
+                await sendTelegramSignal(signal, currentWinRate);
                 await saveSignalToHistory(signal, context);
                 signals.push(signal);
             }
@@ -300,14 +308,14 @@ export async function runAnalysis(context) {
     }
 }
 
-async function sendTelegramSignal(signal) {
+async function sendTelegramSignal(signal, winRate = '0.0') {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
     const text = `🦅 *QUANTUM SNIPER V12* (${ALGORITHM_VERSION})\n\n` +
                  `💎 Símbolo: #${signal.symbol}\n` +
                  `📈 Precio: ${signal.price}\n` +
                  `🎯 TP: ${signal.tp.toFixed(6)}\n` +
                  `🛡️ SL: ${signal.sl.toFixed(6)}\n` +
-                 `⭐ Score: ${signal.score}/100\n\n` +
+                 `⭐ Score: ${signal.score}/100 | 📊 WR: ${winRate}%\n\n` +
                  `📝 Confluencias:\n${signal.reasons.map(r => `• ${r}`).join('\n')}`;
     
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=Markdown`;

@@ -7,6 +7,7 @@ import { schedule } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
 const ALGORITHM_VERSION = 'v2.2.0-KnifeCatcher-Quantum';
+const GLOBAL_SHADOW_MODE = true; // [AUDIT] Forced shadow mode due to negative shadow expectancy
 console.log(`--- THE KNIFE CATCHER Module Loaded (${ALGORITHM_VERSION}) ---`);
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1516,7 +1517,11 @@ function calculateBBWidthHistory(closes, period = 20, stdDev = 2) {
 function evaluateKnifeCatcherModule(ctx) {
   const { symbol, currentPrice, volumeRatio, obMetrics, liquidityTier, rsi15m, rsi1h, bbPercent, bbWidth, btcRisk } = ctx;
   
-  if (bbPercent > -0.04) return { rejectCode: 'KNIFE_NOT_OVERSOLD' }; // Must be 4% below lower band
+  if (bbPercent > -0.04) {
+    // [AUDIT] Enhanced logging for oversold gate
+    if (Math.random() < 0.1) console.log(`[GATE] ${symbol} reject KNIFE_NOT_OVERSOLD: bbPercent=${bbPercent.toFixed(4)} (Threshold: -0.04)`);
+    return { rejectCode: 'KNIFE_NOT_OVERSOLD' }; 
+  }
   if (rsi15m > 25) return { rejectCode: 'KNIFE_RSI_TOO_HIGH' };
   if (volumeRatio < 4.0) return { rejectCode: 'KNIFE_NO_CLIMAX' }; // Needs massive volume absorption
   if (!obMetrics || obMetrics.spreadBps > 15) return { rejectCode: 'KNIFE_HIGH_SPREAD' };
@@ -2228,10 +2233,16 @@ export async function runAnalysis(context) {
 
             // Count only signals that survive sector correlation and are persisted.
             countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
-            await recordSignalHistory(signal, context);
-            signals.push(signal);
-            signalAccepted = true;
-            pLog(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Module: ${signal.module}`);
+            
+            if (!GLOBAL_SHADOW_MODE) {
+              await recordSignalHistory(signal, context);
+              signals.push(signal);
+              signalAccepted = true;
+              pLog(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Module: ${signal.module}`);
+            } else {
+              pLog(`[${runId}] 👻 SHADOW_FORCED: ${symbol} (Score: ${signal.score}) suppressed by GLOBAL_SHADOW_MODE`);
+              // Still record in shadow near-miss logic below if applicable
+            }
             recordSymbolScore(signalMemory, symbol, signal.score, signal.regime);
           }
         }
