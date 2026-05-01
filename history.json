@@ -1,3625 +1,1017 @@
 [
   {
-    "id": "SNIPER-1777446915101-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10221,
-    "tp": 0.1062984,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777446915101,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00002207146714671794,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0020104999999999984,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.000764126953924818,
-        "histPrev": 0.0007010607313681916
-      },
-      "multiDelta": 0.2199004350736278
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.10713,
-    "closedAt": 1777455085657
-  },
-  {
-    "id": "SNIPER-1777447883480-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2503,
-    "tp": 0.26031200000000004,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777447883480,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00005707350735073186,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.002847500000000003,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0005972415719767143,
-        "histPrev": 0.0004545806346063219
-      },
-      "multiDelta": 0.19362745098039172
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604388
-  },
-  {
-    "id": "SNIPER-1777447884412-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10397,
-    "tp": 0.10812880000000001,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777447884412,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000023117011701172457,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0032839999999999953,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009045258143236951,
-        "histPrev": 0.0007010607313681916
-      },
-      "multiDelta": 0.4024947266128704
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.10961,
-    "closedAt": 1777456969271
-  },
-  {
-    "id": "SNIPER-1777448796548-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10454,
-    "tp": 0.1087216,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777448796548,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000023455625562559254,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.003547249999999988,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009499958997937763,
-        "histPrev": 0.0007010607313681916
-      },
-      "multiDelta": 0.36148418300065405
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.10961,
-    "closedAt": 1777456969271
-  },
-  {
-    "id": "SNIPER-1777449649126-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2498,
-    "tp": 0.259792,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777449649126,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.000056084608460845734,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0022850000000000092,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0006065712043122617,
-        "histPrev": 0.0005251030725040573
-      },
-      "multiDelta": 0.32788671023965205
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604388
-  },
-  {
-    "id": "SNIPER-1777449650082-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10511,
-    "tp": 0.10931439999999999,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777449650082,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000027171797179721423,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.003953999999999985,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.001206231099495969,
-        "histPrev": 0.0009843764375649516
-      },
-      "multiDelta": 0.5368003731343222
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.10961,
-    "closedAt": 1777456969271
-  },
-  {
-    "id": "SNIPER-1777449651042-ETHUSDT",
-    "symbol": "ETHUSDT",
-    "price": 2325.17,
-    "tp": 2418.1768,
-    "sl": 2267.8239,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777449651042,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 2305.17,
-        "lastLow": 2279.22,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.38927092709265204,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 25.526499999999942,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 8.000895414387287,
-        "histPrev": 7.251987254370306
-      },
-      "multiDelta": 0.19606539724822347
-    },
-    "outcome": "LOSS",
-    "exitPrice": 2266.99,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777450588263-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10504,
-    "tp": 0.1092416,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777450588263,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000027130213021305622,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0038857499999999934,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0012006470539119157,
-        "histPrev": 0.0009843764375649516
-      },
-      "multiDelta": 0.2337700701040191
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.10961,
-    "closedAt": 1777456969271
-  },
-  {
-    "id": "SNIPER-1777451476777-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10525,
-    "tp": 0.10946,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777451476777,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000027254965496553895,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.003965499999999983,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.001217399190664048,
-        "histPrev": 0.0009843764375649516
-      },
-      "multiDelta": 0.2752619115958607
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.10961,
-    "closedAt": 1777456969271
-  },
-  {
-    "id": "SNIPER-1777452393170-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10561,
-    "tp": 0.1098344,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777452393170,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00002746882688269242,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.004316499999999987,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.001246117139381997,
-        "histPrev": 0.0009843764375649516
-      },
-      "multiDelta": 0.3675696039035521
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.11043,
-    "closedAt": 1777457744425
-  },
-  {
-    "id": "SNIPER-1777453428097-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10548,
-    "tp": 0.10969920000000001,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777453428097,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00003086906690669269,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00402124999999999,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0014161749534997436,
-        "histPrev": 0.0012325902485885165
-      },
-      "multiDelta": 0.4451156130019887
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.11043,
-    "closedAt": 1777457744425
-  },
-  {
-    "id": "SNIPER-1777455087625-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10712,
-    "tp": 0.11140480000000001,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777455087625,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00003184332433243553,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.005220249999999996,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0015470011643259618,
-        "histPrev": 0.0012325902485885165
-      },
-      "multiDelta": 0.6404027326542437
-    }
-  },
-  {
-    "id": "SNIPER-1777455089489-LTCUSDT",
-    "symbol": "LTCUSDT",
-    "price": 56.12,
-    "tp": 58.3648,
-    "sl": 54.4066,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777455089489,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 55.62,
-        "lastLow": 54.68,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.01048724872487204,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.6229999999999976,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.18100240185125216,
-        "histPrev": 0.16584732100071875
-      },
-      "multiDelta": 0.20962962962962026
-    },
-    "outcome": "LOSS",
-    "exitPrice": 54.39,
-    "closedAt": 1777487567140
-  },
-  {
-    "id": "SNIPER-1777455957443-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2511,
-    "tp": 0.261144,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777455957443,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00005352115211520761,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.003272499999999956,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007490317787489653,
-        "histPrev": 0.000582983208058413
-      },
-      "multiDelta": 0.37668350168349224
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604388
-  },
-  {
-    "id": "SNIPER-1777455958378-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10778,
-    "tp": 0.1120912,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777455958378,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0000322354035403563,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00578374999999999,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0015996507369755442,
-        "histPrev": 0.0012325902485885165
-      },
-      "multiDelta": 0.6942396917744915
-    }
-  },
-  {
-    "id": "SNIPER-1777455959950-LTCUSDT",
-    "symbol": "LTCUSDT",
-    "price": 56.17,
-    "tp": 58.4168,
-    "sl": 54.4066,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777455959950,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 55.62,
-        "lastLow": 54.68,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.010457545754574563,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.639249999999997,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.18499100583985495,
-        "histPrev": 0.16584732100071875
-      },
-      "multiDelta": 0.15769980506821857
-    },
-    "outcome": "LOSS",
-    "exitPrice": 54.39,
-    "closedAt": 1777487567140
-  },
-  {
-    "id": "SNIPER-1777456970083-SOLUSDT",
-    "symbol": "SOLUSDT",
-    "price": 85.31,
-    "tp": 88.72240000000001,
-    "sl": 82.585,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777456970083,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 84.95,
-        "lastLow": 83,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.03162436243624363,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.0122500000000088,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.2245640168764993,
-        "histPrev": 0.17511829422005576
-      },
-      "multiDelta": 0.168091168091182
-    },
-    "outcome": "LOSS",
-    "exitPrice": 81.96,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777456971110-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2531,
-    "tp": 0.263224,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777456971110,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00004895709570957068,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.004329999999999945,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00114090682628612,
-        "histPrev": 0.0008925233430022717
-      },
-      "multiDelta": 0.44484126984124944
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604388
-  },
-  {
-    "id": "SNIPER-1777456972074-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10977,
-    "tp": 0.1141608,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777456972074,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000039096609660966865,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.006260000000000002,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00212994971210749,
-        "histPrev": 0.0017320282086958072
-      },
-      "multiDelta": 0.48817832467337574
-    }
-  },
-  {
-    "id": "SNIPER-1777456972676-XRPUSDT",
-    "symbol": "XRPUSDT",
-    "price": 1.4033,
-    "tp": 1.459432,
-    "sl": 1.3700155,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777456972676,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.3861,
-        "lastLow": 1.3769,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.0005873663366336611,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.016319999999999668,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.002355478620928997,
-        "histPrev": 0.001455758404660612
-      },
-      "multiDelta": 0.20108939802336612
-    },
-    "outcome": "LOSS",
-    "exitPrice": 1.3652,
-    "closedAt": 1777475714543
-  },
-  {
-    "id": "SNIPER-1777456973101-BNBUSDT",
-    "symbol": "BNBUSDT",
-    "price": 628.83,
-    "tp": 653.9832,
-    "sl": 619.5268,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777456973101,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 627.54,
-        "lastLow": 622.64,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.10932427242724987,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 3.470250000000078,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.8189846259134583,
-        "histPrev": 0.6338902115434166
-      },
-      "multiDelta": 0.27824736425736646
-    },
-    "outcome": "LOSS",
-    "exitPrice": 618.24,
-    "closedAt": 1777475714543
-  },
-  {
-    "id": "SNIPER-1777456973537-ETHUSDT",
-    "symbol": "ETHUSDT",
-    "price": 2339.68,
-    "tp": 2433.2672,
-    "sl": 2267.8239,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777456973538,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 2305.17,
-        "lastLow": 2279.22,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.36066228622850843,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 32.990749999999935,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 10.839457462838254,
-        "histPrev": 9.654601493979499
-      },
-      "multiDelta": 0.277177123459365
-    },
-    "outcome": "LOSS",
-    "exitPrice": 2266.99,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777456974231-BTCUSDT",
-    "symbol": "BTCUSDT",
-    "price": 77644.7,
-    "tp": 80750.488,
-    "sl": 75801.9457,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777456974231,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 77474.52,
-        "lastLow": 76182.86,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -14.688013801381969,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 886.8472500000062,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 185.95311520513496,
-        "histPrev": 142.99778267924557
-      },
-      "multiDelta": 0.22186250831945434
-    },
-    "outcome": "LOSS",
-    "exitPrice": 75251.22,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777456975075-LTCUSDT",
-    "symbol": "LTCUSDT",
-    "price": 57.5,
-    "tp": 59.800000000000004,
-    "sl": 54.4066,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777456975075,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 55.62,
-        "lastLow": 54.68,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.008470747074706577,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.507000000000005,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.37168232196908235,
-        "histPrev": 0.27269120392091395
-      },
-      "multiDelta": 0.45114263199368415
-    },
-    "outcome": "LOSS",
-    "exitPrice": 54.39,
-    "closedAt": 1777487567140
-  },
-  {
-    "id": "SNIPER-1777457745319-SOLUSDT",
-    "symbol": "SOLUSDT",
-    "price": 85.4,
-    "tp": 88.816,
-    "sl": 82.585,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777457745319,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 84.95,
-        "lastLow": 83,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.031570897089709865,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.1000000000000085,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.23174350405598432,
-        "histPrev": 0.17511829422005576
-      },
-      "multiDelta": 0.2850502324186739
-    },
-    "outcome": "LOSS",
-    "exitPrice": 81.96,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777457745990-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2533,
-    "tp": 0.26343200000000006,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777457745990,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00004883828382838193,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.004475000000000007,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00115686124224057,
-        "histPrev": 0.0008925233430022717
-      },
-      "multiDelta": 0.5019841269841328
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604388
-  },
-  {
-    "id": "SNIPER-1777457747144-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.11031,
-    "tp": 0.11472240000000002,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777457747144,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000039417401740174214,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.006786500000000001,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0021730266351844135,
-        "histPrev": 0.0017320282086958072
-      },
-      "multiDelta": 0.5249364181985524
-    }
-  },
-  {
-    "id": "SNIPER-1777457747730-XRPUSDT",
-    "symbol": "XRPUSDT",
-    "price": 1.4038,
-    "tp": 1.459952,
-    "sl": 1.3700155,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777457747730,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.3861,
-        "lastLow": 1.3769,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.0005870693069306657,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.016807499999999642,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0023953646608150247,
-        "histPrev": 0.001455758404660612
-      },
-      "multiDelta": 0.2663671758011377
-    },
-    "outcome": "LOSS",
-    "exitPrice": 1.3652,
-    "closedAt": 1777475714543
-  },
-  {
-    "id": "SNIPER-1777457748146-BNBUSDT",
-    "symbol": "BNBUSDT",
-    "price": 628.98,
-    "tp": 654.1392000000001,
-    "sl": 619.5268,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777457748146,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 627.54,
-        "lastLow": 622.64,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.10923516351635879,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 3.6165000000000873,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.8309504378793235,
-        "histPrev": 0.6338902115434166
-      },
-      "multiDelta": 0.37216270817268704
-    },
-    "outcome": "LOSS",
-    "exitPrice": 618.24,
-    "closedAt": 1777475714543
-  },
-  {
-    "id": "SNIPER-1777457748563-ETHUSDT",
-    "symbol": "ETHUSDT",
-    "price": 2342.75,
-    "tp": 2436.46,
-    "sl": 2267.8239,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777457748563,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 2305.17,
-        "lastLow": 2279.22,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.3588385238522994,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 35.98400000000038,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 11.084357747738522,
-        "histPrev": 9.654601493979499
-      },
-      "multiDelta": 0.4977914109468426
-    },
-    "outcome": "LOSS",
-    "exitPrice": 2266.99,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777457749189-BTCUSDT",
-    "symbol": "BTCUSDT",
-    "price": 77717.93,
-    "tp": 80826.64719999999,
-    "sl": 75801.9457,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777457749189,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 77474.52,
-        "lastLow": 76182.86,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -14.644510831084023,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 955.0465000000113,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 191.79482460684085,
-        "histPrev": 142.99778267924557
-      },
-      "multiDelta": 0.36886105648637274
-    },
-    "outcome": "LOSS",
-    "exitPrice": 75251.22,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777457749940-LTCUSDT",
-    "symbol": "LTCUSDT",
-    "price": 57.38,
-    "tp": 59.675200000000004,
-    "sl": 54.4066,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777457749940,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 55.62,
-        "lastLow": 54.68,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.008542034203419448,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.3425000000000082,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.36210967239643566,
-        "histPrev": 0.27269120392091395
-      },
-      "multiDelta": 0.2030806164898077
-    },
-    "outcome": "LOSS",
-    "exitPrice": 54.39,
-    "closedAt": 1777487567140
-  },
-  {
-    "id": "SNIPER-1777458662427-SOLUSDT",
-    "symbol": "SOLUSDT",
-    "price": 85.49,
-    "tp": 88.9096,
-    "sl": 82.585,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777458662427,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 84.95,
-        "lastLow": 83,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.031517431743175214,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.1777500000000032,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.23892299123546934,
-        "histPrev": 0.17511829422005576
-      },
-      "multiDelta": 0.3098536201984418
-    },
-    "outcome": "LOSS",
-    "exitPrice": 81.96,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777458663046-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2536,
-    "tp": 0.263744,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777458663046,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00004866006600660143,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.004667499999999991,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0011807928661721756,
-        "histPrev": 0.0008925233430022717
-      },
-      "multiDelta": 0.5236291486291385
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604388
-  },
-  {
-    "id": "SNIPER-1777458664244-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10993,
-    "tp": 0.1143272,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777458664244,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00003919165916591664,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.006416000000000005,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0021427132448710307,
-        "histPrev": 0.0017320282086958072
-      },
-      "multiDelta": 0.43380931987720833
-    }
-  },
-  {
-    "id": "SNIPER-1777458664837-XRPUSDT",
-    "symbol": "XRPUSDT",
-    "price": 1.4035,
-    "tp": 1.45964,
-    "sl": 1.3700155,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777458664837,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.3861,
-        "lastLow": 1.3769,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.0005872475247524742,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.016514999999999835,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0023714330368833636,
-        "histPrev": 0.001455758404660612
-      },
-      "multiDelta": 0.22985923929320365
-    },
-    "outcome": "LOSS",
-    "exitPrice": 1.3652,
-    "closedAt": 1777475714543
-  },
-  {
-    "id": "SNIPER-1777458665312-BNBUSDT",
-    "symbol": "BNBUSDT",
-    "price": 629.18,
-    "tp": 654.3471999999999,
-    "sl": 619.5268,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777458665312,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 627.54,
-        "lastLow": 622.64,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.10911635163517067,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 3.7789999999999964,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.8469048538337347,
-        "histPrev": 0.6338902115434166
-      },
-      "multiDelta": 0.4366377336568608
-    },
-    "outcome": "LOSS",
-    "exitPrice": 618.24,
-    "closedAt": 1777475714543
-  },
-  {
-    "id": "SNIPER-1777458665783-ETHUSDT",
-    "symbol": "ETHUSDT",
-    "price": 2344,
-    "tp": 2437.76,
-    "sl": 2267.8239,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777458665783,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 2305.17,
-        "lastLow": 2279.22,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.3580959495948737,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 37.20275000000038,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 11.184072847453535,
-        "histPrev": 9.654601493979499
-      },
-      "multiDelta": 0.4849328614134996
-    },
-    "outcome": "LOSS",
-    "exitPrice": 2266.99,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777458666411-BTCUSDT",
-    "symbol": "BTCUSDT",
-    "price": 77834.51,
-    "tp": 80947.8904,
-    "sl": 75801.9457,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777458666411,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 77474.52,
-        "lastLow": 76182.86,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -14.575255385539469,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1047.8720000000176,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 201.09465366665972,
-        "histPrev": 142.99778267924557
-      },
-      "multiDelta": 0.4759697271562539
-    },
-    "outcome": "LOSS",
-    "exitPrice": 75251.22,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777459610999-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2525,
-    "tp": 0.2626,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777459610999,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00004931353135313867,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0035949999999999593,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.001093043578422881,
-        "histPrev": 0.0008925233430022717
-      },
-      "multiDelta": 0.25353692201517625
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604389
-  },
-  {
-    "id": "SNIPER-1777459611985-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.11,
-    "tp": 0.1144,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777459611985,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00003923324332433331,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.006484250000000011,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00214829729045507,
-        "histPrev": 0.0017320282086958072
-      },
-      "multiDelta": 0.4505958906206137
-    }
-  },
-  {
-    "id": "SNIPER-1777459612766-BNBUSDT",
-    "symbol": "BNBUSDT",
-    "price": 627.95,
-    "tp": 653.0680000000001,
-    "sl": 619.5268,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777459612766,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 627.54,
-        "lastLow": 622.64,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.1098470447044776,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 2.5797500000001037,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.7487851957140492,
-        "histPrev": 0.6338902115434166
-      },
-      "multiDelta": 0.2140108377092501
-    },
-    "outcome": "LOSS",
-    "exitPrice": 618.24,
-    "closedAt": 1777475714543
-  },
-  {
-    "id": "SNIPER-1777459613178-ETHUSDT",
-    "symbol": "ETHUSDT",
-    "price": 2334,
-    "tp": 2427.36,
-    "sl": 2267.8239,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777459613178,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 2305.17,
-        "lastLow": 2279.22,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.3640365436542796,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 27.45275000000038,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 10.386352049732523,
-        "histPrev": 9.654601493979499
-      },
-      "multiDelta": 0.1550163942100886
-    },
-    "outcome": "LOSS",
-    "exitPrice": 2266.99,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777459613764-BTCUSDT",
-    "symbol": "BTCUSDT",
-    "price": 77607.25,
-    "tp": 80711.54000000001,
-    "sl": 75801.9457,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777459613764,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 77474.52,
-        "lastLow": 76182.86,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -14.710261326133528,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 826.2935000000143,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 182.9656508176704,
-        "histPrev": 142.99778267924557
-      },
-      "multiDelta": 0.19694587457600435
-    },
-    "outcome": "LOSS",
-    "exitPrice": 75251.22,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777460666956-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2526,
-    "tp": 0.262704,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777460666956,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00004600900090009294,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0035424999999999485,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0012453490204293316,
-        "histPrev": 0.0010926999507452073
-      },
-      "multiDelta": 0.29520358868183566
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604389
-  },
-  {
-    "id": "SNIPER-1777460667921-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10958,
-    "tp": 0.1139632,
-    "sl": 0.0983458,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777460667921,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00004496255625562684,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.005783500000000011,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0024219226974592084,
-        "histPrev": 0.002155403143132159
-      },
-      "multiDelta": 0.10166580392074054
-    }
-  },
-  {
-    "id": "SNIPER-1777460669177-BTCUSDT",
-    "symbol": "BTCUSDT",
-    "price": 77612.57,
-    "tp": 80717.07280000001,
-    "sl": 75801.9457,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777460669177,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 77474.52,
-        "lastLow": 76182.86,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -14.51897395739757,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 780.4720000000088,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 213.0208726778801,
-        "histPrev": 183.5019316208054
-      },
-      "multiDelta": 0.199540874439709
-    },
-    "outcome": "LOSS",
-    "exitPrice": 75251.22,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777461381782-ADAUSDT",
-    "symbol": "ADAUSDT",
-    "price": 0.2524,
-    "tp": 0.262496,
-    "sl": 0.244969,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777461381783,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.2482,
-        "lastLow": 0.2462,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -0.00004612781278128169,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0033475000000000033,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0012293946044749093,
-        "histPrev": 0.0010926999507452073
-      },
-      "multiDelta": 0.16425120772947005
-    },
-    "outcome": "LOSS",
-    "exitPrice": 0.2444,
-    "closedAt": 1777477604389
-  },
-  {
-    "id": "SNIPER-1777461382737-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.11008,
-    "tp": 0.11448320000000001,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777461382737,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000045259585958597834,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.006271000000000013,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0024618087373452363,
-        "histPrev": 0.002155403143132159
-      },
-      "multiDelta": 0.3476007632703339
-    }
-  },
-  {
-    "id": "SNIPER-1777461384033-BTCUSDT",
-    "symbol": "BTCUSDT",
-    "price": 77595.45,
-    "tp": 80699.268,
-    "sl": 75801.9457,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777461384033,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 77474.52,
-        "lastLow": 76182.86,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": -14.529144254427274,
-        "isBullish": false
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 763.7800000000134,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 211.6551746721816,
-        "histPrev": 183.5019316208054
-      },
-      "multiDelta": 0.16853783038599265
-    },
-    "outcome": "LOSS",
-    "exitPrice": 75251.22,
-    "closedAt": 1777486608267
-  },
-  {
-    "id": "SNIPER-1777462330015-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.11,
-    "tp": 0.1144,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777462330015,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000045212061206122514,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.006193000000000018,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.002455426970963487,
-        "histPrev": 0.002155403143132159
-      },
-      "multiDelta": 0.31508043806708325
-    }
-  },
-  {
-    "id": "SNIPER-1777463119066-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.1102,
-    "tp": 0.11460800000000002,
-    "sl": 0.0983458,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777463119066,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000045330873087310384,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.006388000000000019,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0024713813869178813,
-        "histPrev": 0.002155403143132159
-      },
-      "multiDelta": 0.38327499932304154
-    }
-  },
-  {
-    "id": "SNIPER-1777464100662-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10915,
-    "tp": 0.113516,
-    "sl": 0.0983458,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777464100662,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00005039255925592916,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.005115250000000002,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.002574384288744014,
-        "histPrev": 0.002429112002572356
-      },
-      "multiDelta": -0.24896736087670512
-    }
-  },
-  {
-    "id": "SNIPER-1777464938372-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10748,
-    "tp": 0.11177920000000001,
-    "sl": 0.0983458,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777464938372,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10099,
-        "lastLow": 0.09884,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00004940048004800775,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.003487000000000018,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.002441164915524638,
-        "histPrev": 0.002429112002572356
-      },
-      "multiDelta": -0.23418704913915697
-    }
-  },
-  {
-    "id": "SNIPER-1777478654300-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.0097,
-    "tp": 0.010088000000000001,
-    "sl": 0.006233674999999999,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777478654300,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006131972397239726,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0014800249999999994,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009425213251484117,
-        "histPrev": 0.0008863497745846419
-      },
-      "multiDelta": 0.40145479910704546
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.010709,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777479364079-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.009715,
-    "tp": 0.0101036,
-    "sl": 0.006233674999999999,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777479364079,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006132863486348639,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0014946499999999984,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009437179063449923,
-        "histPrev": 0.0008863497745846419
-      },
-      "multiDelta": 0.4351675561533676
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.010709,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777480392722-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.010074,
-    "tp": 0.01047696,
-    "sl": 0.006233674999999999,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777480392722,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006154190219021903,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0018226749999999993,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009723560829831696,
-        "histPrev": 0.0008863497745846419
-      },
-      "multiDelta": 0.5262564007230904
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.010709,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777480407274-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.010113,
-    "tp": 0.01051752,
-    "sl": 0.006233674999999999,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777480407274,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006156507050705074,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0018606999999999999,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009754671940942813,
-        "histPrev": 0.0008863497745846419
-      },
-      "multiDelta": 0.5359869396452464
-    },
-    "outcome": "WIN",
-    "exitPrice": 0.010709,
-    "closedAt": 1777481130361
-  },
-  {
-    "id": "SNIPER-1777481133277-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.010904,
-    "tp": 0.01134016,
-    "sl": 0.006233674999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777481133277,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006203497149714976,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0025679250000000004,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0010385669091939956,
-        "histPrev": 0.0008863497745846419
-      },
-      "multiDelta": 0.6880458870770161
-    }
-  },
-  {
-    "id": "SNIPER-1777482031418-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.0108,
-    "tp": 0.011232,
-    "sl": 0.006233674999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777482031418,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0000649669486948694,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0022048750000000002,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0011366678577482813,
-        "histPrev": 0.0010372338559819418
-      },
-      "multiDelta": 0.042708154765512596
-    }
-  },
-  {
-    "id": "SNIPER-1777483009932-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.010646,
-    "tp": 0.01107184,
-    "sl": 0.006233674999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777483009932,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006487546354635456,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0020547250000000003,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0011243829574633813,
-        "histPrev": 0.0010372338559819418
-      },
-      "multiDelta": 0.24325911895283944
-    }
-  },
-  {
-    "id": "SNIPER-1777483890340-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.9945025000000001,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777483890340,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000004984098409879265,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0002575000000000216,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00005134581144161654,
-        "histPrev": 0.00002973887794710528
-      },
-      "multiDelta": 0.3333333333333333
-    }
-  },
-  {
-    "id": "SNIPER-1777485740017-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.9945025000000001,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777485740017,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005141914191450717,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0001500000000000945,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00005971197515997062,
-        "histPrev": 0.00005134581144161654
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777485740710-RLSUSDT",
-    "symbol": "RLSUSDT",
-    "price": 0.009852,
-    "tp": 0.01024608,
-    "sl": 0.006233674999999999,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777485740710,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.010587,
-        "lastLow": 0.006265,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0000665676867686769,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0012624999999999997,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.001056715368249651,
-        "histPrev": 0.0010469350677317054
-      },
-      "multiDelta": 0.20907553054950315
-    }
-  },
-  {
-    "id": "SNIPER-1777488410626-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.9945025000000001,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777488410626,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005141914191450717,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0001500000000000945,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00005971197515997062,
-        "histPrev": 0.00005134581144161654
-      },
-      "multiDelta": 0.3333333333333333
-    }
-  },
-  {
-    "id": "SNIPER-1777489335381-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.9945025000000001,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777489335381,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005293729372963559,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00014249999999993435,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00006563163740525013,
-        "histPrev": 0.0000597610648283009
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777490130964-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.9945025000000001,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777490130964,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005293729372963559,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00014249999999993435,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00006563163740525013,
-        "histPrev": 0.0000597610648283009
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777492892011-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.9945025000000001,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777492892011,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005320732073237778,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00013750000000012363,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00006332410904974495,
-        "histPrev": 0.000057654429427955733
-      },
-      "multiDelta": -0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777497334147-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.9945025000000001,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777497334147,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005399939993998841,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00013249999999986883,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00006704452346495415,
-        "histPrev": 0.00006332410904974495
-      },
-      "multiDelta": 0
-    }
-  },
-  {
-    "id": "SNIPER-1777498308028-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.9945025000000001,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777498308028,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005399939993998841,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00013249999999986883,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00006704452346495415,
-        "histPrev": 0.00006332410904974495
-      },
-      "multiDelta": 0
-    }
-  },
-  {
-    "id": "SNIPER-1777499166242-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.9945025000000001,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777499166242,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.0001,
-        "lastLow": 0.9995,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005459345934599327,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00022999999999995246,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00007502173144224855,
-        "histPrev": 0.00006332410904974495
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777500102853-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.980196,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777500102853,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005530153015303486,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00012750000000005812,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00007535437882721929,
-        "histPrev": 0.00007502173144224855
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777500974858-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.980196,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777500974858,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005530153015303486,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00012750000000005812,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00007535437882721929,
-        "histPrev": 0.00007502173144224855
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777501871270-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0002,
-    "tp": 1.040208,
-    "sl": 0.980196,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777501871270,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005530153015303486,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00012750000000005812,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00007535437882721929,
-        "histPrev": 0.00007502173144224855
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777507601037-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.980294,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777507601038,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005709570957097106,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00021250000000017089,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00008141293430008467,
-        "histPrev": 0.00007475626063802032
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777509164738-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10635,
-    "tp": 0.11060400000000001,
-    "sl": 0.100495,
-    "score": 80,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777509164738,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 0.00006529102910291186,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0007127499999999842,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0006116210659584953,
-        "histPrev": 0.0004238108314187361
-      },
-      "multiDelta": 0.6237896470454676
-    }
-  },
-  {
-    "id": "SNIPER-1777509954096-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10717,
-    "tp": 0.11145680000000001,
-    "sl": 0.100495,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777509954096,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006577815781578329,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0015122499999999789,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0006770341713715766,
-        "histPrev": 0.0004238108314187361
-      },
-      "multiDelta": 0.6686767044325252
-    }
-  },
-  {
-    "id": "SNIPER-1777510839635-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10828,
-    "tp": 0.11261120000000001,
-    "sl": 0.100495,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777510839635,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006984476447645046,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.002450999999999995,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0010092141611590666,
-        "histPrev": 0.0007456234330751182
-      },
-      "multiDelta": 0.7741079594428385
-    }
-  },
-  {
-    "id": "SNIPER-1777510840963-SHIBUSDT",
+    "id": "SNIPER-1777539620437-SHIBUSDT",
     "symbol": "SHIBUSDT",
-    "price": 0.000006265,
-    "tp": 0.000006515600000000001,
+    "price": 0.000006325,
+    "tp": 0.0000065779999999999995,
     "sl": 0.00000596801,
-    "score": 80,
+    "score": 90,
     "module": "CONFLUENCE_SNIPER",
     "status": "OPEN",
-    "time": 1777510840963,
+    "time": 1777539620437,
     "version": "v12.0.0-QuantumSniper",
     "metrics": {
       "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.000006562,
-        "lastLow": 0.000005998,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 2.6402640263453226e-13,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.557500000000027e-8,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 6.4268170230442e-10,
-        "histPrev": -7.135386952295149e-9
-      },
-      "multiDelta": 0.6162077104642155
-    }
-  },
-  {
-    "id": "SNIPER-1777511752081-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.1068,
-    "tp": 0.111072,
-    "sl": 0.100495,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777511752081,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006896555655565915,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0010080000000000089,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0008911514830964029,
-        "histPrev": 0.0007456234330751182
-      },
-      "multiDelta": 0.3435973517477642
-    }
-  },
-  {
-    "id": "SNIPER-1777511753318-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.980294,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777511753318,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005700570056998715,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00020749999999991608,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00007333695843136923,
-        "histPrev": 0.00006540942867716559
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777512643140-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10748,
-    "tp": 0.11177920000000001,
-    "sl": 0.100495,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777512643140,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0000693695169516981,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.001670999999999992,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009453964973414053,
-        "histPrev": 0.0007456234330751182
-      },
-      "multiDelta": 0.4536297142073115
-    }
-  },
-  {
-    "id": "SNIPER-1777512644266-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.980294,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777512644266,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005700570056998715,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00020749999999991608,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00007333695843136923,
-        "histPrev": 0.00006540942867716559
-      },
-      "multiDelta": 0.16666666666666666
-    }
-  },
-  {
-    "id": "SNIPER-1777512644699-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.00000627,
-    "tp": 0.0000065208,
-    "sl": 0.00000596801,
-    "score": 80,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777512644699,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.000006562,
-        "lastLow": 0.000005998,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 3.2343234324062604e-12,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 2.0449999999999948e-8,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 1.041542101165165e-9,
-        "histPrev": -7.135386952295149e-9
-      },
-      "multiDelta": 0.5180595623160537
-    }
-  },
-  {
-    "id": "SNIPER-1777513573258-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.1076,
-    "tp": 0.111904,
-    "sl": 0.100495,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777513573258,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00006944080408041239,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.001787999999999998,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009549691469140642,
-        "histPrev": 0.0007456234330751182
-      },
-      "multiDelta": 0.4730471899354661
-    }
-  },
-  {
-    "id": "SNIPER-1777513574602-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006284,
-    "tp": 0.000006535360000000001,
-    "sl": 0.00000596801,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777513574602,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.000006562,
+        "bullishBOS": true,
+        "lastHigh": 0.000006305,
         "lastLow": 0.000005998,
         "inDiscountZone": false
       },
       "ml": {
-        "slope": 1.1551155115553914e-11,
+        "slope": 3.1135313531351414e-10,
         "isBullish": true
       },
       "sqz": {
         "sqzOn": false,
         "sqzOff": true,
-        "momentum": 3.410000000000023e-8,
+        "momentum": 1.5107499999999923e-7,
         "isBullish": true
       },
       "macd": {
-        "hist": 2.158351217973726e-9,
-        "histPrev": -7.135386952295149e-9
+        "hist": 2.5178298467442793e-8,
+        "histPrev": 1.871530262735596e-8
       },
-      "multiDelta": 0.5828743771308681
+      "multiDelta": 0.815972222222226
     }
   },
   {
-    "id": "SNIPER-1777514511488-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10716,
-    "tp": 0.11144640000000001,
-    "sl": 0.100495,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777514511488,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00007183810381038544,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0012395000000000045,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0010311269568578363,
-        "histPrev": 0.0009007290416358921
-      },
-      "multiDelta": 0.3903652548263376
-    }
-  },
-  {
-    "id": "SNIPER-1777514512593-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.980294,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777514512593,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0000058043804380426865,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00020000000000020002,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0000726441041269954,
-        "histPrev": 0.00006545792979095744
-      },
-      "multiDelta": 0.3333333333333333
-    }
-  },
-  {
-    "id": "SNIPER-1777514513028-SHIBUSDT",
+    "id": "SNIPER-1777540544010-SHIBUSDT",
     "symbol": "SHIBUSDT",
-    "price": 0.000006276,
-    "tp": 0.00000652704,
+    "price": 0.000006312,
+    "tp": 0.00000656448,
     "sl": 0.00000596801,
-    "score": 80,
+    "score": 90,
     "module": "CONFLUENCE_SNIPER",
     "status": "OPEN",
-    "time": 1777514513028,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.000006562,
-        "lastLow": 0.000005998,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 4.970897089701351e-11,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 2.440000000000014e-8,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 7.290645253347308e-9,
-        "histPrev": 2.349851631611776e-10
-      },
-      "multiDelta": 0.6150471028519848
-    }
-  },
-  {
-    "id": "SNIPER-1777515327239-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006269,
-    "tp": 0.0000065197599999999996,
-    "sl": 0.00000596801,
-    "score": 80,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777515327239,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.000006562,
-        "lastLow": 0.000005998,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 4.555055505549298e-11,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.757500000000042e-8,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 6.732240694943451e-9,
-        "histPrev": 2.349851631611776e-10
-      },
-      "multiDelta": 0.4180774058822791
-    }
-  },
-  {
-    "id": "SNIPER-1777516352540-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10606,
-    "tp": 0.11030240000000001,
-    "sl": 0.100495,
-    "score": 75,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777516352540,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 0.0000711846384638517,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00016700000000000048,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009433776691085555,
-        "histPrev": 0.0009007290416358921
-      },
-      "multiDelta": -0.06614688645401105
-    }
-  },
-  {
-    "id": "SNIPER-1777518992578-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10598,
-    "tp": 0.1102192,
-    "sl": 0.100495,
-    "score": 75,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777518992578,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 0.00007279225922592514,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00007849999999999524,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009184664790119618,
-        "histPrev": 0.0008900089191304361
-      },
-      "multiDelta": -0.1302672750541006
-    }
-  },
-  {
-    "id": "SNIPER-1777519844992-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10627,
-    "tp": 0.1105208,
-    "sl": 0.100495,
-    "score": 75,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777519844992,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 0.00007296453645364698,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0003612500000000074,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009416003821458574,
-        "histPrev": 0.0008900089191304361
-      },
-      "multiDelta": -0.15487044965727825
-    }
-  },
-  {
-    "id": "SNIPER-1777519846123-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.980294,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777519846123,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005780978097807825,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00019250000000003986,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0000712419498190009,
-        "histPrev": 0.00006461780648114868
-      },
-      "multiDelta": 0.5
-    }
-  },
-  {
-    "id": "SNIPER-1777521914320-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10645,
-    "tp": 0.110708,
-    "sl": 0.100495,
-    "score": 75,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777521914320,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 0.00007535583558356055,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0005029999999999896,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00101767199710176,
-        "histPrev": 0.000983076954660489
-      },
-      "multiDelta": -0.25172532781227597
-    }
-  },
-  {
-    "id": "SNIPER-1777522527099-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10632,
-    "tp": 0.1105728,
-    "sl": 0.100495,
-    "score": 75,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777522527099,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "lastHigh": 0.112,
-        "lastLow": 0.101,
-        "inDiscountZone": true
-      },
-      "ml": {
-        "slope": 0.00007527860786078848,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00037624999999999464,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0010073016267313911,
-        "histPrev": 0.000983076954660489
-      },
-      "multiDelta": -0.16839199447894815
-    }
-  },
-  {
-    "id": "SNIPER-1777526145535-USDCUSDT",
-    "symbol": "USDCUSDT",
-    "price": 1.0003,
-    "tp": 1.040312,
-    "sl": 0.980294,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777526145535,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": false,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000006007200720064183,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00017500000000025828,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.00007814612136436416,
-        "histPrev": 0.00007557447771744386
-      },
-      "multiDelta": 0.3333333333333333
-    }
-  },
-  {
-    "id": "SNIPER-1777527075424-ENMUSDT",
-    "symbol": "ENMUSDT",
-    "price": 2.325,
-    "tp": 2.418,
-    "sl": 0.2985,
-    "score": 70,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "CLOSED",
-    "time": 1777527075424,
+    "time": 1777540544010,
     "version": "v12.0.0-QuantumSniper",
     "metrics": {
       "smc": {
         "bullishBOS": true,
-        "lastHigh": 1.636,
-        "lastLow": 0.3,
+        "lastHigh": 0.000006305,
+        "lastLow": 0.000005998,
         "inDiscountZone": false
       },
       "ml": {
-        "slope": -0.005111929192919267,
-        "isBullish": false
+        "slope": 3.0363036303626753e-10,
+        "isBullish": true
       },
       "sqz": {
         "sqzOn": false,
         "sqzOff": true,
-        "momentum": 1.2250750000000004,
+        "momentum": 1.3739999999999973e-7,
         "isBullish": true
       },
       "macd": {
-        "hist": 0.294752841145016,
-        "histPrev": 0.20483045216675388
+        "hist": 2.4141261430405364e-8,
+        "histPrev": 1.871530262735596e-8
       },
-      "multiDelta": 0.7383034365258103
-    },
-    "outcome": "WIN",
-    "exitPrice": 2.645,
-    "closedAt": 1777528002383
+      "multiDelta": 0.39172979797979474
+    }
   },
   {
-    "id": "SNIPER-1777528005012-ENMUSDT",
-    "symbol": "ENMUSDT",
-    "price": 2.65,
-    "tp": 2.756,
-    "sl": 0.2985,
-    "score": 70,
+    "id": "SNIPER-1777541555572-SHIBUSDT",
+    "symbol": "SHIBUSDT",
+    "price": 0.000006343,
+    "tp": 0.0000065967200000000004,
+    "sl": 0.00000596801,
+    "score": 90,
     "module": "CONFLUENCE_SNIPER",
     "status": "OPEN",
-    "time": 1777528005012,
+    "time": 1777541555572,
     "version": "v12.0.0-QuantumSniper",
     "metrics": {
       "smc": {
         "bullishBOS": true,
-        "lastHigh": 1.636,
-        "lastLow": 0.3,
+        "lastHigh": 0.000006305,
+        "lastLow": 0.000005998,
         "inDiscountZone": false
       },
       "ml": {
-        "slope": -0.0049188598859885805,
-        "isBullish": false
+        "slope": 3.220462046204259e-10,
+        "isBullish": true
       },
       "sqz": {
         "sqzOn": false,
         "sqzOff": true,
-        "momentum": 1.47945,
+        "momentum": 1.5787500000000058e-7,
         "isBullish": true
       },
       "macd": {
-        "hist": 0.3206787670709419,
-        "histPrev": 0.20483045216675388
+        "hist": 2.661419590334012e-8,
+        "histPrev": 1.871530262735596e-8
       },
-      "multiDelta": 0.773514704131444
+      "multiDelta": 0.619250910746815
     }
   },
   {
-    "id": "SNIPER-1777529073138-TRXUSDT",
+    "id": "SNIPER-1777542353395-SHIBUSDT",
+    "symbol": "SHIBUSDT",
+    "price": 0.000006355,
+    "tp": 0.0000066092,
+    "sl": 0.00000596801,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777542353395,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.000006305,
+        "lastLow": 0.000005998,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 3.291749174917181e-10,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 1.6657500000000018e-7,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 2.757146086060472e-8,
+        "histPrev": 1.871530262735596e-8
+      },
+      "multiDelta": 0.6515886605783896
+    }
+  },
+  {
+    "id": "SNIPER-1777543488369-SHIBUSDT",
+    "symbol": "SHIBUSDT",
+    "price": 0.000006335,
+    "tp": 0.0000065884,
+    "sl": 0.0000061172600000000004,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777543488369,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.000006305,
+        "lastLow": 0.000006148,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 4.237143714370831e-10,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 1.4380000000000022e-7,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 3.07513242006941e-8,
+        "histPrev": 2.5176825777396133e-8
+      },
+      "multiDelta": 0.4798801369863104
+    }
+  },
+  {
+    "id": "SNIPER-1777544210848-SHIBUSDT",
+    "symbol": "SHIBUSDT",
+    "price": 0.000006326,
+    "tp": 0.00000657904,
+    "sl": 0.0000061172600000000004,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777544210848,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.000006305,
+        "lastLow": 0.000006148,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 4.183678367836539e-10,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 1.350249999999996e-7,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 3.0033375482746284e-8,
+        "histPrev": 2.5176825777396133e-8
+      },
+      "multiDelta": 0.2838924826653175
+    }
+  },
+  {
+    "id": "SNIPER-1777584766086-TRXUSDT",
     "symbol": "TRXUSDT",
-    "price": 0.3247,
-    "tp": 0.337688,
+    "price": 0.3269,
+    "tp": 0.33997600000000006,
     "sl": 0.320987,
-    "score": 70,
+    "score": 85,
     "module": "CONFLUENCE_SNIPER",
     "status": "OPEN",
-    "time": 1777529073138,
+    "time": 1777584766086,
     "version": "v12.0.0-QuantumSniper",
     "metrics": {
       "smc": {
         "bullishBOS": true,
-        "lastHigh": 0.324,
+        "lastHigh": 0.3268,
         "lastLow": 0.3226,
         "inDiscountZone": false
       },
       "ml": {
-        "slope": -0.000009819381938170209,
-        "isBullish": false
+        "slope": 0.000005838583858388633,
+        "isBullish": true
       },
       "sqz": {
         "sqzOn": false,
         "sqzOff": true,
-        "momentum": 0.001077500000000009,
+        "momentum": 0.001537500000000025,
         "isBullish": true
       },
       "macd": {
-        "hist": 0.00029540755523266293,
-        "histPrev": 0.00023743278594595685
+        "hist": 0.0007932292694792786,
+        "histPrev": 0.0007751259452103421
       },
-      "multiDelta": 0.5000000000000115
+      "multiDelta": 0.2166666666666696
+    }
+  },
+  {
+    "id": "SNIPER-1777587368710-MXUSDT",
+    "symbol": "MXUSDT",
+    "price": 1.7695,
+    "tp": 1.8402800000000001,
+    "sl": 1.752195,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777587368710,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 1.7682,
+        "lastLow": 1.761,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.000002907890789104615,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.004064999999999985,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0013651091995809939,
+        "histPrev": 0.0012259443812507875
+      },
+      "multiDelta": 0.26121463077986157
+    }
+  },
+  {
+    "id": "SNIPER-1777594516846-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3272,
+    "tp": 0.340288,
+    "sl": 0.320987,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777594516846,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.3268,
+        "lastLow": 0.3226,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.000009722772277229399,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0014174999999999605,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.000756279138390159,
+        "histPrev": 0.0007296411882956599
+      },
+      "multiDelta": 0.46296296296294015
+    }
+  },
+  {
+    "id": "SNIPER-1777595438350-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3271,
+    "tp": 0.340184,
+    "sl": 0.320987,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777595438350,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.3268,
+        "lastLow": 0.3226,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.0000096633663366359,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0013199999999999878,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0007483019304129201,
+        "histPrev": 0.0007296411882956599
+      },
+      "multiDelta": 0.42592592592590767
+    }
+  },
+  {
+    "id": "SNIPER-1777596352431-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3272,
+    "tp": 0.340288,
+    "sl": 0.320987,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777596352431,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.3268,
+        "lastLow": 0.3226,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.000009722772277229399,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0014174999999999605,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.000756279138390159,
+        "histPrev": 0.0007296411882956599
+      },
+      "multiDelta": 0.46296296296294015
+    }
+  },
+  {
+    "id": "SNIPER-1777600956321-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10881,
+    "tp": 0.11316240000000001,
+    "sl": 0.10490284999999999,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777600956321,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011006168616861511,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0017347500000000071,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0007601150189350397,
+        "histPrev": 0.0006557977126790404
+      },
+      "multiDelta": 0.2746253229974294
+    }
+  },
+  {
+    "id": "SNIPER-1777601733019-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10917,
+    "tp": 0.11353680000000001,
+    "sl": 0.10490284999999999,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777601733019,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011027554755475189,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0020582499999999976,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0007888329676529748,
+        "histPrev": 0.0006557977126790404
+      },
+      "multiDelta": 0.5931438415159387
+    }
+  },
+  {
+    "id": "SNIPER-1777602613486-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10871,
+    "tp": 0.1130584,
+    "sl": 0.10490284999999999,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777602613486,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011000228022802073,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0016072500000000045,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0007521378109578147,
+        "histPrev": 0.0006557977126790404
+      },
+      "multiDelta": 0.4018536502257463
+    }
+  },
+  {
+    "id": "SNIPER-1777604421531-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10829,
+    "tp": 0.1126216,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777604421531,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.0001116134413441327,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0011632500000000046,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0007667379093892202,
+        "histPrev": 0.000727852741414875
+      },
+      "multiDelta": -0.25491081508241253
+    }
+  },
+  {
+    "id": "SNIPER-1777605330729-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10861,
+    "tp": 0.1129544,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777605330729,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011180354035403399,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0014752499999999974,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0007922649749162736,
+        "histPrev": 0.000727852741414875
+      },
+      "multiDelta": 0.1953815825784012
+    }
+  },
+  {
+    "id": "SNIPER-1777606318038-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10956,
+    "tp": 0.11394240000000001,
+    "sl": 0.10490284999999999,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777606318038,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011236789678967661,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0022840000000000082,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0008680484506997516,
+        "histPrev": 0.000727852741414875
+      },
+      "multiDelta": 0.2937783234943674
+    }
+  },
+  {
+    "id": "SNIPER-1777607176007-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10926,
+    "tp": 0.1136304,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777607176007,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011218967896789611,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.001991500000000007,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.000844116826768132,
+        "histPrev": 0.000727852741414875
+      },
+      "multiDelta": 0.2375985482134666
+    }
+  },
+  {
+    "id": "SNIPER-1777608120720-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10924,
+    "tp": 0.1136096,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777608120720,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.0001147660366036613,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0019187499999999968,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009139692705846109,
+        "histPrev": 0.0008311716622321358
+      },
+      "multiDelta": 0.18782549321439038
+    }
+  },
+  {
+    "id": "SNIPER-1777609019968-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.1089,
+    "tp": 0.113256,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777609019968,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011456405640564007,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0015872500000000123,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0008868467634621097,
+        "histPrev": 0.0008311716622321358
+      },
+      "multiDelta": -0.18442811632735948
+    }
+  },
+  {
+    "id": "SNIPER-1777609941657-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10841,
+    "tp": 0.11274640000000001,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777609941657,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011427296729673035,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0011095000000000133,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0008477584443737918,
+        "histPrev": 0.0008311716622321358
+      },
+      "multiDelta": -0.2680149626260665
+    }
+  },
+  {
+    "id": "SNIPER-1777610741451-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10861,
+    "tp": 0.1129544,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777610741451,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011439177917791823,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0013045,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0008637128603282002,
+        "histPrev": 0.0008311716622321358
+      },
+      "multiDelta": -0.21103490564601204
+    }
+  },
+  {
+    "id": "SNIPER-1777611916405-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10907,
+    "tp": 0.1134328,
+    "sl": 0.10490284999999999,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777611916405,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011721032103210307,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0017192500000000055,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009295557214102079,
+        "histPrev": 0.0008812038102761488
+      },
+      "multiDelta": 0.3103549223520217
+    }
+  },
+  {
+    "id": "SNIPER-1777612551581-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10927,
+    "tp": 0.11364080000000001,
+    "sl": 0.10490284999999999,
+    "score": 90,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777612551581,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011732913291329094,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.00191425000000002,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009455101373646163,
+        "histPrev": 0.0008812038102761488
+      },
+      "multiDelta": 0.33987210556939473
+    }
+  },
+  {
+    "id": "SNIPER-1777613518177-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10905,
+    "tp": 0.113412,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777613518177,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.0001171984398439849,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0016997500000000137,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009279602798147601,
+        "histPrev": 0.0008812038102761488
+      },
+      "multiDelta": 0.16869252262510329
+    }
+  },
+  {
+    "id": "SNIPER-1777614378499-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10897,
+    "tp": 0.11332880000000001,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777614378499,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011715091509150957,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.001621750000000019,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009215785134329968,
+        "histPrev": 0.0008812038102761488
+      },
+      "multiDelta": 0.12636448029706307
+    }
+  },
+  {
+    "id": "SNIPER-1777615519860-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.109,
+    "tp": 0.11336,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777615519860,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011984734473447658,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0015912500000000024,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009538064331137408,
+        "histPrev": 0.0009328349660039231
+      },
+      "multiDelta": -0.10337810337810177
+    }
+  },
+  {
+    "id": "SNIPER-1777616110458-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10897,
+    "tp": 0.11332880000000001,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777616110458,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011982952295229888,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0015620000000000217,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009514132707205691,
+        "histPrev": 0.0009328349660039231
+      },
+      "multiDelta": -0.015194681861351015
+    }
+  },
+  {
+    "id": "SNIPER-1777617160122-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.10881,
+    "tp": 0.11316240000000001,
+    "sl": 0.10490284999999999,
+    "score": 85,
+    "module": "CONFLUENCE_SNIPER",
+    "status": "OPEN",
+    "time": 1777617160122,
+    "version": "v12.0.0-QuantumSniper",
+    "metrics": {
+      "smc": {
+        "bullishBOS": true,
+        "lastHigh": 0.10813,
+        "lastLow": 0.10543,
+        "inDiscountZone": false
+      },
+      "ml": {
+        "slope": 0.00011973447344734736,
+        "isBullish": true
+      },
+      "sqz": {
+        "sqzOn": false,
+        "sqzOff": true,
+        "momentum": 0.0014060000000000045,
+        "isBullish": true
+      },
+      "macd": {
+        "hist": 0.0009386497379570424,
+        "histPrev": 0.0009328349660039231
+      },
+      "multiDelta": -0.11396011396011264
     }
   }
 ]

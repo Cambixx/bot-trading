@@ -6,7 +6,45 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-### Current Version: v12.0.0 (Quantum Sniper)
+### Current Version: v12.0.1 (Quantum Sniper Remediation)
+**Date:** Apr 30, 2026
+**Theme:** "P0 REMEDIATION — THRESHOLD HARDENING & SHADOW ENFORCEMENT"
+
+### Core Logic & Parameters:
+- **Runtime Version:** `v12.0.0-QuantumSniper`.
+- **Strategy:** High-confluence sniper entry (Score ≥ 70/100).
+- **Modules Integrated:**
+  - **SMC (Smart Money Concepts):** Structural BOS (Break of Structure) + Order Block identification.
+  - **ML (Machine Learning):** Gaussian Process Regression (GPR) based trend direction.
+  - **Squeeze Momentum:** Volatility expansion/compression triggers (TTM Squeeze style).
+  - **MACD Custom:** Momentum confirmation using multi-timeframe alignment.
+- **Risk Model:** Dynamic Swing-Low based Stop Loss. Reward-to-Risk ratio target ≥ 2.
+
+### Changes Made:
+
+#### [H1] P0: Score Threshold Hardening (trader-bot.js)
+- **Problem:** Quantum Sniper v12.0.0 showed negative expectancy (**-1.85%**) in initial operating window. Avg Win Score (82.3) was significantly higher than Avg Loss Score (70.0).
+- **Fix:** Raised `MIN_SCORE_THRESHOLD` from 70 to **82**.
+- **Expected Effect:** Eliminates marginal "noise" trades, focusing only on institutional-grade confluence where the edge is statistically significant.
+- **Falsification:** If signals become too rare (<1 per week), consider relaxing back to 78 if wins remain high-score.
+
+#### [H2] P0: Global Shadow Mode Enforcement (knife-catcher.js)
+- **Problem:** Knife Catcher v2.2.0 shadow archive showed **0% win rate** (9/9 losses) in current market conditions. The "Knife" logic is structurally broken for current volatility.
+- **Fix:** Set `GLOBAL_SHADOW_MODE = true`. Enforced a total halt on live execution.
+- **Enhanced Diagnostics:** Added probabilistic logging for the `KNIFE_NOT_OVERSOLD` gate to collect high-fidelity data on candidate rejections.
+- **Falsification:** Shadow win rate must exceed 55% over n=15 before considering re-activation.
+
+#### [H3] Filter Optimization: USDC/USDT Removal
+- **Problem:** Stablecoin pairs like `USDC/USDT` generate noise signals without genuine trading edge.
+- **Fix:** Added hard filter to exclude `USDC${QUOTE_ASSET}` from candidate analysis.
+
+#### [T1] Performance Telemetry: Win Rate in Alerts
+- **Logic:** Integrated real-time win rate calculation into Telegram notifications for Bot 1.
+- **Benefit:** Immediate feedback on system expectancy with every signal.
+
+---
+
+### Previous Version: v12.0.0 (Quantum Sniper)
 **Date:** Apr 28, 2026
 **Theme:** "QUANTUM SNIPER V12 — SMC + ML + SQUEEZE MOMENTUM"
 

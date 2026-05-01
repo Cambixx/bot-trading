@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v12.0.0 / v2.2.0)
+# 🦅 Documentación del Algoritmo de Trading (v12.0.1 / v2.2.0)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -11,11 +11,11 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 ## Current Runtime Snapshot (v12.0.0)
 
 ### Resumen
-- **Runtime Version:** `v12.0.0-QuantumSniper` / `v2.2.0-KnifeCatcher-Quantum`
+- **Runtime Version:** `v12.0.1-QuantumSniper` / `v2.2.0-KnifeCatcher-Quantum`
 - **File Core:** `trader-bot.js` y `knife-catcher.js`
 - **Estilo Bot 1 (Quantum Sniper):** `spot`, `long-only`, High-Confluence Sniper (`trader-bot.js`).
 - **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, multi-strategy Mean Reversion / Reversal (`knife-catcher.js`).
-- **Filosofía:** Sistema de confluencia institucional (Score ≥ 70) integrando SMC, ML, Volatilidad y Momentum.
+- **Filosofía:** Sistema de confluencia institucional (Score ≥ 82) integrando SMC, ML, Volatilidad y Momentum.
 
 ### Arquitectura de Módulos Activa
 
@@ -25,13 +25,13 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
   - **Módulo ML Trend:** Usa *Gaussian Process Regression* (GPR) para predecir la dirección de la tendencia con suavizado avanzado.
   - **Módulo Squeeze:** Identifica compresión de volatilidad (BB < KC) para capturar el inicio de expansiones explosivas.
   - **Módulo MACD Custom:** Filtro de momentum en temporalidades alineadas.
-  - **Gate de Confluencia:** Requiere un Score Agregado ≥ 70/100 para emitir señal.
+  - **Gate de Confluencia:** Requiere un Score Agregado ≥ 82/100 para emitir señal.
 
 #### Bot 2: Knife Catcher (`knife-catcher.js`)
 - **`STREAK_REVERSAL` (Streak Exhaustion)**
   - **Lógica:** Caza de rebotes tras ≥ 5 velas de 5m rojas consecutivas.
   - **Gates:** Streak ≤ -5, Volume Ratio >= 0.8x.
-- **`SHADOW_ONLY_MODULES` (v2.2.0):** `KNIFE_CATCHER`, `PIVOT_REVERSION` y `KELTNER_REVERSION` están en modo shadow-only por baja expectativa reciente.
+- **`SHADOW_ONLY_MODULES` (v2.2.0):** TODO el bot está en modo **GLOBAL_SHADOW_MODE** por baja expectativa reciente (0% WR).
 
 #### Bot 2: Knife Catcher (`knife-catcher.js`)
 - **`KNIFE_CATCHER` (Flash Crash Reversion)**
@@ -133,6 +133,11 @@ graph TD
 
 ## 5. Changelog Reciente
 
+### v12.0.1-QuantumSniper (30 Abr 2026)
+- **P0 Remediation:** Elevado umbral de ejecución de 70 a **82** tras identificar expectativa negativa en scores bajos.
+- **USDC Filter:** Eliminación del par `USDC/USDT` del universo analizable.
+- **Telemetry WR:** Integración de Win Rate en tiempo real en las alertas de Telegram.
+
 ### v12.0.0-QuantumSniper (28 Abr 2026)
 - **Quantum Sniper Overhaul:** Reconstrucción total del motor de decisión de Bot 1.
 - **SMC Integration:** Implementación de Smart Money Concepts (BOS + Order Blocks) para alineación institucional.
@@ -208,4 +213,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v11.1.2 / v2.1.2 — 26 Abril 2026**
+**Documentación actualizada v12.0.1 / v2.2.0 — 30 Abril 2026**
