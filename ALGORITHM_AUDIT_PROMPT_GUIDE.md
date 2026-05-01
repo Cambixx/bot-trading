@@ -1,8 +1,8 @@
 # Quantum Algorithm Audit & Redesign Guide
 
-> **Version:** `4.0.0-QuantumSniper`
-> **Last Updated:** `2026-04-28`
-> **Applies To:** `netlify/functions/trader-bot.js` (Bot 1: QuantumEdge) and `netlify/functions/knife-catcher.js` (Bot 2: Knife Catcher)
+> **Version:** `5.0.0-FusionLab`
+> **Last Updated:** `2026-05-01`
+> **Applies To:** `netlify/functions/trader-bot.js` (Bot 1: Fusion) and `netlify/functions/knife-catcher.js` (Bot 2: Reversal Lab)
 >
 > This document is the working guide for auditing, diagnosing, and redesigning both trading algorithms.
 > Use it when reviewing live behavior, diagnosing no-signal periods, auditing exit geometry, or proposing code changes.
@@ -20,7 +20,7 @@ These directives are non-negotiable constraints. They override any instruction g
 | Rule | Detail |
 |------|--------|
 | **DO NOT hallucinate data** | If the user has not provided the JSON blobs for the target bot, halt immediately and list exactly which files are missing. Do not infer or fabricate numbers. |
-| **DO NOT mix bot data** | Always explicitly label every data point as belonging to `Bot 1 (QuantumEdge)` or `Bot 2 (Knife Catcher)`. Cross-contamination invalidates the entire audit. |
+| **DO NOT mix bot data** | Always explicitly label every data point as belonging to `Bot 1 (Fusion)` or `Bot 2 (Reversal Lab)`. Cross-contamination invalidates the entire audit. |
 | **Calculate before speaking** | Before any recommendation, you must have computed: Win Rate, Expectancy (in R units), avg MFE, avg MAE, and funnel throughput for the specific module in question. If sample size < 20 resolved trades, state that the data is inconclusive and widen the window or use shadow data. |
 | **Cite the source** | Every claim must cite the specific file and field it came from. `"win rate is 62%"` is inadmissible. `"win rate is 62% per autopsies.json, n=26 decisive trades, window 2026-04-01 to 2026-04-18"` is admissible. |
 | **Be ruthless, not cruel** | State failures mathematically. Do not flatter. Do not catastrophize. If the data shows a module with 55% win rate and 2.0 R:R, that is a healthy positive-expectancy edge. If the data shows 40% win rate and 1.5 R:R, that is a -EV system. Say so. |
@@ -43,43 +43,64 @@ This means:
 
 Before auditing anything, anchor to the current deployed state. If you are reviewing code that has been recently updated, explicitly note the version delta and what changed.
 
-### 2.1 Bot 1: Quantum Sniper (`trader-bot.js`)
+### 2.1 Bot 1: Quantum Fusion (`trader-bot.js`)
 
-**Current version:** `v12.0.0-QuantumSniper`
-**Scope:** High-confluence institutional setups (SMC, ML, Volatility, Momentum).
+**Current version:** `v13.0.0-TradingViewFusion`
+**Scope:** Institutional confluence using Fusion engine (MLMA, SMC, Momentum).
 **Schedule:** Every 15 minutes (`0,15,30,45 * * * *`).
 
 #### Active Live Modules
 
-##### `CONFLUENCE_SNIPER`
-A signal is only considered if the aggregate score (confluence) is $\ge$ 70/100.
+##### `FUSION_CONFLUENCE`
+A signal is only considered if the aggregate score (confluence) is $\ge$ 76/100.
 
 | Module | Purpose | Weight/Gate |
 |--------|---------|-------------|
-| **SMC (Smart Money)** | Market Structure | **Hard Gate:** BOS (Break of Structure) within last 5 bars OR price near Order Block (OB). |
-| **ML Trend (GPR)** | Directional Bias | **Hard Gate:** ML Slope must be positive (GPR Trend > 0). |
-| **Squeeze Momentum** | Volatility State | **Hard Gate:** Must NOT be in a "black squeeze" (BB inside KC without expansion). |
-| **MACD Custom** | Momentum Confirmation | **Hard Gate:** MACD Histogram > 0 and crossing up. |
+| **MLMA (GPR)** | Directional Bias | **Hard Gate:** ML Slope must be positive. |
+| **SMC (Smart Money)** | Market Structure | **Hard Gate:** BOS within last 5 bars or near OB. |
+| **VIDYA** | Volatility Bias | **Hard Gate:** Price > VIDYA (9, 21). |
+| **SOTT / Two-Pole** | Cycle Position | **Hard Gate:** Cycle must be exiting oversold. |
+| **Squeeze** | Momentum State | **Hard Gate:** Must NOT be in a "black squeeze". |
 
 **Score Distribution (Max 100):**
-- **SMC Strength:** 30 pts (Alignment with OB/BOS)
-- **ML Confidence:** 25 pts (Strength of GPR slope)
-- **Squeeze Intensity:** 25 pts (Expansion magnitude)
-- **Momentum (MACD):** 20 pts (Multi-timeframe alignment)
+- **Structure (SMC):** 25 pts
+- **Trend (MLMA/VIDYA):** 30 pts
+- **Cycle (SOTT/TP):** 25 pts
+- **Momentum (Squeeze):** 20 pts
 
-**Risk Model (v12.0.0):**
-- **Stop Loss:** Dynamic. Set at recent Swing Low (0.5% buffer).
-- **Take Profit:** Reward-to-Risk (RR) target of 2.0x (dynamic based on volatility).
-- **Time Stop:** 12 hours.
+**Risk Model (v13.0.0):**
+- **Stop Loss:** Dynamic (Swing Low or ATR-based).
+- **Take Profit:** 2.0x RR target.
+- **Telemetry:** Win Rate (WR) included in alerts.
 
 #### Runtime Gates Outside the Modules
 
 | Gate | Effect |
 |------|--------|
 | `BTC_RED` | Blocks ALL live signals via `REGIME_RISK_OFF`. |
-| `TRANSITION` Regime | **Hard Block** (Added v12.0.0). No trading allowed in this regime. |
-| `LOW` Liquidity | Blocked unless 24h Vol > $2M or depth floor met. |
-| Score < 70 | `SCORE_BELOW_FLOOR` — Signal is discarded or shadowed. |
+| `TRANSITION` Regime | **Hard Block** (unless score > 85). |
+| `LOW` Liquidity | Blocked unless 24h Vol > $15M. |
+| Score < 76 | `SCORE_BELOW_FLOOR` — enters shadow. |
+
+### 2.2 Bot 2: Reversal Lab (`knife-catcher.js`)
+
+**Current version:** `v3.0.0-TradingViewReversalLab`
+**Scope:** Modular Reversal/Reset strategies.
+
+#### Active Live Modules
+
+- **`REVERSAL_RESET_V3`**: Modular detection of capitulation and reclaim.
+- **Modules:** Two-Pole, VIDYA Liquidity Sweep, SOTT Band Reclaim, SMC Reset.
+
+#### `REVERSAL_LAB_V3` (Live)
+
+| Gate | Condition |
+|------|-----------|
+| Capitulation | Two-Pole < -1.8 or SOTT < -1.5 |
+| Reclaim | Price > SMC Reset Level or VIDYA crossover |
+| Score Floor | Score $\ge$ 72 |
+
+Risk model: TP = `atrPct × 1.8`, SL = `atrPct × 1.2`.
 
 #### Runtime Gates Outside the Modules
 
@@ -94,44 +115,13 @@ A signal is only considered if the aggregate score (confluence) is $\ge$ 70/100.
 | Cooldown (default 240 min) | `COOLDOWN_BLOCK` |
 | Sector already selected | `SECTOR_CORRELATION` — only one signal per sector allowed per cycle |
 
-#### v11.0.0 New Features (Audit Must Verify These Are Active)
+#### System Evolution (v13.0.0 / v3.0.0)
 
-- **VWAP anchor**: 96 candles (24h) instead of 50
-- **`multiDelta`**: 3-candle cumulative taker buying pressure (field visible in `entryMetrics.multiDelta`)
-- **ADX gates**: Both modules have ADX hard gates and score bonuses
-- **`momentumAdjustment`**: Signal memory-based ±3 pts score adjustment (field `momentumAdjustment` must not be `0` for recurring symbols)
-- **Trailing stop to break-even**: When price reaches 50% of TP distance, SL moves to entry + 0.1% (`trailingStopActive` field in history)
-- **Regime-aware risk model**: `HIGH_VOL_BREAKOUT` → TP ×1.25; `TRANSITION` → SL ×0.9
-- **ELITE tier ATR ceiling**: `MAX_ATR × 1.2` for ELITE liquidity assets
-- **Improved stale exit**: Favorable move 0.1–0.3% at time stop → `BREAK_EVEN` instead of `STALE_EXIT`
-- **Telegram bug fix**: Module label was checking `BREAKOUT_CONTINUATION` (nonexistent); now correctly shows `VCP_BREAKOUT` vs `VWAP_PULLBACK`
-
-### 2.2 Bot 2: Knife Catcher (`knife-catcher.js`)
-
-**Current version:** `v2.2.0-KnifeCatcher-Quantum`
-**Scope:** Multi-strategy mean reversion and reversal.
-
-#### Active Live Modules
-
-- **`STREAK_REVERSAL`**: ONLY live module. Reversion after ≥ 5 red candles.
-- **`SHADOW_ONLY`**: `KNIFE_CATCHER`, `PIVOT_REVERSION`, `KELTNER_REVERSION`.
-
-#### `STREAK_REVERSAL` (Live)
-
-| Gate | Condition |
-|------|-----------|
-| Streak Length | `streak <= -5` |
-| Volume Ratio | `volumeRatio >= 0.8x` |
-| Regime Check | Must NOT be `TRANSITION` or `HIGH_VOL_BREAKOUT`. |
-
-Risk model: TP = `atrPct × 1.5`, SL = `atrPct × 1.2`, time stop = 2h.
-
-### 2.3 Dual-Bot Interaction Rules
-
-- The two bots are architecturally independent. They share no blob state, no cooldowns, no locks.
-- They can fire on the same symbol simultaneously. This is a position-sizing concern for the trader, not a code bug.
-- When proposing changes, always specify the target bot. A mean-reversion enhancement belongs in `knife-catcher.js`. A trend-following enhancement belongs in `trader-bot.js`.
-- If the user provides data without labeling the bot, ask before proceeding.
+- **`multiDelta`**: 3-candle cumulative taker buying pressure (field `entryMetrics.multiDelta`). Essential for confirming directional intensity.
+- **Institutional Confluence (Bot 1)**: Integrated MLMA (Machine Learning Moving Average) and SMC (Smart Money Concepts) as hard gates.
+- **Reversal Lab (Bot 2)**: Shifted from legacy streaks to modular "Reset" archetypes (Two-Pole, VIDYA, SOTT).
+- **Unified Telemetry**: Both bots now include Win Rate (`WR`) and exhaustive `entryMetrics` for forensic auditing.
+- **Dynamic Risk**: Regime-aware TP/SL multipliers and trailing stop-to-break-even logic.
 
 ---
 
@@ -197,30 +187,13 @@ If any of these is missing, state which is absent and what conclusions cannot be
 
 ### 4.3 High-Value Fields — The "Why" Data
 
-These fields are the most diagnostically powerful. Always cross-reference outcomes against them.
-
-#### `qualityBreakdown` (in autopsies and shadow)
-Decomposed score: `trend`, `expansion`, `participation`, `execution`.
-
-Key questions:
-- Are losses concentrated in trades where `participation < 60` despite `trend > 85`? → volume is needed but not enforced strictly enough
-- Are wins concentrated where all four components are > 70? → confirm minimum quality floor
-- Do `WOULD_WIN` shadows have systematically higher `execution` scores than `WOULD_LOSE` shadows? → execution quality is genuinely predictive
-
-#### `relativeStrengthSnapshot` (`rs1h`, `rs4h`, `rs24h`)
-- Are `VWAP_PULLBACK` losses concentrated when `rs1h < 0.005` (i.e., just barely positive)? → the current `rs1h >= 0` gate may need tightening to `rs1h >= 0.003`
-- Is `rs4h` predictive of win/loss in VWAP_PULLBACK? Calculate avg `rs4h` for wins vs. losses. A large gap suggests raising the gate.
-
-#### `volumeLiquidityConfirmation`
-- `obi` field: Is `OBI < 0` at entry correlated with higher `maePct`? If yes, the `OBI >= -0.05` gate is directionally correct but the threshold may be too lenient.
-- `spreadBps`: Trades with `spreadBps > 5` should show systematically worse execution. If they don't, the spread gate isn't earning its filtering cost.
-- `deltaPass`: Does failing `deltaPass` (taker delta < 0) predict losses? This tests whether the delta computation is genuinely informative.
-
 #### `entryMetrics`
-- `distToEma9`, `distToEma21`: Overextended entries (distToEma9 > +2.5%) on VWAP_PULLBACK should show higher MAE. If they do, add a ceiling gate.
-- `atrPercent`: Do high ATR% entries have better MFE but also higher MAE? This is the ATR position-sizing problem — higher ATR means wider stops, larger dollar risk per unit.
-- `adx` (v11.0.0): Do entries with `adx < 20` show systematically worse outcomes? This validates or invalidates the ADX gate threshold.
-- `multiDelta` (v11.0.0): Do entries with `multiDelta < 0.05` show 0% MFE losses? This validates the anti-falling-knife function.
+ - `multiDelta`: Does failing `deltaPass` (taker delta < 0) predict 0% MFE losses?
+ - `twoPoleValue` / `sottValue`: Do deeper resets (lower values) correlate with higher WR in Reversal Lab?
+ - `vidyaDistancePct`: In Reversal Lab, does a larger sweep (negative distance) lead to better reclaim performance?
+ - `adx`: Do entries with `adx < 18` show systematically worse outcomes in Fusion?
+ - `rs1h` / `rs4h`: Does relative strength outperformance at entry predict win probability?
+ - `distToEma9`: Identify overextension (blow-off tops) in trend-following signals.
 
 #### `mfePct` and `maePct`
 These are the most direct measures of entry and exit quality.
@@ -246,16 +219,6 @@ Zero-MFE rate    = count(mfePct=0 AND outcome=LOSS) / count(outcome=LOSS)
 If `zero-MFE rate > 40%` on losses, the entry timing is systematically wrong for that module.
 If `avg MFE on losses > 0.8%`, the TP/SL geometry is the primary problem, not the entry.
 
-#### `rejectReasonCode` in shadow archive
-The shadow archive is the most important source of dark edge. For each reject code that produced `WOULD_WIN` outcomes, calculate:
-
-```
-Shadow Win Rate (code X) = WOULD_WIN / (WOULD_WIN + WOULD_LOSE)  [for that code]
-Expected Gain if promoted = Shadow Win Rate × (TP_pct / SL_pct) − (1 − Shadow Win Rate)
-```
-
-If `Expected Gain > 0.2R`, the gate is leaving real edge on the table. If `Expected Gain < 0`, the gate is doing its job.
-
 ---
 
 ## 5. Required Audit Protocol
@@ -263,16 +226,11 @@ If `Expected Gain > 0.2R`, the gate is leaving real edge on the table. If `Expec
 Execute these steps in strict order. Do not skip steps even if you think you already know the answer.
 
 ### Step 1 — Confirm the Active Runtime
-
-Before making any claims, read the deployed code and verify:
-
-- [ ] `ALGORITHM_VERSION` matches what is documented here
-- [ ] All active module evaluators are in `liveAllowed` set
-- [ ] Score floor logic matches documentation (`baseRequiredScore`, `getRequiredScore` modifiers)
-- [ ] Liquidity tier restrictions match documentation
-- [ ] BTC context restrictions match documentation
-- [ ] v11.0.0 features are active (VWAP 96-candle anchor, multiDelta computation, ADX gates, trailing BE stop)
-- [ ] Telegram module label uses `VCP_BREAKOUT` (not `BREAKOUT_CONTINUATION`)
+ - [ ] `ALGORITHM_VERSION` matches `v13.x` for Bot 1 and `v3.x` for Bot 2.
+ - [ ] All active module evaluators are in `liveAllowed` or the main execution loop.
+ - [ ] Score floor logic matches documentation (`76` for Bot 1, `72` for Bot 2).
+ - [ ] `multiDelta` and `executionQuality` fields are populated in records.
+ - [ ] Telegram alerts include Win Rate telemetry.
 
 **If the code and docs disagree on any of the above, note the mismatch explicitly before proceeding.**
 
@@ -317,7 +275,7 @@ Reject Code                | Count | % of total rejects
 
 ### Step 4 — Compute Core Performance Metrics
 
-Using `autopsies.json`, compute for each module separately (`VWAP_PULLBACK` and `VCP_BREAKOUT`):
+Using `autopsies.json`, compute for each module separately:
 
 ```
 Sample size (n_decisive)  = WIN + LOSS [exclude PENDING, EXPIRED, STALE_EXIT handled separately]
@@ -404,10 +362,7 @@ Reject Code              | n_resolved | WOULD_WIN | WOULD_LOSE | Shadow WR | Exp
 [code]                   |            |           |            |           |
 ```
 
-For `Expected Gain (R)`, use the module's benchmark R:R (e.g., VWAP_PULLBACK uses 3.0/1.4 ≈ 2.14 R:R):
-```
-Expected Gain (R) = Shadow_WR × 2.14 − (1 − Shadow_WR) × 1.0
-```
+For `Expected Gain (R)`, use the module's benchmark R:R.
 
 **Interpretation:**
 - Expected Gain > 0.3R → strong case for relaxing the gate (but validate against minimum n ≥ 10)
@@ -415,15 +370,14 @@ Expected Gain (R) = Shadow_WR × 2.14 − (1 − Shadow_WR) × 1.0
 - Expected Gain < 0.1R → gate is working correctly, do not touch
 - Expected Gain < 0 → gate is saving us from bad trades, definitely do not relax
 
-### Step 9 — Validate v11.0.0 Specific Features
+### Step 9 — Validate System Foundations
 
-For any audit of Bot 1 after the v11.0.0 deployment, specifically validate these new features are working as intended:
+For any audit after the Fusion/Reversal Lab deployment:
 
-- **`momentumAdjustment`**: Check `autopsies.json` for trades where `momentumAdjustment ≠ 0`. If all entries show `0`, the signal memory is not being threaded correctly.
-- **Trailing stop**: Check `history.json` for entries with `trailingStopActive = true`. If none exist despite many trades, the trailing stop is not triggering. Calculate at what % of open trades the trailing stop should have theoretically activated.
-- **ADX gates**: Verify in `persistent_logs.json` that `VWAP_NO_TREND_STRUCTURE` and `VCP_NO_ADX_BASE` appear as reject codes. If they never appear, ADX data is not being computed.
-- **`multiDelta`**: Verify in signal output or autopsies that `entryMetrics.multiDelta` contains non-null values. All nulls indicate taker data is unavailable from the exchange.
-- **VWAP 24h anchor**: This is an internal computation; validate by checking that `vwapDistance` values in signals are different from what would be expected with a 50-candle anchor on strongly trended assets.
+- **`multiDelta`**: Verify `entryMetrics.multiDelta` contains non-null values. Nulls indicate taker data failure.
+- **Reset Modules (Bot 2)**: Verify that signals were triggered by `Two-Pole`, `VIDYA`, or `SOTT` reclaim, not just a simple candle count.
+- **MLMA/SMC Gates (Bot 1)**: Check for `MLMA_NOT_BULLISH` or `SMC_NO_STRUCTURE` rejects in logs. If absent, gates may be bypassed.
+- **Win Rate Telemetry**: Cross-check the WR shown in Telegram with the WR calculated from `autopsies.json`. They must align.
 
 ### Step 10 — Propose the Smallest High-Leverage Change
 
