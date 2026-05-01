@@ -43,44 +43,36 @@ This means:
 
 Before auditing anything, anchor to the current deployed state. If you are reviewing code that has been recently updated, explicitly note the version delta and what changed.
 
-### 2.1 Bot 1: Quantum Fusion (`trader-bot.js`)
+### 2.1 Bot 1: TradingView Fusion (`trader-bot.js`)
 
 **Current version:** `v13.0.0-TradingViewFusion`
-**Scope:** Institutional confluence using Fusion engine (MLMA, SMC, Momentum).
+**Scope:** Spot long-only trend/reclaim scanner using translated TradingView indicator logic.
 **Schedule:** Every 15 minutes (`0,15,30,45 * * * *`).
 
 #### Active Live Modules
 
-##### `FUSION_CONFLUENCE`
-A signal is only considered if the aggregate score (confluence) is $\ge$ 76/100.
+| Module | Purpose | Core Gates |
+|--------|---------|------------|
+| `VIDYA_SQUEEZE_EXPANSION` | Trend expansion after compression/acceleration | VIDYA trend up, bullish/rising Squeeze, MACD above signal |
+| `SMC_DISCOUNT_RECLAIM` | Pullback to value after bullish structure | Recent SMC bullish structure plus EMA/VWAP/order-block reclaim |
+| `TWO_POLE_PULLBACK_CONTINUATION` | Controlled pullback continuation | Two-Pole reset with supportive 1H SOTT/MLMA context |
 
-| Module | Purpose | Weight/Gate |
-|--------|---------|-------------|
-| **MLMA (GPR)** | Directional Bias | **Hard Gate:** ML Slope must be positive. |
-| **SMC (Smart Money)** | Market Structure | **Hard Gate:** BOS within last 5 bars or near OB. |
-| **VIDYA** | Volatility Bias | **Hard Gate:** Price > VIDYA (9, 21). |
-| **SOTT / Two-Pole** | Cycle Position | **Hard Gate:** Cycle must be exiting oversold. |
-| **Squeeze** | Momentum State | **Hard Gate:** Must NOT be in a "black squeeze". |
-
-**Score Distribution (Max 100):**
-- **Structure (SMC):** 25 pts
-- **Trend (MLMA/VIDYA):** 30 pts
-- **Cycle (SOTT/TP):** 25 pts
-- **Momentum (Squeeze):** 20 pts
+**Score Floor:** Baseline `76`, adjusted upward by liquidity, BTC AMBER, volatile regimes, or module-specific context.
 
 **Risk Model (v13.0.0):**
-- **Stop Loss:** Dynamic (Swing Low or ATR-based).
-- **Take Profit:** 2.0x RR target.
-- **Telemetry:** Win Rate (WR) included in alerts.
+- **Stop Loss:** Dynamic ATR plus structure/VIDYA stop reference.
+- **Take Profit:** Module-specific R target, generally `2.05R` to `2.4R`.
+- **Telemetry:** Win Rate (WR) included in alerts; `entryMetrics`, `qualityBreakdown`, `riskModel`, `relativeStrengthSnapshot`, and `volumeLiquidityConfirmation` are persisted.
 
 #### Runtime Gates Outside the Modules
 
 | Gate | Effect |
 |------|--------|
 | `BTC_RED` | Blocks ALL live signals via `REGIME_RISK_OFF`. |
-| `TRANSITION` Regime | **Hard Block** (unless score > 85). |
-| `LOW` Liquidity | Blocked unless 24h Vol > $15M. |
+| `RANGING` / `VOLATILE_TRANSITION` | Raises required score; not a universal hard block. |
+| `LOW` Liquidity | Blocked by execution gate. |
 | Score < 76 | `SCORE_BELOW_FLOOR` — enters shadow. |
+| `TRADER_GLOBAL_SHADOW_MODE=true` | Converts otherwise-live signals into shadow records for observation. |
 
 ### 2.2 Bot 2: Reversal Lab (`knife-catcher.js`)
 
@@ -89,36 +81,36 @@ A signal is only considered if the aggregate score (confluence) is $\ge$ 76/100.
 
 #### Active Live Modules
 
-- **`REVERSAL_RESET_V3`**: Modular detection of capitulation and reclaim.
-- **Modules:** Two-Pole, VIDYA Liquidity Sweep, SOTT Band Reclaim, SMC Reset.
+- **Modules:** Two-Pole Capitulation Reset, VIDYA Liquidity Sweep, SOTT Band Reclaim.
 
-#### `REVERSAL_LAB_V3` (Live)
+| Module | Purpose | Core Gates |
+|--------|---------|------------|
+| `TWO_POLE_CAPITULATION_RESET` | Capitulation reset after sharp local selloff | Impulse down plus Two-Pole reset and volume confirmation |
+| `VIDYA_LIQUIDITY_SWEEP` | Prior-low sweep/reclaim | Liquidity sweep or SMC reclaim plus VIDYA/MACD/Two-Pole upturn |
+| `SOTT_BAND_RECLAIM` | Mean-reversion reclaim | Lower Bollinger band reclaim plus SOTT bull cross and momentum upturn |
 
-| Gate | Condition |
-|------|-----------|
-| Capitulation | Two-Pole < -1.8 or SOTT < -1.5 |
-| Reclaim | Price > SMC Reset Level or VIDYA crossover |
-| Score Floor | Score $\ge$ 72 |
+**Score Floor:** Baseline `72`, adjusted upward by liquidity, BTC AMBER, high-volatility regimes, and trend conditions.
 
-Risk model: TP = `atrPct × 1.8`, SL = `atrPct × 1.2`.
+Risk model: module-specific ATR/structure stop with `2.15R` to `2.45R` targets.
 
 #### Runtime Gates Outside the Modules
 
 | Gate | Effect |
 |------|--------|
 | `BTC_RED` (4H trend break or RSI4h < 44) | Blocks ALL live signals via `REGIME_RISK_OFF` |
-| `btcRisk = AMBER` (1H stretched > EMA21 × 1.018 or RSI1h > 68) | Increases required score; blocks VCP_BREAKOUT |
-| `MEDIUM` liquidity tier | Only VWAP_PULLBACK can trade live; VCP blocked |
-| `LOW` liquidity tier | Blocked unless depth ≥ $200k (depth-floor promotion, half sizing) |
+| `btcRisk = AMBER` (1H stretched > EMA21 × 1.018 or RSI1h > 68) | Increases required score |
+| `MEDIUM` liquidity tier | Increases required score |
+| `LOW` liquidity tier | Blocked by execution gate |
 | Score below `requiredScore` | `SCORE_BELOW_FLOOR` — enters shadow, not live |
 | Open position on same symbol | `OPEN_POSITION_BLOCK` |
 | Cooldown (default 240 min) | `COOLDOWN_BLOCK` |
 | Sector already selected | `SECTOR_CORRELATION` — only one signal per sector allowed per cycle |
+| `KNIFE_GLOBAL_SHADOW_MODE=true` | Converts otherwise-live signals into shadow records for observation |
 
 #### System Evolution (v13.0.0 / v3.0.0)
 
-- **`multiDelta`**: 3-candle cumulative taker buying pressure (field `entryMetrics.multiDelta`). Essential for confirming directional intensity.
-- **Institutional Confluence (Bot 1)**: Integrated MLMA (Machine Learning Moving Average) and SMC (Smart Money Concepts) as hard gates.
+- **`multiDelta` / `deltaRatio`**: cumulative taker/price-action buying pressure. Stored as `entryMetrics.multiDelta`, `entryMetrics.deltaRatio`, top-level `deltaRatio`, and `volumeLiquidityConfirmation.deltaRatio`.
+- **TradingView Fusion (Bot 1)**: Integrated MLMA-style trend, SMC, VIDYA, Squeeze, MACD and Two-Pole/SOTT reset logic.
 - **Reversal Lab (Bot 2)**: Shifted from legacy streaks to modular "Reset" archetypes (Two-Pole, VIDYA, SOTT).
 - **Unified Telemetry**: Both bots now include Win Rate (`WR`) and exhaustive `entryMetrics` for forensic auditing.
 - **Dynamic Risk**: Regime-aware TP/SL multipliers and trailing stop-to-break-even logic.
@@ -166,7 +158,7 @@ A valid change must satisfy all three:
 | `history.json` | `signal-history-v2` | Bot 1 | Live signal history (open + closed) |
 | `autopsies.json` | `trade-autopsies-v1` | Bot 1 | Closed-trade forensics with MFE/MAE |
 | `shadow_trades.json` | `shadow-trades-v1` | Bot 1 | Active near-misses (PENDING) |
-| `shadow_trades_archive.json` | `shadow-trades-archive-v1` | Bot 1 | Resolved near-misses (WOULD_WIN/WOULD_LOSE) |
+| `shadow_trades_archive.json` | `shadow-archive-v1` | Bot 1 | Resolved near-misses (WOULD_WIN/WOULD_LOSE) |
 | `persistent_logs.json` | `persistent-logs-v1` | Bot 1 | Runtime log stream |
 | `signal_memory.json` | `signal-memory-v1` | Bot 1 | Per-symbol recent score history |
 | `knife_history.json` | `knife-history-v1` | Bot 2 | Live signal history |
@@ -188,12 +180,12 @@ If any of these is missing, state which is absent and what conclusions cannot be
 ### 4.3 High-Value Fields — The "Why" Data
 
 #### `entryMetrics`
- - `multiDelta`: Does failing `deltaPass` (taker delta < 0) predict 0% MFE losses?
- - `twoPoleValue` / `sottValue`: Do deeper resets (lower values) correlate with higher WR in Reversal Lab?
+ - `multiDelta` / `deltaRatio`: Does weak directional pressure predict 0% MFE losses?
+ - `twoPoleValue` / `twoPole5m` / `sottValue`: Do deeper resets (lower values) correlate with higher WR in Reversal Lab?
  - `vidyaDistancePct`: In Reversal Lab, does a larger sweep (negative distance) lead to better reclaim performance?
- - `adx`: Do entries with `adx < 18` show systematically worse outcomes in Fusion?
+ - `adx` / `adx15m`: Do entries with `adx < 18` show systematically worse outcomes in Fusion?
  - `rs1h` / `rs4h`: Does relative strength outperformance at entry predict win probability?
- - `distToEma9`: Identify overextension (blow-off tops) in trend-following signals.
+ - `distToEma9` and `vwapDistance`: Identify overextension (blow-off tops) in trend-following signals.
 
 #### `mfePct` and `maePct`
 These are the most direct measures of entry and exit quality.
@@ -226,11 +218,11 @@ If `avg MFE on losses > 0.8%`, the TP/SL geometry is the primary problem, not th
 Execute these steps in strict order. Do not skip steps even if you think you already know the answer.
 
 ### Step 1 — Confirm the Active Runtime
- - [ ] `ALGORITHM_VERSION` matches `v13.x` for Bot 1 and `v3.x` for Bot 2.
- - [ ] All active module evaluators are in `liveAllowed` or the main execution loop.
- - [ ] Score floor logic matches documentation (`76` for Bot 1, `72` for Bot 2).
- - [ ] `multiDelta` and `executionQuality` fields are populated in records.
- - [ ] Telegram alerts include Win Rate telemetry.
+- [ ] `ALGORITHM_VERSION` matches `v13.x` for Bot 1 and `v3.x` for Bot 2.
+- [ ] All active module evaluators are in the main execution loop, unless `TRADER_GLOBAL_SHADOW_MODE` or `KNIFE_GLOBAL_SHADOW_MODE` is intentionally enabled.
+- [ ] Score floor logic matches documentation (`76` for Bot 1, `72` for Bot 2).
+- [ ] `entryMetrics.multiDelta`, `entryMetrics.deltaRatio`, `volumeLiquidityConfirmation.deltaRatio`, and `executionQuality`/`qualityBreakdown.execution` fields are populated in records.
+- [ ] Telegram alerts include Win Rate telemetry.
 
 **If the code and docs disagree on any of the above, note the mismatch explicitly before proceeding.**
 
@@ -255,6 +247,7 @@ Universe selected     | X      | 100%          |
 ORDERBOOK_OK          | X      | X%            |
 LIQUIDITY_BASE_OK     | X      | X%            |
 REGIME_OK             | X      | X%            |
+CONTEXT_OK            | X      | X%            |
 MODULE_OK             | X      | X%            |
 EXECUTION_OK          | X      | X%            |
 SCORE_OK              | X      | X%            |
@@ -531,8 +524,8 @@ Before deploying any code change, verify all of the following:
 
 ### Telegram
 - [ ] Message sends without errors for both module types
-- [ ] Module label renders correctly (`📉 PULLBACK` for VWAP_PULLBACK, `🚀 BREAKOUT` for VCP_BREAKOUT)
-- [ ] New fields (ADX, multiDelta, R:R, momentum adjustment) display correctly
+- [ ] Module labels render correctly for `VIDYA_*`, `SMC_*`, `TWO_POLE_*`, and `SOTT_*` modules
+- [ ] New fields (ADX, multiDelta/deltaRatio, R:R, reset metrics) display or persist correctly
 - [ ] `escapeMarkdownV2` is applied to all dynamic values
 
 ### Runtime Safety
@@ -546,8 +539,7 @@ Before deploying any code change, verify all of the following:
 - [ ] `score` in signal object ≤ 100 and ≥ 0
 - [ ] `tp > price > sl` invariant holds
 - [ ] `riskModel.realRR >= 1.5` (enforced gate)
-- [ ] `scoreBeforeMomentum` and `momentumAdjustment` sum to `score`
-- [ ] `requiredScore` is documented in signal object
+- [ ] `requiredScore`, `qualityBreakdown`, and `riskModel` are documented in signal object
 
 ### Build Validation
 ```bash
@@ -600,7 +592,7 @@ Identify the **single primary bottleneck** with this statement:
 Present the metrics table from Step 4. For each module:
 
 ```
-Module:          VWAP_PULLBACK
+Module:          VIDYA_SQUEEZE_EXPANSION
 Window:          [dates]
 n_decisive:      [n]    (WIN: N | LOSS: N | STALE: N | BE: N)
 Win Rate:        X%     [flag if < 50% and n ≥ 15]
@@ -635,9 +627,9 @@ Present the dark edge table from Step 8. For any code showing Expected Gain > 0.
 
 ---
 
-### Section G — v11.0.0 Feature Validation (Bot 1 Only)
+### Section G — v13/v3 Feature Validation
 
-Check each v11 feature from Step 9 and report:
+Check each current feature from Step 9 and report:
 - ✅ Confirmed active with evidence
 - ⚠️ Ambiguous — data absent but no error
 - ❌ Not working as expected — cite evidence

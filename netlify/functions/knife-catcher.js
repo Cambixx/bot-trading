@@ -960,9 +960,17 @@ function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
       atrPercent5m: roundMetric(ctx.atrPercent5m, 2),
       atrPercent15m: roundMetric(ctx.atrPercent15m, 2),
       adx15m: roundMetric(ctx.adx15m?.adx, 1),
+      adx: roundMetric(ctx.adx15m?.adx, 1),
+      deltaRatio: roundMetric(ctx.deltaRatio5m, 3),
+      multiDelta: roundMetric(ctx.deltaRatio5m, 3),
+      rs1h: roundMetric(ctx.rs1h, 4),
+      rs4h: roundMetric(ctx.rs4h, 4),
+      vwapDistance: ctx.vwap15m ? roundMetric(((ctx.currentPrice - ctx.vwap15m) / ctx.vwap15m) * 100, 2) : null,
       return12x5m: roundMetric(ctx.return12x5m, 2),
       redStreak5m: ctx.redStreak5m,
+      sottValue: roundMetric(ctx.sott15m?.signal, 3),
       twoPole5m: roundMetric(ctx.twoPole5m?.value, 3),
+      twoPoleValue: roundMetric(ctx.twoPole5m?.value, 3),
       twoPole15m: roundMetric(ctx.twoPole15m?.value, 3),
       vidyaDistancePct: roundMetric(ctx.vidya5m?.distancePct, 2),
       riskRewardRatio: roundMetric(risk.realRR, 2)
@@ -987,15 +995,25 @@ function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
 export function generateSignal(symbol, candles5m, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
   const ctx = buildContext(symbol, candles5m, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext);
   if (ctx.rejectCode) {
+    if (['LIQUIDITY_FLOOR', 'INDICATOR_GAP', 'ATR_FILTER'].includes(ctx.rejectCode)) {
+      countMetric(analysisState?.stageCounts, 'ORDERBOOK_OK');
+    }
+    if (['INDICATOR_GAP', 'ATR_FILTER'].includes(ctx.rejectCode)) {
+      countMetric(analysisState?.stageCounts, 'LIQUIDITY_BASE_OK');
+    }
     countMetric(analysisState?.rejectCounts, ctx.rejectCode);
     return null;
   }
+
+  countMetric(analysisState?.stageCounts, 'ORDERBOOK_OK');
+  countMetric(analysisState?.stageCounts, 'LIQUIDITY_BASE_OK');
+  countMetric(analysisState?.stageCounts, 'REGIME_OK');
+  countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
   if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED') {
     countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');
     return null;
   }
-  countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
   const moduleResults = [
     evaluateTwoPoleCapitulation(ctx),
@@ -1211,6 +1229,7 @@ export async function runAnalysis(context) {
           shadowCandidates.push(recordShadowNearMiss(signal, 'SECTOR_CORRELATION', {
             blockedBySymbol: selectedSectorLeaders.get(signal.sector)
           }));
+          recordSymbolScore(signalMemory, symbol, signal.score, signal.module);
           await sleep(8);
           continue;
         }
@@ -1243,6 +1262,9 @@ export async function runAnalysis(context) {
     }
 
     if (shadowCandidates.length) {
+      for (const shadow of shadowCandidates) {
+        recordSymbolScore(signalMemory, shadow.symbol, shadow.score, shadow.module || shadow.rejectReasonCode);
+      }
       const existingShadows = await loadShadowTrades(context);
       await saveShadowTrades([...existingShadows, ...shadowCandidates], context);
       pLog(`[SHADOW] Recorded ${shadowCandidates.length} near-misses`);

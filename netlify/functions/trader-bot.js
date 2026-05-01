@@ -55,6 +55,7 @@ export const ALGORITHM_VERSION = 'v13.0.0-TradingViewFusion';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
+const GLOBAL_SHADOW_MODE = (process.env.TRADER_GLOBAL_SHADOW_MODE || 'false').toLowerCase() === 'true';
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 48;
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 15000000;
@@ -869,6 +870,7 @@ function buildContext(symbol, candles15mRaw, candles1hRaw, candles4hRaw, orderBo
   const volumeSMA = calculateVolumeSMA(candles15m, 20);
   const volumeRatio = volumeSMA ? last15m.volume / volumeSMA : 1;
   const deltaRatio = calculateMultiCandleDelta(candles15m, 3);
+  const ema9_15m = calculateEMA(closes15m, 9);
   const ema21_15m = calculateEMA(closes15m, 21);
   const ema50_15m = calculateEMA(closes15m, 50);
   const ema21_1h = calculateEMA(closes1h, 21);
@@ -923,6 +925,7 @@ function buildContext(symbol, candles15mRaw, candles1hRaw, candles4hRaw, orderBo
     rsi1h,
     volumeRatio,
     deltaRatio,
+    ema9_15m,
     ema21_15m,
     ema50_15m,
     ema21_1h,
@@ -1000,6 +1003,13 @@ function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
     entryMetrics: {
       atrPercent: roundMetric(ctx.atrPercent15m, 2),
       adx15m: roundMetric(ctx.adx15m?.adx, 1),
+      adx: roundMetric(ctx.adx15m?.adx, 1),
+      deltaRatio: roundMetric(ctx.deltaRatio, 3),
+      multiDelta: roundMetric(ctx.deltaRatio, 3),
+      rs1h: roundMetric(ctx.rs1h, 4),
+      rs4h: roundMetric(ctx.rs4h, 4),
+      distToEma9: ctx.ema9_15m ? roundMetric(((ctx.currentPrice - ctx.ema9_15m) / ctx.ema9_15m) * 100, 2) : null,
+      vwapDistance: ctx.vwap15m ? roundMetric(((ctx.currentPrice - ctx.vwap15m) / ctx.vwap15m) * 100, 2) : null,
       vidyaDistancePct: roundMetric(ctx.vidya15?.distancePct, 2),
       squeezeMomentum: roundMetric(ctx.squeeze15?.momentum, 6),
       macdHist: roundMetric(ctx.macd15?.hist, 8),
@@ -1028,15 +1038,25 @@ function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
 export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
   const ctx = buildContext(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext);
   if (ctx.rejectCode) {
+    if (['LIQUIDITY_FLOOR', 'INDICATOR_GAP', 'ATR_FILTER'].includes(ctx.rejectCode)) {
+      countMetric(analysisState?.stageCounts, 'ORDERBOOK_OK');
+    }
+    if (['INDICATOR_GAP', 'ATR_FILTER'].includes(ctx.rejectCode)) {
+      countMetric(analysisState?.stageCounts, 'LIQUIDITY_BASE_OK');
+    }
     countMetric(analysisState?.rejectCounts, ctx.rejectCode);
     return null;
   }
+
+  countMetric(analysisState?.stageCounts, 'ORDERBOOK_OK');
+  countMetric(analysisState?.stageCounts, 'LIQUIDITY_BASE_OK');
+  countMetric(analysisState?.stageCounts, 'REGIME_OK');
+  countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
   if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED') {
     countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');
     return null;
   }
-  countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
   const moduleResults = [
     evaluateVidyaSqueeze(ctx),
@@ -1103,6 +1123,7 @@ async function sendTelegramNotification(signals, stats = null) {
     message += `📊 _WR: ${esc(stats.winRate)}% \\| Open: ${esc(stats.open)} \\| W/L: ${esc(stats.wins)}/${esc(stats.losses)}_\n`;
   }
   message += `_${esc(`${ALGORITHM_VERSION} • spot long-only`)}_\n\n`;
+  if (GLOBAL_SHADOW_MODE) message += `_GLOBAL SHADOW MODE activo_\n\n`;
 
   for (const signal of [...signals].sort((a, b) => b.score - a.score).slice(0, 5)) {
     const btcIcon = signal.btcContext?.status === 'GREEN' ? '🟢' : '🟡';
@@ -1249,23 +1270,29 @@ export async function runAnalysis(context) {
           shadowCandidates.push(recordShadowNearMiss(signal, 'SECTOR_CORRELATION', {
             blockedBySymbol: selectedSectorLeaders.get(signal.sector)
           }));
+          recordSymbolScore(signalMemory, symbol, signal.score, signal.module);
           await sleep(8);
           continue;
         }
 
         cooldowns[symbol] = Date.now();
         await saveCooldowns(cooldowns, context);
-        await recordSignalHistory(signal, context);
         recordSymbolScore(signalMemory, symbol, signal.score, signal.module);
-        signals.push(signal);
-        countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
 
         if (protectedSector) {
           selectedSectors.add(signal.sector);
           selectedSectorLeaders.set(signal.sector, symbol);
         }
 
-        pLog(`[${runId}] SIGNAL: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
+        if (GLOBAL_SHADOW_MODE) {
+          shadowCandidates.push(recordShadowNearMiss(signal, 'GLOBAL_SHADOW_MODE'));
+          pLog(`[${runId}] SHADOW_FORCED: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
+        } else {
+          await recordSignalHistory(signal, context);
+          signals.push(signal);
+          countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
+          pLog(`[${runId}] SIGNAL: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
+        }
         await sleep(8);
       } catch (error) {
         errors++;
@@ -1275,6 +1302,9 @@ export async function runAnalysis(context) {
     }
 
     if (shadowCandidates.length) {
+      for (const shadow of shadowCandidates) {
+        recordSymbolScore(signalMemory, shadow.symbol, shadow.score, shadow.module || shadow.rejectReasonCode);
+      }
       const existingShadows = await loadShadowTrades(context);
       await saveShadowTrades([...existingShadows, ...shadowCandidates], context);
       pLog(`[SHADOW] Recorded ${shadowCandidates.length} near-misses`);
@@ -1308,6 +1338,7 @@ export async function runAnalysis(context) {
         return [key, Number(value)];
       })),
       telegram,
+      globalShadowMode: GLOBAL_SHADOW_MODE,
       timestamp: new Date().toISOString()
     };
   } catch (error) {
