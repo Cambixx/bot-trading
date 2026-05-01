@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v12.0.1 / v2.2.0)
+# 🦅 Documentación del Algoritmo de Trading (v13.0.0 / v3.0.0)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,55 +8,49 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v12.0.0)
+## Current Runtime Snapshot (v13.0.0)
 
 ### Resumen
-- **Runtime Version:** `v12.0.1-QuantumSniper` / `v2.2.0-KnifeCatcher-Quantum`
+- **Runtime Version:** `v13.0.0-TradingViewFusion` / `v3.0.0-TradingViewReversalLab`
 - **File Core:** `trader-bot.js` y `knife-catcher.js`
-- **Estilo Bot 1 (Quantum Sniper):** `spot`, `long-only`, High-Confluence Sniper (`trader-bot.js`).
-- **Estilo Bot 2 (Knife Catcher):** `spot`, `long-only`, multi-strategy Mean Reversion / Reversal (`knife-catcher.js`).
-- **Filosofía:** Sistema de confluencia institucional (Score ≥ 82) integrando SMC, ML, Volatilidad y Momentum.
+- **Estilo Bot 1 (TradingView Fusion):** `spot`, `long-only`, trend/reclaim scanner (`trader-bot.js`).
+- **Estilo Bot 2 (Reversal Lab):** `spot`, `long-only`, confirmed reversal scanner (`knife-catcher.js`).
+- **Filosofía:** módulos de estrategia separados, derivados de los indicadores en `tradinview-indicators`, con historial/cooldowns/shadow trading preservados en Netlify Blobs.
 
 ### Arquitectura de Módulos Activa
 
-#### Bot 1: Quantum Sniper (`trader-bot.js`)
-- **`CONFLUENCE_SNIPER` (Multi-Indicator Edge)**
-  - **Módulo SMC:** Detecta *Break of Structure* (BOS) y *Order Blocks* (OB). Prioriza entradas en zonas de liquidez institucional.
-  - **Módulo ML Trend:** Usa *Gaussian Process Regression* (GPR) para predecir la dirección de la tendencia con suavizado avanzado.
-  - **Módulo Squeeze:** Identifica compresión de volatilidad (BB < KC) para capturar el inicio de expansiones explosivas.
-  - **Módulo MACD Custom:** Filtro de momentum en temporalidades alineadas.
-  - **Gate de Confluencia:** Requiere un Score Agregado ≥ 82/100 para emitir señal.
+#### Bot 1: TradingView Fusion (`trader-bot.js`)
+- **`VIDYA_SQUEEZE_EXPANSION`**
+  - **Lógica:** Volumatic VIDYA en tendencia alcista + Squeeze Momentum alcista + MACD confirmado.
+  - **Uso:** captura expansiones de tendencia tras compresión o aceleración limpia.
+- **`SMC_DISCOUNT_RECLAIM`**
+  - **Lógica:** estructura SMC alcista reciente + reclaim de EMA/VWAP u order block.
+  - **Uso:** entradas de continuación tras pullback a zona de valor.
+- **`TWO_POLE_PULLBACK_CONTINUATION`**
+  - **Lógica:** reset del oscilador Two-Pole dentro de tendencia 1H compatible por SOTT/MLMA.
+  - **Uso:** pullbacks controlados, evitando persecución de velas extendidas.
 
-#### Bot 2: Knife Catcher (`knife-catcher.js`)
-- **`STREAK_REVERSAL` (Streak Exhaustion)**
-  - **Lógica:** Caza de rebotes tras ≥ 5 velas de 5m rojas consecutivas.
-  - **Gates:** Streak ≤ -5, Volume Ratio >= 0.8x.
-- **`SHADOW_ONLY_MODULES` (v2.2.0):** TODO el bot está en modo **GLOBAL_SHADOW_MODE** por baja expectativa reciente (0% WR).
-
-#### Bot 2: Knife Catcher (`knife-catcher.js`)
-- **`KNIFE_CATCHER` (Flash Crash Reversion)**
-- **`STREAK_REVERSAL` (Streak Exhaustion)**
-  - **Lógica:** Caza de rebotes tras $\ge$ 5 velas de 5m rojas consecutivas.
-  - **Gates:** Streak $\le$ -5, **Volume Ratio >= 0.8x (hard gate desde v2.1.0)**. Rechaza con `STREAK_LOW_VOL` si volumen insuficiente.
-- **`PIVOT_REVERSION` (Pivot Mean Reversion)**
-  - **Lógica:** Retorno al punto pivote de 4H cuando el precio se desvía agresivamente a la baja.
-  - **Gates:** Precio por debajo del Punto Pivote (48 bars lookback @ 5m).
-- **`KELTNER_REVERSION` (Channel Fade)**
-  - **Lógica:** Fade de la banda inferior de Keltner (1.5 ATR / EMA 20).
-  - **Gates:** Cierre por debajo de la banda inferior en 5m.
-- **Exit Telemetry (v2.1.2):** Bot 2 no usa trailing stop a break-even. Sus cierres siguen siendo `TAKE_PROFIT`, `STOP_LOSS` o `TIME_STOP_STALE_EXIT`, pero ahora quedan persistidos con `exitPrice`, `exitReason` y `closedAt` para auditoría.
+#### Bot 2: Reversal Lab (`knife-catcher.js`)
+- **`TWO_POLE_CAPITULATION_RESET`**
+  - **Lógica:** impulso de capitulación + reset/buy cross de Two-Pole + volumen.
+- **`VIDYA_LIQUIDITY_SWEEP`**
+  - **Lógica:** barrido de mínimo previo o reclaim SMC + VIDYA/MACD/Two-Pole confirmando giro.
+- **`SOTT_BAND_RECLAIM`**
+  - **Lógica:** recuperación de banda inferior de Bollinger + cruce alcista SOTT + momentum girando.
+- **Modo Shadow opcional:** `KNIFE_GLOBAL_SHADOW_MODE=true` fuerza Bot 2 a registrar señales como shadow sin enviarlas como live.
+- **Exit Telemetry:** Bot 2 sigue persistiendo `exitPrice`, `exitReason` y `closedAt` para auditoría.
 
 
 ### Clasificación de Riesgo & Regímenes
 - **`RISK_OFF`:** Bloqueo total si `BTC 4H` está bajista o BTC Status es `RED`.
-- **`TRANSITION / RANGING`:** Operativos pero con score mínimo (Suelo) más elevado.
+- **`RANGING / VOLATILE_TRANSITION`:** Operativos con score mínimo más elevado, especialmente en Bot 2.
 - **BTC Context (SEM):**
   - `RED`: Bloqueo total (Shadow Only).
   - `AMBER`: Requiere +4/+2 puntos extra de Score para entrar live.
   - `GREEN`: Operación normal.
-- **Penalización de Régimen (Bot 2, v2.1.1):**
-  - `TRENDING`: `STREAK_REVERSAL`, `PIVOT_REVERSION` y `KELTNER_REVERSION` requieren `+5` puntos extra en el score mínimo.
-  - `HIGH_VOL_BREAKOUT`: esos mismos módulos requieren otros `+5` puntos extra, porque el audit live mostró expectativa negativa en expansión de volatilidad.
+- **Penalización de Régimen (v13/v3):**
+  - Bot 1 sube el suelo en `RANGING` para expansiones VIDYA y en `VOLATILE_TRANSITION`.
+  - Bot 2 sube el suelo en `TRENDING`, `HIGH_VOL_BREAKOUT` y `VOLATILE_TRANSITION` para evitar comprar reversión contra tendencias violentas.
 
 ### Filtros de Liquidez (v10.1.0 Update)
 - `ELITE` / `HIGH` → Live ✅
@@ -72,8 +66,8 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 El bot opera como un ecosistema serverless interconectado:
 
 - **Netlify Functions Paralelas:**
-  - `trader-bot`: Bot 1 (QuantumEdge). Corre en los minutos `0,15,30,45`.
-  - `knife-catcher`: Bot 2 (Mean Reversion). Corre en los minutos `5,20,35,50` para evitar rate-limits de MEXC.
+  - `trader-bot`: Bot 1 (TradingView Fusion). Corre en los minutos `0,15,30,45`.
+  - `knife-catcher`: Bot 2 (Reversal Lab). Corre en los minutos `5,20,35,50` para evitar rate-limits de MEXC.
   - `auto-digest`: Genera el reporte diario a las **09:00 UTC**.
   - `telegram-bot`: Interfaz de comandos.
 - **Netlify Blobs (Aislados):**
@@ -82,14 +76,15 @@ El bot opera como un ecosistema serverless interconectado:
 
 ---
 
-## 2. Sistema de Decisión (Quantum Edition)
+## 2. Sistema de Decisión (TradingView Fusion)
 
-A diferencia de versiones anteriores, el Score ya no decide **SI** entramos, sino **CUÁNTO** apostamos.
+A diferencia de las versiones de confluencia genérica, cada señal nace de un módulo concreto. El score decide prioridad y tamaño, pero el módulo decide si existe un setup válido.
 
-1. **Validación de Módulo:** ¿Cumple el asset los requisitos del `VCP_BREAKOUT`? (Si/No).
+1. **Validación de Módulo:** ¿Cumple el asset los requisitos de uno de los módulos activos?
 2. **Ranking:** Si varios módulos son válidos, se elige el de mayor Score.
-3. **Execution Gate:** Spread < 8bps y profundidad suficiente.
-4. **Position Sizing:** El Score final escalado entre 0-100 determina el `recommendedSize` (0.5% a 3.5%).
+3. **Execution Gate:** spread/profundidad/liquidez deben pasar antes de persistir una señal live.
+4. **Shadow Tracking:** candidatos cercanos que fallen score, ejecución o sector se guardan como shadow para auditoría.
+5. **Position Sizing:** el score, ATR, liquidez, régimen y fuerza relativa determinan `recommendedSize`.
 
 ---
 
@@ -101,7 +96,7 @@ graph TD
     B -- Yes --> C[Stop / Persistent Log]
     B -- No --> D[Acquire Run Lock]
     D --> E[BTC Context Analysis]
-    E --> F[Select Top 38 Leaders]
+    E --> F[Select Momentum Universe]
     F --> G{Module Match?}
     G -- No --> H[Reject / Shadow Near-Miss]
     G -- Yes --> I{Execution Gate?}
@@ -115,23 +110,30 @@ graph TD
 
 | Módulo | SL Base | TP Base | Ratio R:R |
 |--------|---------|---------|-----------|
-| `VCP_BREAKOUT` (Bot 1) | 1.2x ATR | 2.5x ATR | 2.08:1 |
-| `VWAP_PULLBACK` (Bot 1) | 1.4x ATR | 3.0x ATR | 2.14:1 |
-| `KNIFE_CATCHER` (Bot 2) | 1.0x ATR | 3.5x ATR | 3.50:1 |
-| `STREAK_REVERSAL` (Bot 2)| ~1.2% Fixed| ~3.0% Fixed| 2.50:1 | 
-| `PIVOT_REVERSION` (Bot 2)| ~1.0% Fixed| ~3.0% Fixed| 3.00:1 | 
-| `KELTNER_REVERSION` (Bot 2)| 1.4x ATR | 3.2x ATR | 2.28:1 | 
+| `VIDYA_SQUEEZE_EXPANSION` (Bot 1) | ~1.35x ATR / estructura | 2.3R | >=2.0:1 |
+| `SMC_DISCOUNT_RECLAIM` (Bot 1) | ~1.2x ATR / swing low | 2.4R | >=2.0:1 |
+| `TWO_POLE_PULLBACK_CONTINUATION` (Bot 1) | ~1.15x ATR | 2.05R | >=1.8:1 |
+| `TWO_POLE_CAPITULATION_RESET` (Bot 2) | ~1.15x ATR / sweep low | 2.25R | >=1.8:1 |
+| `VIDYA_LIQUIDITY_SWEEP` (Bot 2) | ~1.25x ATR / sweep low | 2.45R | >=1.8:1 |
+| `SOTT_BAND_RECLAIM` (Bot 2) | ~1.1x ATR | 2.15R | >=1.8:1 |
 
 
-- **Time Stop:** Cada módulo define sus horas de espera. `KNIFE_CATCHER` cierra a las 4h si no rebota, mientras que Bot 1 espera entre 6h y 12h. En v11.0.0, `HIGH_VOL_BREAKOUT` usa un time stop más apretado (reducido en 2h).
-- **ATR Dynamic:** Si el ATR % es muy alto (>2.5%), el tamaño de posición se reduce un 35% automáticamente. Los tokens con liquidez `ELITE` relajan este límite en un 20% (v11).
+- **Time Stop:** Cada módulo define sus horas de espera. Bot 1 usa ventanas aproximadas de 10h-16h; Bot 2 usa 5h-7h y reduce el tiempo en regímenes violentos.
+- **ATR Dynamic:** Si el ATR % es alto, el tamaño de posición se reduce automáticamente. Bot 2 usa sizing más conservador por tratarse de reversión.
 - **Break-Even Stop (Añadido en v11.0.0):** Cuando un trade en Bot 1 alcanza el 50% de la distancia hacia su Take Profit, el Stop Loss se mueve automáticamente a Break-Even + 0.1%.
 - **Exit Telemetry (v11.1.2):** Si ese stop movido se ejecuta con el precio todavía por encima de la entrada, el cierre se clasifica como `BREAK_EVEN` con `exitReason=TRAIL_BE_STOP` en vez de `LOSS`. Si hay gap por debajo de la entrada, sigue contando como `LOSS`.
-- **Regime Stops:** En transición (`TRANSITION`), el Stop Loss se aprieta al 0.9x del multiplicador base.
+- **Regime Stops:** En `VOLATILE_TRANSITION` y `HIGH_VOL_BREAKOUT` se sube el score mínimo y Bot 2 acorta su time stop.
 
 ---
 
 ## 5. Changelog Reciente
+
+### v13.0.0-TradingViewFusion / v3.0.0-TradingViewReversalLab (1 May 2026)
+- **Full Strategy Reset:** `trader-bot.js` y `knife-catcher.js` fueron reconstruidos desde cero usando traducciones JS de los indicadores en `tradinview-indicators`.
+- **Bot 1:** nuevos módulos `VIDYA_SQUEEZE_EXPANSION`, `SMC_DISCOUNT_RECLAIM` y `TWO_POLE_PULLBACK_CONTINUATION`.
+- **Bot 2:** nuevos módulos `TWO_POLE_CAPITULATION_RESET`, `VIDYA_LIQUIDITY_SWEEP` y `SOTT_BAND_RECLAIM`.
+- **Persistence Preserved:** se mantienen claves de Netlify Blobs para history, cooldowns, shadows, archives, autopsies y persistent logs.
+- **Telegram Preserved:** las alertas siguen usando el bot actual y el handler manual con `NOTIFY_SECRET` opcional.
 
 ### v12.0.1-QuantumSniper (30 Abr 2026)
 - **P0 Remediation:** Elevado umbral de ejecución de 70 a **82** tras identificar expectativa negativa en scores bajos.
@@ -213,4 +215,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v12.0.1 / v2.2.0 — 30 Abril 2026**
+**Documentación actualizada v13.0.0 / v3.0.0 — 1 Mayo 2026**

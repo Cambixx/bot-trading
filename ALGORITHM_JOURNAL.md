@@ -6,7 +6,50 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-### Current Version: v12.0.1 (Quantum Sniper Remediation)
+### Current Version: v13.0.0 (TradingView Fusion / Reversal Lab)
+**Date:** May 1, 2026
+**Theme:** "FULL STRATEGY RESET — TRADINGVIEW INDICATOR TRANSLATION"
+
+### Core Logic & Parameters:
+- **Runtime Versions:** `v13.0.0-TradingViewFusion` / `v3.0.0-TradingViewReversalLab`.
+- **Bot 1 Strategy:** Trend/reclaim bot using translated TradingView-style modules:
+  - `VIDYA_SQUEEZE_EXPANSION`: Volumatic VIDYA trend + LazyBear Squeeze + MACD confirmation.
+  - `SMC_DISCOUNT_RECLAIM`: Smart Money bullish structure + EMA/VWAP/order-block reclaim.
+  - `TWO_POLE_PULLBACK_CONTINUATION`: Two-Pole reset inside supportive SOTT/MLMA higher-timeframe trend.
+- **Bot 2 Strategy:** Confirmed reversal lab replacing pure falling-knife logic:
+  - `TWO_POLE_CAPITULATION_RESET`: Capitulation impulse plus Two-Pole reset.
+  - `VIDYA_LIQUIDITY_SWEEP`: Prior-low sweep/reclaim plus VIDYA/MACD/Two-Pole confirmation.
+  - `SOTT_BAND_RECLAIM`: Bollinger lower-band reclaim plus SOTT bull cross and momentum upturn.
+- **Persistence Preserved:** Existing Netlify Blob keys remain in use for histories, cooldowns, shadows, archives, autopsies and persistent logs.
+- **Alerts Preserved:** Telegram notifications remain wired through the existing bot credentials and manual notify handler.
+
+### Changes Made:
+
+#### [H1] Full Bot 1 Rebuild (`trader-bot.js`)
+- **Problem:** v12 Quantum Sniper still depended on high-threshold confluence that produced poor recent expectancy and fragile signal frequency.
+- **Fix:** Rebuilt Bot 1 from scratch around independent TradingView-derived modules. The score now ranks coherent strategy setups rather than aggregating loosely related confirmations.
+- **Expected Effect:** Cleaner separation between trend expansion, SMC reclaim and pullback-continuation conditions, with each module carrying its own risk geometry and reasons.
+- **Falsification:** If the next 15 decisive Bot 1 trades show WR <45% or zero-MFE losses >40%, module-specific gates should be audited before changing global thresholds.
+
+#### [H2] Full Bot 2 Rebuild (`knife-catcher.js`)
+- **Problem:** Previous knife modules were forced into global shadow mode after a 0% recent shadow win rate. Pure oversold/mean-reversion triggers were structurally unsafe.
+- **Fix:** Replaced them with confirmed reversal modules requiring reset/reclaim evidence from Two-Pole, SOTT, VIDYA, SMC, MACD, volume and order-book conditions.
+- **Expected Effect:** Bot 2 should stop buying merely because price is down and instead wait for a tradable reversal footprint.
+- **Falsification:** If Bot 2 reversal modules produce expectancy <0R over 12 decisive trades, enable `KNIFE_GLOBAL_SHADOW_MODE=true` and audit the worst module first.
+
+#### [T1] Shared Indicator Translation Layer
+- **Logic:** Added `tradingview-strategy-core.js` to centralize the JavaScript translations of Squeeze, MACD, MLMA-style Gaussian MA, VIDYA, Two-Pole, SOTT approximation and SMC pivots.
+- **Benefit:** Both bots now use the same indicator math while keeping separate schedules, history keys, shadow stores and Telegram messages.
+
+### Validation Criteria:
+- **Bot 1:** ≥45% decisive WR or positive expectancy over first 15 closed trades; inspect module-level autopsies.
+- **Bot 2:** ≥50% decisive WR or positive expectancy over first 12 closed trades; shadow unresolved candidates must continue archiving.
+- **Telemetry:** No missing `exitPrice`, `exitReason`, `closedAt`, `module`, `riskModel` or `version` on new closed trades.
+- **Check at:** 14 calendar days or 15 Bot 1 decisive trades / 12 Bot 2 decisive trades.
+
+---
+
+### Previous Version: v12.0.1 (Quantum Sniper Remediation)
 **Date:** Apr 30, 2026
 **Theme:** "P0 REMEDIATION — THRESHOLD HARDENING & SHADOW ENFORCEMENT"
 

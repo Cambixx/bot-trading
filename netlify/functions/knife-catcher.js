@@ -1,33 +1,75 @@
 /**
- * Netlify Scheduled Function - Evidence-First Spot Intraday Analysis
- * Focused on liquid crypto spot pairs, long-only, with transparent module logic.
+ * Netlify Scheduled Function - TradingView Reversal Lab v3
+ * Spot long-only reversal scanner. It replaces the old global-shadow knife logic
+ * with confirmed reset modules based on Two-Pole, SOTT, VIDYA, SMC and Squeeze.
  */
 
 import { schedule } from "@netlify/functions";
-import { getStore } from "@netlify/blobs";
+import {
+  buildExecutionQuality,
+  buildRelativeStrengthSnapshot,
+  buildVolumeLiquidityConfirmation,
+  calculateADX,
+  calculateATR,
+  calculateBollingerBands,
+  calculateEMA,
+  calculateMACD,
+  calculateOrderBookMetrics as coreCalculateOrderBookMetrics,
+  calculateRelativeStrength,
+  calculateRSI,
+  calculateSOTT,
+  calculateSqueeze,
+  calculateTwoPoleOscillator,
+  calculateVIDYA,
+  calculateVolatilityPercentile,
+  calculateVolumeSMA,
+  calculateVWAP,
+  clamp,
+  classifyLiquidityTier as coreClassifyLiquidityTier,
+  countMetric,
+  detectBTCContext,
+  detectMarketRegime,
+  detectSMC,
+  escapeMarkdownV2,
+  formatPrice,
+  getAllTickers24h,
+  getClosedCandles,
+  getExecutionRejectCode as coreGetExecutionRejectCode,
+  getInternalStore as coreGetInternalStore,
+  getKlines,
+  getOrderBookDepth,
+  getRecentRangeLevels,
+  getSector,
+  isNonCryptoWrapper,
+  isProtectedSector,
+  normalizeBaseAsset,
+  roundMetric,
+  selectTopSymbols,
+  sleep,
+  toSummaryPairs
+} from './tradingview-strategy-core.js';
 
-const ALGORITHM_VERSION = 'v2.2.0-KnifeCatcher-Quantum';
-const GLOBAL_SHADOW_MODE = true; // [AUDIT] Forced shadow mode due to negative shadow expectancy
-console.log(`--- THE KNIFE CATCHER Module Loaded (${ALGORITHM_VERSION}) ---`);
+export const ALGORITHM_VERSION = 'v3.0.0-TradingViewReversalLab';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 65;
-const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 8;
-const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 90000;
-const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.12;
-const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 6;
+const GLOBAL_SHADOW_MODE = (process.env.KNIFE_GLOBAL_SHADOW_MODE || 'false').toLowerCase() === 'true';
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
-const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 60;
-const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 8000000;
-const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
+const SIGNAL_SCORE_THRESHOLD = process.env.KNIFE_SIGNAL_SCORE_THRESHOLD ? Number(process.env.KNIFE_SIGNAL_SCORE_THRESHOLD) : 72;
+const MAX_SPREAD_BPS = process.env.KNIFE_MAX_SPREAD_BPS ? Number(process.env.KNIFE_MAX_SPREAD_BPS) : 10;
+const MIN_DEPTH_QUOTE = process.env.KNIFE_MIN_DEPTH_QUOTE ? Number(process.env.KNIFE_MIN_DEPTH_QUOTE) : 75000;
+const MIN_ATR_PCT = process.env.KNIFE_MIN_ATR_PCT ? Number(process.env.KNIFE_MIN_ATR_PCT) : 0.18;
+const MAX_ATR_PCT = process.env.KNIFE_MAX_ATR_PCT ? Number(process.env.KNIFE_MAX_ATR_PCT) : 7;
+const MAX_SYMBOLS = process.env.KNIFE_MAX_SYMBOLS ? Number(process.env.KNIFE_MAX_SYMBOLS) : 64;
+const MIN_QUOTE_VOL_24H = process.env.KNIFE_MIN_QUOTE_VOL_24H ? Number(process.env.KNIFE_MIN_QUOTE_VOL_24H) : 8000000;
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 240;
 const AVOID_ASIA_SESSION = (process.env.AVOID_ASIA_SESSION || 'false').toLowerCase() === 'true';
+const NOTIFY_SECRET = process.env.NOTIFY_SECRET || '';
 
 export const COOLDOWN_STORE_KEY = 'signal-cooldowns';
 const COOLDOWN_EXPIRY_HOURS = 24;
-const RUN_LOCK_KEY = 'global-run-lock';
+const RUN_LOCK_KEY = 'knife-run-lock-v3';
 
 export const HISTORY_STORE_KEY = 'knife-history-v1';
 export const SHADOW_STORE_KEY = 'knife-shadow-trades-v1';
@@ -37,182 +79,59 @@ export const AUTOPSY_STORE_KEY = 'knife-trade-autopsies-v1';
 export const PERSISTENT_LOG_STORE_KEY = 'knife-persistent-logs-v1';
 
 const SHADOW_BENCHMARK_VERSION = `${ALGORITHM_VERSION}-shadow-v1`;
-const SHADOW_BENCHMARK_TP_PCT = process.env.SHADOW_BENCHMARK_TP_PCT ? Number(process.env.SHADOW_BENCHMARK_TP_PCT) : 0.015;
-const SHADOW_BENCHMARK_SL_PCT = process.env.SHADOW_BENCHMARK_SL_PCT ? Number(process.env.SHADOW_BENCHMARK_SL_PCT) : 0.010;
+const SHADOW_BENCHMARK_TP_PCT = process.env.KNIFE_SHADOW_TP_PCT ? Number(process.env.KNIFE_SHADOW_TP_PCT) : 0.018;
+const SHADOW_BENCHMARK_SL_PCT = process.env.KNIFE_SHADOW_SL_PCT ? Number(process.env.KNIFE_SHADOW_SL_PCT) : 0.010;
 
-const MEXC_API = 'https://api.mexc.com/api/v3';
-const candleCache = new Map();
-const CACHE_TTL_MS = 5 * 60 * 1000;
+export const calculateOrderBookMetrics = coreCalculateOrderBookMetrics;
 
-const STABLE_BASES = new Set(['USDT', 'USDC', 'BUSD', 'FDUSD', 'DAI', 'EUR', 'GBP']);
-const TOKENIZED_METAL_BASES = new Set(['PAXG', 'XAUT', 'XAG', 'XAU']);
-const CORE_LEADERS = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'LINK'];
-
-const SECTOR_MAP = {
-  BTC: 'BLUE_CHIP',
-  ETH: 'BLUE_CHIP',
-  BNB: 'BLUE_CHIP',
-  XRP: 'BLUE_CHIP',
-  SOL: 'L1',
-  AVAX: 'L1',
-  ADA: 'L1',
-  DOT: 'L1',
-  NEAR: 'L1',
-  ATOM: 'L1',
-  DOGE: 'MEME',
-  SHIB: 'MEME',
-  PEPE: 'MEME',
-  FLOKI: 'MEME',
-  LINK: 'DEFI',
-  UNI: 'DEFI',
-  AAVE: 'DEFI',
-  COMP: 'DEFI',
-  MKR: 'DEFI',
-  ARB: 'L2',
-  OP: 'L2',
-  MATIC: 'L2',
-  STRK: 'L2',
-  RENDER: 'AI',
-  FET: 'AI',
-  AGIX: 'AI',
-  WLD: 'AI'
-};
-
-const FALLBACK_SYMBOLS = CORE_LEADERS.map(base => `${base}${QUOTE_ASSET}`);
-
-function getCachedCandles(key) {
-  const cached = candleCache.get(key);
-  if (!cached) return null;
-  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
-    candleCache.delete(key);
-    return null;
-  }
-  return cached.data;
+export function getInternalStore(context) {
+  return coreGetInternalStore(context);
 }
 
-function setCachedCandles(key, data) {
-  candleCache.set(key, { data, timestamp: Date.now() });
+export function classifyLiquidityTier(quoteVol24h, depthQuoteTopN, spreadBps) {
+  return coreClassifyLiquidityTier(quoteVol24h, depthQuoteTopN, spreadBps, MAX_SPREAD_BPS);
 }
 
-function normalizeBaseAsset(symbol = '') {
-  return symbol.endsWith(QUOTE_ASSET) ? symbol.slice(0, -QUOTE_ASSET.length) : symbol;
-}
-
-function getSector(symbol) {
-  return SECTOR_MAP[normalizeBaseAsset(symbol)] || 'OTHER';
-}
-
-function isProtectedSector(sector) {
-  return sector && sector !== 'UNKNOWN' && sector !== 'OTHER';
+export function getExecutionRejectCode(obMetrics, liquidityTier) {
+  return coreGetExecutionRejectCode(obMetrics, liquidityTier, {
+    maxSpreadBps: MAX_SPREAD_BPS,
+    minDepthQuote: MIN_DEPTH_QUOTE
+  });
 }
 
 function getTradingSessionStatus(now = new Date()) {
   const utcHour = now.getUTCHours();
-  if (!AVOID_ASIA_SESSION) {
-    return { allowed: true, utcHour, reason: null };
-  }
-
-  if (utcHour >= 0 && utcHour < 7) {
+  if (AVOID_ASIA_SESSION && utcHour >= 0 && utcHour < 7) {
     return {
       allowed: false,
       utcHour,
-      reason: `Asia session detected (${utcHour}:00 UTC) - trading restricted`
+      reason: `Asia session detected (${utcHour}:00 UTC) - reversal trading restricted`
     };
   }
-
   return { allowed: true, utcHour, reason: null };
 }
 
-function isNonCryptoWrapper(base) {
-  if (!base) return true;
-  if (STABLE_BASES.has(base)) return true;
-  if (TOKENIZED_METAL_BASES.has(base)) return true;
-  if (base.includes('(') || base.includes(')')) return true;
-  if (base.startsWith('GOLD') || base.startsWith('SILVER')) return true;
-  if (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BULL') || base.endsWith('BEAR')) return true;
-  return false;
-}
-
-function escapeMarkdownV2(text = '') {
-  if (typeof text !== 'string') text = String(text);
-  return text.replace(/([_*\u005B\u005D()~`>#+=|{}.!-])/g, '\\$1');
-}
-
-async function fetchWithTimeout(url, timeout = 15000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Codex Trading Research Bot)'
-      }
-    });
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function intervalToMs(interval) {
-  if (typeof interval !== 'string' || interval.length < 2) return null;
-  const match = interval.trim().match(/^(\d+)\s*([mhd])$/i);
-  if (!match) return null;
-  const value = Number(match[1]);
-  const unit = match[2].toLowerCase();
-  if (!Number.isFinite(value) || value <= 0) return null;
-
-  if (unit === 'm') return value * 60 * 1000;
-  if (unit === 'h') return value * 60 * 60 * 1000;
-  if (unit === 'd') return value * 24 * 60 * 60 * 1000;
-  return null;
-}
-
-function getClosedCandles(candles, interval, now = Date.now()) {
-  if (!Array.isArray(candles) || candles.length === 0) return [];
-  const intervalMs = intervalToMs(interval);
-  if (!intervalMs) return candles.slice();
-
-  const toleranceMs = 2000;
-  const last = candles[candles.length - 1];
-  const closeTime = Number.isFinite(last?.closeTime) ? last.closeTime : (Number.isFinite(last?.time) ? last.time + intervalMs : null);
-
-  if (!Number.isFinite(closeTime)) return candles.slice(0, -1);
-  return now < (closeTime - toleranceMs) ? candles.slice(0, -1) : candles.slice();
-}
-
-export function getInternalStore(context) {
-  const options = { name: 'trading-signals' };
-  const siteID = context?.site?.id || context?.siteID || process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token = context?.token || process.env.NETLIFY_AUTH_TOKEN;
-  if (siteID) options.siteID = siteID;
-  if (token) options.token = token;
-  return getStore(options);
+function formatPersistentLogEntry(message, date = new Date()) {
+  const timestamp = date.toISOString().replace('T', ' ').split('.')[0];
+  return `[${timestamp}] ${message}`;
 }
 
 export async function loadCooldowns(context) {
   try {
     const store = getInternalStore(context);
     const data = await store.get(COOLDOWN_STORE_KEY, { type: 'json' });
-    if (!data) return {};
+    if (!data || typeof data !== 'object') return {};
 
     const now = Date.now();
     const expiryMs = COOLDOWN_EXPIRY_HOURS * 3600 * 1000;
     const fresh = {};
-    for (const [symbol, ts] of Object.entries(data)) {
-      if (Number.isFinite(Number(ts)) && now - Number(ts) < expiryMs) {
-        fresh[symbol] = Number(ts);
-      }
+    for (const [symbol, timestamp] of Object.entries(data)) {
+      const value = Number(timestamp);
+      if (Number.isFinite(value) && now - value < expiryMs) fresh[symbol] = value;
     }
     return fresh;
   } catch (error) {
-    console.error('Error loading cooldowns:', error.message);
+    console.error('[COOLDOWN] load error:', error.message);
     return {};
   }
 }
@@ -220,9 +139,9 @@ export async function loadCooldowns(context) {
 export async function saveCooldowns(cooldowns, context) {
   try {
     const store = getInternalStore(context);
-    await store.setJSON(COOLDOWN_STORE_KEY, cooldowns);
+    await store.setJSON(COOLDOWN_STORE_KEY, cooldowns || {});
   } catch (error) {
-    console.error('Error saving cooldowns:', error.message);
+    console.error('[COOLDOWN] save error:', error.message);
   }
 }
 
@@ -231,16 +150,14 @@ async function acquireRunLock(context) {
     const store = getInternalStore(context);
     const lock = await store.get(RUN_LOCK_KEY, { type: 'json' });
     const now = Date.now();
-
-    if (lock && now - lock.timestamp < 3 * 60000) {
-      console.warn(`[LOCK] Analysis already in progress (${Math.round((now - lock.timestamp) / 1000)}s old).`);
+    if (lock && Number.isFinite(lock.timestamp) && now - lock.timestamp < 3 * 60000) {
+      console.warn(`[LOCK] Knife analysis already running (${Math.round((now - lock.timestamp) / 1000)}s old)`);
       return false;
     }
-
-    await store.setJSON(RUN_LOCK_KEY, { timestamp: now, id: `run-${now}` });
+    await store.setJSON(RUN_LOCK_KEY, { timestamp: now, id: `knife-${now}` });
     return true;
   } catch (error) {
-    console.error('[LOCK] Error acquiring lock:', error.message);
+    console.error('[LOCK] acquire error:', error.message);
     return true;
   }
 }
@@ -250,21 +167,8 @@ async function releaseRunLock(context) {
     const store = getInternalStore(context);
     await store.delete(RUN_LOCK_KEY);
   } catch (error) {
-    console.error('[LOCK] Error releasing lock:', error.message);
+    console.error('[LOCK] release error:', error.message);
   }
-}
-
-function roundMetric(value, decimals = 2) {
-  return Number.isFinite(value) ? Number(value.toFixed(decimals)) : null;
-}
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function countMetric(bucket, key) {
-  if (!bucket || !key) return;
-  bucket[key] = (bucket[key] || 0) + 1;
 }
 
 export function closeTradeWithTelemetry(item, outcome, exitReason, exitPrice, closedAt = Date.now()) {
@@ -276,142 +180,16 @@ export function closeTradeWithTelemetry(item, outcome, exitReason, exitPrice, cl
   return item;
 }
 
-function formatPersistentLogEntry(message, date = new Date()) {
-  const timestamp = date.toISOString().replace('T', ' ').split('.')[0];
-  return `[${timestamp}] ${message}`;
-}
-
-function toSummaryPairs(bucket, limit = 8) {
-  return Object.entries(bucket || {})
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([key, value]) => `${key}=${value}`);
-}
-
-function buildRelativeStrengthSnapshot(rs1h, rs4h, rs24h) {
-  return {
-    rs1h: roundMetric(rs1h, 4),
-    rs4h: roundMetric(rs4h, 4),
-    rs24h: roundMetric(rs24h, 2)
-  };
-}
-
-function buildVolumeLiquidityConfirmation(volumeRatio, deltaRatio, obMetrics, liquidityTier, minVolumeRatio) {
-  return {
-    minVolumeRatio: roundMetric(minVolumeRatio, 2),
-    volumeRatio: roundMetric(volumeRatio),
-    volumePass: Number.isFinite(volumeRatio) ? volumeRatio >= minVolumeRatio : false,
-    deltaRatio: deltaRatio === null ? null : roundMetric(deltaRatio, 3),
-    deltaPass: deltaRatio === null ? null : deltaRatio >= 0,
-    obi: obMetrics ? roundMetric(obMetrics.obi, 3) : null,
-    obiPass: obMetrics ? obMetrics.obi >= -0.05 : false,
-    spreadBps: obMetrics ? roundMetric(obMetrics.spreadBps, 1) : null,
-    depthQuoteTopN: obMetrics ? Math.round(obMetrics.depthQuoteTopN) : null,
-    liquidityTier
-  };
-}
-
-function buildRiskModel(regime, module, atrPercent, liquidityTier, override = null) {
-  let tpMultiplier = 3.0;
-  let slMultiplier = 1.5;
-  let timeStopHours = 10;
-
-  if (module === 'KNIFE_CATCHER') {
-    tpMultiplier = 3.5;
-    slMultiplier = 1.0;
-    timeStopHours = 4;
-  }
-
-  // Apply overrides if provided
-  if (override) {
-    if (override.tpMultiplier !== undefined) tpMultiplier = override.tpMultiplier;
-    if (override.slMultiplier !== undefined) slMultiplier = override.slMultiplier;
-    if (override.timeStopHours !== undefined) timeStopHours = override.timeStopHours;
-  }
-
-  if (liquidityTier === 'MEDIUM') {
-    tpMultiplier *= 0.95;
-    slMultiplier *= 0.95;
-  }
-
-  const tpPct = (atrPercent / 100) * tpMultiplier;
-  const slPct = (atrPercent / 100) * slMultiplier;
-
-  return {
-    tpMultiplier: roundMetric(tpMultiplier, 2),
-    slMultiplier: roundMetric(slMultiplier, 2),
-    tpPct,
-    slPct,
-    realRR: slMultiplier > 0 ? tpMultiplier / slMultiplier : 0,
-    timeStopHours
-  };
-}
-
-async function recordSignalHistory(signal, context) {
-  try {
-    const store = getInternalStore(context);
-    const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
-
-    history.push({
-      id: `${Date.now()}-${signal.symbol}`,
-      symbol: signal.symbol,
-      price: signal.price,
-      tp: signal.tp,
-      sl: signal.sl,
-      type: signal.type,
-      time: Date.now(),
-      status: 'OPEN',
-      score: signal.score,
-      regime: signal.regime,
-      btcRisk: signal.btcContext?.status || 'UNKNOWN',
-      sector: signal.sector || getSector(signal.symbol),
-      module: signal.module || null,
-      entryArchetype: signal.entryArchetype || null,
-      liquidityTier: signal.liquidityTier || null,
-      promotedFromLow: signal.promotedFromLow || false,
-      scoreBeforeMomentum: signal.scoreBeforeMomentum ?? signal.score,
-      momentumAdjustment: signal.momentumAdjustment || 0,
-      requiredScore: signal.requiredScore || null,
-      requiredStrongCategories: signal.requiredStrongCategories ?? null,
-      expectedHoldingHours: signal.expectedHoldingHours || null,
-      riskModel: signal.riskModel || null,
-      entryMetrics: signal.entryMetrics || null,
-      qualityBreakdown: signal.qualityBreakdown || null,
-      relativeStrengthSnapshot: signal.relativeStrengthSnapshot || null,
-      volumeLiquidityConfirmation: signal.volumeLiquidityConfirmation || null,
-      rejectReasonCode: signal.rejectReasonCode || null,
-      volumeRatio: signal.volumeRatio || null,
-      reasons: signal.reasons || [],
-      maxFavorable: signal.price,
-      maxAdverse: signal.price,
-      trailingStopActive: false,
-      exitPrice: null,
-      exitReason: null,
-      closedAt: null
-    });
-
-    await store.setJSON(HISTORY_STORE_KEY, history.slice(-200));
-  } catch (error) {
-    console.error('Error recording history:', error.message);
-  }
-}
-
 async function recordTradeAutopsy(item, context) {
   try {
     const store = getInternalStore(context);
     const autopsies = await store.get(AUTOPSY_STORE_KEY, { type: 'json' }) || [];
-
     const entryPrice = item.price || item.entry;
     const exitTimestamp = Number.isFinite(item.closedAt) ? item.closedAt : Date.now();
-    const hoursOpen = (exitTimestamp - item.time) / 3600000;
     const maxFav = Number.isFinite(item.maxFavorable) ? item.maxFavorable : entryPrice;
     const maxAdv = Number.isFinite(item.maxAdverse) ? item.maxAdverse : entryPrice;
-    const favorableMove = item.type === 'BUY'
-      ? (maxFav - entryPrice) / entryPrice
-      : (entryPrice - maxFav) / entryPrice;
-    const adverseMove = item.type === 'BUY'
-      ? (entryPrice - maxAdv) / entryPrice
-      : (maxAdv - entryPrice) / entryPrice;
+    const favorableMove = (maxFav - entryPrice) / entryPrice;
+    const adverseMove = (entryPrice - maxAdv) / entryPrice;
 
     autopsies.push({
       id: item.id,
@@ -420,17 +198,14 @@ async function recordTradeAutopsy(item, context) {
       regime: item.regime || 'UNKNOWN',
       btcRisk: item.btcRisk || 'UNKNOWN',
       score: item.score || 0,
-      sector: item.sector || getSector(item.symbol),
+      sector: item.sector || getSector(item.symbol, QUOTE_ASSET),
       module: item.module || null,
       entryArchetype: item.entryArchetype || null,
       liquidityTier: item.liquidityTier || null,
-      scoreBeforeMomentum: item.scoreBeforeMomentum ?? item.score ?? 0,
-      momentumAdjustment: item.momentumAdjustment || 0,
       requiredScore: item.requiredScore || null,
-      requiredStrongCategories: item.requiredStrongCategories ?? null,
       expectedHoldingHours: item.expectedHoldingHours || null,
       riskModel: item.riskModel || null,
-      hoursOpen: roundMetric(hoursOpen, 1),
+      hoursOpen: roundMetric((exitTimestamp - item.time) / 3600000, 1),
       favorableMovePct: roundMetric(favorableMove * 100, 2),
       adverseMovePct: roundMetric(adverseMove * 100, 2),
       mfePct: roundMetric(favorableMove * 100, 2),
@@ -439,81 +214,99 @@ async function recordTradeAutopsy(item, context) {
       qualityBreakdown: item.qualityBreakdown || null,
       relativeStrengthSnapshot: item.relativeStrengthSnapshot || null,
       volumeLiquidityConfirmation: item.volumeLiquidityConfirmation || null,
-      rejectReasonCode: item.rejectReasonCode || null,
-      volumeRatio: item.volumeRatio || null,
-      trailingStopActive: item.trailingStopActive === true,
+      reasons: item.reasons || [],
+      trailingStopActive: false,
       exitPrice: Number.isFinite(item.exitPrice) ? item.exitPrice : null,
       exitReason: item.exitReason || null,
-      closedAt: exitTimestamp
+      closedAt: exitTimestamp,
+      version: item.version || ALGORITHM_VERSION
     });
 
-    await store.setJSON(AUTOPSY_STORE_KEY, autopsies.slice(-200));
-    console.log(`[AUTOPSY] ${item.symbol}: ${item.outcome} | Score=${item.score} | Regime=${item.regime}`);
+    await store.setJSON(AUTOPSY_STORE_KEY, autopsies.slice(-300));
   } catch (error) {
-    console.error('[AUTOPSY] Error recording:', error.message);
+    console.error('[AUTOPSY] record error:', error.message);
+  }
+}
+
+async function recordSignalHistory(signal, context) {
+  try {
+    const store = getInternalStore(context);
+    const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
+    history.push({
+      id: `KNIFE-${Date.now()}-${signal.symbol}`,
+      symbol: signal.symbol,
+      price: signal.price,
+      tp: signal.tp,
+      sl: signal.sl,
+      type: 'BUY',
+      time: Date.now(),
+      status: 'OPEN',
+      score: signal.score,
+      regime: signal.regime,
+      btcRisk: signal.btcContext?.status || 'UNKNOWN',
+      sector: signal.sector || getSector(signal.symbol, QUOTE_ASSET),
+      module: signal.module,
+      entryArchetype: signal.entryArchetype,
+      liquidityTier: signal.liquidityTier,
+      requiredScore: signal.requiredScore,
+      expectedHoldingHours: signal.expectedHoldingHours,
+      riskModel: signal.riskModel,
+      entryMetrics: signal.entryMetrics,
+      qualityBreakdown: signal.qualityBreakdown,
+      relativeStrengthSnapshot: signal.relativeStrengthSnapshot,
+      volumeLiquidityConfirmation: signal.volumeLiquidityConfirmation,
+      reasons: signal.reasons || [],
+      maxFavorable: signal.price,
+      maxAdverse: signal.price,
+      trailingStopActive: false,
+      exitPrice: null,
+      exitReason: null,
+      closedAt: null,
+      version: ALGORITHM_VERSION
+    });
+    await store.setJSON(HISTORY_STORE_KEY, history.slice(-250));
+  } catch (error) {
+    console.error('[HISTORY] record error:', error.message);
   }
 }
 
 async function updateSignalHistory(tickers, context, pLog = console.log) {
-  if (!Array.isArray(tickers) || tickers.length === 0) return { stats: { open: 0, wins: 0, losses: 0, bes: 0, staleExits: 0, winRate: 0 }, openSymbols: [] };
-
   try {
     const store = getInternalStore(context);
     const history = await store.get(HISTORY_STORE_KEY, { type: 'json' }) || [];
     if (!history.length) return { stats: { open: 0, wins: 0, losses: 0, bes: 0, staleExits: 0, winRate: 0 }, openSymbols: [] };
 
-    const prices = new Map(tickers.map(t => [t.symbol, Number(t.lastPrice)]));
+    const prices = new Map((tickers || []).map(ticker => [ticker.symbol, Number(ticker.lastPrice)]));
     let updated = false;
 
     for (const item of history) {
       if (item.status !== 'OPEN') continue;
-
       const currentPrice = prices.get(item.symbol);
       if (!Number.isFinite(currentPrice) || currentPrice <= 0) continue;
-
       const entryPrice = item.price || item.entry;
       if (!Number.isFinite(item.maxFavorable)) item.maxFavorable = entryPrice;
       if (!Number.isFinite(item.maxAdverse)) item.maxAdverse = entryPrice;
+      if (currentPrice > item.maxFavorable) item.maxFavorable = currentPrice;
+      if (currentPrice < item.maxAdverse) item.maxAdverse = currentPrice;
 
-      if (item.type === 'BUY') {
-        if (currentPrice > item.maxFavorable) item.maxFavorable = currentPrice;
-        if (currentPrice < item.maxAdverse) item.maxAdverse = currentPrice;
-
-        if (currentPrice >= item.tp) {
-          closeTradeWithTelemetry(item, 'WIN', 'TAKE_PROFIT', currentPrice);
-          updated = true;
-          await recordTradeAutopsy(item, context);
-        } else if (currentPrice <= item.sl) {
-          closeTradeWithTelemetry(item, 'LOSS', 'STOP_LOSS', currentPrice);
-          updated = true;
-          await recordTradeAutopsy(item, context);
-        }
-      } else {
-        if (currentPrice < item.maxFavorable) item.maxFavorable = currentPrice;
-        if (currentPrice > item.maxAdverse) item.maxAdverse = currentPrice;
-
-        if (currentPrice <= item.tp) {
-          closeTradeWithTelemetry(item, 'WIN', 'TAKE_PROFIT', currentPrice);
-          updated = true;
-          await recordTradeAutopsy(item, context);
-        } else if (currentPrice >= item.sl) {
-          closeTradeWithTelemetry(item, 'LOSS', 'STOP_LOSS', currentPrice);
-          updated = true;
-          await recordTradeAutopsy(item, context);
-        }
+      if (currentPrice >= item.tp) {
+        closeTradeWithTelemetry(item, 'WIN', 'TAKE_PROFIT', currentPrice);
+        updated = true;
+        await recordTradeAutopsy(item, context);
+      } else if (currentPrice <= item.sl) {
+        closeTradeWithTelemetry(item, 'LOSS', 'STOP_LOSS', currentPrice);
+        updated = true;
+        await recordTradeAutopsy(item, context);
       }
 
-      const staleExitHours = Number.isFinite(item.expectedHoldingHours) ? item.expectedHoldingHours : 12;
+      const staleExitHours = Number.isFinite(item.expectedHoldingHours) ? item.expectedHoldingHours : 8;
       const hoursOpen = (Date.now() - item.time) / 3600000;
-      const favorableMove = item.type === 'BUY'
-        ? ((item.maxFavorable || entryPrice) - entryPrice) / entryPrice
-        : (entryPrice - (item.maxFavorable || entryPrice)) / entryPrice;
-
+      const favorableMove = ((item.maxFavorable || entryPrice) - entryPrice) / entryPrice;
       if (item.status === 'OPEN' && hoursOpen > staleExitHours && favorableMove < 0.003) {
         closeTradeWithTelemetry(item, 'STALE_EXIT', 'TIME_STOP_STALE_EXIT', currentPrice);
         updated = true;
         await recordTradeAutopsy(item, context);
-        pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, favorable move ${(favorableMove * 100).toFixed(2)}%`);
+        pLog(`[STALE_EXIT] ${item.symbol}: ${hoursOpen.toFixed(1)}h open, MFE ${(favorableMove * 100).toFixed(2)}%`);
       } else if (item.status === 'OPEN' && Date.now() - item.time > 48 * 3600 * 1000) {
         item.status = 'EXPIRED';
         updated = true;
@@ -527,9 +320,8 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
     const losses = closed.filter(item => item.outcome === 'LOSS' || item.outcome === 'STALE_EXIT').length;
     const bes = closed.filter(item => item.outcome === 'BREAK_EVEN').length;
     const staleExits = closed.filter(item => item.outcome === 'STALE_EXIT').length;
-    const totalDecisive = wins + losses;
-    const winRate = totalDecisive > 0 ? (wins / totalDecisive * 100).toFixed(1) : 0;
     const openSignals = history.filter(item => item.status === 'OPEN');
+    const totalDecisive = wins + losses;
 
     return {
       stats: {
@@ -538,12 +330,12 @@ async function updateSignalHistory(tickers, context, pLog = console.log) {
         losses,
         bes,
         staleExits,
-        winRate
+        winRate: totalDecisive > 0 ? (wins / totalDecisive * 100).toFixed(1) : 0
       },
       openSymbols: openSignals.map(item => item.symbol)
     };
   } catch (error) {
-    console.error('Error updating history:', error.message);
+    console.error('[HISTORY] update error:', error.message);
     return { stats: { open: 0, wins: 0, losses: 0, bes: 0, staleExits: 0, winRate: 0 }, openSymbols: [] };
   }
 }
@@ -552,12 +344,10 @@ export async function loadShadowTrades(context) {
   try {
     const store = getInternalStore(context);
     const data = await store.get(SHADOW_STORE_KEY, { type: 'json' });
-    if (!Array.isArray(data)) return [];
-
     const now = Date.now();
-    return data.filter(item => now - item.timestamp < 48 * 3600 * 1000);
+    return Array.isArray(data) ? data.filter(item => now - item.timestamp < 48 * 3600 * 1000) : [];
   } catch (error) {
-    console.error('[SHADOW] Error loading:', error.message);
+    console.error('[SHADOW] load error:', error.message);
     return [];
   }
 }
@@ -565,9 +355,10 @@ export async function loadShadowTrades(context) {
 export async function loadShadowTradeArchive(context) {
   try {
     const store = getInternalStore(context);
-    return await store.get(SHADOW_ARCHIVE_STORE_KEY, { type: 'json' }) || [];
+    const data = await store.get(SHADOW_ARCHIVE_STORE_KEY, { type: 'json' });
+    return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error('[SHADOW_ARCHIVE] Error loading:', error.message);
+    console.error('[SHADOW] archive load error:', error.message);
     return [];
   }
 }
@@ -575,85 +366,73 @@ export async function loadShadowTradeArchive(context) {
 async function saveShadowTrades(shadows, context) {
   try {
     const store = getInternalStore(context);
-    await store.setJSON(SHADOW_STORE_KEY, shadows.slice(-100));
+    await store.setJSON(SHADOW_STORE_KEY, shadows.slice(-150));
   } catch (error) {
-    console.error('[SHADOW] Error saving:', error.message);
+    console.error('[SHADOW] save error:', error.message);
   }
 }
 
 async function saveShadowTradeArchive(shadows, context) {
   try {
     const store = getInternalStore(context);
-    await store.setJSON(SHADOW_ARCHIVE_STORE_KEY, shadows);
+    await store.setJSON(SHADOW_ARCHIVE_STORE_KEY, shadows.slice(-600));
   } catch (error) {
-    console.error('[SHADOW_ARCHIVE] Error saving:', error.message);
+    console.error('[SHADOW] archive save error:', error.message);
   }
 }
 
 async function archiveResolvedShadowTrades(shadows, context, pLog = console.log) {
-  const settled = shadows.filter(item => item.outcome !== 'PENDING');
-  if (!settled.length) return shadows;
+  const resolved = shadows.filter(item => item.outcome !== 'PENDING');
+  if (!resolved.length) return shadows;
 
   const archive = await loadShadowTradeArchive(context);
-  const archiveIds = new Set(archive.map(item => item.id));
+  const ids = new Set(archive.map(item => item.id));
   const archivedAt = Date.now();
-  const newEntries = [];
-
-  for (const shadow of settled) {
+  const additions = [];
+  for (const shadow of resolved) {
     if (!shadow.archivedAt) shadow.archivedAt = archivedAt;
-    if (!archiveIds.has(shadow.id)) {
-      archiveIds.add(shadow.id);
-      newEntries.push({ ...shadow });
+    if (!ids.has(shadow.id)) {
+      ids.add(shadow.id);
+      additions.push({ ...shadow });
     }
   }
-
-  if (newEntries.length) {
-    await saveShadowTradeArchive([...archive, ...newEntries], context);
-    pLog(`[SHADOW_ARCHIVE] Archived ${newEntries.length} resolved near-misses`);
+  if (additions.length) {
+    await saveShadowTradeArchive([...archive, ...additions], context);
+    pLog(`[SHADOW] Archived ${additions.length} resolved near-misses`);
   }
-
   return shadows.filter(item => item.outcome === 'PENDING');
 }
 
-function recordShadowNearMiss(symbol, score, price, regime, rejectReasonCode, btcContext, entryMetrics, qualityBreakdown, meta = {}) {
+function recordShadowNearMiss(signal, rejectReasonCode, meta = {}) {
   const now = Date.now();
-  const benchmarkTpPct = meta.shadowBenchmarkTpPct ?? SHADOW_BENCHMARK_TP_PCT;
-  const benchmarkSlPct = meta.shadowBenchmarkSlPct ?? SHADOW_BENCHMARK_SL_PCT;
-
+  const tpPct = meta.shadowBenchmarkTpPct ?? (signal.tp && signal.price ? (signal.tp - signal.price) / signal.price : SHADOW_BENCHMARK_TP_PCT);
+  const slPct = meta.shadowBenchmarkSlPct ?? (signal.sl && signal.price ? (signal.price - signal.sl) / signal.price : SHADOW_BENCHMARK_SL_PCT);
   return {
-    id: `shadow-${now}-${symbol}`,
-    symbol,
-    score,
-    scoreBeforeMomentum: meta.scoreBeforeMomentum ?? score,
-    momentumAdjustment: meta.momentumAdjustment || 0,
-    requiredScore: meta.requiredScore ?? null,
-    requiredStrongCategories: meta.requiredStrongCategories ?? null,
-    scoreGap: meta.requiredScore !== undefined && meta.requiredScore !== null
-      ? Number((meta.requiredScore - score).toFixed(2))
-      : null,
-    price,
-    regime,
-    atrPercent: entryMetrics?.atrPercent || null,
+    id: `knife-shadow-${now}-${signal.symbol}`,
+    symbol: signal.symbol,
+    score: signal.score,
+    requiredScore: signal.requiredScore ?? null,
+    scoreGap: Number.isFinite(signal.requiredScore) ? roundMetric(signal.requiredScore - signal.score, 2) : null,
+    price: signal.price,
+    regime: signal.regime,
     rejectReasonCode,
     rejectReason: rejectReasonCode,
-    btcRisk: btcContext?.status || 'UNKNOWN',
-    sector: meta.sector || getSector(symbol),
-    module: meta.module || null,
-    entryArchetype: meta.entryArchetype || null,
-    liquidityTier: meta.liquidityTier || null,
-    blockedBySector: meta.blockedBySector || null,
-    blockedBySymbol: meta.blockedBySymbol || null,
-    expectedHoldingHours: meta.expectedHoldingHours || null,
-    riskModel: meta.riskModel || null,
-    relativeStrengthSnapshot: meta.relativeStrengthSnapshot || null,
-    volumeLiquidityConfirmation: meta.volumeLiquidityConfirmation || null,
+    btcRisk: signal.btcContext?.status || 'UNKNOWN',
+    sector: signal.sector || getSector(signal.symbol, QUOTE_ASSET),
+    module: signal.module || null,
+    entryArchetype: signal.entryArchetype || null,
+    liquidityTier: signal.liquidityTier || null,
+    expectedHoldingHours: signal.expectedHoldingHours || null,
+    riskModel: signal.riskModel || null,
+    relativeStrengthSnapshot: signal.relativeStrengthSnapshot || null,
+    volumeLiquidityConfirmation: signal.volumeLiquidityConfirmation || null,
     timestamp: now,
-    entryMetrics: entryMetrics || null,
-    qualityBreakdown: qualityBreakdown || null,
+    entryMetrics: signal.entryMetrics || null,
+    qualityBreakdown: signal.qualityBreakdown || null,
     shadowBenchmark: {
-      version: meta.shadowBenchmarkVersion || SHADOW_BENCHMARK_VERSION,
-      tpPct: benchmarkTpPct,
-      slPct: benchmarkSlPct
+      version: meta.shadowBenchmarkVersion || `${SHADOW_BENCHMARK_VERSION}-${signal.module || 'UNKNOWN'}`,
+      tpPct,
+      slPct
     },
     maxFavorableMovePct: null,
     maxAdverseMovePct: null,
@@ -663,132 +442,79 @@ function recordShadowNearMiss(symbol, score, price, regime, rejectReasonCode, bt
   };
 }
 
-async function updateShadowTrades(tickers, context, pLog = console.log) {
+async function updateShadowTrades(context, pLog = console.log) {
   try {
     let shadows = await loadShadowTrades(context);
     if (!shadows.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
-
     if (shadows.some(item => item.outcome !== 'PENDING')) {
       shadows = await archiveResolvedShadowTrades(shadows, context, pLog);
       await saveShadowTrades(shadows, context);
     }
 
-    const pendingShadows = shadows.filter(item => item.outcome === 'PENDING');
-    if (!pendingShadows.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
+    const pending = shadows.filter(item => item.outcome === 'PENDING');
+    if (!pending.length) return { total: 0, wouldWin: 0, wouldLose: 0 };
 
-    const symbols = [...new Set(pendingShadows.map(item => item.symbol))];
     let updated = false;
-
-    for (const symbol of symbols) {
-      try {
-        const symbolShadows = pendingShadows.filter(item => item.symbol === symbol);
-        const candles = await getKlines(symbol, '15m', 200).catch(() => null);
-        if (!candles) continue;
-
-        for (const shadow of symbolShadows) {
-          const entryTime = shadow.timestamp;
-          const entryPrice = shadow.price;
-          const tpLevel = entryPrice * (1 + (shadow.shadowBenchmark?.tpPct || SHADOW_BENCHMARK_TP_PCT));
-          const slLevel = entryPrice * (1 - (shadow.shadowBenchmark?.slPct || SHADOW_BENCHMARK_SL_PCT));
-          const futureCandles = candles.filter(candle => candle.time > entryTime);
-
-          let maxHigh = entryPrice;
-          let minLow = entryPrice;
-
-          for (const candle of futureCandles) {
-            if (candle.high > maxHigh) maxHigh = candle.high;
-            if (candle.low < minLow) minLow = candle.low;
-
-            const hitTP = candle.high >= tpLevel;
-            const hitSL = candle.low <= slLevel;
-
-            shadow.maxFavorableMovePct = roundMetric(((maxHigh - entryPrice) / entryPrice) * 100, 2);
-            shadow.maxAdverseMovePct = roundMetric(((entryPrice - minLow) / entryPrice) * 100, 2);
-
-            if (hitTP && hitSL) {
-              shadow.outcome = candle.close >= candle.open ? 'WOULD_WIN' : 'WOULD_LOSE';
-              shadow.resolvedAt = Date.now();
-              updated = true;
-              break;
-            }
-            if (hitTP) {
-              shadow.outcome = 'WOULD_WIN';
-              shadow.resolvedAt = Date.now();
-              updated = true;
-              break;
-            }
-            if (hitSL) {
-              shadow.outcome = 'WOULD_LOSE';
-              shadow.resolvedAt = Date.now();
-              updated = true;
-              break;
-            }
-          }
-
-          if (shadow.outcome === 'PENDING' && Date.now() - shadow.timestamp > 48 * 3600 * 1000) {
-            shadow.outcome = 'EXPIRED';
+    for (const symbol of [...new Set(pending.map(item => item.symbol))]) {
+      const candles = await getKlines(symbol, '5m', 500).catch(() => null);
+      if (!candles) continue;
+      for (const shadow of pending.filter(item => item.symbol === symbol)) {
+        const entryPrice = shadow.price;
+        const tpLevel = entryPrice * (1 + (shadow.shadowBenchmark?.tpPct || SHADOW_BENCHMARK_TP_PCT));
+        const slLevel = entryPrice * (1 - (shadow.shadowBenchmark?.slPct || SHADOW_BENCHMARK_SL_PCT));
+        const futureCandles = candles.filter(candle => candle.time > shadow.timestamp);
+        let maxHigh = entryPrice;
+        let minLow = entryPrice;
+        for (const candle of futureCandles) {
+          if (candle.high > maxHigh) maxHigh = candle.high;
+          if (candle.low < minLow) minLow = candle.low;
+          shadow.maxFavorableMovePct = roundMetric(((maxHigh - entryPrice) / entryPrice) * 100, 2);
+          shadow.maxAdverseMovePct = roundMetric(((entryPrice - minLow) / entryPrice) * 100, 2);
+          const hitTP = candle.high >= tpLevel;
+          const hitSL = candle.low <= slLevel;
+          if (hitTP && hitSL) {
+            shadow.outcome = candle.close >= candle.open ? 'WOULD_WIN' : 'WOULD_LOSE';
             shadow.resolvedAt = Date.now();
             updated = true;
+            break;
+          }
+          if (hitTP) {
+            shadow.outcome = 'WOULD_WIN';
+            shadow.resolvedAt = Date.now();
+            updated = true;
+            break;
+          }
+          if (hitSL) {
+            shadow.outcome = 'WOULD_LOSE';
+            shadow.resolvedAt = Date.now();
+            updated = true;
+            break;
           }
         }
-      } catch (error) {
-        console.error(`[SHADOW] Error resolving ${symbol}:`, error.message);
+        if (shadow.outcome === 'PENDING' && Date.now() - shadow.timestamp > 48 * 3600 * 1000) {
+          shadow.outcome = 'EXPIRED';
+          shadow.resolvedAt = Date.now();
+          updated = true;
+        }
       }
     }
 
     if (updated) {
-      const resolvedBeforeCleanup = shadows.filter(item => item.outcome !== 'PENDING' && item.outcome !== 'EXPIRED');
-      const wouldWin = resolvedBeforeCleanup.filter(item => item.outcome === 'WOULD_WIN').length;
-      const wouldLose = resolvedBeforeCleanup.filter(item => item.outcome === 'WOULD_LOSE').length;
+      const decisive = shadows.filter(item => item.outcome === 'WOULD_WIN' || item.outcome === 'WOULD_LOSE');
+      const stats = {
+        total: decisive.length,
+        wouldWin: decisive.filter(item => item.outcome === 'WOULD_WIN').length,
+        wouldLose: decisive.filter(item => item.outcome === 'WOULD_LOSE').length
+      };
       shadows = await archiveResolvedShadowTrades(shadows, context, pLog);
       await saveShadowTrades(shadows, context);
-      return { total: resolvedBeforeCleanup.length, wouldWin, wouldLose };
+      return stats;
     }
-
-    const resolved = shadows.filter(item => item.outcome !== 'PENDING' && item.outcome !== 'EXPIRED');
-    return {
-      total: resolved.length,
-      wouldWin: resolved.filter(item => item.outcome === 'WOULD_WIN').length,
-      wouldLose: resolved.filter(item => item.outcome === 'WOULD_LOSE').length
-    };
+    return { total: 0, wouldWin: 0, wouldLose: 0 };
   } catch (error) {
-    console.error('[SHADOW] Error updating:', error.message);
+    console.error('[SHADOW] update error:', error.message);
     return { total: 0, wouldWin: 0, wouldLose: 0 };
   }
-}
-
-async function loadSignalMemory(context) {
-  try {
-    const store = getInternalStore(context);
-    const data = await store.get(MEMORY_STORE_KEY, { type: 'json' });
-    if (!data || typeof data !== 'object') return {};
-
-    const now = Date.now();
-    const fresh = {};
-    for (const [symbol, entries] of Object.entries(data)) {
-      const validEntries = Array.isArray(entries) ? entries.filter(item => now - item.timestamp < 2 * 3600 * 1000) : [];
-      if (validEntries.length) fresh[symbol] = validEntries;
-    }
-    return fresh;
-  } catch (error) {
-    console.error('[MEMORY] Error loading:', error.message);
-    return {};
-  }
-}
-
-async function saveSignalMemory(memory, context) {
-  try {
-    const store = getInternalStore(context);
-    await store.setJSON(MEMORY_STORE_KEY, memory);
-  } catch (error) {
-    console.error('[MEMORY] Error saving:', error.message);
-  }
-}
-
-function recordSymbolScore(memory, symbol, score, regime) {
-  if (!memory[symbol]) memory[symbol] = [];
-  memory[symbol].push({ score, regime, timestamp: Date.now() });
-  if (memory[symbol].length > 8) memory[symbol] = memory[symbol].slice(-8);
 }
 
 export async function loadPersistentLogs(context) {
@@ -797,7 +523,7 @@ export async function loadPersistentLogs(context) {
     const data = await store.get(PERSISTENT_LOG_STORE_KEY, { type: 'json' });
     return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error('[PLOG] Error loading:', error.message);
+    console.error('[PLOG] load error:', error.message);
     return [];
   }
 }
@@ -807,871 +533,394 @@ async function savePersistentLogs(logs, context) {
     const store = getInternalStore(context);
     await store.setJSON(PERSISTENT_LOG_STORE_KEY, logs.slice(-4000));
   } catch (error) {
-    console.error('[PLOG] Error saving:', error.message);
+    console.error('[PLOG] save error:', error.message);
   }
 }
 
-async function appendPersistentLogEntries(messages, context, date = new Date()) {
+async function loadSignalMemory(context) {
   try {
-    const existingLogs = await loadPersistentLogs(context);
-    const nextLogs = messages.map(message => formatPersistentLogEntry(message, date));
-    await savePersistentLogs([...existingLogs, ...nextLogs], context);
+    const store = getInternalStore(context);
+    const data = await store.get(MEMORY_STORE_KEY, { type: 'json' });
+    if (!data || typeof data !== 'object') return {};
+    const now = Date.now();
+    const fresh = {};
+    for (const [symbol, entries] of Object.entries(data)) {
+      const valid = Array.isArray(entries) ? entries.filter(item => now - item.timestamp < 4 * 3600 * 1000) : [];
+      if (valid.length) fresh[symbol] = valid;
+    }
+    return fresh;
   } catch (error) {
-    console.error('[PLOG] Error appending:', error.message);
+    console.error('[MEMORY] load error:', error.message);
+    return {};
   }
 }
 
-async function getKlines(symbol, interval = '15m', limit = 200) {
-  const cacheKey = `${symbol}-${interval}-${limit}`;
-  const cached = getCachedCandles(cacheKey);
-  if (cached) return cached;
-
-  const url = `${MEXC_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
-  const response = await fetchWithTimeout(url);
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => 'No body');
-    throw new Error(`MEXC HTTP error: ${response.status} - ${errorBody}`);
+async function saveSignalMemory(memory, context) {
+  try {
+    const store = getInternalStore(context);
+    await store.setJSON(MEMORY_STORE_KEY, memory);
+  } catch (error) {
+    console.error('[MEMORY] save error:', error.message);
   }
-
-  const json = await response.json();
-  if (!Array.isArray(json)) throw new Error(`MEXC: Invalid klines response for ${symbol}`);
-
-  const intervalMs = intervalToMs(interval);
-  const candles = json.map(candle => {
-    const openTime = Number(candle[0]);
-    const closeTimeRaw = candle[6] ? Number(candle[6]) : null;
-    const closeTime = Number.isFinite(closeTimeRaw) && Number.isFinite(intervalMs)
-      ? closeTimeRaw
-      : (Number.isFinite(openTime) && Number.isFinite(intervalMs) ? openTime + intervalMs : null);
-
-    return {
-      time: openTime,
-      open: Number(candle[1]),
-      high: Number(candle[2]),
-      low: Number(candle[3]),
-      close: Number(candle[4]),
-      volume: Number(candle[5]),
-      closeTime,
-      quoteVolume: Number(candle[7]),
-      trades: candle[8] ? Number(candle[8]) : 0,
-      takerBuyBaseVolume: candle[9] ? Number(candle[9]) : null,
-      takerBuyQuoteVolume: candle[10] ? Number(candle[10]) : null
-    };
-  }).filter(validateCandle);
-
-  setCachedCandles(cacheKey, candles);
-  return candles;
 }
 
-function validateCandle(candle) {
-  return (
-    Number.isFinite(candle.open) && candle.open > 0 &&
-    Number.isFinite(candle.high) && candle.high > 0 &&
-    Number.isFinite(candle.low) && candle.low > 0 &&
-    Number.isFinite(candle.close) && candle.close > 0 &&
-    candle.high >= candle.low &&
-    candle.high >= candle.open &&
-    candle.high >= candle.close &&
-    candle.low <= candle.open &&
-    candle.low <= candle.close &&
-    Number.isFinite(candle.volume) && candle.volume >= 0
-  );
+function recordSymbolScore(memory, symbol, score, module) {
+  if (!memory[symbol]) memory[symbol] = [];
+  memory[symbol].push({ score, module, timestamp: Date.now() });
+  memory[symbol] = memory[symbol].slice(-10);
 }
 
-async function getOrderBookDepth(symbol, limit = 20) {
-  const url = `${MEXC_API}/depth?symbol=${symbol}&limit=${limit}`;
-  const response = await fetchWithTimeout(url);
-  if (!response.ok) return null;
-
-  const json = await response.json();
-  if (!json || !Array.isArray(json.bids) || !Array.isArray(json.asks)) return null;
-
-  return {
-    bids: json.bids.map(([p, q]) => [Number(p), Number(q)]),
-    asks: json.asks.map(([p, q]) => [Number(p), Number(q)])
-  };
-}
-
-async function getAllTickers24h() {
-  const url = `${MEXC_API}/ticker/24hr`;
-  const response = await fetchWithTimeout(url);
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => 'No body');
-    throw new Error(`MEXC HTTP error: ${response.status} - ${errorBody}`);
-  }
-  const json = await response.json();
-  if (!Array.isArray(json)) throw new Error('MEXC: Invalid ticker/24hr response');
-  return json;
-}
-
-function getTopSymbolsByOpportunity(tickers, quoteAsset, limit, minQuoteVolume) {
-  const btcTicker = tickers.find(ticker => ticker.symbol === `BTC${quoteAsset}`);
-  const btcChange = btcTicker ? Number(btcTicker.priceChangePercent || 0) : 0;
-
-  const scored = tickers
-    .filter(ticker => typeof ticker.symbol === 'string' && ticker.symbol.endsWith(quoteAsset))
-    .map(ticker => {
-      const base = normalizeBaseAsset(ticker.symbol);
-      const quoteVolume = Number(ticker.quoteVolume || 0);
-      if (!base || !Number.isFinite(quoteVolume)) return null;
-      if (quoteVolume < minQuoteVolume) return null;
-      if (isNonCryptoWrapper(base)) return null;
-
-      const high = Number(ticker.highPrice || 0);
-      const low = Number(ticker.lowPrice || 0);
-      const priceChange = Number(ticker.priceChangePercent || 0);
-      const volatility = low > 0 ? ((high - low) / low) * 100 : 0;
-      const rs24h = priceChange - btcChange;
-      const liquidityScore = Math.log10(Math.max(quoteVolume, 1));
-      const opportunityScore = (liquidityScore * 0.5) + (clamp(rs24h, -15, 15) * 0.3) + (clamp(volatility, 0, 25) * 0.2);
-
-      return {
-        symbol: ticker.symbol,
-        base,
-        quoteVolume,
-        opportunityScore,
-        rs24h
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => {
-      if (b.opportunityScore !== a.opportunityScore) return b.opportunityScore - a.opportunityScore;
-      return b.quoteVolume - a.quoteVolume;
-    });
-
-  const guaranteed = CORE_LEADERS
-    .map(base => `${base}${quoteAsset}`)
-    .filter(symbol => scored.some(item => item.symbol === symbol));
-
-  const merged = [];
-  const seen = new Set();
-  for (const symbol of [...guaranteed, ...scored.map(item => item.symbol)]) {
-    if (!seen.has(symbol)) {
-      seen.add(symbol);
-      merged.push(symbol);
-    }
-  }
-
-  console.log(`Universe selection ${ALGORITHM_VERSION}: ${merged.length} eligible symbols before cap`);
-  return merged.slice(0, limit);
-}
-
-function calculateRSISeries(closes, period = 14) {
-  if (!Array.isArray(closes) || closes.length < period + 1) return null;
-
-  const series = new Array(closes.length).fill(null);
-  let avgGain = 0;
-  let avgLoss = 0;
-
-  for (let i = 1; i <= period; i++) {
-    const change = closes[i] - closes[i - 1];
-    avgGain += change > 0 ? change : 0;
-    avgLoss += change < 0 ? -change : 0;
-  }
-
-  avgGain /= period;
-  avgLoss /= period;
-  series[period] = avgLoss === 0 ? 100 : (100 - (100 / (1 + (avgGain / avgLoss))));
-
-  for (let i = period + 1; i < closes.length; i++) {
-    const change = closes[i] - closes[i - 1];
-    const gain = change > 0 ? change : 0;
-    const loss = change < 0 ? -change : 0;
-    avgGain = ((avgGain * (period - 1)) + gain) / period;
-    avgLoss = ((avgLoss * (period - 1)) + loss) / period;
-    series[i] = avgLoss === 0 ? 100 : (100 - (100 / (1 + (avgGain / avgLoss))));
-  }
-
-  return series;
-}
-
-function calculateRSI(closes, period = 14) {
-  const series = calculateRSISeries(closes, period);
-  if (!series) return null;
-  for (let i = series.length - 1; i >= 0; i--) {
-    if (Number.isFinite(series[i])) return series[i];
-  }
-  return null;
-}
-
-function calculateEMA(data, period) {
-  if (!Array.isArray(data) || data.length < period) return null;
-  const multiplier = 2 / (period + 1);
-  let ema = data.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
-
-  for (let i = period; i < data.length; i++) {
-    ema = (data[i] - ema) * multiplier + ema;
-  }
-
-  return ema;
-}
-
-function calculateEMASeries(data, period) {
-  if (!Array.isArray(data) || data.length < period) return null;
-  const multiplier = 2 / (period + 1);
-  const series = new Array(data.length).fill(null);
-  let ema = data.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
-  series[period - 1] = ema;
-
-  for (let i = period; i < data.length; i++) {
-    ema = (data[i] - ema) * multiplier + ema;
-    series[i] = ema;
-  }
-
-  return series;
-}
-
-function calculateSlope(closes, period = 21, lookback = 6) {
-  const emaSeries = calculateEMASeries(closes, period);
-  if (!emaSeries) return 0;
-  const valid = emaSeries.filter(value => Number.isFinite(value));
-  if (valid.length < lookback) return 0;
-
-  const recent = valid.slice(-lookback);
-  const start = recent[0];
-  const end = recent[recent.length - 1];
-  if (!Number.isFinite(start) || !Number.isFinite(end) || start === 0) return 0;
-  return (end - start) / start;
-}
-
-function calculateATRSeries(candles, period = 14) {
-  if (!Array.isArray(candles) || candles.length < period + 1) return null;
-
-  const atrSeries = new Array(candles.length).fill(null);
-  let trSum = 0;
-
-  for (let i = 1; i <= period; i++) {
-    const current = candles[i];
-    const prevClose = candles[i - 1].close;
-    const tr = Math.max(
-      current.high - current.low,
-      Math.abs(current.high - prevClose),
-      Math.abs(current.low - prevClose)
-    );
-    trSum += tr;
-  }
-
-  let atr = trSum / period;
-  atrSeries[period] = atr;
-
-  for (let i = period + 1; i < candles.length; i++) {
-    const current = candles[i];
-    const prevClose = candles[i - 1].close;
-    const tr = Math.max(
-      current.high - current.low,
-      Math.abs(current.high - prevClose),
-      Math.abs(current.low - prevClose)
-    );
-    atr = ((atr * (period - 1)) + tr) / period;
-    atrSeries[i] = atr;
-  }
-
-  return atrSeries;
-}
-
-function calculateATR(candles, period = 14) {
-  const series = calculateATRSeries(candles, period);
-  if (!series) return null;
-  for (let i = series.length - 1; i >= 0; i--) {
-    if (Number.isFinite(series[i])) return series[i];
-  }
-  return null;
-}
-
-function calculateVolumeSMA(candles, period = 20) {
-  if (!Array.isArray(candles) || candles.length < period) return null;
-  const volumes = candles.slice(-period).map(candle => candle.volume);
-  return volumes.reduce((sum, value) => sum + value, 0) / period;
-}
-
-function calculateVWAP(candles, lookback = 50) {
-  if (!Array.isArray(candles) || candles.length < Math.min(lookback, 5)) return null;
+function calculateMultiCandleDelta(candles, lookback = 5) {
   const slice = candles.slice(-lookback);
-  let pv = 0;
-  let volume = 0;
+  if (!slice.length) return 0;
+  const takerValues = slice
+    .map(candle => {
+      if (!Number.isFinite(candle.takerBuyBaseVolume) || !Number.isFinite(candle.volume) || candle.volume <= 0) return null;
+      return (2 * (candle.takerBuyBaseVolume / candle.volume)) - 1;
+    })
+    .filter(Number.isFinite);
+  if (takerValues.length === slice.length) return takerValues.reduce((sum, value) => sum + value, 0) / takerValues.length;
 
-  for (const candle of slice) {
-    const typicalPrice = (candle.high + candle.low + candle.close) / 3;
-    pv += typicalPrice * candle.volume;
-    volume += candle.volume;
-  }
-
-  return volume > 0 ? pv / volume : null;
+  return slice.reduce((sum, candle) => {
+    const range = Math.max(candle.high - candle.low, candle.close * 0.0001);
+    return sum + clamp((candle.close - candle.open) / range, -1, 1);
+  }, 0) / slice.length;
 }
 
-function calculateBollingerBands(closes, period = 20, stdDev = 2) {
-  if (!Array.isArray(closes) || closes.length < period) return null;
-  const slice = closes.slice(-period);
-  const mean = slice.reduce((sum, value) => sum + value, 0) / period;
-  const variance = slice.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / period;
-  const sd = Math.sqrt(variance);
-
-  return {
-    upper: mean + stdDev * sd,
-    middle: mean,
-    lower: mean - stdDev * sd
-  };
-}
-
-function calculateADX(candles, period = 14) {
-  if (!Array.isArray(candles) || candles.length < (period * 2 + 1)) return null;
-
-  let trSum = 0;
-  let plusDMSum = 0;
-  let minusDMSum = 0;
-
-  for (let i = 1; i <= period; i++) {
-    const current = candles[i];
-    const prev = candles[i - 1];
-    const upMove = current.high - prev.high;
-    const downMove = prev.low - current.low;
-    const plusDM = upMove > downMove && upMove > 0 ? upMove : 0;
-    const minusDM = downMove > upMove && downMove > 0 ? downMove : 0;
-    const tr = Math.max(
-      current.high - current.low,
-      Math.abs(current.high - prev.close),
-      Math.abs(current.low - prev.close)
-    );
-
-    trSum += tr;
-    plusDMSum += plusDM;
-    minusDMSum += minusDM;
-  }
-
-  let atr = trSum;
-  let plusDM = plusDMSum;
-  let minusDM = minusDMSum;
-  const dxSeries = new Array(candles.length).fill(null);
-
-  for (let i = period; i < candles.length; i++) {
-    if (i > period) {
-      const current = candles[i];
-      const prev = candles[i - 1];
-      const upMove = current.high - prev.high;
-      const downMove = prev.low - current.low;
-      const plusDMValue = upMove > downMove && upMove > 0 ? upMove : 0;
-      const minusDMValue = downMove > upMove && downMove > 0 ? downMove : 0;
-      const tr = Math.max(
-        current.high - current.low,
-        Math.abs(current.high - prev.close),
-        Math.abs(current.low - prev.close)
-      );
-
-      atr = atr - (atr / period) + tr;
-      plusDM = plusDM - (plusDM / period) + plusDMValue;
-      minusDM = minusDM - (minusDM / period) + minusDMValue;
-    }
-
-    if (!Number.isFinite(atr) || atr <= 0) continue;
-    const plusDI = (plusDM / atr) * 100;
-    const minusDI = (minusDM / atr) * 100;
-    const denom = plusDI + minusDI;
-    if (!Number.isFinite(denom) || denom === 0) continue;
-    dxSeries[i] = (Math.abs(plusDI - minusDI) / denom) * 100;
-  }
-
-  const firstADXIndex = period * 2;
-  let adx = 0;
-  for (let i = period; i < firstADXIndex; i++) {
-    if (!Number.isFinite(dxSeries[i])) return null;
-    adx += dxSeries[i];
-  }
-  adx /= period;
-
-  for (let i = firstADXIndex; i < candles.length; i++) {
-    if (!Number.isFinite(dxSeries[i])) continue;
-    adx = ((adx * (period - 1)) + dxSeries[i]) / period;
-  }
-
-  if (!Number.isFinite(adx) || atr <= 0) return null;
-  const plusDI = (plusDM / atr) * 100;
-  const minusDI = (minusDM / atr) * 100;
-  if (!Number.isFinite(plusDI) || !Number.isFinite(minusDI)) return null;
-
-  return {
-    adx,
-    plusDI,
-    minusDI,
-    bullishTrend: plusDI > minusDI,
-    bearishTrend: minusDI > plusDI
-  };
-}
-
-function calculateVolatilityPercentile(candles, atrPeriod = 14) {
-  const atrSeries = calculateATRSeries(candles, atrPeriod);
-  if (!atrSeries || atrSeries.length < 50) return 50;
-
-  const currentATR = atrSeries[atrSeries.length - 1];
-  const sample = atrSeries.slice(-50).filter(value => Number.isFinite(value));
-  if (!sample.length || !Number.isFinite(currentATR)) return 50;
-
-  const sorted = [...sample].sort((a, b) => a - b);
-  const rank = sorted.findIndex(value => value >= currentATR);
-  if (rank === -1) return 100;
-  return (rank / sorted.length) * 100;
-}
-
-function calculateRelativeStrength(symbolCloses, benchmarkCloses, lookback = 12) {
-  if (!Array.isArray(symbolCloses) || !Array.isArray(benchmarkCloses)) return 0;
-  if (symbolCloses.length < lookback || benchmarkCloses.length < lookback) return 0;
-
-  const symbolStart = symbolCloses[symbolCloses.length - lookback];
-  const symbolEnd = symbolCloses[symbolCloses.length - 1];
-  const benchmarkStart = benchmarkCloses[benchmarkCloses.length - lookback];
-  const benchmarkEnd = benchmarkCloses[benchmarkCloses.length - 1];
-  if ([symbolStart, symbolEnd, benchmarkStart, benchmarkEnd].some(value => !Number.isFinite(value) || value <= 0)) return 0;
-
-  const symbolReturn = (symbolEnd - symbolStart) / symbolStart;
-  const benchmarkReturn = (benchmarkEnd - benchmarkStart) / benchmarkStart;
-  return symbolReturn - benchmarkReturn;
-}
-
-function getRecentRangeLevels(candles, lookback = 20) {
-  if (!Array.isArray(candles) || candles.length < lookback + 1) return null;
-  const slice = candles.slice(-(lookback + 1), -1);
-  const highs = slice.map(candle => candle.high);
-  const lows = slice.map(candle => candle.low);
-  const high = Math.max(...highs);
-  const low = Math.min(...lows);
-  if (!Number.isFinite(high) || !Number.isFinite(low) || high <= 0 || low <= 0) return null;
-
-  return {
-    high,
-    low,
-    widthPct: ((high - low) / low) * 100
-  };
-}
-
-export function calculateOrderBookMetrics(orderBook) {
-  if (!orderBook || !Array.isArray(orderBook.bids) || !Array.isArray(orderBook.asks) || !orderBook.bids.length || !orderBook.asks.length) return null;
-
-  const [bestBidPrice] = orderBook.bids[0];
-  const [bestAskPrice] = orderBook.asks[0];
-  if (!Number.isFinite(bestBidPrice) || !Number.isFinite(bestAskPrice) || bestBidPrice <= 0 || bestAskPrice <= 0) return null;
-
-  const mid = (bestAskPrice + bestBidPrice) / 2;
-  const spreadBps = ((bestAskPrice - bestBidPrice) / mid) * 10000;
-  // Use the full fetched snapshot so majors are not misclassified by a truncated top-of-book view.
-  const topBids = orderBook.bids.slice(0, 20);
-  const topAsks = orderBook.asks.slice(0, 20);
-  const bidNotional = topBids.reduce((sum, [price, quantity]) => sum + (price * quantity), 0);
-  const askNotional = topAsks.reduce((sum, [price, quantity]) => sum + (price * quantity), 0);
-  const totalNotional = bidNotional + askNotional;
-  const obi = totalNotional > 0 ? (bidNotional - askNotional) / totalNotional : 0;
-
-  return {
-    spreadBps,
-    depthQuoteTopN: totalNotional,
-    obi
-  };
-}
-
-export function classifyLiquidityTier(quoteVol24h, depthQuoteTopN, spreadBps) {
-  if (quoteVol24h >= 50000000 && depthQuoteTopN >= 250000 && spreadBps <= 3) return 'ELITE';
-  if (quoteVol24h >= 20000000 && depthQuoteTopN >= 150000 && spreadBps <= 5) return 'HIGH';
-  if (quoteVol24h >= 8000000 && depthQuoteTopN >= 90000 && spreadBps <= MAX_SPREAD_BPS) return 'MEDIUM';
-  return 'LOW';
-}
-
-export function getExecutionRejectCode(obMetrics, liquidityTier) {
-  if (!obMetrics) return 'ORDERBOOK_UNAVAILABLE';
-  if (obMetrics.spreadBps > MAX_SPREAD_BPS) return 'EXEC_SPREAD';
-  if (obMetrics.depthQuoteTopN < MIN_DEPTH_QUOTE) return 'EXEC_DEPTH';
-  if (liquidityTier === 'LOW') return 'LIQUIDITY_TIER_LOW';
-  return null;
-}
-
-function buildExecutionQuality(liquidityTier, spreadBps, depthQuoteTopN) {
-  let base = 60;
-  if (liquidityTier === 'ELITE') base = 95;
-  else if (liquidityTier === 'HIGH') base = 82;
-  else if (liquidityTier === 'MEDIUM') base = 68;
-
-  if (spreadBps <= 2) base += 3;
-  else if (spreadBps >= 7) base -= 5;
-
-  if (depthQuoteTopN >= 250000) base += 3;
-  else if (depthQuoteTopN <= 100000) base -= 3;
-
-  return clamp(base, 0, 100);
-}
-
-function detectBTCContext(candles4h, candles1h, ticker24h) {
-  const closed4h = getClosedCandles(candles4h, '4h');
-  const closed1h = getClosedCandles(candles1h, '60m');
-  const closes4h = closed4h.map(candle => candle.close);
-  const closes1h = closed1h.map(candle => candle.close);
-
-  const ema21_4h = calculateEMA(closes4h, 21);
-  const ema50_4h = calculateEMA(closes4h, 50);
-  const ema21_1h = calculateEMA(closes1h, 21);
-  const rsi4h = calculateRSI(closes4h, 14);
-  const rsi1h = calculateRSI(closes1h, 14);
-  const price4h = closes4h[closes4h.length - 1];
-  const price1h = closes1h[closes1h.length - 1];
-  const priceChange24h = Number(ticker24h?.priceChangePercent || 0);
-
-  if (!Number.isFinite(price4h) || !Number.isFinite(ema21_4h) || !Number.isFinite(ema50_4h) || !Number.isFinite(rsi4h) || !Number.isFinite(rsi1h)) {
-    return {
-      status: 'GREEN',
-      reason: 'BTC context fallback',
-      closes4h,
-      closes1h,
-      priceChange24h
-    };
-  }
-
-  if (price4h < ema50_4h || ema21_4h < ema50_4h || rsi4h < 44) {
-    return {
-      status: 'RED',
-      reason: 'BTC 4H risk-off',
-      closes4h,
-      closes1h,
-      priceChange24h,
-      rsi4h: roundMetric(rsi4h, 1),
-      rsi1h: roundMetric(rsi1h, 1)
-    };
-  }
-
-  if ((Number.isFinite(price1h) && Number.isFinite(ema21_1h) && price1h > ema21_1h * 1.018) || rsi1h > 68) {
-    return {
-      status: 'AMBER',
-      reason: 'BTC short-term stretched',
-      closes4h,
-      closes1h,
-      priceChange24h,
-      rsi4h: roundMetric(rsi4h, 1),
-      rsi1h: roundMetric(rsi1h, 1)
-    };
-  }
-
-  return {
-    status: 'GREEN',
-    reason: 'BTC trend supportive',
-    closes4h,
-    closes1h,
-    priceChange24h,
-    rsi4h: roundMetric(rsi4h, 1),
-    rsi1h: roundMetric(rsi1h, 1)
-  };
-}
-
-function calculateStreak(opens, closes) {
-  if (opens.length !== closes.length) return [];
-  const streak = new Array(closes.length).fill(0);
-  for (let i = 1; i < closes.length; i++) {
-    if (closes[i] < opens[i]) { // red
-      streak[i] = streak[i - 1] < 0 ? streak[i - 1] - 1 : -1;
-    } else if (closes[i] > opens[i]) { // green
-      streak[i] = streak[i - 1] > 0 ? streak[i - 1] + 1 : 1;
-    } else {
-      streak[i] = 0;
-    }
+function countRedStreak(candles) {
+  let streak = 0;
+  for (let i = candles.length - 1; i >= 0; i--) {
+    if (candles[i].close < candles[i].open) streak++;
+    else break;
   }
   return streak;
 }
 
-function evaluateStreakReversalModule(ctx) {
-  const { streak5m, volumeRatio } = ctx;
-  if (!Array.isArray(streak5m) || streak5m.length < 1) return { rejectCode: 'STREAK_NO_DATA' };
+function recentReturn(candles, lookback) {
+  if (!Array.isArray(candles) || candles.length <= lookback) return 0;
+  const start = candles[candles.length - 1 - lookback].close;
+  const end = candles[candles.length - 1].close;
+  return start > 0 ? ((end - start) / start) * 100 : 0;
+}
 
-  const currentStreak = streak5m[streak5m.length - 1];
+function buildRiskModel(ctx, candidate) {
+  const price = ctx.currentPrice;
+  const atr = ctx.atr5m || ctx.atr15m;
+  let slAtr = candidate.slAtr ?? 1.2;
+  let tpR = candidate.tpR ?? 2.25;
+  let timeStopHours = candidate.timeStopHours ?? 6;
+  if (ctx.regime === 'HIGH_VOL_BREAKOUT' || ctx.regime === 'VOLATILE_TRANSITION') timeStopHours = Math.max(3, timeStopHours - 1);
 
-  // We only care about LONG signals (spot long-only)
-  if (currentStreak > -5) return { rejectCode: 'STREAK_NOT_MET' };
-
-  // v2.1.0 [H1]: Hard gate — STREAK_REVERSAL requires volume confirmation.
-  // Audit found 3/4 STREAK losses had volumePass=false (ratios 0.33x–0.72x).
-  // Module-specific minVolumeRatio = 0.8x.
-  const minVolumeRatio = 0.8;
-  if (!Number.isFinite(volumeRatio) || volumeRatio < minVolumeRatio) {
-    return { rejectCode: 'STREAK_LOW_VOL' };
+  const sweepLow = Number.isFinite(ctx.range20_5m?.low) && ctx.range20_5m.low < price ? ctx.range20_5m.low * 0.997 : null;
+  const smcLow = Number.isFinite(ctx.smc5m?.lastLow) && ctx.smc5m.lastLow < price ? ctx.smc5m.lastLow * 0.996 : null;
+  let sl = price - atr * slAtr;
+  for (const stop of [sweepLow, smcLow]) {
+    if (Number.isFinite(stop)) sl = Math.max(sl, stop);
   }
 
-  const score = clamp(70 + (Math.abs(currentStreak) - 5) * 5, 70, 95);
+  const minRiskPct = 0.0065;
+  const maxRiskPct = 0.05;
+  let riskPct = (price - sl) / price;
+  if (!Number.isFinite(riskPct) || riskPct <= 0) riskPct = minRiskPct;
+  if (riskPct < minRiskPct) sl = price * (1 - minRiskPct);
+  if (riskPct > maxRiskPct) sl = price * (1 - maxRiskPct);
 
+  const risk = price - sl;
+  const tp = price + risk * tpR;
   return {
-    candidate: {
-      module: 'STREAK_REVERSAL',
-      entryArchetype: '5-Red Candle Reversal',
-      score,
-      baseRequiredScore: 65,
-      qualityBreakdown: {
-        trend: 0,
-        expansion: score,
-        participation: 60,
-        execution: 70
-      },
-      reasons: [`${Math.abs(currentStreak)} Consecutive Red Candles (5m)`],
-      minVolumeRatio,
-      riskModelOverride: { tpMultiplier: 2.5, slMultiplier: 1.2, timeStopHours: 10 }
-    }
+    sl,
+    tp,
+    tpPct: (tp - price) / price,
+    slPct: (price - sl) / price,
+    realRR: risk > 0 ? (tp - price) / risk : 0,
+    slAtr,
+    tpR,
+    timeStopHours
   };
 }
 
-function evaluatePivotPointModule(ctx) {
-  const { candles5m, currentPrice } = ctx;
-  if (!Array.isArray(candles5m) || candles5m.length < 50) return { rejectCode: 'PIVOT_NO_DATA' };
-
-  // Calculate pivot from previous period (48 candles)
-  const slice = candles5m.slice(-49, -1);
-  const hs = slice.map(c => c.high);
-  const ls = slice.map(c => c.low);
-  const h = Math.max(...hs);
-  const l = Math.min(...ls);
-  const c = slice[slice.length - 1].close;
-  const pivot = (h + l + c) / 3;
-
-  if (currentPrice >= pivot) return { rejectCode: 'PIVOT_NOT_BELOW' };
-
-  const distFromPivot = ((pivot - currentPrice) / pivot) * 100;
-  if (distFromPivot < 0.3) return { rejectCode: 'PIVOT_TOO_CLOSE' };
-
-  const score = clamp(65 + distFromPivot * 8, 65, 90);
-
-  return {
-    candidate: {
-      module: 'PIVOT_REVERSION',
-      entryArchetype: 'Pivot Point Mean Reversion',
-      score,
-      baseRequiredScore: 65,
-      qualityBreakdown: {
-        trend: 0,
-        expansion: score,
-        participation: 50,
-        execution: 70
-      },
-      reasons: [`Price below 4H Pivot Level (${distFromPivot.toFixed(2)}%)`],
-      minVolumeRatio: 0.8,
-      riskModelOverride: { tpMultiplier: 3.0, slMultiplier: 1.2, timeStopHours: 5 }
-    }
-  };
+function calculateRecommendedSize(score, atrPct, regime, liquidityTier, rsStrength) {
+  let size = 0.45;
+  if (score >= 78) size += 0.25;
+  if (score >= 86) size += 0.25;
+  if (liquidityTier === 'ELITE') size += 0.4;
+  else if (liquidityTier === 'HIGH') size += 0.25;
+  if (Number.isFinite(rsStrength) && rsStrength > -0.004) size += 0.1;
+  if (atrPct > 4) size *= 0.55;
+  else if (atrPct > 2.5) size *= 0.75;
+  if (regime === 'HIGH_VOL_BREAKOUT' || regime === 'VOLATILE_TRANSITION') size *= 0.75;
+  return clamp(size, 0.25, 1.8).toFixed(1);
 }
 
-function evaluateKeltnerFlippedModule(ctx) {
-  const { closes5m, highs5m, lows5m, currentPrice } = ctx;
-  if (!Array.isArray(closes5m) || closes5m.length < 25) return { rejectCode: 'KELTNER_NO_DATA' };
-
-  const midSeries = calculateEMASeries(closes5m, 20);
-  const mid = midSeries[midSeries.length - 1];
-  if (!Number.isFinite(mid)) return { rejectCode: 'KELTNER_NO_MID' };
-
-  // ATR as EMA(TR, 10)
-  const trSeries = [];
-  for (let i = 1; i < closes5m.length; i++) {
-    trSeries.push(Math.max(
-      highs5m[i] - lows5m[i],
-      Math.abs(highs5m[i] - closes5m[i - 1]),
-      Math.abs(lows5m[i] - closes5m[i - 1])
-    ));
-  }
-  const atr = calculateEMA(trSeries, 10);
-  if (!Number.isFinite(atr)) return { rejectCode: 'KELTNER_NO_ATR' };
-
-  const lower = mid - 1.5 * atr;
-  if (currentPrice >= lower) return { rejectCode: 'KELTNER_NOT_BELOW' };
-
-  const distFromLower = ((lower - currentPrice) / lower) * 100;
-  const score = clamp(72 + distFromLower * 10, 72, 92);
-
-  return {
-    candidate: {
-      module: 'KELTNER_REVERSION',
-      entryArchetype: 'Keltner Channel Fade',
-      score,
-      baseRequiredScore: 68,
-      qualityBreakdown: {
-        trend: 0,
-        expansion: score,
-        participation: 50,
-        execution: 70
-      },
-      reasons: ['Price below Keltner Lower Band (Flipped Fade)'],
-      minVolumeRatio: 0.8,
-      riskModelOverride: { tpMultiplier: 3.2, slMultiplier: 1.4, timeStopHours: 10 }
-    }
-  };
-}
-
-function detectMarketRegime({ bull4h, atrPercentile, btcRisk }) {
-  if (btcRisk === 'RED') return 'RISK_OFF';
-  if (bull4h && atrPercentile >= 70) return 'HIGH_VOL_BREAKOUT';
-  if (bull4h) return 'TRENDING';
-  return 'TRANSITION';
-}
-
-function calculateBBWidthHistory(closes, period = 20, stdDev = 2) {
-  if (!Array.isArray(closes) || closes.length < period * 2) return null;
-  const widths = [];
-  for(let i = closes.length - 100; i <= closes.length - 1; i++) {
-     if(i < period) continue;
-     const slice = closes.slice(i - period + 1, i + 1);
-     const mean = slice.reduce((sum, value) => sum + value, 0) / period;
-     const variance = slice.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / period;
-     const sd = Math.sqrt(variance);
-     widths.push((2 * stdDev * sd) / mean);
-  }
-  return widths;
-}
-
-function evaluateKnifeCatcherModule(ctx) {
-  const { symbol, currentPrice, volumeRatio, obMetrics, liquidityTier, rsi15m, rsi1h, bbPercent, bbWidth, btcRisk } = ctx;
-  
-  if (bbPercent > -0.04) {
-    // [AUDIT] Enhanced logging for oversold gate
-    if (Math.random() < 0.1) console.log(`[GATE] ${symbol} reject KNIFE_NOT_OVERSOLD: bbPercent=${bbPercent.toFixed(4)} (Threshold: -0.04)`);
-    return { rejectCode: 'KNIFE_NOT_OVERSOLD' }; 
-  }
-  if (rsi15m > 25) return { rejectCode: 'KNIFE_RSI_TOO_HIGH' };
-  if (volumeRatio < 4.0) return { rejectCode: 'KNIFE_NO_CLIMAX' }; // Needs massive volume absorption
-  if (!obMetrics || obMetrics.spreadBps > 15) return { rejectCode: 'KNIFE_HIGH_SPREAD' };
-  
-  // Scoring
-  const stretchQuality = clamp(50 + ((-0.04 - bbPercent) * 1000), 50, 100);
-  const participationQuality = clamp(50 + ((volumeRatio - 4.0) * 10), 50, 100);
-  const executionQuality = buildExecutionQuality(liquidityTier, obMetrics.spreadBps, obMetrics.depthQuoteTopN);
-  
-  const score = Math.round(stretchQuality * 0.5 + participationQuality * 0.3 + executionQuality * 0.2);
-  
-  const reasons = ['🔪 Extreme Flash Crash Liquidations'];
-  reasons.push(`Price stretched ${(bbPercent * -100).toFixed(1)}% below BB`);
-  reasons.push(`Capitulation Volume (${volumeRatio.toFixed(1)}x)`);
-  if (rsi15m < 20) reasons.push(`Severe Oversold (RSI: ${rsi15m.toFixed(1)})`);
-
-  return {
-    candidate: {
-      module: 'KNIFE_CATCHER',
-      entryArchetype: 'Flash Crash Reversion',
-      score,
-      baseRequiredScore: Math.max(SIGNAL_SCORE_THRESHOLD, 60),
-      qualityBreakdown: {
-        trend: 0,
-        expansion: roundMetric(stretchQuality, 1),
-        participation: roundMetric(participationQuality, 1),
-        execution: roundMetric(executionQuality, 1)
-      },
-      reasons,
-      minVolumeRatio: 4.0
-    }
-  };
-}
-
-function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, relativeStrength, promotedFromLow = false) {
-  let size = 0.8;
-  if (module === 'VCP_BREAKOUT') size += 0.2;
-  if (score >= 78) size += 0.4;
-  if (score >= 84) size += 0.4;
-  if (liquidityTier === 'ELITE') size += 0.7;
-  else if (liquidityTier === 'HIGH') size += 0.4;
-  else size += 0.1;
-
-  if (relativeStrength > 0.015) size += 0.3;
-  else if (relativeStrength > 0.008) size += 0.15;
-
-  if (atrPct > 2.5) size *= 0.65;
-  else if (atrPct > 1.5) size *= 0.8;
-
-  if (regime === 'HIGH_VOL_BREAKOUT' || regime === 'TRANSITION') size *= 0.8;
-  // v10.1.0: Half sizing for depth-floor promoted LOW-tier trades
-  if (promotedFromLow) size *= 0.5;
-  
-  // v2.0.0: Reversion strategies often have lower win rates but higher rewards, keep size modest
-  if (['STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION'].includes(module)) {
-    size *= 0.9;
-  }
-  
-  return clamp(size, 0.4, 3.5).toFixed(1);
-}
-
-function getRequiredScore(candidate, regime, liquidityTier, btcRisk) {
-  let required = candidate.baseRequiredScore;
-  const meanReversionModules = new Set(['STREAK_REVERSAL', 'PIVOT_REVERSION', 'KELTNER_REVERSION']);
-  if (liquidityTier === 'MEDIUM') required += 3;
-  if (btcRisk === 'AMBER') required += 2;
-  if (regime === 'TRANSITION') required += 2;
-  
-  // v2.0.0: Strictness per module
-  if (candidate.module === 'KNIFE_CATCHER') required = Math.max(required, 70);
-  
-  // v2.1.0 [H2]: TRENDING regime penalty for mean-reversion modules.
-  // Audit found TRENDING WR=33.3% (2W/4L) vs TRANSITION WR=73.3% (11W/4L).
-  // Mean reversion structurally underperforms when price doesn't mean-revert.
-  if (regime === 'TRENDING' && meanReversionModules.has(candidate.module)) {
-    required += 5;
-  }
-
-  // v2.1.1 [H4]: HIGH_VOL_BREAKOUT penalty for mean-reversion modules.
-  // Apr 21-23 audit showed HIGH_VOL_BREAKOUT expectancy at -0.18R (4W/12L)
-  // versus TRANSITION at +1.05R (4W/3L) in knife_autopsies.json.
-  if (regime === 'HIGH_VOL_BREAKOUT' && meanReversionModules.has(candidate.module)) {
-    required += 5;
-  }
-  
+function getRequiredScore(candidate, ctx) {
+  let required = candidate.baseRequiredScore ?? SIGNAL_SCORE_THRESHOLD;
+  if (ctx.liquidityTier === 'MEDIUM') required += 2;
+  if (ctx.btcContext?.status === 'AMBER') required += 3;
+  if (ctx.regime === 'HIGH_VOL_BREAKOUT') required += 5;
+  if (ctx.regime === 'VOLATILE_TRANSITION') required += 4;
+  if (ctx.regime === 'TRENDING' && candidate.module !== 'VIDYA_LIQUIDITY_SWEEP') required += 3;
+  if (ctx.atrPercent5m > 4) required += 3;
   return required;
 }
 
-function pickPreferredReject(regime, pullbackResult, breakoutResult, streakResult, pivotResult, keltnerResult) {
-  return pullbackResult?.rejectCode || breakoutResult?.rejectCode || streakResult?.rejectCode || pivotResult?.rejectCode || keltnerResult?.rejectCode || 'NO_MODULE_MATCH';
-}
+function evaluateTwoPoleCapitulation(ctx) {
+  const { twoPole5m, twoPole15m, rsi5m, rsi15m, volumeRatio5m, deltaRatio5m, return12x5m, redStreak5m, executionQuality } = ctx;
+  const impulse = return12x5m <= -1.1 || redStreak5m >= 4 || rsi5m <= 30 || rsi15m <= 36;
+  if (!impulse) return { rejectCode: 'TWOPOLE_NO_CAPITULATION' };
+  if (!(twoPole5m?.buy || (twoPole5m?.bullish && twoPole5m.deeplyOversold) || twoPole15m?.buy)) return { rejectCode: 'TWOPOLE_NO_RESET' };
+  if (volumeRatio5m < 1.05) return { rejectCode: 'TWOPOLE_LOW_VOLUME' };
 
-function buildCandidateShadow(symbol, candidate, ctx, requiredScore, rejectReasonCode, btcContext, shadowCollector) {
-  if (!shadowCollector) return;
-  if (!candidate || candidate.score < Math.max(requiredScore - 8, 60)) return;
+  const stretchQuality = 62
+    + clamp(Math.abs(Math.min(return12x5m, 0)) * 4, 0, 14)
+    + (redStreak5m >= 5 ? 6 : 0)
+    + (rsi5m <= 25 ? 6 : 0);
+  const resetQuality = 62
+    + (twoPole5m?.buy ? 12 : 0)
+    + (twoPole15m?.buy ? 8 : 0)
+    + (twoPole5m?.deeplyOversold ? 5 : 0);
+  const participationQuality = 56
+    + clamp((volumeRatio5m - 1) * 16, -4, 18)
+    + clamp((deltaRatio5m || 0) * 10, -5, 8);
+  const score = Math.round(stretchQuality * 0.34 + resetQuality * 0.32 + participationQuality * 0.18 + executionQuality * 0.16);
 
-  shadowCollector.push(recordShadowNearMiss(
-    symbol,
-    candidate.score,
-    ctx.currentPrice,
-    ctx.regime,
-    rejectReasonCode,
-    btcContext,
-    {
-      distToEma9: roundMetric(ctx.distToEma9),
-      distToEma21: roundMetric(ctx.distToEma21),
-      distToEma50: roundMetric(ctx.distToEma50),
-      atrPercent: roundMetric(ctx.atrPercent15m),
-      bbPercent: roundMetric(ctx.bbPercent),
-      breakoutDistancePct: roundMetric(ctx.breakoutDistancePct, 2),
-      pullbackFromHigh20Pct: roundMetric(ctx.pullbackFromHigh20Pct, 2),
-      riskRewardRatio: roundMetric(candidate.riskModel.realRR),
-      timeStopHours: candidate.riskModel.timeStopHours
-    },
-    candidate.qualityBreakdown,
-    {
-      scoreBeforeMomentum: candidate.score,
-      requiredScore,
-      requiredStrongCategories: null,
-      sector: getSector(symbol),
-      module: candidate.module,
-      entryArchetype: candidate.entryArchetype,
-      liquidityTier: ctx.liquidityTier,
-      expectedHoldingHours: candidate.riskModel.timeStopHours,
-      riskModel: {
-        tpMultiplier: candidate.riskModel.tpMultiplier,
-        slMultiplier: candidate.riskModel.slMultiplier,
-        realRR: roundMetric(candidate.riskModel.realRR),
-        timeStopHours: candidate.riskModel.timeStopHours
+  return {
+    candidate: {
+      module: 'TWO_POLE_CAPITULATION_RESET',
+      entryArchetype: 'Two-Pole capitulation reset',
+      score: clamp(score, 0, 100),
+      baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
+      minVolumeRatio: 1.05,
+      tpR: 2.25,
+      slAtr: 1.15,
+      timeStopHours: 5,
+      qualityBreakdown: {
+        stretch: roundMetric(stretchQuality, 1),
+        reset: roundMetric(resetQuality, 1),
+        participation: roundMetric(participationQuality, 1),
+        execution: roundMetric(executionQuality, 1)
       },
-      relativeStrengthSnapshot: buildRelativeStrengthSnapshot(ctx.rs1h, ctx.rs4h, ctx.rs24h),
-      volumeLiquidityConfirmation: buildVolumeLiquidityConfirmation(
-        ctx.volumeRatio,
-        ctx.deltaRatio,
-        ctx.obMetrics,
-        ctx.liquidityTier,
-        candidate.minVolumeRatio
-      ),
-      shadowBenchmarkTpPct: candidate.riskModel.tpPct,
-      shadowBenchmarkSlPct: candidate.riskModel.slPct,
-      shadowBenchmarkVersion: `${ALGORITHM_VERSION}-${candidate.module}`
+      reasons: [
+        'Capitulation impulse detected',
+        twoPole5m?.buy ? 'Two-Pole 5m buy cross' : 'Two-Pole oversold reset',
+        `${roundMetric(volumeRatio5m, 1)}x volume confirmation`
+      ]
     }
-  ));
+  };
 }
 
-function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredScore, promotedFromLow = false) {
+function evaluateVidyaLiquiditySweep(ctx) {
+  const { currentPrice, last5m, range20_5m, smc5m, vidya5m, macd5m, twoPole5m, volumeRatio5m, obMetrics, executionQuality } = ctx;
+  const sweptLow = range20_5m && last5m.low < range20_5m.low * 0.998 && currentPrice > range20_5m.low;
+  const structureReclaim = smc5m?.bullishBOS || smc5m?.nearBullishOrderBlock;
+  if (!(sweptLow || structureReclaim)) return { rejectCode: 'VIDYA_NO_LIQUIDITY_SWEEP' };
+  if (!(macd5m?.histDelta > 0 || twoPole5m?.buy || twoPole5m?.bullish)) return { rejectCode: 'VIDYA_NO_RECLAIM_MOMENTUM' };
+  if (volumeRatio5m < 1.15) return { rejectCode: 'VIDYA_SWEEP_LOW_VOLUME' };
+  if (obMetrics?.obi < -0.12) return { rejectCode: 'VIDYA_ORDERBOOK_ASK_HEAVY' };
+
+  const stretchQuality = 64 + (sweptLow ? 10 : 0) + (structureReclaim ? 8 : 0);
+  const resetQuality = 60 + (vidya5m?.trendCrossUp ? 10 : 0) + (macd5m?.crossUp ? 7 : 0) + (twoPole5m?.buy ? 7 : 0);
+  const participationQuality = 58 + clamp((volumeRatio5m - 1) * 15, -4, 16) + clamp((obMetrics?.obi || 0) * 18, -5, 8);
+  const score = Math.round(stretchQuality * 0.34 + resetQuality * 0.3 + participationQuality * 0.2 + executionQuality * 0.16);
+
+  return {
+    candidate: {
+      module: 'VIDYA_LIQUIDITY_SWEEP',
+      entryArchetype: 'Liquidity sweep reclaim',
+      score: clamp(score, 0, 100),
+      baseRequiredScore: SIGNAL_SCORE_THRESHOLD + 1,
+      minVolumeRatio: 1.15,
+      tpR: 2.45,
+      slAtr: 1.25,
+      timeStopHours: 6,
+      qualityBreakdown: {
+        stretch: roundMetric(stretchQuality, 1),
+        reset: roundMetric(resetQuality, 1),
+        participation: roundMetric(participationQuality, 1),
+        execution: roundMetric(executionQuality, 1)
+      },
+      reasons: [
+        sweptLow ? 'Prior low swept and reclaimed' : 'SMC reclaim',
+        vidya5m?.trendCrossUp ? 'VIDYA trend flip up' : 'VIDYA reclaim context',
+        'Momentum improving after sweep'
+      ]
+    }
+  };
+}
+
+function evaluateSottBandReclaim(ctx) {
+  const { currentPrice, last15m, bb15m, sott15m, macd15m, squeeze15m, rsi15m, volumeRatio15m, executionQuality } = ctx;
+  if (!bb15m || !(last15m.low < bb15m.lower && currentPrice > bb15m.lower)) return { rejectCode: 'SOTT_NO_BAND_RECLAIM' };
+  if (!(sott15m?.bullCross || (sott15m?.channelIsBull && sott15m.signal < 0.1))) return { rejectCode: 'SOTT_NO_BULL_CROSS' };
+  if (!(macd15m?.histDelta > 0 || squeeze15m?.rising)) return { rejectCode: 'SOTT_NO_MOMENTUM_UPTURN' };
+  if (!Number.isFinite(rsi15m) || rsi15m < 24 || rsi15m > 48) return { rejectCode: 'SOTT_RSI_OUT_OF_RANGE' };
+
+  const stretchQuality = 64 + clamp((bb15m.lower - last15m.low) / bb15m.lower * 1200, 0, 12) + (rsi15m < 34 ? 5 : 0);
+  const resetQuality = 62 + (sott15m?.bullCross ? 12 : 0) + (macd15m?.histDelta > 0 ? 5 : 0) + (squeeze15m?.rising ? 4 : 0);
+  const participationQuality = 56 + clamp((volumeRatio15m - 0.9) * 16, -5, 12);
+  const score = Math.round(stretchQuality * 0.33 + resetQuality * 0.33 + participationQuality * 0.17 + executionQuality * 0.17);
+
+  return {
+    candidate: {
+      module: 'SOTT_BAND_RECLAIM',
+      entryArchetype: 'SOTT Bollinger reclaim',
+      score: clamp(score, 0, 100),
+      baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
+      minVolumeRatio: 0.9,
+      tpR: 2.15,
+      slAtr: 1.1,
+      timeStopHours: 7,
+      qualityBreakdown: {
+        stretch: roundMetric(stretchQuality, 1),
+        reset: roundMetric(resetQuality, 1),
+        participation: roundMetric(participationQuality, 1),
+        execution: roundMetric(executionQuality, 1)
+      },
+      reasons: [
+        'Lower Bollinger band reclaimed',
+        sott15m?.bullCross ? 'SOTT bull cross' : 'SOTT channel turning up',
+        'Momentum upturn confirmed'
+      ]
+    }
+  };
+}
+
+function buildContext(symbol, candles5mRaw, candles15mRaw, candles1hRaw, candles4hRaw, orderBook, ticker24h, btcContext) {
+  const baseAsset = normalizeBaseAsset(symbol, QUOTE_ASSET);
+  if (isNonCryptoWrapper(baseAsset)) return { rejectCode: 'UNIVERSE_NON_CRYPTO' };
+
+  const candles5m = getClosedCandles(candles5mRaw, '5m');
+  const candles15m = getClosedCandles(candles15mRaw, '15m');
+  const candles1h = getClosedCandles(candles1hRaw, '60m');
+  const candles4h = getClosedCandles(candles4hRaw, '4h');
+  if (candles5m.length < 220 || candles15m.length < 180 || candles1h.length < 100 || candles4h.length < 70) return { rejectCode: 'DATA_MTF_SHORT' };
+
+  const obMetrics = calculateOrderBookMetrics(orderBook);
+  if (!obMetrics) return { rejectCode: 'ORDERBOOK_UNAVAILABLE' };
+
+  const quoteVol24h = Number(ticker24h?.quoteVolume || 0);
+  if (!Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) return { rejectCode: 'LIQUIDITY_FLOOR' };
+  const liquidityTier = classifyLiquidityTier(quoteVol24h, obMetrics.depthQuoteTopN, obMetrics.spreadBps);
+  const executionQuality = buildExecutionQuality(liquidityTier, obMetrics.spreadBps, obMetrics.depthQuoteTopN);
+
+  const closes5m = candles5m.map(candle => candle.close);
+  const closes15m = candles15m.map(candle => candle.close);
+  const closes1h = candles1h.map(candle => candle.close);
+  const closes4h = candles4h.map(candle => candle.close);
+  const currentPrice = closes5m[closes5m.length - 1];
+  const last5m = candles5m[candles5m.length - 1];
+  const last15m = candles15m[candles15m.length - 1];
+  const atr5m = calculateATR(candles5m, 14);
+  const atr15m = calculateATR(candles15m, 14);
+  const atrPercent5m = atr5m && currentPrice > 0 ? (atr5m / currentPrice) * 100 : null;
+  const atrPercent15m = atr15m && currentPrice > 0 ? (atr15m / currentPrice) * 100 : null;
+  const rsi5m = calculateRSI(closes5m, 14);
+  const rsi15m = calculateRSI(closes15m, 14);
+  const volumeSMA5m = calculateVolumeSMA(candles5m, 30);
+  const volumeSMA15m = calculateVolumeSMA(candles15m, 20);
+  const volumeRatio5m = volumeSMA5m ? last5m.volume / volumeSMA5m : 1;
+  const volumeRatio15m = volumeSMA15m ? last15m.volume / volumeSMA15m : 1;
+  const deltaRatio5m = calculateMultiCandleDelta(candles5m, 5);
+  const ema21_1h = calculateEMA(closes1h, 21);
+  const ema50_1h = calculateEMA(closes1h, 50);
+  const ema21_4h = calculateEMA(closes4h, 21);
+  const ema50_4h = calculateEMA(closes4h, 50);
+  const adx15m = calculateADX(candles15m, 14);
+  const vwap15m = calculateVWAP(candles15m, 96);
+  const bb15m = calculateBollingerBands(closes15m, 20, 2);
+  const range20_5m = getRecentRangeLevels(candles5m, 20);
+  const range48_15m = getRecentRangeLevels(candles15m, 48);
+  const twoPole5m = calculateTwoPoleOscillator(closes5m, 15);
+  const twoPole15m = calculateTwoPoleOscillator(closes15m, 15);
+  const vidya5m = calculateVIDYA(candles5m, 10, 20, 2);
+  const macd5m = calculateMACD(closes5m, 12, 26, 9);
+  const macd15m = calculateMACD(closes15m, 12, 26, 9);
+  const sott15m = calculateSOTT(candles15m, 20, 20);
+  const squeeze15m = calculateSqueeze(candles15m, 20, 2, 1.5);
+  const smc5m = detectSMC(candles5m, 4);
+  const smc15m = detectSMC(candles15m, 4);
+
+  if (![atrPercent5m, atrPercent15m, rsi5m, rsi15m, currentPrice].every(Number.isFinite) || !twoPole5m || !macd5m || !vidya5m) {
+    return { rejectCode: 'INDICATOR_GAP' };
+  }
+  if (atrPercent5m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) return { rejectCode: 'ATR_FILTER' };
+
+  const bull4h = Number.isFinite(ema21_4h) && Number.isFinite(ema50_4h) && closes4h[closes4h.length - 1] > ema21_4h && ema21_4h > ema50_4h;
+  const bull1h = Number.isFinite(ema21_1h) && Number.isFinite(ema50_1h) && closes1h[closes1h.length - 1] > ema21_1h && ema21_1h > ema50_1h;
+  const atrPercentile = calculateVolatilityPercentile(candles15m, 14, 80);
+  const regime = detectMarketRegime({
+    bull4h,
+    adx15m: adx15m?.adx,
+    atrPercentile,
+    btcRisk: btcContext?.status || 'UNKNOWN'
+  });
+  const rs1h = btcContext?.closes1h ? calculateRelativeStrength(closes1h, btcContext.closes1h, 6) : 0;
+  const rs4h = btcContext?.closes4h ? calculateRelativeStrength(closes4h, btcContext.closes4h, 12) : 0;
+  const rs24h = Number(ticker24h?.priceChangePercent || 0) - Number(btcContext?.priceChange24h || 0);
+
+  return {
+    symbol,
+    baseAsset,
+    candles5m,
+    candles15m,
+    candles1h,
+    candles4h,
+    closes5m,
+    closes15m,
+    closes1h,
+    closes4h,
+    currentPrice,
+    last5m,
+    last15m,
+    atr5m,
+    atr15m,
+    atrPercent5m,
+    atrPercent15m,
+    rsi5m,
+    rsi15m,
+    volumeRatio5m,
+    volumeRatio15m,
+    deltaRatio5m,
+    ema21_1h,
+    ema50_1h,
+    ema21_4h,
+    ema50_4h,
+    bull4h,
+    bull1h,
+    adx15m,
+    atrPercentile,
+    vwap15m,
+    bb15m,
+    range20_5m,
+    range48_15m,
+    twoPole5m,
+    twoPole15m,
+    vidya5m,
+    macd5m,
+    macd15m,
+    sott15m,
+    squeeze15m,
+    smc5m,
+    smc15m,
+    redStreak5m: countRedStreak(candles5m),
+    return12x5m: recentReturn(candles5m, 12),
+    obMetrics,
+    liquidityTier,
+    executionQuality,
+    quoteVol24h,
+    regime,
+    rs1h,
+    rs4h,
+    rs24h,
+    btcContext
+  };
+}
+
+function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
+  const risk = buildRiskModel(ctx, candidate);
   const relativeStrengthSnapshot = buildRelativeStrengthSnapshot(ctx.rs1h, ctx.rs4h, ctx.rs24h);
   const volumeLiquidityConfirmation = buildVolumeLiquidityConfirmation(
-    ctx.volumeRatio,
-    ctx.deltaRatio,
+    ctx.volumeRatio5m,
+    ctx.deltaRatio5m,
     ctx.obMetrics,
     ctx.liquidityTier,
     candidate.minVolumeRatio
@@ -1681,360 +930,149 @@ function createSignalFromCandidate(symbol, candidate, ctx, btcContext, requiredS
     symbol,
     price: ctx.currentPrice,
     score: Math.round(clamp(candidate.score, 0, 100)),
+    requiredScore,
     regime: ctx.regime,
     type: 'BUY',
-    rsi: ctx.rsi15m.toFixed(1),
-    rsi1h: ctx.rsi1h.toFixed(1),
-    bbPosition: Math.round(ctx.bbPercent * 100),
-    volumeRatio: roundMetric(ctx.volumeRatio),
-    volumeConfirmed: volumeLiquidityConfirmation.volumePass,
+    tp: risk.tp,
+    sl: risk.sl,
+    rsi: roundMetric(ctx.rsi5m, 1),
+    rsi15m: roundMetric(ctx.rsi15m, 1),
+    atrPercent: roundMetric(ctx.atrPercent5m, 2),
+    volumeRatio: roundMetric(ctx.volumeRatio5m),
     spreadBps: roundMetric(ctx.obMetrics.spreadBps, 1),
     depthQuoteTopN: Math.round(ctx.obMetrics.depthQuoteTopN),
     obi: roundMetric(ctx.obMetrics.obi, 3),
-    deltaRatio: ctx.deltaRatio === null ? null : roundMetric(ctx.deltaRatio, 3),
-    atrPercent: roundMetric(ctx.atrPercent15m),
+    deltaRatio: roundMetric(ctx.deltaRatio5m, 3),
     vwap: ctx.vwap15m,
     vwapDistance: ctx.vwap15m ? roundMetric(((ctx.currentPrice - ctx.vwap15m) / ctx.vwap15m) * 100) : null,
-    tp: ctx.currentPrice * (1 + candidate.riskModel.tpPct),
-    sl: ctx.currentPrice * (1 - candidate.riskModel.slPct),
-    entryMetrics: {
-      distToEma9: roundMetric(ctx.distToEma9),
-      distToEma21: roundMetric(ctx.distToEma21),
-      distToEma50: roundMetric(ctx.distToEma50),
-      atrPercent: roundMetric(ctx.atrPercent15m),
-      bbPercent: roundMetric(ctx.bbPercent),
-      breakoutDistancePct: roundMetric(ctx.breakoutDistancePct, 2),
-      pullbackFromHigh20Pct: roundMetric(ctx.pullbackFromHigh20Pct, 2),
-      riskRewardRatio: roundMetric(candidate.riskModel.realRR),
-      timeStopHours: candidate.riskModel.timeStopHours
-    },
-    qualityBreakdown: candidate.qualityBreakdown,
-    scoreBeforeMomentum: candidate.score,
-    momentumAdjustment: 0,
-    requiredScore,
-    requiredStrongCategories: null,
-    reasons: candidate.reasons,
-    mode: candidate.score >= requiredScore + 8 ? 'PRIORITY' : 'STANDARD',
-    recommendedSize: calculateRecommendedSize(
-      candidate.score,
-      ctx.atrPercent15m,
-      ctx.regime,
-      candidate.module,
-      ctx.liquidityTier,
-      Math.max(ctx.rs1h, ctx.rs4h),
-      promotedFromLow
-    ),
-    btcContext,
     module: candidate.module,
     entryArchetype: candidate.entryArchetype,
     liquidityTier: ctx.liquidityTier,
-    promotedFromLow,
-    expectedHoldingHours: candidate.riskModel.timeStopHours,
+    sector: getSector(symbol, QUOTE_ASSET),
+    expectedHoldingHours: risk.timeStopHours,
     riskModel: {
-      tpMultiplier: candidate.riskModel.tpMultiplier,
-      slMultiplier: candidate.riskModel.slMultiplier,
-      realRR: roundMetric(candidate.riskModel.realRR),
-      timeStopHours: candidate.riskModel.timeStopHours
+      slAtr: roundMetric(risk.slAtr, 2),
+      tpR: roundMetric(risk.tpR, 2),
+      realRR: roundMetric(risk.realRR, 2),
+      timeStopHours: risk.timeStopHours
     },
+    entryMetrics: {
+      atrPercent5m: roundMetric(ctx.atrPercent5m, 2),
+      atrPercent15m: roundMetric(ctx.atrPercent15m, 2),
+      adx15m: roundMetric(ctx.adx15m?.adx, 1),
+      return12x5m: roundMetric(ctx.return12x5m, 2),
+      redStreak5m: ctx.redStreak5m,
+      twoPole5m: roundMetric(ctx.twoPole5m?.value, 3),
+      twoPole15m: roundMetric(ctx.twoPole15m?.value, 3),
+      vidyaDistancePct: roundMetric(ctx.vidya5m?.distancePct, 2),
+      riskRewardRatio: roundMetric(risk.realRR, 2)
+    },
+    qualityBreakdown: candidate.qualityBreakdown,
     relativeStrengthSnapshot,
     volumeLiquidityConfirmation,
-    rejectReasonCode: null
+    reasons: candidate.reasons,
+    recommendedSize: calculateRecommendedSize(
+      candidate.score,
+      ctx.atrPercent5m,
+      ctx.regime,
+      ctx.liquidityTier,
+      Math.max(ctx.rs1h, ctx.rs4h)
+    ),
+    btcContext: ctx.btcContext,
+    rejectReasonCode: null,
+    version: ALGORITHM_VERSION
   };
 }
 
-function generateSignal(symbol, candles5m, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
-  const baseAsset = normalizeBaseAsset(symbol);
-  if (isNonCryptoWrapper(baseAsset)) {
-    countMetric(analysisState?.rejectCounts, 'UNIVERSE_NON_CRYPTO');
+export function generateSignal(symbol, candles5m, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
+  const ctx = buildContext(symbol, candles5m, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext);
+  if (ctx.rejectCode) {
+    countMetric(analysisState?.rejectCounts, ctx.rejectCode);
     return null;
   }
 
-  if (!Array.isArray(candles15m) || candles15m.length < 201) {
-    countMetric(analysisState?.rejectCounts, 'DATA_15M_SHORT');
+  if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED') {
+    countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');
     return null;
   }
+  countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
-  const closedCandles5m = getClosedCandles(candles5m, '5m');
-  const closedCandles15m = getClosedCandles(candles15m, '15m');
-  const closedCandles1h = getClosedCandles(candles1h, '60m');
-  const closedCandles4h = getClosedCandles(candles4h, '4h');
-  if (closedCandles15m.length < 200 || closedCandles1h.length < 120 || closedCandles4h.length < 60) {
-    countMetric(analysisState?.rejectCounts, 'DATA_MTF_SHORT');
-    return null;
-  }
+  const moduleResults = [
+    evaluateTwoPoleCapitulation(ctx),
+    evaluateVidyaLiquiditySweep(ctx),
+    evaluateSottBandReclaim(ctx)
+  ];
+  const candidates = moduleResults
+    .map(result => result.candidate)
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
 
-  const obMetrics = calculateOrderBookMetrics(orderBook);
-  if (!obMetrics) {
-    countMetric(analysisState?.rejectCounts, 'ORDERBOOK_UNAVAILABLE');
-    return null;
-  }
-  countMetric(analysisState?.stageCounts, 'ORDERBOOK_OK');
-
-  const quoteVol24h = Number(ticker24h?.quoteVolume || 0);
-  if (!Number.isFinite(quoteVol24h) || quoteVol24h < MIN_QUOTE_VOL_24H) {
-    countMetric(analysisState?.rejectCounts, 'LIQUIDITY_FLOOR');
-    return null;
-  }
-  countMetric(analysisState?.stageCounts, 'LIQUIDITY_BASE_OK');
-
-  const liquidityTier = classifyLiquidityTier(quoteVol24h, obMetrics.depthQuoteTopN, obMetrics.spreadBps);
-
-  const closes15m = closedCandles15m.map(candle => candle.close);
-  const closes1h = closedCandles1h.map(candle => candle.close);
-  const closes4h = closedCandles4h.map(candle => candle.close);
-
-  const currentPrice = closes15m[closes15m.length - 1];
-  const currentPrice1h = closes1h[closes1h.length - 1];
-  const currentPrice4h = closes4h[closes4h.length - 1];
-  const rsi15m = calculateRSI(closes15m, 14);
-  const rsi1h = calculateRSI(closes1h, 14);
-  const bb15m = calculateBollingerBands(closes15m, 20, 2);
-  const ema9_15m = calculateEMA(closes15m, 9);
-  const ema21_15m = calculateEMA(closes15m, 21);
-  const ema50_15m = calculateEMA(closes15m, 50);
-  const ema21_1h = calculateEMA(closes1h, 21);
-  const ema50_1h = calculateEMA(closes1h, 50);
-  const ema21_4h = calculateEMA(closes4h, 21);
-  const ema50_4h = calculateEMA(closes4h, 50);
-  const adx15m = calculateADX(closedCandles15m, 14);
-  const atr15m = calculateATR(closedCandles15m, 14);
-  const atrPercent15m = atr15m && currentPrice > 0 ? (atr15m / currentPrice) * 100 : null;
-  const atrPercentile = calculateVolatilityPercentile(closedCandles15m, 14);
-  const vwap15m = calculateVWAP(closedCandles15m, 50);
-  const volumeSMA15m = calculateVolumeSMA(closedCandles15m, 20);
-  const currentVolume15m = closedCandles15m[closedCandles15m.length - 1].volume;
-  const volumeRatio = volumeSMA15m ? currentVolume15m / volumeSMA15m : 1;
-  const range20 = getRecentRangeLevels(closedCandles15m, 20);
-
-  // 5m specific analysis
-  const closes5m = closedCandles5m.map(c => c.close);
-  const opens5m = closedCandles5m.map(c => c.open);
-  const highs5m = closedCandles5m.map(c => c.high);
-  const lows5m = closedCandles5m.map(c => c.low);
-  const streak5m = calculateStreak(opens5m, closes5m);
-
-  if (!bb15m || !Number.isFinite(atrPercent15m) || !Number.isFinite(rsi15m) || !Number.isFinite(rsi1h)) {
-    countMetric(analysisState?.rejectCounts, 'INDICATOR_GAP');
-    return null;
-  }
-  if (atrPercent15m < MIN_ATR_PCT || atrPercent15m > MAX_ATR_PCT) {
-    countMetric(analysisState?.rejectCounts, 'ATR_FILTER');
-    return null;
-  }
-
-  const lastCandle = closedCandles15m[closedCandles15m.length - 1];
-  const takerBuyBase = Number.isFinite(lastCandle.takerBuyBaseVolume) ? lastCandle.takerBuyBaseVolume : null;
-  const totalBaseVol = Number(lastCandle.volume);
-  const buyRatio = takerBuyBase !== null && totalBaseVol > 0 ? takerBuyBase / totalBaseVol : null;
-  const deltaRatio = buyRatio === null ? null : (2 * buyRatio - 1);
-
-  const bull4h = Number.isFinite(ema21_4h) && Number.isFinite(ema50_4h) && currentPrice4h > ema21_4h && ema21_4h > ema50_4h;
-  const bull1h = Number.isFinite(ema21_1h) && Number.isFinite(ema50_1h) && currentPrice1h > ema21_1h && ema21_1h > ema50_1h;
-  const rs4h = btcContext?.closes4h ? calculateRelativeStrength(closes4h, btcContext.closes4h, 12) : 0;
-  const rs1h = btcContext?.closes1h ? calculateRelativeStrength(closes1h, btcContext.closes1h, 6) : 0;
-  const rs24h = Number(ticker24h?.priceChangePercent || 0) - Number(btcContext?.priceChange24h || 0);
-
-  const bbPercent = bb15m.upper !== bb15m.lower ? (currentPrice - bb15m.lower) / (bb15m.upper - bb15m.lower) : 0.5;
-  const distToEma9 = ema9_15m ? ((currentPrice - ema9_15m) / ema9_15m) * 100 : 0;
-  const distToEma21 = ema21_15m ? ((currentPrice - ema21_15m) / ema21_15m) * 100 : 0;
-  const distToEma50 = ema50_15m ? ((currentPrice - ema50_15m) / ema50_15m) * 100 : 0;
-  const pullbackFromHigh20Pct = range20 ? ((range20.high - currentPrice) / range20.high) * 100 : null;
-  const breakoutDistancePct = range20 ? ((currentPrice - range20.high) / range20.high) * 100 : null;
-  const candleRange = lastCandle.high - lastCandle.low;
-  const candleStrength = candleRange > 0 ? (lastCandle.close - lastCandle.low) / candleRange : 0.5;
-  const emaSlope1h = calculateSlope(closes1h, 21, 6);
-
-  const regime = detectMarketRegime({
-    bull4h,
-    atrPercentile,
-    btcRisk: btcContext?.status || 'UNKNOWN'
-  });
-
-  if (regime === 'RISK_OFF') {
-    countMetric(analysisState?.rejectCounts, 'REGIME_RISK_OFF');
-    return null;
-  }
-  countMetric(analysisState?.stageCounts, 'REGIME_OK');
-
-  const sessionStatus = getTradingSessionStatus();
-  const ctx = {
-    symbol,
-    utcHour: sessionStatus.utcHour,
-    closes15m,
-    currentPrice,
-    ema9_15m,
-    ema21_15m,
-    ema50_15m,
-    ema21_4h,
-    ema50_4h,
-    vwap15m,
-    distToEma9,
-    distToEma21,
-    distToEma50,
-    bbPercent,
-    volumeRatio,
-    deltaRatio,
-    obMetrics,
-    liquidityTier,
-    bull4h,
-    bull1h,
-    regime,
-    rsi15m,
-    rsi1h,
-    rs1h,
-    rs4h,
-    rs24h,
-    atrPercent15m,
-    atrPercentile,
-    range20,
-    pullbackFromHigh20Pct,
-    breakoutDistancePct,
-    candleStrength,
-    emaSlope1h
-  };
-
-  const knifeResult = evaluateKnifeCatcherModule(ctx);
-  const streakResult = evaluateStreakReversalModule({ ...ctx, candles5m, streak5m });
-  const pivotResult = evaluatePivotPointModule({ ...ctx, candles5m });
-  const keltnerResult = evaluateKeltnerFlippedModule({ ...ctx, closes5m, highs5m, lows5m });
-  
-  const moduleCandidates = [];
-
-  if (knifeResult.candidate) {
-    knifeResult.candidate.riskModel = buildRiskModel(regime, 'KNIFE_CATCHER', atrPercent15m, liquidityTier);
-    moduleCandidates.push(knifeResult.candidate);
-    countMetric(analysisState?.moduleCandidates, 'KNIFE_CATCHER');
-  }
-  
-  if (streakResult.candidate) {
-    streakResult.candidate.riskModel = buildRiskModel(regime, 'STREAK_REVERSAL', atrPercent15m, liquidityTier, streakResult.candidate.riskModelOverride);
-    moduleCandidates.push(streakResult.candidate);
-    countMetric(analysisState?.moduleCandidates, 'STREAK_REVERSAL');
-  }
-
-  if (pivotResult.candidate) {
-    pivotResult.candidate.riskModel = buildRiskModel(regime, 'PIVOT_REVERSION', atrPercent15m, liquidityTier, pivotResult.candidate.riskModelOverride);
-    moduleCandidates.push(pivotResult.candidate);
-    countMetric(analysisState?.moduleCandidates, 'PIVOT_REVERSION');
-  }
-
-  if (keltnerResult.candidate) {
-    keltnerResult.candidate.riskModel = buildRiskModel(regime, 'KELTNER_REVERSION', atrPercent15m, liquidityTier, keltnerResult.candidate.riskModelOverride);
-    moduleCandidates.push(keltnerResult.candidate);
-    countMetric(analysisState?.moduleCandidates, 'KELTNER_REVERSION');
-  }
-
-  if (!moduleCandidates.length) {
-    countMetric(analysisState?.rejectCounts, pickPreferredReject(regime, knifeResult, { rejectCode: null }, streakResult, pivotResult, keltnerResult));
+  if (!candidates.length) {
+    const reject = moduleResults.find(result => result.rejectCode)?.rejectCode || 'NO_MODULE_MATCH';
+    countMetric(analysisState?.rejectCounts, reject);
     return null;
   }
   countMetric(analysisState?.stageCounts, 'MODULE_OK');
+  for (const candidate of candidates) countMetric(analysisState?.moduleCandidates, candidate.module);
 
-  const sortedCandidates = moduleCandidates.sort((a, b) => b.score - a.score);
-  const bestCandidate = sortedCandidates[0];
-  const requiredScore = getRequiredScore(bestCandidate, regime, liquidityTier, btcContext?.status || 'UNKNOWN');
+  const best = candidates[0];
+  const requiredScore = getRequiredScore(best, ctx);
+  const signal = createSignalFromCandidate(symbol, best, ctx, requiredScore);
 
-  if (btcContext?.status === 'RED') {
-    countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');
-    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, 'BTC_RED_BLOCK', btcContext, shadowCollector);
+  const executionReject = getExecutionRejectCode(ctx.obMetrics, ctx.liquidityTier);
+  if (executionReject) {
+    countMetric(analysisState?.rejectCounts, executionReject);
+    if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, executionReject));
     return null;
-  }
-
-  // v2.2.0 [H1]: P0 audit finding — shadow KELTNER, KNIFE, PIVOT modules.
-  // KELTNER_REVERSION: 0W/4L, -1.0R, 75% zero-MFE (knife_autopsies.json, 2026-04-26 to 2026-04-28).
-  // KNIFE_CATCHER: 0W/1L, 100% zero-MFE. PIVOT_REVERSION: 0W/1L, entered with volumePass=false.
-  // Only STREAK_REVERSAL is positive: 2W/1L, +1.054R.
-  // Shadow archive (107 resolved): 11.2% WOULD_WIN — gates are saving money.
-  const liveAllowed = new Set(['STREAK_REVERSAL']);
-  const shadowOnlyModules = new Set(['KNIFE_CATCHER', 'PIVOT_REVERSION', 'KELTNER_REVERSION']);
-  
-  if (shadowOnlyModules.has(bestCandidate.module)) {
-    countMetric(analysisState?.rejectCounts, `MODULE_SHADOW_ONLY_${bestCandidate.module}`);
-    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, `MODULE_SHADOW_ONLY`, btcContext, shadowCollector);
-    return null;
-  }
-  
-  if (!liveAllowed.has(bestCandidate.module)) {
-    return null;
-  }
-  
-  // v2.2.0 [H3]: Block TRANSITION regime for all Bot 2 modules.
-  // Audit: TRANSITION 4 trades, 0 wins, -1.0R expectancy. Mean reversion has no stable mean to revert to in TRANSITION.
-  if (regime === 'TRANSITION') {
-    countMetric(analysisState?.rejectCounts, 'TRANSITION_REGIME_BLOCK');
-    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, 'TRANSITION_REGIME_BLOCK', btcContext, shadowCollector);
-    return null;
-  }
-
-  const executionRejectCode = getExecutionRejectCode(obMetrics, liquidityTier);
-  // v10.1.0: Depth-floor promotion — allow VWAP_PULLBACK LOW-tier candidates
-  // with depthQuoteTopN >= $200k to trade live at reduced sizing
-  const isDepthFloorPromotion = (
-    executionRejectCode === 'LIQUIDITY_TIER_LOW' &&
-    bestCandidate.module === 'VWAP_PULLBACK' &&
-    obMetrics.depthQuoteTopN >= 200000
-  );
-  if (executionRejectCode && !isDepthFloorPromotion) {
-    countMetric(analysisState?.rejectCounts, executionRejectCode);
-    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, executionRejectCode, btcContext, shadowCollector);
-    return null;
-  }
-  if (isDepthFloorPromotion) {
-    countMetric(analysisState?.stageCounts, 'PROMOTED_LOW');
   }
   countMetric(analysisState?.stageCounts, 'EXECUTION_OK');
 
-  if (bestCandidate.score < requiredScore) {
+  if (ctx.volumeRatio5m < best.minVolumeRatio) {
+    countMetric(analysisState?.rejectCounts, 'VOLUME_BELOW_MODULE_FLOOR');
+    if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, 'VOLUME_BELOW_MODULE_FLOOR'));
+    return null;
+  }
+
+  if (signal.score < requiredScore) {
     countMetric(analysisState?.rejectCounts, 'SCORE_BELOW_FLOOR');
-    buildCandidateShadow(symbol, bestCandidate, ctx, requiredScore, 'SCORE_BELOW_FLOOR', btcContext, shadowCollector);
+    if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, 'SCORE_BELOW_FLOOR'));
     return null;
   }
   countMetric(analysisState?.stageCounts, 'SCORE_OK');
 
-  if (bestCandidate.riskModel.realRR < 1.5) {
+  if (!signal.riskModel || signal.riskModel.realRR < 1.8) {
     countMetric(analysisState?.rejectCounts, 'RISK_MODEL_RR');
     return null;
   }
 
-  return createSignalFromCandidate(symbol, bestCandidate, ctx, btcContext, requiredScore, isDepthFloorPromotion);
+  return signal;
 }
 
 async function sendTelegramNotification(signals, stats = null) {
   if (!TELEGRAM_ENABLED || !TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.log('Telegram disabled or missing credentials');
+    console.log('[TELEGRAM] disabled or missing credentials');
     return { success: false, reason: 'disabled' };
   }
-
-  const hasHistory = stats && (stats.open > 0 || stats.wins > 0 || stats.losses > 0);
-  if (!signals.length && !hasHistory) return { success: true, sent: 0 };
+  if (!signals.length) return { success: true, sent: 0 };
 
   const esc = value => escapeMarkdownV2(value !== undefined && value !== null ? value : '');
-  let message = '🔔 *DAY TRADE ALERT* 🔔\n';
-
+  let message = `🩸 *REVERSAL LAB BOT* 🩸\n`;
   if (stats) {
-    message += `📊 _Win Rate: ${esc(stats.winRate)}% \\| Open: ${esc(stats.open)} \\| W/L: ${esc(stats.wins)}/${esc(stats.losses)}_\n`;
+    message += `📊 _WR: ${esc(stats.winRate)}% \\| Open: ${esc(stats.open)} \\| W/L: ${esc(stats.wins)}/${esc(stats.losses)}_\n`;
   }
-
-  message += `_${esc(`${ALGORITHM_VERSION} • Spot long-only intraday`)}_\n\n`;
+  message += `_${esc(`${ALGORITHM_VERSION} • confirmed spot reversals`)}_\n`;
+  if (GLOBAL_SHADOW_MODE) message += `_GLOBAL SHADOW MODE activo_\n`;
+  message += `\n`;
 
   for (const signal of [...signals].sort((a, b) => b.score - a.score).slice(0, 5)) {
-    const riskType = signal.btcContext?.status === 'GREEN' ? '🟢' : '🟡';
-    const formatPrice = p => p < 1 ? p.toFixed(6) : p.toFixed(2);
-    
-    message += `🩸🔪 *THE KNIFE CATCHER* 🔪🩸\n\n`;
-    message += `*${esc(signal.symbol)}* M15\n`;
-    message += `*Context:* ${riskType} BTC \\| Regime: ${esc(signal.regime)}\n\n`;
-    message += `*Score:* ${esc(Math.round(signal.score))}/100 \\| Volume: ${esc((signal.volumeRatio || 0).toFixed(1))}x\n`;
-    message += `*Entry:* ${esc(formatPrice(signal.price))}\n`;
-    message += `*Target:* ${esc(formatPrice(signal.tp))}\n`;
-    message += `*Stop:* ${esc(formatPrice(signal.sl))}\n\n`;
-    message += `🏦 Liquidity: ${esc(signal.liquidityTier)} \\| 📚 Spread: ${esc(signal.spreadBps)} bps\n`;
-    message += `📊 Vol: ${esc(roundMetric(signal.volumeRatio, 1))}x \\| RS 1h/4h: ${esc(roundMetric(signal.relativeStrengthSnapshot?.rs1h, 3))}/${esc(roundMetric(signal.relativeStrengthSnapshot?.rs4h, 3))}\n`;
-    message += `🌀 ATR: ${esc(roundMetric(signal.atrPercent, 2))}% \\| Size: ${esc(signal.recommendedSize)}% \\| Time stop: ${esc(signal.expectedHoldingHours)}h\n`;
-    if (Array.isArray(signal.reasons) && signal.reasons.length) {
-      message += `💡 _${esc(signal.reasons.join(' • '))}_\n`;
-    }
-    message += `───────────────────\n`;
+    const btcIcon = signal.btcContext?.status === 'GREEN' ? '🟢' : '🟡';
+    message += `*${esc(signal.symbol)}* \\| ${esc(signal.module)}\n`;
+    message += `${btcIcon} BTC \\| Regime: ${esc(signal.regime)} \\| Score: *${esc(signal.score)}/${esc(signal.requiredScore)}*\n`;
+    message += `Entry: ${esc(formatPrice(signal.price))} \\| TP: ${esc(formatPrice(signal.tp))} \\| SL: ${esc(formatPrice(signal.sl))}\n`;
+    message += `Liq: ${esc(signal.liquidityTier)} \\| Spread: ${esc(signal.spreadBps)} bps \\| Vol: ${esc(signal.volumeRatio)}x\n`;
+    message += `RS 1h/4h: ${esc(signal.relativeStrengthSnapshot?.rs1h)}/${esc(signal.relativeStrengthSnapshot?.rs4h)} \\| Size: ${esc(signal.recommendedSize)}% \\| Stop: ${esc(signal.expectedHoldingHours)}h\n`;
+    if (signal.reasons?.length) message += `_ ${esc(signal.reasons.join(' • '))} _\n`;
+    message += `──────────────\n`;
   }
 
   const timeStr = new Date().toLocaleTimeString('es-ES', {
@@ -2042,12 +1080,10 @@ async function sendTelegramNotification(signals, stats = null) {
     minute: '2-digit',
     timeZone: 'Europe/Madrid'
   });
-  message += `🤖 _Day Trade Scanner_ • ${esc(timeStr)}`;
-
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  message += `🤖 _Reversal Scanner_ • ${esc(timeStr)}`;
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -2056,17 +1092,14 @@ async function sendTelegramNotification(signals, stats = null) {
         parse_mode: 'MarkdownV2'
       })
     });
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Telegram API Error:', errorText);
+      const errorText = await response.text().catch(() => '');
+      console.error('[TELEGRAM] API error:', errorText);
       return { success: false, error: errorText };
     }
-
-    console.log(`Telegram notification sent for ${signals.length} signals`);
     return { success: true, sent: signals.length };
   } catch (error) {
-    console.error('Telegram Exception:', error.message);
+    console.error('[TELEGRAM] send error:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -2074,105 +1107,86 @@ async function sendTelegramNotification(signals, stats = null) {
 export async function runAnalysis(context) {
   const sessionStatus = getTradingSessionStatus();
   if (!sessionStatus.allowed) {
-    const sessionMessages = [
-      `--- DAY TRADE Analysis Skipped ${ALGORITHM_VERSION} ---`,
+    const messages = [
+      `--- Knife Analysis Skipped ${ALGORITHM_VERSION} ---`,
       `[SESSION] ${sessionStatus.reason}`,
-      '[SESSION] Trading paused - Low liquidity session'
+      '[SESSION] Reversal trading paused - low liquidity session'
     ];
-    sessionMessages.forEach(message => console.log(message));
-    await appendPersistentLogEntries(sessionMessages, context);
-    return { success: true, signals: 0, reason: 'Asia session - trading restricted', session: 'ASIA_BLOCKED' };
+    messages.forEach(message => console.log(message));
+    const existingLogs = await loadPersistentLogs(context);
+    await savePersistentLogs([...existingLogs, ...messages.map(message => formatPersistentLogEntry(message))], context);
+    return { success: true, signals: 0, reason: sessionStatus.reason, session: 'ASIA_BLOCKED' };
   }
 
   const canProceed = await acquireRunLock(context);
   if (!canProceed) return { success: false, error: 'Locked' };
 
-  const runId = `RUN-${Math.floor(Math.random() * 1000000)}`;
+  const runId = `KNIFE-${Math.floor(Math.random() * 1000000)}`;
   const cycleLogs = [];
   const pLog = message => {
-    const timestamp = new Date().toISOString().replace('T', ' ').split('.')[0];
-    const logEntry = `[${timestamp}] ${message}`;
+    const entry = formatPersistentLogEntry(message);
     console.log(message);
-    cycleLogs.push(logEntry);
+    cycleLogs.push(entry);
   };
 
   try {
-    pLog(`--- DAY TRADE Analysis Started ${ALGORITHM_VERSION} ---`);
+    pLog(`--- Knife Analysis Started ${ALGORITHM_VERSION} ---`);
     pLog(`Execution ID: ${runId}`);
 
-    const cooldowns = await loadCooldowns(context);
-    pLog(`Loaded ${Object.keys(cooldowns).length} cooldown entries`);
-
-    const signals = [];
-    const shadowCandidates = [];
-    let analyzed = 0;
-    let errors = 0;
-    const selectedSectors = new Set();
-    const selectedSectorLeaders = new Map();
-
-    const analysisState = {
-      rejectCounts: {},
-      moduleCandidates: {},
-      stageCounts: {}
-    };
-
-    const signalMemory = await loadSignalMemory(context);
-    pLog(`[MEMORY] Loaded memory for ${Object.keys(signalMemory).length} symbols`);
-
-    let btcContext = { status: 'GREEN', reason: 'BTC context fallback', closes4h: [], closes1h: [], priceChange24h: 0 };
     const tickers24h = await getAllTickers24h();
     const tickersBySymbol = new Map(tickers24h.map(ticker => [ticker.symbol, ticker]));
+    const historyData = await updateSignalHistory(tickers24h, context, pLog);
+    const stats = historyData.stats;
+    const openSymbols = new Set(historyData.openSymbols);
+    const shadowStats = await updateShadowTrades(context, pLog);
+    if (shadowStats.total > 0) pLog(`[SHADOW] ${shadowStats.wouldWin}W/${shadowStats.wouldLose}L resolved`);
 
+    let btcContext = { status: 'GREEN', reason: 'BTC fallback', closes4h: [], closes1h: [], priceChange24h: 0 };
     try {
       const btcSymbol = `BTC${QUOTE_ASSET}`;
-      const [btcCandles4h, btcCandles1h] = await Promise.all([
-        getKlines(btcSymbol, '4h', 100),
-        getKlines(btcSymbol, '60m', 100)
+      const [btc4h, btc1h] = await Promise.all([
+        getKlines(btcSymbol, '4h', 120),
+        getKlines(btcSymbol, '60m', 160)
       ]);
-      btcContext = detectBTCContext(btcCandles4h, btcCandles1h, tickersBySymbol.get(btcSymbol));
-      if (btcContext.status === 'RED') pLog(`[BTC-SEM] 🔴 RED: ${btcContext.reason}`);
-      else if (btcContext.status === 'AMBER') pLog(`[BTC-SEM] 🟡 AMBER: ${btcContext.reason}`);
-      else pLog(`[BTC-SEM] 🟢 GREEN: ${btcContext.reason}`);
+      btcContext = detectBTCContext(btc4h, btc1h, tickersBySymbol.get(btcSymbol));
+      pLog(`[BTC] ${btcContext.status}: ${btcContext.reason}`);
     } catch (error) {
-      pLog(`[BTC-SEM] Fallback context: ${error.message}`);
+      pLog(`[BTC] fallback: ${error.message}`);
     }
 
-    const topSymbols = tickers24h.length
-      ? getTopSymbolsByOpportunity(tickers24h, QUOTE_ASSET, MAX_SYMBOLS, MIN_QUOTE_VOL_24H)
-      : FALLBACK_SYMBOLS;
-    pLog(`[UNIVERSE] Selected ${topSymbols.length} symbols after opportunity ranking`);
+    const cooldowns = await loadCooldowns(context);
+    const signalMemory = await loadSignalMemory(context);
+    const symbols = selectTopSymbols(tickers24h, QUOTE_ASSET, MAX_SYMBOLS, MIN_QUOTE_VOL_24H, 'reversion');
+    const analysisState = { rejectCounts: {}, moduleCandidates: {}, stageCounts: {} };
+    const shadowCandidates = [];
+    const signals = [];
+    const selectedSectors = new Set();
+    const selectedSectorLeaders = new Map();
+    let analyzed = 0;
+    let errors = 0;
 
-    const histData = await updateSignalHistory(tickers24h, context, pLog);
-    const stats = histData?.stats || { open: 0, wins: 0, losses: 0, bes: 0, staleExits: 0, winRate: 0 };
-    const openSymbols = histData?.openSymbols || [];
-    pLog(`[${runId}] Performance Stats: ${JSON.stringify(stats)}`);
+    pLog(`[UNIVERSE] Selected ${symbols.length} reversion symbols`);
 
-    const shadowStats = await updateShadowTrades(tickers24h, context, pLog);
-    if (shadowStats.total > 0) {
-      pLog(`[SHADOW] Stats: ${shadowStats.wouldWin} would-win / ${shadowStats.wouldLose} would-lose of ${shadowStats.total} resolved`);
-    }
-
-    for (const symbol of topSymbols) {
-      if (openSymbols.includes(symbol)) {
+    for (const symbol of symbols) {
+      if (openSymbols.has(symbol)) {
         countMetric(analysisState.rejectCounts, 'OPEN_POSITION_BLOCK');
         continue;
       }
-
-      if (cooldowns[symbol] && (Date.now() - cooldowns[symbol] < ALERT_COOLDOWN_MIN * 60000)) {
+      if (cooldowns[symbol] && Date.now() - cooldowns[symbol] < ALERT_COOLDOWN_MIN * 60000) {
         countMetric(analysisState.rejectCounts, 'COOLDOWN_BLOCK');
         continue;
       }
 
       try {
-        const [candles5m, candles15m, orderBook, candles1h, candles4h] = await Promise.all([
-          getKlines(symbol, '5m', 200),
-          getKlines(symbol, '15m', 500),
-          getOrderBookDepth(symbol, 20),
-          getKlines(symbol, '60m', 200),
-          getKlines(symbol, '4h', 100)
+        const [candles5m, candles15m, candles1h, candles4h, orderBook] = await Promise.all([
+          getKlines(symbol, '5m', 320),
+          getKlines(symbol, '15m', 240),
+          getKlines(symbol, '60m', 160),
+          getKlines(symbol, '4h', 120),
+          getOrderBookDepth(symbol, 20)
         ]);
-
         analyzed++;
+
         const signal = generateSignal(
           symbol,
           candles5m,
@@ -2186,106 +1200,67 @@ export async function runAnalysis(context) {
           shadowCandidates
         );
 
-        let signalAccepted = false;
-        if (signal) {
-          const sector = getSector(symbol);
-          signal.sector = sector;
-          const protectedSector = isProtectedSector(sector);
-
-          if (protectedSector && selectedSectors.has(sector)) {
-            const blockedBySymbol = selectedSectorLeaders.get(sector) || 'UNKNOWN';
-            countMetric(analysisState.rejectCounts, 'SECTOR_CORRELATION');
-            shadowCandidates.push(recordShadowNearMiss(
-              symbol,
-              signal.score,
-              signal.price,
-              signal.regime,
-              'SECTOR_CORRELATION',
-              signal.btcContext,
-              signal.entryMetrics,
-              signal.qualityBreakdown,
-              {
-                scoreBeforeMomentum: signal.scoreBeforeMomentum,
-                requiredScore: signal.requiredScore,
-                sector,
-                module: signal.module,
-                entryArchetype: signal.entryArchetype,
-                liquidityTier: signal.liquidityTier,
-                expectedHoldingHours: signal.expectedHoldingHours,
-                riskModel: signal.riskModel,
-                relativeStrengthSnapshot: signal.relativeStrengthSnapshot,
-                volumeLiquidityConfirmation: signal.volumeLiquidityConfirmation,
-                shadowBenchmarkTpPct: signal.riskModel ? (signal.tp - signal.price) / signal.price : undefined,
-                shadowBenchmarkSlPct: signal.riskModel ? (signal.price - signal.sl) / signal.price : undefined,
-                shadowBenchmarkVersion: signal.module ? `${ALGORITHM_VERSION}-${signal.module}` : ALGORITHM_VERSION,
-                blockedBySector: sector,
-                blockedBySymbol
-              }
-            ));
-          } else {
-            cooldowns[symbol] = Date.now();
-            await saveCooldowns(cooldowns, context);
-
-            if (protectedSector) {
-              selectedSectors.add(sector);
-              selectedSectorLeaders.set(sector, symbol);
-            }
-
-            // Count only signals that survive sector correlation and are persisted.
-            countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
-            
-            if (!GLOBAL_SHADOW_MODE) {
-              await recordSignalHistory(signal, context);
-              signals.push(signal);
-              signalAccepted = true;
-              pLog(`[${runId}] 🎯 SIGNAL GENERATED: ${symbol} | Score: ${signal.score} | Module: ${signal.module}`);
-            } else {
-              pLog(`[${runId}] 👻 SHADOW_FORCED: ${symbol} (Score: ${signal.score}) suppressed by GLOBAL_SHADOW_MODE`);
-              // Still record in shadow near-miss logic below if applicable
-            }
-            recordSymbolScore(signalMemory, symbol, signal.score, signal.regime);
-          }
+        if (!signal) {
+          await sleep(8);
+          continue;
         }
 
-        const lastShadow = shadowCandidates.length ? shadowCandidates[shadowCandidates.length - 1] : null;
-        if (!signalAccepted && lastShadow && lastShadow.symbol === symbol) {
-          recordSymbolScore(signalMemory, symbol, lastShadow.score, lastShadow.regime);
+        const protectedSector = isProtectedSector(signal.sector);
+        if (protectedSector && selectedSectors.has(signal.sector)) {
+          countMetric(analysisState.rejectCounts, 'SECTOR_CORRELATION');
+          shadowCandidates.push(recordShadowNearMiss(signal, 'SECTOR_CORRELATION', {
+            blockedBySymbol: selectedSectorLeaders.get(signal.sector)
+          }));
+          await sleep(8);
+          continue;
         }
 
-        await sleep(10);
+        cooldowns[symbol] = Date.now();
+        await saveCooldowns(cooldowns, context);
+        recordSymbolScore(signalMemory, symbol, signal.score, signal.module);
+
+        if (protectedSector) {
+          selectedSectors.add(signal.sector);
+          selectedSectorLeaders.set(signal.sector, symbol);
+        }
+
+        if (GLOBAL_SHADOW_MODE) {
+          shadowCandidates.push(recordShadowNearMiss(signal, 'GLOBAL_SHADOW_MODE'));
+          pLog(`[${runId}] SHADOW_FORCED: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
+        } else {
+          await recordSignalHistory(signal, context);
+          signals.push(signal);
+          countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
+          pLog(`[${runId}] SIGNAL: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
+        }
+
+        await sleep(8);
       } catch (error) {
-        pLog(`Error analyzing ${symbol}: ${error.message}`);
         errors++;
-        await sleep(10);
+        pLog(`[ERROR] ${symbol}: ${error.message}`);
+        await sleep(8);
       }
     }
 
-    pLog(`Analysis complete: ${analyzed} coins, ${signals.length} signals, ${errors} errors`);
-
-    const moduleSummary = toSummaryPairs(analysisState.moduleCandidates);
-    const stageSummary = toSummaryPairs(analysisState.stageCounts);
-    const rejectSummary = toSummaryPairs(analysisState.rejectCounts);
-    if (stageSummary.length) pLog(`[THROUGHPUT] Stages: ${stageSummary.join(' | ')}`);
-    if (moduleSummary.length) pLog(`[THROUGHPUT] Module candidates: ${moduleSummary.join(' | ')}`);
-    if (rejectSummary.length) pLog(`[THROUGHPUT] Rejects: ${rejectSummary.join(' | ')}`);
+    if (shadowCandidates.length) {
+      const existingShadows = await loadShadowTrades(context);
+      await saveShadowTrades([...existingShadows, ...shadowCandidates], context);
+      pLog(`[SHADOW] Recorded ${shadowCandidates.length} near-misses`);
+    }
 
     await saveSignalMemory(signalMemory, context);
 
-    if (shadowCandidates.length > 0) {
-      const existingShadows = await loadShadowTrades(context);
-      await saveShadowTrades([...existingShadows, ...shadowCandidates], context);
-      pLog(`[SHADOW] Recorded ${shadowCandidates.length} near-misses this cycle`);
-    }
+    const stageSummary = toSummaryPairs(analysisState.stageCounts);
+    const moduleSummary = toSummaryPairs(analysisState.moduleCandidates);
+    const rejectSummary = toSummaryPairs(analysisState.rejectCounts);
+    if (stageSummary.length) pLog(`[THROUGHPUT] Stages: ${stageSummary.join(' | ')}`);
+    if (moduleSummary.length) pLog(`[THROUGHPUT] Modules: ${moduleSummary.join(' | ')}`);
+    if (rejectSummary.length) pLog(`[THROUGHPUT] Rejects: ${rejectSummary.join(' | ')}`);
 
     const existingLogs = await loadPersistentLogs(context);
     await savePersistentLogs([...existingLogs, ...cycleLogs], context);
 
-    let telegramResult = { success: true, sent: 0 };
-    if (signals.length > 0) {
-      telegramResult = await sendTelegramNotification(signals, stats);
-    }
-
-    await releaseRunLock(context);
+    const telegram = signals.length ? await sendTelegramNotification(signals, stats) : { success: true, sent: 0 };
 
     return {
       success: true,
@@ -2300,109 +1275,79 @@ export async function runAnalysis(context) {
         const [key, value] = pair.split('=');
         return [key, Number(value)];
       })),
-      persistentLogsRecorded: cycleLogs.length,
-      telegram: telegramResult,
+      globalShadowMode: GLOBAL_SHADOW_MODE,
+      telegram,
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    pLog(`CRITICAL ERROR in runAnalysis: ${error.message}`);
-    await releaseRunLock(context);
+    pLog(`[CRITICAL] ${error.message}`);
     return { success: false, error: error.message };
+  } finally {
+    await releaseRunLock(context);
   }
 }
 
-const scheduledHandler = async (event, context) => {
-  const method = event && (event.httpMethod || event.method) ? String(event.httpMethod || event.method).toUpperCase() : '';
+const scheduledHandler = async (event = {}, context = {}) => {
+  const method = event && (event.httpMethod || event.method)
+    ? String(event.httpMethod || event.method).toUpperCase()
+    : '';
 
-  if (method) {
-    const headers = event.headers || {};
-    const nfEvent = (headers['x-nf-event'] || headers['X-NF-Event'] || headers['x-nf-Event'] || '').toString().toLowerCase();
+  if (!method) {
+    const result = await runAnalysis(context);
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(result) };
+  }
 
-    if (method === 'OPTIONS') {
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'Content-Type, x-notify-secret',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Content-Type': 'application/json'
-        },
-        body: ''
-      };
-    }
-
-    if (method !== 'POST') {
-      return {
-        statusCode: 405,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ success: false, error: 'Method not allowed' })
-      };
-    }
-
-    let payload = null;
-    if (event.body) {
-      try {
-        payload = JSON.parse(event.body);
-      } catch {
-        return {
-          statusCode: 400,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ success: false, error: 'Invalid JSON body' })
-        };
-      }
-    }
-
-    const hasNextRun = payload && typeof payload.next_run === 'string';
-    const isSchedule = nfEvent === 'schedule' || hasNextRun;
-
-    if (isSchedule) {
-      const result = await runAnalysis(context);
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result)
-      };
-    }
-
-    if (!NOTIFY_SECRET) {
-      return {
-        statusCode: 503,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ success: false, error: 'NOTIFY_SECRET not configured' })
-      };
-    }
-
-    const clientSecret = headers['x-notify-secret'] || headers['X-Notify-Secret'] || headers['x-notify-Secret'] || '';
-    if (clientSecret !== NOTIFY_SECRET) {
-      return {
-        statusCode: 401,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ success: false, error: 'Unauthorized' })
-      };
-    }
-
-    const incomingSignals = payload && Array.isArray(payload.signals) ? payload.signals : null;
-    if (!incomingSignals || !incomingSignals.length) {
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ success: false, error: 'No signals provided' })
-      };
-    }
-
-    const telegram = await sendTelegramNotification(incomingSignals);
+  if (method === 'OPTIONS') {
     return {
-      statusCode: telegram.success ? 200 : 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ success: telegram.success, telegram })
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, x-notify-secret',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Content-Type': 'application/json'
+      },
+      body: ''
     };
   }
 
-  const result = await runAnalysis(context);
+  if (method !== 'POST') {
+    return { statusCode: 405, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ success: false, error: 'Method not allowed' }) };
+  }
+
+  let payload = null;
+  if (event.body) {
+    try {
+      payload = JSON.parse(event.body);
+    } catch {
+      return { statusCode: 400, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ success: false, error: 'Invalid JSON body' }) };
+    }
+  }
+
+  const headers = event.headers || {};
+  const nfEvent = String(headers['x-nf-event'] || headers['X-NF-Event'] || '').toLowerCase();
+  const isSchedule = nfEvent === 'schedule' || typeof payload?.next_run === 'string';
+  if (isSchedule) {
+    const result = await runAnalysis(context);
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(result) };
+  }
+
+  if (NOTIFY_SECRET) {
+    const clientSecret = headers['x-notify-secret'] || headers['X-Notify-Secret'] || '';
+    if (clientSecret !== NOTIFY_SECRET) {
+      return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ success: false, error: 'Unauthorized' }) };
+    }
+  }
+
+  const incomingSignals = Array.isArray(payload?.signals) ? payload.signals : [];
+  if (!incomingSignals.length) {
+    return { statusCode: 400, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ success: false, error: 'No signals provided' }) };
+  }
+
+  const telegram = await sendTelegramNotification(incomingSignals);
   return {
-    statusCode: 200,
+    statusCode: telegram.success ? 200 : 500,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(result)
+    body: JSON.stringify({ success: telegram.success, telegram })
   };
 };
 
