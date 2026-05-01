@@ -1221,6 +1221,7 @@ export async function runAnalysis(context) {
     const analysisState = { rejectCounts: {}, moduleCandidates: {}, stageCounts: {} };
     const shadowCandidates = [];
     const signals = [];
+    const telegramSignals = [];
     const selectedSectors = new Set();
     const selectedSectorLeaders = new Map();
     let analyzed = 0;
@@ -1286,10 +1287,12 @@ export async function runAnalysis(context) {
 
         if (GLOBAL_SHADOW_MODE) {
           shadowCandidates.push(recordShadowNearMiss(signal, 'GLOBAL_SHADOW_MODE'));
+          telegramSignals.push(signal);
           pLog(`[${runId}] SHADOW_FORCED: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
         } else {
           await recordSignalHistory(signal, context);
           signals.push(signal);
+          telegramSignals.push(signal);
           countMetric(analysisState.stageCounts, 'LIVE_SIGNAL');
           pLog(`[${runId}] SIGNAL: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
         }
@@ -1322,7 +1325,7 @@ export async function runAnalysis(context) {
     const existingLogs = await loadPersistentLogs(context);
     await savePersistentLogs([...existingLogs, ...cycleLogs], context);
 
-    const telegram = signals.length ? await sendTelegramNotification(signals, stats) : { success: true, sent: 0 };
+    const telegram = telegramSignals.length ? await sendTelegramNotification(telegramSignals, stats) : { success: true, sent: 0 };
 
     return {
       success: true,
