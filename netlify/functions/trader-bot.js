@@ -50,7 +50,7 @@ import {
   toSummaryPairs
 } from './tradingview-strategy-core.js';
 
-export const ALGORITHM_VERSION = 'v13.0.0-TradingViewFusion';
+export const ALGORITHM_VERSION = 'v13.1.0-TradingViewFusion';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -711,6 +711,7 @@ function evaluateVidyaSqueeze(ctx) {
   const { vidya15, squeeze15, macd15, mlma1h, sott1h, volumeRatio, deltaRatio, executionQuality } = ctx;
   if (!vidya15?.trendUp) return { rejectCode: 'VIDYA_TREND_DOWN' };
   if (!squeeze15?.bullish || !squeeze15.rising) return { rejectCode: 'SQUEEZE_NOT_EXPANDING' };
+  if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'OVEREXTENDED' };
   if (!macd15?.aboveSignal || macd15.histDelta < -Math.abs(macd15.hist) * 0.2) return { rejectCode: 'MACD_NOT_CONFIRMED' };
 
   const trendQuality = 66
@@ -807,6 +808,7 @@ function evaluateTwoPoleContinuation(ctx) {
   const { twoPole15, sott1h, mlma1h, currentPrice, ema21_15m, ema50_15m, rsi15m, volumeRatio, executionQuality } = ctx;
   if (!(ctx.bull1h || mlma1h?.bullish || sott1h?.strongBull)) return { rejectCode: 'TWOPOLE_HTF_NOT_BULLISH' };
   if (!(twoPole15?.buy || (twoPole15?.bullish && twoPole15.value < 0.15 && twoPole15.slope > 0))) return { rejectCode: 'TWOPOLE_NO_RESET' };
+  if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'OVEREXTENDED' };
   if (!Number.isFinite(ema50_15m) || currentPrice <= ema50_15m) return { rejectCode: 'TWOPOLE_BELOW_EMA50' };
   if (!Number.isFinite(rsi15m) || rsi15m < 42 || rsi15m > 68) return { rejectCode: 'TWOPOLE_RSI_OUT_OF_RANGE' };
 
@@ -907,6 +909,8 @@ function buildContext(symbol, candles15mRaw, candles1hRaw, candles4hRaw, orderBo
   const rs1h = btcContext?.closes1h ? calculateRelativeStrength(closes1h, btcContext.closes1h, 6) : 0;
   const rs4h = btcContext?.closes4h ? calculateRelativeStrength(closes4h, btcContext.closes4h, 12) : 0;
   const rs24h = Number(ticker24h?.priceChangePercent || 0) - Number(btcContext?.priceChange24h || 0);
+  const vwapDistance = vwap15m ? roundMetric(((currentPrice - vwap15m) / vwap15m) * 100, 2) : null;
+  const distToEma9 = ema9_15m ? roundMetric(((currentPrice - ema9_15m) / ema9_15m) * 100, 2) : null;
 
   return {
     symbol,
@@ -937,6 +941,8 @@ function buildContext(symbol, candles15mRaw, candles1hRaw, candles4hRaw, orderBo
     adx15m,
     atrPercentile,
     vwap15m,
+    vwapDistance,
+    distToEma9,
     bb15m,
     range20,
     squeeze15,
@@ -1053,8 +1059,9 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
   countMetric(analysisState?.stageCounts, 'REGIME_OK');
   countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
-  if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED') {
-    countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');
+  if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED' || ctx.regime === 'RANGING') {
+    const code = ctx.regime === 'RANGING' ? 'REGIME_RANGING_BLOCK' : 'BTC_RED_BLOCK';
+    countMetric(analysisState?.rejectCounts, code);
     return null;
   }
 
@@ -1083,9 +1090,12 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
 
   const executionReject = getExecutionRejectCode(ctx.obMetrics, ctx.liquidityTier);
   if (executionReject) {
-    countMetric(analysisState?.rejectCounts, executionReject);
-    if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, executionReject));
-    return null;
+    const isOpportunistic = executionReject === 'LIQUIDITY_TIER_LOW' && signal.score >= 85;
+    if (!isOpportunistic) {
+      countMetric(analysisState?.rejectCounts, executionReject);
+      if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, executionReject));
+      return null;
+    }
   }
   countMetric(analysisState?.stageCounts, 'EXECUTION_OK');
 

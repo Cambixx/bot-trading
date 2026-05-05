@@ -49,7 +49,7 @@ import {
   toSummaryPairs
 } from './tradingview-strategy-core.js';
 
-export const ALGORITHM_VERSION = 'v3.0.0-TradingViewReversalLab';
+export const ALGORITHM_VERSION = 'v3.1.0-TradingViewReversalLab';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -59,7 +59,7 @@ const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const SIGNAL_SCORE_THRESHOLD = process.env.KNIFE_SIGNAL_SCORE_THRESHOLD ? Number(process.env.KNIFE_SIGNAL_SCORE_THRESHOLD) : 72;
 const MAX_SPREAD_BPS = process.env.KNIFE_MAX_SPREAD_BPS ? Number(process.env.KNIFE_MAX_SPREAD_BPS) : 10;
 const MIN_DEPTH_QUOTE = process.env.KNIFE_MIN_DEPTH_QUOTE ? Number(process.env.KNIFE_MIN_DEPTH_QUOTE) : 75000;
-const MIN_ATR_PCT = process.env.KNIFE_MIN_ATR_PCT ? Number(process.env.KNIFE_MIN_ATR_PCT) : 0.18;
+const MIN_ATR_PCT = process.env.KNIFE_MIN_ATR_PCT ? Number(process.env.KNIFE_MIN_ATR_PCT) : 0.14;
 const MAX_ATR_PCT = process.env.KNIFE_MAX_ATR_PCT ? Number(process.env.KNIFE_MAX_ATR_PCT) : 7;
 const MAX_SYMBOLS = process.env.KNIFE_MAX_SYMBOLS ? Number(process.env.KNIFE_MAX_SYMBOLS) : 64;
 const MIN_QUOTE_VOL_24H = process.env.KNIFE_MIN_QUOTE_VOL_24H ? Number(process.env.KNIFE_MIN_QUOTE_VOL_24H) : 8000000;
