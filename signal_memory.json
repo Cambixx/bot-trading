@@ -1,1 +1,349 @@
-[]
+{
+  "DASHUSDT": [
+    {
+      "score": 62,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777945575741
+    },
+    {
+      "score": 62,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777946524544
+    },
+    {
+      "score": 66,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777947426401
+    }
+  ],
+  "PENDLEUSDT": [
+    {
+      "score": 64,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777945575741
+    },
+    {
+      "score": 64,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777946524544
+    },
+    {
+      "score": 64,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777947426401
+    },
+    {
+      "score": 68,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777948222003
+    },
+    {
+      "score": 70,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777950208127
+    },
+    {
+      "score": 66,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777951021883
+    },
+    {
+      "score": 68,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777951968835
+    },
+    {
+      "score": 64,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777952792279
+    }
+  ],
+  "XMRUSDT": [
+    {
+      "score": 61,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777949181011
+    },
+    {
+      "score": 64,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777956331412
+    },
+    {
+      "score": 60,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777957327008
+    },
+    {
+      "score": 79,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777958204349
+    },
+    {
+      "score": 74,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777959921795
+    }
+  ],
+  "TONUSDT": [
+    {
+      "score": 67,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777945575741
+    },
+    {
+      "score": 71,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777946524544
+    },
+    {
+      "score": 74,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777948218403
+    }
+  ],
+  "ZECUSDT": [
+    {
+      "score": 65,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777945575741
+    },
+    {
+      "score": 63,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777948222003
+    }
+  ],
+  "TAOUSDT": [
+    {
+      "score": 65,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777946524544
+    },
+    {
+      "score": 64,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777948222003
+    }
+  ],
+  "LUNCUSDT": [
+    {
+      "score": 67,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777957327008
+    },
+    {
+      "score": 63,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777958204349
+    }
+  ],
+  "ASTEROIDUSDT": [
+    {
+      "score": 65,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777945575741
+    },
+    {
+      "score": 72,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777946524544
+    },
+    {
+      "score": 67,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777947426401
+    },
+    {
+      "score": 64,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777948222003
+    },
+    {
+      "score": 63,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777949181011
+    },
+    {
+      "score": 66,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777950208127
+    }
+  ],
+  "ADAUSDT": [
+    {
+      "score": 63,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777947426401
+    },
+    {
+      "score": 64,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777948222003
+    },
+    {
+      "score": 68,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777949181011
+    },
+    {
+      "score": 64,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777950208127
+    },
+    {
+      "score": 61,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777951021883
+    },
+    {
+      "score": 60,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777951968835
+    },
+    {
+      "score": 65,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777952792279
+    },
+    {
+      "score": 69,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777953754747
+    },
+    {
+      "score": 65,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777954616381
+    },
+    {
+      "score": 68,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777955538181
+    }
+  ],
+  "SOLUSDT": [
+    {
+      "score": 72,
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "timestamp": 1777946524544
+    },
+    {
+      "score": 80,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777947421720
+    }
+  ],
+  "DOGEUSDT": [
+    {
+      "score": 71,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777947422380
+    }
+  ],
+  "LTCUSDT": [
+    {
+      "score": 65,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777948222003
+    },
+    {
+      "score": 62,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777949181011
+    },
+    {
+      "score": 60,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777950208127
+    },
+    {
+      "score": 64,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777951021883
+    },
+    {
+      "score": 62,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777951968835
+    }
+  ],
+  "BTCUSDT": [
+    {
+      "score": 83,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "timestamp": 1777949177263
+    }
+  ],
+  "XRPUSDT": [
+    {
+      "score": 74,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777949177602
+    },
+    {
+      "score": 74,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777949181011
+    },
+    {
+      "score": 68,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777950204438
+    }
+  ],
+  "BCHUSDT": [
+    {
+      "score": 68,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777952792279
+    },
+    {
+      "score": 65,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777953754747
+    },
+    {
+      "score": 65,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777954616381
+    },
+    {
+      "score": 62,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777955538181
+    },
+    {
+      "score": 63,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777956331412
+    },
+    {
+      "score": 62,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777957327008
+    },
+    {
+      "score": 66,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777958204349
+    },
+    {
+      "score": 68,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777959921795
+    }
+  ],
+  "BSBUSDT": [
+    {
+      "score": 61,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777957327008
+    },
+    {
+      "score": 61,
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "timestamp": 1777958204349
+    }
+  ]
+}

@@ -1,1 +1,306 @@
-[]
+[
+  {
+    "id": "knife-shadow-1777890927108-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "score": 73,
+    "requiredScore": 77,
+    "scoreGap": 4,
+    "price": 84.09,
+    "regime": "VOLATILE_TRANSITION",
+    "rejectReasonCode": "SCORE_BELOW_FLOOR",
+    "rejectReason": "SCORE_BELOW_FLOOR",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "VIDYA_LIQUIDITY_SWEEP",
+    "entryArchetype": "Liquidity sweep reclaim",
+    "liquidityTier": "ELITE",
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "slAtr": 1.25,
+      "tpR": 2.45,
+      "realRR": 2.45,
+      "timeStopHours": 5
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0018,
+      "rs4h": -0.0055,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 1.15,
+      "volumeRatio": 4.25,
+      "volumePass": true,
+      "deltaRatio": -0.048,
+      "deltaPass": true,
+      "obi": 0.044,
+      "obiPass": true,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 2989353,
+      "liquidityTier": "ELITE"
+    },
+    "timestamp": 1777890927108,
+    "entryMetrics": {
+      "atrPercent5m": 0.3,
+      "atrPercent15m": 0.42,
+      "adx15m": 22.4,
+      "adx": 22.4,
+      "deltaRatio": -0.048,
+      "multiDelta": -0.048,
+      "rs1h": -0.0018,
+      "rs4h": -0.0055,
+      "vwapDistance": -0.62,
+      "return12x5m": -1.07,
+      "redStreak5m": 0,
+      "sottValue": 0.019,
+      "twoPole5m": 0.223,
+      "twoPoleValue": 0.223,
+      "twoPole15m": -0.459,
+      "vidyaDistancePct": -0.74,
+      "riskRewardRatio": 2.45
+    },
+    "qualityBreakdown": {
+      "stretch": 72,
+      "reset": 60,
+      "participation": 74.8,
+      "execution": 100
+    },
+    "shadowBenchmark": {
+      "version": "v3.0.0-TradingViewReversalLab-shadow-v1-VIDYA_LIQUIDITY_SWEEP",
+      "tpPct": 0.01592499999999987,
+      "slPct": 0.006499999999999919
+    },
+    "maxFavorableMovePct": 1.45,
+    "maxAdverseMovePct": 0.58,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "knife-shadow-1777890927340-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "score": 72,
+    "requiredScore": 77,
+    "scoreGap": 5,
+    "price": 624.29,
+    "regime": "VOLATILE_TRANSITION",
+    "rejectReasonCode": "SCORE_BELOW_FLOOR",
+    "rejectReason": "SCORE_BELOW_FLOOR",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_LIQUIDITY_SWEEP",
+    "entryArchetype": "Liquidity sweep reclaim",
+    "liquidityTier": "HIGH",
+    "expectedHoldingHours": 5,
+    "riskModel": {
+      "slAtr": 1.25,
+      "tpR": 2.45,
+      "realRR": 2.45,
+      "timeStopHours": 5
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0029,
+      "rs4h": 0.0009,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 1.15,
+      "volumeRatio": 1.8,
+      "volumePass": true,
+      "deltaRatio": 0.047,
+      "deltaPass": true,
+      "obi": 0.355,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 159324,
+      "liquidityTier": "HIGH"
+    },
+    "timestamp": 1777890927340,
+    "entryMetrics": {
+      "atrPercent5m": 0.24,
+      "atrPercent15m": 0.37,
+      "adx15m": 23.9,
+      "adx": 23.9,
+      "deltaRatio": 0.047,
+      "multiDelta": 0.047,
+      "rs1h": 0.0029,
+      "rs4h": 0.0009,
+      "vwapDistance": -0.25,
+      "return12x5m": -0.89,
+      "redStreak5m": 0,
+      "sottValue": 0.431,
+      "twoPole5m": 0.168,
+      "twoPoleValue": 0.168,
+      "twoPole15m": -0.284,
+      "vidyaDistancePct": -0.64,
+      "riskRewardRatio": 2.45
+    },
+    "qualityBreakdown": {
+      "stretch": 72,
+      "reset": 60,
+      "participation": 76.4,
+      "execution": 87
+    },
+    "shadowBenchmark": {
+      "version": "v3.0.0-TradingViewReversalLab-shadow-v1-VIDYA_LIQUIDITY_SWEEP",
+      "tpPct": 0.01592499999999979,
+      "slPct": 0.006499999999999908
+    },
+    "maxFavorableMovePct": 0.72,
+    "maxAdverseMovePct": 0.49,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "knife-shadow-1777905371317-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "score": 72,
+    "requiredScore": 73,
+    "scoreGap": 1,
+    "price": 1.3988,
+    "regime": "RANGING",
+    "rejectReasonCode": "SCORE_BELOW_FLOOR",
+    "rejectReason": "SCORE_BELOW_FLOOR",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_LIQUIDITY_SWEEP",
+    "entryArchetype": "Liquidity sweep reclaim",
+    "liquidityTier": "HIGH",
+    "expectedHoldingHours": 6,
+    "riskModel": {
+      "slAtr": 1.25,
+      "tpR": 2.45,
+      "realRR": 2.45,
+      "timeStopHours": 6
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.001,
+      "rs4h": -0.0036,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 1.15,
+      "volumeRatio": 1.83,
+      "volumePass": true,
+      "deltaRatio": 0.426,
+      "deltaPass": true,
+      "obi": 0.228,
+      "obiPass": true,
+      "spreadBps": 0.7,
+      "depthQuoteTopN": 923888,
+      "liquidityTier": "HIGH"
+    },
+    "timestamp": 1777905371317,
+    "entryMetrics": {
+      "atrPercent5m": 0.21,
+      "atrPercent15m": 0.36,
+      "adx15m": 29,
+      "adx": 29,
+      "deltaRatio": 0.426,
+      "multiDelta": 0.426,
+      "rs1h": -0.001,
+      "rs4h": -0.0036,
+      "vwapDistance": -0.16,
+      "return12x5m": 0,
+      "redStreak5m": 0,
+      "sottValue": -0.449,
+      "twoPole5m": 0.438,
+      "twoPoleValue": 0.438,
+      "twoPole15m": -0.607,
+      "vidyaDistancePct": 0.16,
+      "riskRewardRatio": 2.45
+    },
+    "qualityBreakdown": {
+      "stretch": 72,
+      "reset": 60,
+      "participation": 74.5,
+      "execution": 90
+    },
+    "shadowBenchmark": {
+      "version": "v3.0.0-TradingViewReversalLab-shadow-v1-VIDYA_LIQUIDITY_SWEEP",
+      "tpPct": 0.015924999999999974,
+      "slPct": 0.006499999999999996
+    },
+    "maxFavorableMovePct": 1.06,
+    "maxAdverseMovePct": 0.51,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  },
+  {
+    "id": "knife-shadow-1777927832933-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "score": 71,
+    "requiredScore": 73,
+    "scoreGap": 2,
+    "price": 0.11021,
+    "regime": "RANGING",
+    "rejectReasonCode": "SCORE_BELOW_FLOOR",
+    "rejectReason": "SCORE_BELOW_FLOOR",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "VIDYA_LIQUIDITY_SWEEP",
+    "entryArchetype": "Liquidity sweep reclaim",
+    "liquidityTier": "HIGH",
+    "expectedHoldingHours": 6,
+    "riskModel": {
+      "slAtr": 1.25,
+      "tpR": 2.45,
+      "realRR": 2.45,
+      "timeStopHours": 6
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0125,
+      "rs4h": 0.0001,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 1.15,
+      "volumeRatio": 1.25,
+      "volumePass": true,
+      "deltaRatio": -0.027,
+      "deltaPass": true,
+      "obi": -0.082,
+      "obiPass": false,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 1106059,
+      "liquidityTier": "HIGH"
+    },
+    "timestamp": 1777927832933,
+    "entryMetrics": {
+      "atrPercent5m": 0.19,
+      "atrPercent15m": 0.45,
+      "adx15m": 16.3,
+      "adx": 16.3,
+      "deltaRatio": -0.027,
+      "multiDelta": -0.027,
+      "rs1h": -0.0125,
+      "rs4h": 0.0001,
+      "vwapDistance": -0.71,
+      "return12x5m": -0.24,
+      "redStreak5m": 1,
+      "sottValue": -0.153,
+      "twoPole5m": -0.641,
+      "twoPoleValue": -0.641,
+      "twoPole15m": 0.104,
+      "vidyaDistancePct": -0.39,
+      "riskRewardRatio": 2.45
+    },
+    "qualityBreakdown": {
+      "stretch": 72,
+      "reset": 67,
+      "participation": 60.3,
+      "execution": 90
+    },
+    "shadowBenchmark": {
+      "version": "v3.0.0-TradingViewReversalLab-shadow-v1-VIDYA_LIQUIDITY_SWEEP",
+      "tpPct": 0.015924999999999925,
+      "slPct": 0.0064999999999999685
+    },
+    "maxFavorableMovePct": 0.67,
+    "maxAdverseMovePct": 0.19,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  }
+]

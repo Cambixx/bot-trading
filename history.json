@@ -1,1017 +1,3155 @@
 [
   {
-    "id": "SNIPER-1777539620437-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006325,
-    "tp": 0.0000065779999999999995,
-    "sl": 0.00000596801,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777539620437,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.000006305,
-        "lastLow": 0.000005998,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 3.1135313531351414e-10,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.5107499999999923e-7,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 2.5178298467442793e-8,
-        "histPrev": 1.871530262735596e-8
-      },
-      "multiDelta": 0.815972222222226
-    }
+    "id": "TRADER-1777651295194-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 78437.86,
+    "tp": 79755.61604799998,
+    "sl": 77888.79498,
+    "initialSl": 77888.79498,
+    "type": "BUY",
+    "time": 1777651295194,
+    "status": "CLOSED",
+    "score": 72,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "ELITE",
+    "requiredScore": 69,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.35,
+      "adx15m": 49.4,
+      "adx": 49.4,
+      "deltaRatio": 0.189,
+      "multiDelta": 0.189,
+      "rs1h": 0,
+      "rs4h": 0,
+      "distToEma9": 0.03,
+      "vwapDistance": 1.21,
+      "vidyaDistancePct": 0.93,
+      "squeezeMomentum": 668.353714,
+      "macdHist": 5.79188049,
+      "twoPole": 0.775,
+      "smcRangePct": 1.09,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 60,
+      "participation": 59.6,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 0.99,
+      "volumePass": true,
+      "deltaRatio": 0.189,
+      "deltaPass": true,
+      "obi": 0.432,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 2067909,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 78437.86,
+    "maxAdverse": 78125.96,
+    "trailingStopActive": false,
+    "exitPrice": 78255.57,
+    "exitReason": "TIME_STOP_STALE_EXIT",
+    "closedAt": 1777709725093,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "STALE_EXIT"
   },
   {
-    "id": "SNIPER-1777540544010-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006312,
-    "tp": 0.00000656448,
-    "sl": 0.00000596801,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777540544010,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.000006305,
-        "lastLow": 0.000005998,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 3.0363036303626753e-10,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.3739999999999973e-7,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 2.4141261430405364e-8,
-        "histPrev": 1.871530262735596e-8
-      },
-      "multiDelta": 0.39172979797979474
-    }
+    "id": "TRADER-1777651295859-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 84.46,
+    "tp": 85.41228649999998,
+    "sl": 83.99547,
+    "initialSl": 83.99547,
+    "type": "BUY",
+    "time": 1777651295859,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "AMBER",
+    "sector": "L1",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "HIGH",
+    "requiredScore": 70,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.33,
+      "adx15m": 21.9,
+      "adx": 21.9,
+      "deltaRatio": 0.27,
+      "multiDelta": 0.27,
+      "rs1h": -0.0086,
+      "rs4h": -0.0104,
+      "distToEma9": 0.12,
+      "vwapDistance": 0.71,
+      "vidyaDistancePct": 0.6,
+      "squeezeMomentum": 0.169321,
+      "macdHist": 0.00249443,
+      "twoPole": 0.115,
+      "smcRangePct": 1.14,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 63.7,
+      "participation": 73,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0086,
+      "rs4h": -0.0104,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 1.82,
+      "volumePass": true,
+      "deltaRatio": 0.27,
+      "deltaPass": true,
+      "obi": -0.014,
+      "obiPass": true,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 2634085,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "SOTT higher timeframe bullish",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 84.46,
+    "maxAdverse": 83.93,
+    "trailingStopActive": false,
+    "exitPrice": 83.93,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777656693724,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
   },
   {
-    "id": "SNIPER-1777541555572-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006343,
-    "tp": 0.0000065967200000000004,
-    "sl": 0.00000596801,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777541555572,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.000006305,
-        "lastLow": 0.000005998,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 3.220462046204259e-10,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.5787500000000058e-7,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 2.661419590334012e-8,
-        "histPrev": 1.871530262735596e-8
-      },
-      "multiDelta": 0.619250910746815
-    }
-  },
-  {
-    "id": "SNIPER-1777542353395-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006355,
-    "tp": 0.0000066092,
-    "sl": 0.00000596801,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777542353395,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.000006305,
-        "lastLow": 0.000005998,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 3.291749174917181e-10,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.6657500000000018e-7,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 2.757146086060472e-8,
-        "histPrev": 1.871530262735596e-8
-      },
-      "multiDelta": 0.6515886605783896
-    }
-  },
-  {
-    "id": "SNIPER-1777543488369-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006335,
-    "tp": 0.0000065884,
-    "sl": 0.0000061172600000000004,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777543488369,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.000006305,
-        "lastLow": 0.000006148,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 4.237143714370831e-10,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.4380000000000022e-7,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 3.07513242006941e-8,
-        "histPrev": 2.5176825777396133e-8
-      },
-      "multiDelta": 0.4798801369863104
-    }
-  },
-  {
-    "id": "SNIPER-1777544210848-SHIBUSDT",
-    "symbol": "SHIBUSDT",
-    "price": 0.000006326,
-    "tp": 0.00000657904,
-    "sl": 0.0000061172600000000004,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777544210848,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.000006305,
-        "lastLow": 0.000006148,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 4.183678367836539e-10,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 1.350249999999996e-7,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 3.0033375482746284e-8,
-        "histPrev": 2.5176825777396133e-8
-      },
-      "multiDelta": 0.2838924826653175
-    }
-  },
-  {
-    "id": "SNIPER-1777584766086-TRXUSDT",
-    "symbol": "TRXUSDT",
-    "price": 0.3269,
-    "tp": 0.33997600000000006,
-    "sl": 0.320987,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777584766086,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.3268,
-        "lastLow": 0.3226,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000005838583858388633,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.001537500000000025,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007932292694792786,
-        "histPrev": 0.0007751259452103421
-      },
-      "multiDelta": 0.2166666666666696
-    }
-  },
-  {
-    "id": "SNIPER-1777587368710-MXUSDT",
-    "symbol": "MXUSDT",
-    "price": 1.7695,
-    "tp": 1.8402800000000001,
-    "sl": 1.752195,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777587368710,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 1.7682,
-        "lastLow": 1.761,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000002907890789104615,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.004064999999999985,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0013651091995809939,
-        "histPrev": 0.0012259443812507875
-      },
-      "multiDelta": 0.26121463077986157
-    }
-  },
-  {
-    "id": "SNIPER-1777594516846-TRXUSDT",
-    "symbol": "TRXUSDT",
-    "price": 0.3272,
-    "tp": 0.340288,
-    "sl": 0.320987,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777594516846,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.3268,
-        "lastLow": 0.3226,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000009722772277229399,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0014174999999999605,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.000756279138390159,
-        "histPrev": 0.0007296411882956599
-      },
-      "multiDelta": 0.46296296296294015
-    }
-  },
-  {
-    "id": "SNIPER-1777595438350-TRXUSDT",
-    "symbol": "TRXUSDT",
-    "price": 0.3271,
-    "tp": 0.340184,
-    "sl": 0.320987,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777595438350,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.3268,
-        "lastLow": 0.3226,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0000096633663366359,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0013199999999999878,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007483019304129201,
-        "histPrev": 0.0007296411882956599
-      },
-      "multiDelta": 0.42592592592590767
-    }
-  },
-  {
-    "id": "SNIPER-1777596352431-TRXUSDT",
-    "symbol": "TRXUSDT",
-    "price": 0.3272,
-    "tp": 0.340288,
-    "sl": 0.320987,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777596352431,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.3268,
-        "lastLow": 0.3226,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.000009722772277229399,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0014174999999999605,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.000756279138390159,
-        "histPrev": 0.0007296411882956599
-      },
-      "multiDelta": 0.46296296296294015
-    }
-  },
-  {
-    "id": "SNIPER-1777600956321-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10881,
-    "tp": 0.11316240000000001,
-    "sl": 0.10490284999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777600956321,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011006168616861511,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0017347500000000071,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007601150189350397,
-        "histPrev": 0.0006557977126790404
-      },
-      "multiDelta": 0.2746253229974294
-    }
-  },
-  {
-    "id": "SNIPER-1777601733019-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10917,
-    "tp": 0.11353680000000001,
-    "sl": 0.10490284999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777601733019,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011027554755475189,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0020582499999999976,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007888329676529748,
-        "histPrev": 0.0006557977126790404
-      },
-      "multiDelta": 0.5931438415159387
-    }
-  },
-  {
-    "id": "SNIPER-1777602613486-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10871,
-    "tp": 0.1130584,
-    "sl": 0.10490284999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777602613486,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011000228022802073,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0016072500000000045,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007521378109578147,
-        "histPrev": 0.0006557977126790404
-      },
-      "multiDelta": 0.4018536502257463
-    }
-  },
-  {
-    "id": "SNIPER-1777604421531-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10829,
-    "tp": 0.1126216,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777604421531,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0001116134413441327,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0011632500000000046,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007667379093892202,
-        "histPrev": 0.000727852741414875
-      },
-      "multiDelta": -0.25491081508241253
-    }
-  },
-  {
-    "id": "SNIPER-1777605330729-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10861,
-    "tp": 0.1129544,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777605330729,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011180354035403399,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0014752499999999974,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0007922649749162736,
-        "histPrev": 0.000727852741414875
-      },
-      "multiDelta": 0.1953815825784012
-    }
-  },
-  {
-    "id": "SNIPER-1777606318038-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10956,
-    "tp": 0.11394240000000001,
-    "sl": 0.10490284999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777606318038,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011236789678967661,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0022840000000000082,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0008680484506997516,
-        "histPrev": 0.000727852741414875
-      },
-      "multiDelta": 0.2937783234943674
-    }
-  },
-  {
-    "id": "SNIPER-1777607176007-DOGEUSDT",
+    "id": "TRADER-1777671183890-DOGEUSDT",
     "symbol": "DOGEUSDT",
     "price": 0.10926,
-    "tp": 0.1136304,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777607176007,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011218967896789611,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.001991500000000007,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.000844116826768132,
-        "histPrev": 0.000727852741414875
-      },
-      "multiDelta": 0.2375985482134666
-    }
+    "tp": 0.11109556799999999,
+    "sl": 0.10849518,
+    "initialSl": 0.10849518,
+    "type": "BUY",
+    "time": 1777671183890,
+    "status": "CLOSED",
+    "score": 77,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "HIGH",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.41,
+      "adx15m": 18.2,
+      "adx": 18.2,
+      "deltaRatio": 0.371,
+      "multiDelta": 0.371,
+      "rs1h": -0.0016,
+      "rs4h": 0.0138,
+      "distToEma9": 0.28,
+      "vwapDistance": 0.48,
+      "vidyaDistancePct": 0.28,
+      "squeezeMomentum": 0.000115,
+      "macdHist": 0.00000686,
+      "twoPole": -0.41,
+      "smcRangePct": 0.67,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 76,
+      "participation": 72,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0016,
+      "rs4h": 0.0138,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 2.02,
+      "volumePass": true,
+      "deltaRatio": 0.371,
+      "deltaPass": true,
+      "obi": 0.096,
+      "obiPass": true,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 781551,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Two-Pole buy reset"
+    ],
+    "maxFavorable": 0.10926,
+    "maxAdverse": 0.10835,
+    "trailingStopActive": false,
+    "exitPrice": 0.10835,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777676587794,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
   },
   {
-    "id": "SNIPER-1777608120720-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10924,
-    "tp": 0.1136096,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777608120720,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0001147660366036613,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0019187499999999968,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009139692705846109,
-        "histPrev": 0.0008311716622321358
-      },
-      "multiDelta": 0.18782549321439038
-    }
+    "id": "TRADER-1777682801638-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.3891,
+    "tp": 1.4047621025,
+    "sl": 1.38145995,
+    "initialSl": 1.38145995,
+    "type": "BUY",
+    "time": 1777682801638,
+    "status": "CLOSED",
+    "score": 72,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "HIGH",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.21,
+      "adx15m": 27,
+      "adx": 27,
+      "deltaRatio": 0.463,
+      "multiDelta": 0.463,
+      "rs1h": -0.0033,
+      "rs4h": -0.0216,
+      "distToEma9": 0.19,
+      "vwapDistance": 0.44,
+      "vidyaDistancePct": 0.07,
+      "squeezeMomentum": -0.002428,
+      "macdHist": 0.00023429,
+      "twoPole": -0.728,
+      "smcRangePct": 0.66,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 62,
+      "participation": 60.8,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0033,
+      "rs4h": -0.0216,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 0.79,
+      "volumePass": true,
+      "deltaRatio": 0.463,
+      "deltaPass": true,
+      "obi": 0.136,
+      "obiPass": true,
+      "spreadBps": 1.4,
+      "depthQuoteTopN": 977703,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "SOTT higher timeframe bullish",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 1.3891,
+    "maxAdverse": 1.3858,
+    "trailingStopActive": false,
+    "exitPrice": 1.3868,
+    "exitReason": "TIME_STOP_STALE_EXIT",
+    "closedAt": 1777719792350,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "STALE_EXIT"
   },
   {
-    "id": "SNIPER-1777609019968-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.1089,
-    "tp": 0.113256,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777609019968,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011456405640564007,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0015872500000000123,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0008868467634621097,
-        "histPrev": 0.0008311716622321358
-      },
-      "multiDelta": -0.18442811632735948
-    }
+    "id": "TRADER-1777686354522-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2298.98,
+    "tp": 2324.9009994999997,
+    "sl": 2286.33561,
+    "initialSl": 2286.33561,
+    "type": "BUY",
+    "time": 1777686354522,
+    "status": "CLOSED",
+    "score": 74,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "ELITE",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.19,
+      "adx15m": 19.5,
+      "adx": 19.5,
+      "deltaRatio": 0.131,
+      "multiDelta": 0.131,
+      "rs1h": -0.0032,
+      "rs4h": -0.0118,
+      "distToEma9": 0.09,
+      "vwapDistance": 0.08,
+      "vidyaDistancePct": 0.08,
+      "squeezeMomentum": 7.191643,
+      "macdHist": 0.95825753,
+      "twoPole": -0.266,
+      "smcRangePct": 0.44,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 62,
+      "participation": 62.6,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0032,
+      "rs4h": -0.0118,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 0.91,
+      "volumePass": true,
+      "deltaRatio": 0.131,
+      "deltaPass": true,
+      "obi": 0.084,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 558228,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "SOTT higher timeframe bullish",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 2302.44,
+    "maxAdverse": 2298.98,
+    "trailingStopActive": false,
+    "exitPrice": 2302.07,
+    "exitReason": "TIME_STOP_STALE_EXIT",
+    "closedAt": 1777723499382,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "STALE_EXIT"
   },
   {
-    "id": "SNIPER-1777609941657-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10841,
-    "tp": 0.11274640000000001,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777609941657,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011427296729673035,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0011095000000000133,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0008477584443737918,
-        "histPrev": 0.0008311716622321358
-      },
-      "multiDelta": -0.2680149626260665
-    }
+    "id": "TRADER-1777688138290-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 83.96,
+    "tp": 85.37052800000001,
+    "sl": 83.37227999999999,
+    "initialSl": 83.37227999999999,
+    "type": "BUY",
+    "time": 1777688138290,
+    "status": "CLOSED",
+    "score": 70,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "HIGH",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.22,
+      "adx15m": 23.4,
+      "adx": 23.4,
+      "deltaRatio": 0.436,
+      "multiDelta": 0.436,
+      "rs1h": 0.0006,
+      "rs4h": -0.0218,
+      "distToEma9": 0.09,
+      "vwapDistance": -0.1,
+      "vidyaDistancePct": 0.13,
+      "squeezeMomentum": 0.112821,
+      "macdHist": 0.04792261,
+      "twoPole": 0.214,
+      "smcRangePct": 0.56,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 66,
+      "expansion": 60,
+      "participation": 72,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0006,
+      "rs4h": -0.0218,
+      "rs24h": -0.02
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 2.18,
+      "volumePass": true,
+      "deltaRatio": 0.436,
+      "deltaPass": true,
+      "obi": -0.004,
+      "obiPass": true,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 3486027,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 84.12,
+    "maxAdverse": 83.71,
+    "trailingStopActive": false,
+    "exitPrice": 84.12,
+    "exitReason": "TIME_STOP_STALE_EXIT",
+    "closedAt": 1777746655653,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "STALE_EXIT"
   },
   {
-    "id": "SNIPER-1777610741451-DOGEUSDT",
+    "id": "TRADER-1777730668385-DOGEUSDT",
     "symbol": "DOGEUSDT",
-    "price": 0.10861,
-    "tp": 0.1129544,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777610741451,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011439177917791823,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0013045,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0008637128603282002,
-        "histPrev": 0.0008311716622321358
-      },
-      "multiDelta": -0.21103490564601204
-    }
+    "price": 0.1086,
+    "tp": 0.11042448,
+    "sl": 0.1078398,
+    "initialSl": 0.1078398,
+    "type": "BUY",
+    "time": 1777730668385,
+    "status": "CLOSED",
+    "score": 70,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 68,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.29,
+      "adx15m": 13.5,
+      "adx": 13.5,
+      "deltaRatio": 0.364,
+      "multiDelta": 0.364,
+      "rs1h": 0.0078,
+      "rs4h": -0.0156,
+      "distToEma9": 0.56,
+      "vwapDistance": -0.03,
+      "vidyaDistancePct": 0.44,
+      "squeezeMomentum": 0.000063,
+      "macdHist": 0.00009824,
+      "twoPole": 0.59,
+      "smcRangePct": 0.84,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 70,
+      "expansion": 66,
+      "participation": 72,
+      "execution": 76
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0078,
+      "rs4h": -0.0156,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 3.01,
+      "volumePass": true,
+      "deltaRatio": 0.364,
+      "deltaPass": true,
+      "obi": 0.04,
+      "obiPass": true,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 989138,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 0.1086,
+    "maxAdverse": 0.10767,
+    "trailingStopActive": false,
+    "exitPrice": 0.10767,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777772724088,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
   },
   {
-    "id": "SNIPER-1777611916405-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10907,
-    "tp": 0.1134328,
-    "sl": 0.10490284999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777611916405,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011721032103210307,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0017192500000000055,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009295557214102079,
-        "histPrev": 0.0008812038102761488
-      },
-      "multiDelta": 0.3103549223520217
-    }
+    "id": "TRADER-1777758374569-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2328.41,
+    "tp": 2367.527288,
+    "sl": 2312.11113,
+    "initialSl": 2312.11113,
+    "type": "BUY",
+    "time": 1777758374569,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "ELITE",
+    "requiredScore": 69,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.17,
+      "adx15m": 35.3,
+      "adx": 35.3,
+      "deltaRatio": 0.302,
+      "multiDelta": 0.302,
+      "rs1h": 0.0014,
+      "rs4h": -0.0042,
+      "distToEma9": 0.6,
+      "vwapDistance": 0.96,
+      "vidyaDistancePct": 0.98,
+      "squeezeMomentum": -1.398571,
+      "macdHist": 1.12001631,
+      "twoPole": 0.101,
+      "smcRangePct": 0.15,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 70,
+      "expansion": 66,
+      "participation": 72,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0014,
+      "rs4h": -0.0042,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 8.3,
+      "volumePass": true,
+      "deltaRatio": 0.302,
+      "deltaPass": true,
+      "obi": -0.546,
+      "obiPass": false,
+      "spreadBps": 0,
+      "depthQuoteTopN": 1078863,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 2328.41,
+    "maxAdverse": 2310.99,
+    "trailingStopActive": false,
+    "exitPrice": 2310.99,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777767388245,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
   },
   {
-    "id": "SNIPER-1777612551581-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10927,
-    "tp": 0.11364080000000001,
-    "sl": 0.10490284999999999,
-    "score": 90,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777612551581,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011732913291329094,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.00191425000000002,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009455101373646163,
-        "histPrev": 0.0008812038102761488
-      },
-      "multiDelta": 0.33987210556939473
-    }
+    "id": "TRADER-1777758374981-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 84.64,
+    "tp": 86.06195199999999,
+    "sl": 84.04752,
+    "initialSl": 84.04752,
+    "type": "BUY",
+    "time": 1777758374981,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 68,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.17,
+      "adx15m": 37.6,
+      "adx": 37.6,
+      "deltaRatio": 0.386,
+      "multiDelta": 0.386,
+      "rs1h": 0.0022,
+      "rs4h": -0.0147,
+      "distToEma9": 0.42,
+      "vwapDistance": 0.85,
+      "vidyaDistancePct": 0.75,
+      "squeezeMomentum": 0.00775,
+      "macdHist": 0.02791795,
+      "twoPole": 0.315,
+      "smcRangePct": 0.44,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 66,
+      "participation": 72,
+      "execution": 76
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0022,
+      "rs4h": -0.0147,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 6.11,
+      "volumePass": true,
+      "deltaRatio": 0.386,
+      "deltaPass": true,
+      "obi": -0.202,
+      "obiPass": false,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 2406773,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 84.64,
+    "maxAdverse": 83.85,
+    "trailingStopActive": false,
+    "exitPrice": 83.85,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777767388411,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
   },
   {
-    "id": "SNIPER-1777613518177-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10905,
-    "tp": 0.113412,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777613518177,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.0001171984398439849,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0016997500000000137,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009279602798147601,
-        "histPrev": 0.0008812038102761488
-      },
-      "multiDelta": 0.16869252262510329
-    }
+    "id": "TRADER-1777763037332-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.3959,
+    "tp": 1.4183739899999996,
+    "sl": 1.3861287,
+    "initialSl": 1.3861287,
+    "type": "BUY",
+    "time": 1777763037332,
+    "status": "CLOSED",
+    "score": 76,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 73,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.2,
+      "adx15m": 39,
+      "adx": 39,
+      "deltaRatio": -0.006,
+      "multiDelta": -0.006,
+      "rs1h": -0.0022,
+      "rs4h": -0.0087,
+      "distToEma9": 0.15,
+      "vwapDistance": 0.53,
+      "vidyaDistancePct": 0.37,
+      "squeezeMomentum": 0.000179,
+      "macdHist": 0.00002382,
+      "twoPole": -0.318,
+      "smcRangePct": 0.73,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 71.2,
+      "participation": 78.9,
+      "execution": 76
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0022,
+      "rs4h": -0.0087,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 2.84,
+      "volumePass": true,
+      "deltaRatio": -0.006,
+      "deltaPass": true,
+      "obi": -0.148,
+      "obiPass": false,
+      "spreadBps": 0.7,
+      "depthQuoteTopN": 856272,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD bullish cross"
+    ],
+    "maxFavorable": 1.3959,
+    "maxAdverse": 1.3858,
+    "trailingStopActive": false,
+    "exitPrice": 1.3858,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777771921363,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
   },
   {
-    "id": "SNIPER-1777614378499-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10897,
-    "tp": 0.11332880000000001,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777614378499,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011715091509150957,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.001621750000000019,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009215785134329968,
-        "histPrev": 0.0008812038102761488
-      },
-      "multiDelta": 0.12636448029706307
-    }
+    "id": "TRADER-1777767391487-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 78569.79,
+    "tp": 79889.762472,
+    "sl": 78019.80146999999,
+    "initialSl": 78019.80146999999,
+    "type": "BUY",
+    "time": 1777767391487,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "ELITE",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.16,
+      "adx15m": 40.3,
+      "adx": 40.3,
+      "deltaRatio": -0.498,
+      "multiDelta": -0.498,
+      "rs1h": 0,
+      "rs4h": 0,
+      "distToEma9": -0.13,
+      "vwapDistance": 0.23,
+      "vidyaDistancePct": 0.16,
+      "squeezeMomentum": 74.473214,
+      "macdHist": -6.79841568,
+      "twoPole": 0.411,
+      "smcRangePct": 0.93,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 60,
+      "participation": 63.4,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.2,
+      "volumePass": true,
+      "deltaRatio": -0.498,
+      "deltaPass": false,
+      "obi": 0.187,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 1685711,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "EMA/VWAP reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 78674.99,
+    "maxAdverse": 78143.85,
+    "trailingStopActive": false,
+    "exitPrice": 78674.99,
+    "exitReason": "TIME_STOP_STALE_EXIT",
+    "closedAt": 1777825947203,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "STALE_EXIT"
   },
   {
-    "id": "SNIPER-1777615519860-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.109,
-    "tp": 0.11336,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777615519860,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011984734473447658,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0015912500000000024,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009538064331137408,
-        "histPrev": 0.0009328349660039231
-      },
-      "multiDelta": -0.10337810337810177
-    }
+    "id": "TRADER-1777786221048-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3369,
+    "tp": 0.3425599199999999,
+    "sl": 0.33723689999999995,
+    "initialSl": 0.3345417,
+    "type": "BUY",
+    "time": 1777786221048,
+    "status": "CLOSED",
+    "score": 71,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 68,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.26,
+      "adx15m": 27.6,
+      "adx": 27.6,
+      "deltaRatio": 0.244,
+      "multiDelta": 0.244,
+      "rs1h": 0.0063,
+      "rs4h": -0.0016,
+      "distToEma9": 1.72,
+      "vwapDistance": 1.66,
+      "vidyaDistancePct": 1.85,
+      "squeezeMomentum": -0.000928,
+      "macdHist": 0.00044881,
+      "twoPole": -0.01,
+      "smcRangePct": 0.27,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 66,
+      "participation": 72,
+      "execution": 73
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0063,
+      "rs4h": -0.0016,
+      "rs24h": 0.02
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 13.11,
+      "volumePass": true,
+      "deltaRatio": 0.244,
+      "deltaPass": true,
+      "obi": 0.17,
+      "obiPass": true,
+      "spreadBps": 3,
+      "depthQuoteTopN": 1449398,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 0.3399,
+    "maxAdverse": 0.3369,
+    "trailingStopActive": true,
+    "exitPrice": 0.3371,
+    "exitReason": "TRAIL_BE_STOP",
+    "closedAt": 1777790750976,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "BREAK_EVEN"
   },
   {
-    "id": "SNIPER-1777616110458-DOGEUSDT",
-    "symbol": "DOGEUSDT",
-    "price": 0.10897,
-    "tp": 0.11332880000000001,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
-    "status": "OPEN",
-    "time": 1777616110458,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011982952295229888,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0015620000000000217,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009514132707205691,
-        "histPrev": 0.0009328349660039231
-      },
-      "multiDelta": -0.015194681861351015
-    }
+    "id": "TRADER-1777801526762-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2316.32,
+    "tp": 2355.2341759999995,
+    "sl": 2318.63632,
+    "initialSl": 2300.1057600000004,
+    "type": "BUY",
+    "time": 1777801526762,
+    "status": "CLOSED",
+    "score": 77,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "ELITE",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.16,
+      "adx15m": 26.7,
+      "adx": 26.7,
+      "deltaRatio": 0.459,
+      "multiDelta": 0.459,
+      "rs1h": 0.0002,
+      "rs4h": -0.0018,
+      "distToEma9": 0.25,
+      "vwapDistance": 0.19,
+      "vidyaDistancePct": 0.42,
+      "squeezeMomentum": 3.928464,
+      "macdHist": 1.06147046,
+      "twoPole": 0.516,
+      "smcRangePct": 0.59,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 66,
+      "participation": 72,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0002,
+      "rs4h": -0.0018,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 4.13,
+      "volumePass": true,
+      "deltaRatio": 0.459,
+      "deltaPass": true,
+      "obi": 0.154,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 972188,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 2351.75,
+    "maxAdverse": 2316.32,
+    "trailingStopActive": true,
+    "exitPrice": 2318.23,
+    "exitReason": "TRAIL_BE_STOP",
+    "closedAt": 1777853151024,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "BREAK_EVEN"
   },
   {
-    "id": "SNIPER-1777617160122-DOGEUSDT",
+    "id": "TRADER-1777808714906-DOGEUSDT",
     "symbol": "DOGEUSDT",
-    "price": 0.10881,
-    "tp": 0.11316240000000001,
-    "sl": 0.10490284999999999,
-    "score": 85,
-    "module": "CONFLUENCE_SNIPER",
+    "price": 0.10857,
+    "tp": 0.110393976,
+    "sl": 0.10867856999999999,
+    "initialSl": 0.10781001,
+    "type": "BUY",
+    "time": 1777808714906,
+    "status": "CLOSED",
+    "score": 71,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 68,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.27,
+      "adx15m": 15.8,
+      "adx": 15.8,
+      "deltaRatio": 0.555,
+      "multiDelta": 0.555,
+      "rs1h": -0.0047,
+      "rs4h": -0.0204,
+      "distToEma9": 0.49,
+      "vwapDistance": 0.28,
+      "vidyaDistancePct": 0.46,
+      "squeezeMomentum": 0.000003,
+      "macdHist": 0.00001808,
+      "twoPole": 0.339,
+      "smcRangePct": 0.41,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 66,
+      "participation": 69.1,
+      "execution": 76
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0047,
+      "rs4h": -0.0204,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.52,
+      "volumePass": true,
+      "deltaRatio": 0.555,
+      "deltaPass": true,
+      "obi": 0.026,
+      "obiPass": true,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 1001169,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 0.10954,
+    "maxAdverse": 0.10828,
+    "trailingStopActive": true,
+    "exitPrice": 0.10836,
+    "exitReason": "TRAIL_STOP_GAP_LOSS",
+    "closedAt": 1777851934045,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777810541846-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 84.2,
+    "tp": 85.55562,
+    "sl": 83.6106,
+    "initialSl": 83.6106,
+    "type": "BUY",
+    "time": 1777810541846,
+    "status": "CLOSED",
+    "score": 80,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "HIGH",
+    "requiredScore": 69,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.18,
+      "adx15m": 22,
+      "adx": 22,
+      "deltaRatio": 0.345,
+      "multiDelta": 0.345,
+      "rs1h": -0.0022,
+      "rs4h": -0.0085,
+      "distToEma9": 0.22,
+      "vwapDistance": 0.18,
+      "vidyaDistancePct": 0.38,
+      "squeezeMomentum": 0.035786,
+      "macdHist": 0.01412853,
+      "twoPole": 0.483,
+      "smcRangePct": 0.41,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 83,
+      "expansion": 72,
+      "participation": 83.1,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0022,
+      "rs4h": -0.0085,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 2.05,
+      "volumePass": true,
+      "deltaRatio": 0.345,
+      "deltaPass": true,
+      "obi": -0.109,
+      "obiPass": false,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 2933120,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 84.85,
+    "maxAdverse": 83.49,
+    "trailingStopActive": false,
+    "exitPrice": 83.49,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777854755233,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777810542439-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.3977,
+    "tp": 1.4202029699999998,
+    "sl": 1.3879161,
+    "initialSl": 1.3879161,
+    "type": "BUY",
+    "time": 1777810542439,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 71,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.16,
+      "adx15m": 30.3,
+      "adx": 30.3,
+      "deltaRatio": 0.644,
+      "multiDelta": 0.644,
+      "rs1h": 0.0023,
+      "rs4h": -0.0035,
+      "distToEma9": 0.4,
+      "vwapDistance": 0.53,
+      "vidyaDistancePct": 0.74,
+      "squeezeMomentum": 0.002385,
+      "macdHist": 0.00086708,
+      "twoPole": 0.785,
+      "smcRangePct": 0.26,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 73,
+      "expansion": 69.3,
+      "participation": 86.7,
+      "execution": 76
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0023,
+      "rs4h": -0.0035,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 2.09,
+      "volumePass": true,
+      "deltaRatio": 0.644,
+      "deltaPass": true,
+      "obi": -0.128,
+      "obiPass": false,
+      "spreadBps": 1.4,
+      "depthQuoteTopN": 977755,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 1.4025,
+    "maxAdverse": 1.3872,
+    "trailingStopActive": false,
+    "exitPrice": 1.3872,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777853151162,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777823175476-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3385,
+    "tp": 0.34394985000000006,
+    "sl": 0.3361305,
+    "initialSl": 0.3361305,
+    "type": "BUY",
+    "time": 1777823175476,
+    "status": "CLOSED",
+    "score": 78,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 67,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.24,
+      "adx15m": 22,
+      "adx": 22,
+      "deltaRatio": 0.525,
+      "multiDelta": 0.525,
+      "rs1h": -0.0083,
+      "rs4h": 0.0282,
+      "distToEma9": 0.11,
+      "vwapDistance": 0.74,
+      "vidyaDistancePct": 0.45,
+      "squeezeMomentum": 0.000756,
+      "macdHist": 0.00000933,
+      "twoPole": -0.401,
+      "smcRangePct": 0.92,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 76,
+      "participation": 82.6,
+      "execution": 73
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0083,
+      "rs4h": 0.0282,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 1.74,
+      "volumePass": true,
+      "deltaRatio": 0.525,
+      "deltaPass": true,
+      "obi": -0.016,
+      "obiPass": true,
+      "spreadBps": 3,
+      "depthQuoteTopN": 1481100,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD bullish cross"
+    ],
+    "maxFavorable": 0.339,
+    "maxAdverse": 0.3379,
+    "trailingStopActive": false,
+    "exitPrice": 0.339,
+    "exitReason": "TIME_STOP_STALE_EXIT",
+    "closedAt": 1777874493951,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "STALE_EXIT"
+  },
+  {
+    "id": "TRADER-1777842320238-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 78910.49,
+    "tp": 80180.94888900002,
+    "sl": 78989.40049,
+    "initialSl": 78358.11657,
+    "type": "BUY",
+    "time": 1777842320238,
+    "status": "CLOSED",
+    "score": 77,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "ELITE",
+    "requiredScore": 65,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.16,
+      "adx15m": 24.7,
+      "adx": 24.7,
+      "deltaRatio": 0.132,
+      "multiDelta": 0.132,
+      "rs1h": 0,
+      "rs4h": 0,
+      "distToEma9": 0.09,
+      "vwapDistance": 0.38,
+      "vidyaDistancePct": 0.39,
+      "squeezeMomentum": 26.554464,
+      "macdHist": 19.97086541,
+      "twoPole": -0.206,
+      "smcRangePct": 0.24,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 69,
+      "participation": 68.6,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 1.22,
+      "volumePass": true,
+      "deltaRatio": 0.132,
+      "deltaPass": true,
+      "obi": 0.176,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 1650007,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 80382.16,
+    "maxAdverse": 78423.4,
+    "trailingStopActive": true,
+    "exitPrice": 80382.16,
+    "exitReason": "TAKE_PROFIT",
+    "closedAt": 1777864509980,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "WIN"
+  },
+  {
+    "id": "TRADER-1777847563246-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "price": 619.47,
+    "tp": 626.4545242499998,
+    "sl": 620.08947,
+    "initialSl": 616.0629150000001,
+    "type": "BUY",
+    "time": 1777847563246,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 69,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.18,
+      "adx15m": 15.1,
+      "adx": 15.1,
+      "deltaRatio": 0.296,
+      "multiDelta": 0.296,
+      "rs1h": -0.004,
+      "rs4h": -0.0004,
+      "distToEma9": -0.01,
+      "vwapDistance": 0.19,
+      "vidyaDistancePct": 0.12,
+      "squeezeMomentum": -0.222286,
+      "macdHist": 0.00840647,
+      "twoPole": -0.668,
+      "smcRangePct": 0.34,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 74,
+      "participation": 71.7,
+      "execution": 73
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.004,
+      "rs4h": -0.0004,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 1.52,
+      "volumePass": true,
+      "deltaRatio": 0.296,
+      "deltaPass": true,
+      "obi": 0.786,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 138393,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "SOTT higher timeframe bullish",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 627.51,
+    "maxAdverse": 616.45,
+    "trailingStopActive": true,
+    "exitPrice": 627.51,
+    "exitReason": "TAKE_PROFIT",
+    "closedAt": 1777867294673,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "WIN"
+  },
+  {
+    "id": "TRADER-1777858360563-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.11019,
+    "tp": 0.112041192,
+    "sl": 0.11030018999999998,
+    "initialSl": 0.10941867,
+    "type": "BUY",
+    "time": 1777858360563,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 68,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.5,
+      "adx15m": 20.5,
+      "adx": 20.5,
+      "deltaRatio": 0.706,
+      "multiDelta": 0.706,
+      "rs1h": 0.0064,
+      "rs4h": -0.0009,
+      "distToEma9": 1.11,
+      "vwapDistance": 1.54,
+      "vidyaDistancePct": 1.5,
+      "squeezeMomentum": -0.000021,
+      "macdHist": 0.00010782,
+      "twoPole": -0.014,
+      "smcRangePct": 1.83,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 66,
+      "participation": 72,
+      "execution": 73
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0064,
+      "rs4h": -0.0009,
+      "rs24h": 0.02
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 2.38,
+      "volumePass": true,
+      "deltaRatio": 0.706,
+      "deltaPass": true,
+      "obi": -0.087,
+      "obiPass": false,
+      "spreadBps": 2.7,
+      "depthQuoteTopN": 948736,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "EMA/VWAP reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 0.11219,
+    "maxAdverse": 0.11019,
+    "trailingStopActive": true,
+    "exitPrice": 0.11219,
+    "exitReason": "TAKE_PROFIT",
+    "closedAt": 1777860142073,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "WIN"
+  },
+  {
+    "id": "TRADER-1777859211361-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 84.03,
+    "tp": 85.44170400000002,
+    "sl": 84.11402999999999,
+    "initialSl": 83.44179,
+    "type": "BUY",
+    "time": 1777859211361,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "HIGH",
+    "requiredScore": 69,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.37,
+      "adx15m": 22.3,
+      "adx": 22.3,
+      "deltaRatio": -0.042,
+      "multiDelta": -0.042,
+      "rs1h": -0.0045,
+      "rs4h": -0.0012,
+      "distToEma9": 0.22,
+      "vwapDistance": -0.05,
+      "vidyaDistancePct": -0.13,
+      "squeezeMomentum": -0.480393,
+      "macdHist": -0.04472521,
+      "twoPole": -0.61,
+      "smcRangePct": 1.92,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 66,
+      "participation": 64.3,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0045,
+      "rs4h": -0.0012,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.25,
+      "volumePass": true,
+      "deltaRatio": -0.042,
+      "deltaPass": true,
+      "obi": 0.182,
+      "obiPass": true,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 2872789,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 85.49,
+    "maxAdverse": 84.03,
+    "trailingStopActive": true,
+    "exitPrice": 85.49,
+    "exitReason": "TAKE_PROFIT",
+    "closedAt": 1777862801400,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "WIN"
+  },
+  {
+    "id": "TRADER-1777860144638-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.4046,
+    "tp": 1.42819728,
+    "sl": 1.4060046,
+    "initialSl": 1.3947678000000001,
+    "type": "BUY",
+    "time": 1777860144638,
+    "status": "CLOSED",
+    "score": 76,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 74,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.41,
+      "adx15m": 21.4,
+      "adx": 21.4,
+      "deltaRatio": 0.47,
+      "multiDelta": 0.47,
+      "rs1h": -0.0024,
+      "rs4h": -0.0007,
+      "distToEma9": 0.92,
+      "vwapDistance": 0.91,
+      "vidyaDistancePct": 0.84,
+      "squeezeMomentum": -0.004653,
+      "macdHist": 0.00077611,
+      "twoPole": -0.682,
+      "smcRangePct": 1.5,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 86,
+      "expansion": 66,
+      "participation": 72,
+      "execution": 76
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0024,
+      "rs4h": -0.0007,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 3.84,
+      "volumePass": true,
+      "deltaRatio": 0.47,
+      "deltaPass": true,
+      "obi": -0.241,
+      "obiPass": false,
+      "spreadBps": 1.4,
+      "depthQuoteTopN": 872923,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 1.4178,
+    "maxAdverse": 1.4034,
+    "trailingStopActive": true,
+    "exitPrice": 1.4047,
+    "exitReason": "TRAIL_BE_STOP",
+    "closedAt": 1777876303492,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "BREAK_EVEN"
+  },
+  {
+    "id": "TRADER-1777862803381-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2379.82,
+    "tp": 2418.1351019999997,
+    "sl": 2363.1612600000003,
+    "initialSl": 2363.1612600000003,
+    "type": "BUY",
+    "time": 1777862803381,
+    "status": "CLOSED",
+    "score": 83,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "ELITE",
+    "requiredScore": 68,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.5,
+      "adx15m": 27.1,
+      "adx": 27.1,
+      "deltaRatio": 0.528,
+      "multiDelta": 0.528,
+      "rs1h": -0.0018,
+      "rs4h": 0.0058,
+      "distToEma9": 1.36,
+      "vwapDistance": 1.94,
+      "vidyaDistancePct": 2.25,
+      "squeezeMomentum": 2.967857,
+      "macdHist": 5.89644187,
+      "twoPole": -0.401,
+      "smcRangePct": 2.03,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 77,
+      "participation": 85.3,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0018,
+      "rs4h": 0.0058,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 2.9,
+      "volumePass": true,
+      "deltaRatio": 0.528,
+      "deltaPass": true,
+      "obi": -0.016,
+      "obiPass": true,
+      "spreadBps": 1.3,
+      "depthQuoteTopN": 490545,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 2390.83,
+    "maxAdverse": 2361.75,
+    "trailingStopActive": false,
+    "exitPrice": 2361.75,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777876303635,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777868130634-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "price": 635.64,
+    "tp": 645.873804,
+    "sl": 631.19052,
+    "initialSl": 631.19052,
+    "type": "BUY",
+    "time": 1777868130634,
+    "status": "CLOSED",
+    "score": 80,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "AMBER",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 73,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.37,
+      "adx15m": 33.8,
+      "adx": 33.8,
+      "deltaRatio": 0.846,
+      "multiDelta": 0.846,
+      "rs1h": -0.0052,
+      "rs4h": -0.0095,
+      "distToEma9": 1.49,
+      "vwapDistance": 2.23,
+      "vidyaDistancePct": 2.56,
+      "squeezeMomentum": 4.751393,
+      "macdHist": 1.22768025,
+      "twoPole": 0.327,
+      "smcRangePct": 1.79,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 77,
+      "participation": 87,
+      "execution": 73
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0052,
+      "rs4h": -0.0095,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 4.98,
+      "volumePass": true,
+      "deltaRatio": 0.846,
+      "deltaPass": true,
+      "obi": 0.775,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 143221,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 636.05,
+    "maxAdverse": 629.3,
+    "trailingStopActive": false,
+    "exitPrice": 629.3,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777876303788,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777878050723-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 79880.52,
+    "tp": 81222.512736,
+    "sl": 79321.35636,
+    "initialSl": 79321.35636,
+    "type": "BUY",
+    "time": 1777878050723,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "ELITE",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.32,
+      "adx15m": 34,
+      "adx": 34,
+      "deltaRatio": 0.139,
+      "multiDelta": 0.139,
+      "rs1h": 0,
+      "rs4h": 0,
+      "distToEma9": -0.07,
+      "vwapDistance": 0.67,
+      "vidyaDistancePct": 0.49,
+      "squeezeMomentum": -99.462679,
+      "macdHist": -93.52542628,
+      "twoPole": 0.33,
+      "smcRangePct": 3.01,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 66,
+      "participation": 68.3,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.47,
+      "volumePass": true,
+      "deltaRatio": 0.139,
+      "deltaPass": true,
+      "obi": 0.097,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 1709404,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 79880.52,
+    "maxAdverse": 78628.98,
+    "trailingStopActive": false,
+    "exitPrice": 78628.98,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777889737341,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777887942534-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.4189,
+    "tp": 1.4417442900000002,
+    "sl": 1.4089677,
+    "initialSl": 1.4089677,
+    "type": "BUY",
+    "time": 1777887942534,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 71,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.3,
+      "adx15m": 19.8,
+      "adx": 19.8,
+      "deltaRatio": 0.436,
+      "multiDelta": 0.436,
+      "rs1h": 0.0065,
+      "rs4h": -0.0024,
+      "distToEma9": 0.41,
+      "vwapDistance": 1.22,
+      "vidyaDistancePct": 0.92,
+      "squeezeMomentum": 0.001276,
+      "macdHist": 0.00013969,
+      "twoPole": -0.206,
+      "smcRangePct": 0.51,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 71.4,
+      "participation": 76.8,
+      "execution": 73
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0065,
+      "rs4h": -0.0024,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 1.48,
+      "volumePass": true,
+      "deltaRatio": 0.436,
+      "deltaPass": true,
+      "obi": -0.249,
+      "obiPass": false,
+      "spreadBps": 2.1,
+      "depthQuoteTopN": 1519869,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD bullish cross"
+    ],
+    "maxFavorable": 1.4189,
+    "maxAdverse": 1.3923,
+    "trailingStopActive": false,
+    "exitPrice": 1.3923,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777889737490,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777905171123-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 79246.16,
+    "tp": 80577.49548799999,
+    "sl": 79325.40616,
+    "initialSl": 78691.43688000001,
+    "type": "BUY",
+    "time": 1777905171123,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "ELITE",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.36,
+      "adx15m": 30.1,
+      "adx": 30.1,
+      "deltaRatio": 0.214,
+      "multiDelta": 0.214,
+      "rs1h": 0,
+      "rs4h": 0,
+      "distToEma9": 0.33,
+      "vwapDistance": -0.06,
+      "vidyaDistancePct": -0.02,
+      "squeezeMomentum": -190.504214,
+      "macdHist": 46.13818553,
+      "twoPole": -0.495,
+      "smcRangePct": 1.17,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 74,
+      "expansion": 66,
+      "participation": 65.3,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.3,
+      "volumePass": true,
+      "deltaRatio": 0.214,
+      "deltaPass": true,
+      "obi": -0.245,
+      "obiPass": false,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 1664998,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 80789.77,
+    "maxAdverse": 79246.16,
+    "trailingStopActive": true,
+    "exitPrice": 80789.77,
+    "exitReason": "TAKE_PROFIT",
+    "closedAt": 1777949173264,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "WIN"
+  },
+  {
+    "id": "TRADER-1777905175007-TRXUSDT",
+    "symbol": "TRXUSDT",
+    "price": 0.3394,
+    "tp": 0.34510191999999995,
+    "sl": 0.3370242,
+    "initialSl": 0.3370242,
+    "type": "BUY",
+    "time": 1777905175007,
     "status": "OPEN",
-    "time": 1777617160122,
-    "version": "v12.0.0-QuantumSniper",
-    "metrics": {
-      "smc": {
-        "bullishBOS": true,
-        "lastHigh": 0.10813,
-        "lastLow": 0.10543,
-        "inDiscountZone": false
-      },
-      "ml": {
-        "slope": 0.00011973447344734736,
-        "isBullish": true
-      },
-      "sqz": {
-        "sqzOn": false,
-        "sqzOff": true,
-        "momentum": 0.0014060000000000045,
-        "isBullish": true
-      },
-      "macd": {
-        "hist": 0.0009386497379570424,
-        "histPrev": 0.0009328349660039231
-      },
-      "multiDelta": -0.11396011396011264
-    }
+    "score": 70,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 68,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.26,
+      "adx15m": 29.3,
+      "adx": 29.3,
+      "deltaRatio": 0.54,
+      "multiDelta": 0.54,
+      "rs1h": 0.0073,
+      "rs4h": 0.0186,
+      "distToEma9": 0.19,
+      "vwapDistance": 0.18,
+      "vidyaDistancePct": 0.15,
+      "squeezeMomentum": -0.000569,
+      "macdHist": -0.00009401,
+      "twoPole": -0.388,
+      "smcRangePct": 1.31,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 66,
+      "participation": 59.7,
+      "execution": 73
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0073,
+      "rs4h": 0.0186,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 0.99,
+      "volumePass": true,
+      "deltaRatio": 0.54,
+      "deltaPass": true,
+      "obi": 0.016,
+      "obiPass": true,
+      "spreadBps": 2.9,
+      "depthQuoteTopN": 1444144,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 0.3411,
+    "maxAdverse": 0.3392,
+    "trailingStopActive": false,
+    "exitPrice": null,
+    "exitReason": null,
+    "closedAt": null,
+    "version": "v13.0.0-TradingViewFusion"
+  },
+  {
+    "id": "TRADER-1777906022012-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2352.66,
+    "tp": 2379.1862414999996,
+    "sl": 2355.0126599999994,
+    "initialSl": 2339.72037,
+    "type": "BUY",
+    "time": 1777906022012,
+    "status": "CLOSED",
+    "score": 75,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "ELITE",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.4,
+      "adx15m": 22.2,
+      "adx": 22.2,
+      "deltaRatio": 0.409,
+      "multiDelta": 0.409,
+      "rs1h": 0.0015,
+      "rs4h": 0.0083,
+      "distToEma9": 0.42,
+      "vwapDistance": 0.06,
+      "vidyaDistancePct": 0.08,
+      "squeezeMomentum": -0.37975,
+      "macdHist": 2.07361257,
+      "twoPole": -0.332,
+      "smcRangePct": 1.93,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 62,
+      "participation": 66.9,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0015,
+      "rs4h": 0.0083,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 1.2,
+      "volumePass": true,
+      "deltaRatio": 0.409,
+      "deltaPass": true,
+      "obi": 0.48,
+      "obiPass": true,
+      "spreadBps": 0.6,
+      "depthQuoteTopN": 949561,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "SOTT higher timeframe bullish",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 2371.98,
+    "maxAdverse": 2347.64,
+    "trailingStopActive": true,
+    "exitPrice": 2347.64,
+    "exitReason": "TRAIL_STOP_GAP_LOSS",
+    "closedAt": 1777908742290,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777906826459-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 84.99,
+    "tp": 86.358339,
+    "sl": 84.39506999999999,
+    "initialSl": 84.39506999999999,
+    "type": "BUY",
+    "time": 1777906826459,
+    "status": "CLOSED",
+    "score": 82,
+    "regime": "VOLATILE_TRANSITION",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "ELITE",
+    "requiredScore": 68,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.42,
+      "adx15m": 27,
+      "adx": 27,
+      "deltaRatio": 0.476,
+      "multiDelta": 0.476,
+      "rs1h": -0.0057,
+      "rs4h": -0.0047,
+      "distToEma9": 0.69,
+      "vwapDistance": 0.49,
+      "vidyaDistancePct": 0.7,
+      "squeezeMomentum": 0.279571,
+      "macdHist": 0.12501878,
+      "twoPole": -0.142,
+      "smcRangePct": 1.91,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 83,
+      "expansion": 72,
+      "participation": 84.7,
+      "execution": 98
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0057,
+      "rs4h": -0.0047,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 2.65,
+      "volumePass": true,
+      "deltaRatio": 0.476,
+      "deltaPass": true,
+      "obi": -0.162,
+      "obiPass": false,
+      "spreadBps": 2.4,
+      "depthQuoteTopN": 2698992,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 84.99,
+    "maxAdverse": 84.3,
+    "trailingStopActive": false,
+    "exitPrice": 84.3,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777908758309,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777906826924-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "price": 627.14,
+    "tp": 634.2110035,
+    "sl": 623.69073,
+    "initialSl": 623.69073,
+    "type": "BUY",
+    "time": 1777906826924,
+    "status": "CLOSED",
+    "score": 74,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "HIGH",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.3,
+      "adx15m": 25.7,
+      "adx": 25.7,
+      "deltaRatio": 0.504,
+      "multiDelta": 0.504,
+      "rs1h": -0.0103,
+      "rs4h": 0.0037,
+      "distToEma9": 0.4,
+      "vwapDistance": 0.17,
+      "vidyaDistancePct": 0.21,
+      "squeezeMomentum": 0.155929,
+      "macdHist": 0.49086267,
+      "twoPole": -0.336,
+      "smcRangePct": 1.58,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 62,
+      "participation": 73,
+      "execution": 87
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0103,
+      "rs4h": 0.0037,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 1.67,
+      "volumePass": true,
+      "deltaRatio": 0.504,
+      "deltaPass": true,
+      "obi": 0.201,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 180031,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "SOTT higher timeframe bullish",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 628.2,
+    "maxAdverse": 622.93,
+    "trailingStopActive": false,
+    "exitPrice": 622.93,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777927603737,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777906827570-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.11203,
+    "tp": 0.11360665781752795,
+    "sl": 0.11126089862559613,
+    "initialSl": 0.11126089862559613,
+    "type": "BUY",
+    "time": 1777906827570,
+    "status": "CLOSED",
+    "score": 74,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "HIGH",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.6,
+      "adx15m": 22.3,
+      "adx": 22.3,
+      "deltaRatio": 0.471,
+      "multiDelta": 0.471,
+      "rs1h": -0.0034,
+      "rs4h": 0.0098,
+      "distToEma9": 0.7,
+      "vwapDistance": 0.99,
+      "vidyaDistancePct": 0.75,
+      "squeezeMomentum": 0.000842,
+      "macdHist": 0.00018021,
+      "twoPole": -0.199,
+      "smcRangePct": 2.52,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 78,
+      "expansion": 62,
+      "participation": 71.3,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0034,
+      "rs4h": 0.0098,
+      "rs24h": 0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 1.48,
+      "volumePass": true,
+      "deltaRatio": 0.471,
+      "deltaPass": true,
+      "obi": -0.084,
+      "obiPass": false,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 857011,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "SOTT higher timeframe bullish",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 0.11203,
+    "maxAdverse": 0.11114,
+    "trailingStopActive": false,
+    "exitPrice": 0.11114,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777907791956,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777932940612-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.11082,
+    "tp": 0.11206949549999999,
+    "sl": 0.11021049000000001,
+    "initialSl": 0.11021049000000001,
+    "type": "BUY",
+    "time": 1777932940612,
+    "status": "CLOSED",
+    "score": 73,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "HIGH",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.39,
+      "adx15m": 12.8,
+      "adx": 12.8,
+      "deltaRatio": 0.166,
+      "multiDelta": 0.166,
+      "rs1h": -0.0024,
+      "rs4h": 0.0001,
+      "distToEma9": 0.19,
+      "vwapDistance": -0.22,
+      "vidyaDistancePct": -0.14,
+      "squeezeMomentum": -0.000379,
+      "macdHist": 0.00003565,
+      "twoPole": 0.043,
+      "smcRangePct": 1.43,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 70,
+      "expansion": 65.1,
+      "participation": 73,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0024,
+      "rs4h": 0.0001,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 1.96,
+      "volumePass": true,
+      "deltaRatio": 0.166,
+      "deltaPass": true,
+      "obi": -0.009,
+      "obiPass": true,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 1063828,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "Higher timeframe trend supportive",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 0.11082,
+    "maxAdverse": 0.11016,
+    "trailingStopActive": false,
+    "exitPrice": 0.11016,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777934738572,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777943099368-BNBUSDT",
+    "symbol": "BNBUSDT",
+    "price": 624.75,
+    "tp": 631.7940562499999,
+    "sl": 621.313875,
+    "initialSl": 621.313875,
+    "type": "BUY",
+    "time": 1777943099368,
+    "status": "OPEN",
+    "score": 72,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "HIGH",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.18,
+      "adx15m": 13.4,
+      "adx": 13.4,
+      "deltaRatio": -0.021,
+      "multiDelta": -0.021,
+      "rs1h": -0.0017,
+      "rs4h": -0.011,
+      "distToEma9": 0.11,
+      "vwapDistance": -0.38,
+      "vidyaDistancePct": -0.07,
+      "squeezeMomentum": -0.226964,
+      "macdHist": 0.07893658,
+      "twoPole": -0.287,
+      "smcRangePct": 0.52,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 70,
+      "expansion": 74,
+      "participation": 60.5,
+      "execution": 87
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0017,
+      "rs4h": -0.011,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 0.77,
+      "volumePass": true,
+      "deltaRatio": -0.021,
+      "deltaPass": true,
+      "obi": 0.374,
+      "obiPass": true,
+      "spreadBps": 0.2,
+      "depthQuoteTopN": 182117,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "Higher timeframe trend supportive",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 627.51,
+    "maxAdverse": 624.75,
+    "trailingStopActive": false,
+    "exitPrice": null,
+    "exitReason": null,
+    "closedAt": null,
+    "version": "v13.0.0-TradingViewFusion"
+  },
+  {
+    "id": "TRADER-1777944785350-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "price": 2361.29,
+    "tp": 2387.91354475,
+    "sl": 2363.65129,
+    "initialSl": 2348.302905,
+    "type": "BUY",
+    "time": 1777944785350,
+    "status": "OPEN",
+    "score": 75,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_PULLBACK_CONTINUATION",
+    "entryArchetype": "Two-Pole pullback continuation",
+    "liquidityTier": "ELITE",
+    "requiredScore": 64,
+    "expectedHoldingHours": 10,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.05,
+      "realRR": 2.05,
+      "timeStopHours": 10
+    },
+    "entryMetrics": {
+      "atrPercent": 0.25,
+      "adx15m": 11.5,
+      "adx": 11.5,
+      "deltaRatio": 0.557,
+      "multiDelta": 0.557,
+      "rs1h": -0.0005,
+      "rs4h": -0.0016,
+      "distToEma9": 0.22,
+      "vwapDistance": 0.11,
+      "vidyaDistancePct": 0.3,
+      "squeezeMomentum": -0.379464,
+      "macdHist": 0.79510955,
+      "twoPole": -0.285,
+      "smcRangePct": 0.88,
+      "riskRewardRatio": 2.05
+    },
+    "qualityBreakdown": {
+      "trend": 70,
+      "expansion": 74,
+      "participation": 62.4,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0005,
+      "rs4h": -0.0016,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.75,
+      "volumeRatio": 0.89,
+      "volumePass": true,
+      "deltaRatio": 0.557,
+      "deltaPass": true,
+      "obi": -0.43,
+      "obiPass": false,
+      "spreadBps": 0,
+      "depthQuoteTopN": 885481,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "Two-Pole oscillator reset",
+      "Higher timeframe trend supportive",
+      "Pullback touched value area"
+    ],
+    "maxFavorable": 2382.18,
+    "maxAdverse": 2361.29,
+    "trailingStopActive": true,
+    "exitPrice": null,
+    "exitReason": null,
+    "closedAt": null,
+    "version": "v13.0.0-TradingViewFusion"
+  },
+  {
+    "id": "TRADER-1777947421779-SOLUSDT",
+    "symbol": "SOLUSDT",
+    "price": 84.58,
+    "tp": 85.941738,
+    "sl": 83.98794,
+    "initialSl": 83.98794,
+    "type": "BUY",
+    "time": 1777947421779,
+    "status": "OPEN",
+    "score": 80,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "L1",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "ELITE",
+    "requiredScore": 69,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.23,
+      "adx15m": 10.6,
+      "adx": 10.6,
+      "deltaRatio": 0.398,
+      "multiDelta": 0.398,
+      "rs1h": -0.0011,
+      "rs4h": -0.0161,
+      "distToEma9": 0.26,
+      "vwapDistance": -0.08,
+      "vidyaDistancePct": 0.26,
+      "squeezeMomentum": 0.007321,
+      "macdHist": 0.04807284,
+      "twoPole": -0.007,
+      "smcRangePct": 0.64,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 73,
+      "expansion": 77,
+      "participation": 79.2,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0011,
+      "rs4h": -0.0161,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 1.64,
+      "volumePass": true,
+      "deltaRatio": 0.398,
+      "deltaPass": true,
+      "obi": 0.03,
+      "obiPass": true,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 4013253,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 84.77,
+    "maxAdverse": 84.58,
+    "trailingStopActive": false,
+    "exitPrice": null,
+    "exitReason": null,
+    "closedAt": null,
+    "version": "v13.0.0-TradingViewFusion"
+  },
+  {
+    "id": "TRADER-1777947422443-DOGEUSDT",
+    "symbol": "DOGEUSDT",
+    "price": 0.1112,
+    "tp": 0.11306815999999999,
+    "sl": 0.1104216,
+    "initialSl": 0.1104216,
+    "type": "BUY",
+    "time": 1777947422443,
+    "status": "OPEN",
+    "score": 71,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "MEME",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "HIGH",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.36,
+      "adx15m": 19,
+      "adx": 19,
+      "deltaRatio": 0.024,
+      "multiDelta": 0.024,
+      "rs1h": 0.0015,
+      "rs4h": -0.0006,
+      "distToEma9": 0.32,
+      "vwapDistance": 0.03,
+      "vidyaDistancePct": 0.39,
+      "squeezeMomentum": 0.000194,
+      "macdHist": 0.00010794,
+      "twoPole": 0.313,
+      "smcRangePct": 0.86,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 66,
+      "expansion": 66,
+      "participation": 67.7,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0015,
+      "rs4h": -0.0006,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.44,
+      "volumePass": true,
+      "deltaRatio": 0.024,
+      "deltaPass": true,
+      "obi": 0.011,
+      "obiPass": true,
+      "spreadBps": 0.9,
+      "depthQuoteTopN": 1111924,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 0.11149,
+    "maxAdverse": 0.1112,
+    "trailingStopActive": false,
+    "exitPrice": null,
+    "exitReason": null,
+    "closedAt": null,
+    "version": "v13.0.0-TradingViewFusion"
+  },
+  {
+    "id": "TRADER-1777948218465-TONUSDT",
+    "symbol": "TONUSDT",
+    "price": 1.801,
+    "tp": 1.943369684720396,
+    "sl": 1.7391001370780885,
+    "initialSl": 1.7391001370780885,
+    "type": "BUY",
+    "time": 1777948218465,
+    "status": "CLOSED",
+    "score": 74,
+    "regime": "HIGH_VOL_BREAKOUT",
+    "btcRisk": "GREEN",
+    "sector": "OTHER",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "MEDIUM",
+    "requiredScore": 67,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 2.55,
+      "adx15m": 57.6,
+      "adx": 57.6,
+      "deltaRatio": 0.284,
+      "multiDelta": 0.284,
+      "rs1h": 0.1768,
+      "rs4h": 0.2132,
+      "distToEma9": 3.88,
+      "vwapDistance": 15.38,
+      "vidyaDistancePct": 12.81,
+      "squeezeMomentum": 0.108932,
+      "macdHist": 0.00787921,
+      "twoPole": 1.137,
+      "smcRangePct": 18.67,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 70,
+      "participation": 74,
+      "execution": 70
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.1768,
+      "rs4h": 0.2132,
+      "rs24h": 0.3
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 1.42,
+      "volumePass": true,
+      "deltaRatio": 0.284,
+      "deltaPass": true,
+      "obi": 0.083,
+      "obiPass": true,
+      "spreadBps": 5.6,
+      "depthQuoteTopN": 203150,
+      "liquidityTier": "MEDIUM"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 1.801,
+    "maxAdverse": 1.734,
+    "trailingStopActive": false,
+    "exitPrice": 1.734,
+    "exitReason": "STOP_LOSS",
+    "closedAt": 1777953747768,
+    "version": "v13.0.0-TradingViewFusion",
+    "outcome": "LOSS"
+  },
+  {
+    "id": "TRADER-1777949177322-BTCUSDT",
+    "symbol": "BTCUSDT",
+    "price": 80807.15,
+    "tp": 82108.14511499999,
+    "sl": 80241.49995,
+    "initialSl": 80241.49995,
+    "type": "BUY",
+    "time": 1777949177322,
+    "status": "OPEN",
+    "score": 83,
+    "regime": "TRENDING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "VIDYA_SQUEEZE_EXPANSION",
+    "entryArchetype": "Volumatic VIDYA trend expansion",
+    "liquidityTier": "ELITE",
+    "requiredScore": 65,
+    "expectedHoldingHours": 14,
+    "riskModel": {
+      "slAtr": 1.35,
+      "tpR": 2.3,
+      "realRR": 2.3,
+      "timeStopHours": 14
+    },
+    "entryMetrics": {
+      "atrPercent": 0.24,
+      "adx15m": 21.6,
+      "adx": 21.6,
+      "deltaRatio": 0.476,
+      "multiDelta": 0.476,
+      "rs1h": 0,
+      "rs4h": 0,
+      "distToEma9": 0.53,
+      "vwapDistance": 1.36,
+      "vidyaDistancePct": 1.13,
+      "squeezeMomentum": 138.678286,
+      "macdHist": 64.32465082,
+      "twoPole": -0.047,
+      "smcRangePct": 0.81,
+      "riskRewardRatio": 2.3
+    },
+    "qualityBreakdown": {
+      "trend": 80,
+      "expansion": 77,
+      "participation": 84.7,
+      "execution": 100
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0,
+      "rs4h": 0,
+      "rs24h": 0
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.95,
+      "volumeRatio": 1.95,
+      "volumePass": true,
+      "deltaRatio": 0.476,
+      "deltaPass": true,
+      "obi": 0.192,
+      "obiPass": true,
+      "spreadBps": 0,
+      "depthQuoteTopN": 1575604,
+      "liquidityTier": "ELITE"
+    },
+    "reasons": [
+      "VIDYA trend up",
+      "Squeeze momentum rising",
+      "MACD above signal"
+    ],
+    "maxFavorable": 80851.57,
+    "maxAdverse": 80763.72,
+    "trailingStopActive": false,
+    "exitPrice": null,
+    "exitReason": null,
+    "closedAt": null,
+    "version": "v13.0.0-TradingViewFusion"
+  },
+  {
+    "id": "TRADER-1777950204502-XRPUSDT",
+    "symbol": "XRPUSDT",
+    "price": 1.4008,
+    "tp": 1.42433344,
+    "sl": 1.3909944,
+    "initialSl": 1.3909944,
+    "type": "BUY",
+    "time": 1777950204502,
+    "status": "OPEN",
+    "score": 68,
+    "regime": "RANGING",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "SMC_DISCOUNT_RECLAIM",
+    "entryArchetype": "SMC value reclaim",
+    "liquidityTier": "HIGH",
+    "requiredScore": 66,
+    "expectedHoldingHours": 16,
+    "riskModel": {
+      "slAtr": 1.2,
+      "tpR": 2.4,
+      "realRR": 2.4,
+      "timeStopHours": 16
+    },
+    "entryMetrics": {
+      "atrPercent": 0.25,
+      "adx15m": 18.5,
+      "adx": 18.5,
+      "deltaRatio": 0.221,
+      "multiDelta": 0.221,
+      "rs1h": -0.0014,
+      "rs4h": -0.0158,
+      "distToEma9": 0.13,
+      "vwapDistance": -0.11,
+      "vidyaDistancePct": 0.22,
+      "squeezeMomentum": 0.001848,
+      "macdHist": 0.00112855,
+      "twoPole": 0.27,
+      "smcRangePct": 0.81,
+      "riskRewardRatio": 2.4
+    },
+    "qualityBreakdown": {
+      "trend": 66,
+      "expansion": 60,
+      "participation": 61.8,
+      "execution": 90
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": -0.0014,
+      "rs4h": -0.0158,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.85,
+      "volumeRatio": 1.11,
+      "volumePass": true,
+      "deltaRatio": 0.221,
+      "deltaPass": true,
+      "obi": -0.119,
+      "obiPass": false,
+      "spreadBps": 0.7,
+      "depthQuoteTopN": 920833,
+      "liquidityTier": "HIGH"
+    },
+    "reasons": [
+      "Bullish SMC structure",
+      "Order-block reclaim",
+      "Momentum improving"
+    ],
+    "maxFavorable": 1.405,
+    "maxAdverse": 1.4008,
+    "trailingStopActive": false,
+    "exitPrice": null,
+    "exitReason": null,
+    "closedAt": null,
+    "version": "v13.0.0-TradingViewFusion"
   }
 ]
