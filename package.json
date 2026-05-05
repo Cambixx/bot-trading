@@ -12,7 +12,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "sync": "node scripts/sync-blobs.js",
-    "scan": "node scripts/manual-run.js"
+    "scan": "node scripts/manual-run.js",
+    "reset": "node scripts/clear-blobs.js"
   },
   "dependencies": {
     "@netlify/blobs": "^10.5.0",
