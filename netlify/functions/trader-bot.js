@@ -59,10 +59,10 @@ const GLOBAL_SHADOW_MODE = (process.env.TRADER_GLOBAL_SHADOW_MODE || 'false').to
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 48;
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 15000000;
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 76;
-const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 8;
-const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 90000;
-const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.16;
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 5;
+const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 100;
+const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 1000;
+const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.10;
 const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 5.5;
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 240;
 const AVOID_ASIA_SESSION = (process.env.AVOID_ASIA_SESSION || 'false').toLowerCase() === 'true';
@@ -709,9 +709,15 @@ function getRequiredScore(candidate, ctx) {
 
 function evaluateVidyaSqueeze(ctx) {
   const { vidya15, squeeze15, macd15, mlma1h, sott1h, volumeRatio, deltaRatio, executionQuality } = ctx;
-  if (!vidya15?.trendUp) return { rejectCode: 'VIDYA_TREND_DOWN' };
-  if (!squeeze15?.bullish || !squeeze15.rising) return { rejectCode: 'SQUEEZE_NOT_EXPANDING' };
-  if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'OVEREXTENDED' };
+  // Super Aggressive: Ignore VIDYA trend
+  // if (!vidya15?.trendUp) return { rejectCode: 'VIDYA_TREND_DOWN' };
+  const hasMomentum = (squeeze15?.bullish && squeeze15?.rising) || (macd15?.aboveSignal && macd15?.histDelta > 0);
+  if (!hasMomentum) return { rejectCode: 'NO_MOMENTUM' };
+  
+  const isStrongTrendExpansion = (squeeze15?.fired || macd15?.crossUp) && volumeRatio > 1.2;
+  if (!isStrongTrendExpansion) {
+    if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'OVEREXTENDED' };
+  }
   if (!macd15?.aboveSignal || macd15.histDelta < -Math.abs(macd15.hist) * 0.2) return { rejectCode: 'MACD_NOT_CONFIRMED' };
 
   const trendQuality = 66
@@ -740,8 +746,8 @@ function evaluateVidyaSqueeze(ctx) {
       module: 'VIDYA_SQUEEZE_EXPANSION',
       entryArchetype: 'Volumatic VIDYA trend expansion',
       score: clamp(score, 0, 100),
-      baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
-      minVolumeRatio: 0.95,
+      baseRequiredScore: 5,
+      minVolumeRatio: 0.5,
       tpR: 2.3,
       slAtr: 1.35,
       timeStopHours: 14,
@@ -784,8 +790,8 @@ function evaluateSMCReclaim(ctx) {
       module: 'SMC_DISCOUNT_RECLAIM',
       entryArchetype: 'SMC value reclaim',
       score: clamp(score, 0, 100),
-      baseRequiredScore: SIGNAL_SCORE_THRESHOLD + 1,
-      minVolumeRatio: 0.85,
+      baseRequiredScore: 5,
+      minVolumeRatio: 0.5,
       tpR: 2.4,
       slAtr: 1.2,
       timeStopHours: 16,
@@ -810,7 +816,7 @@ function evaluateTwoPoleContinuation(ctx) {
   if (!(twoPole15?.buy || (twoPole15?.bullish && twoPole15.value < 0.15 && twoPole15.slope > 0))) return { rejectCode: 'TWOPOLE_NO_RESET' };
   if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'OVEREXTENDED' };
   if (!Number.isFinite(ema50_15m) || currentPrice <= ema50_15m) return { rejectCode: 'TWOPOLE_BELOW_EMA50' };
-  if (!Number.isFinite(rsi15m) || rsi15m < 42 || rsi15m > 68) return { rejectCode: 'TWOPOLE_RSI_OUT_OF_RANGE' };
+  if (!Number.isFinite(rsi15m) || rsi15m < 38 || rsi15m > 75) return { rejectCode: 'TWOPOLE_RSI_OUT_OF_RANGE' };
 
   const touchedValue = Number.isFinite(ema21_15m) ? ctx.last15m.low <= ema21_15m * 1.006 : false;
   const trendQuality = 64 + (sott1h?.strongBull ? 8 : 0) + (mlma1h?.bullish ? 6 : 0);
@@ -823,8 +829,8 @@ function evaluateTwoPoleContinuation(ctx) {
       module: 'TWO_POLE_PULLBACK_CONTINUATION',
       entryArchetype: 'Two-Pole pullback continuation',
       score: clamp(score, 0, 100),
-      baseRequiredScore: SIGNAL_SCORE_THRESHOLD - 1,
-      minVolumeRatio: 0.75,
+      baseRequiredScore: 5,
+      minVolumeRatio: 0.5,
       tpR: 2.05,
       slAtr: 1.15,
       timeStopHours: 10,
@@ -1059,9 +1065,13 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
   countMetric(analysisState?.stageCounts, 'REGIME_OK');
   countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
-  if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED' || ctx.regime === 'RANGING') {
-    const code = ctx.regime === 'RANGING' ? 'REGIME_RANGING_BLOCK' : 'BTC_RED_BLOCK';
-    countMetric(analysisState?.rejectCounts, code);
+  if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED') {
+    countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');
+    return null;
+  }
+  
+  if (ctx.regime === 'RANGING' && ctx.bias === 'BEARISH') {
+    countMetric(analysisState?.rejectCounts, 'REGIME_RANGING_BLOCK');
     return null;
   }
 
@@ -1070,6 +1080,10 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
     evaluateSMCReclaim(ctx),
     evaluateTwoPoleContinuation(ctx)
   ];
+
+  if (analysisState?.debug) {
+    console.log(`[DEBUG] Modules:`, moduleResults.map(r => r.candidate ? r.candidate.module : r.rejectCode));
+  }
 
   const candidates = moduleResults
     .map(result => result.candidate)

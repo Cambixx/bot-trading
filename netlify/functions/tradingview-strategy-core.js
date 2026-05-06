@@ -129,7 +129,7 @@ export function isNonCryptoWrapper(base) {
   if (TOKENIZED_METAL_BASES.has(base)) return true;
   if (base.includes('(') || base.includes(')')) return true;
   if (base.startsWith('GOLD') || base.startsWith('SILVER')) return true;
-  if (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BULL') || base.endsWith('BEAR')) return true;
+  if (base.length > 4 && (base.endsWith('UP') || base.endsWith('DOWN') || base.endsWith('BULL') || base.endsWith('BEAR'))) return true;
   return false;
 }
 
@@ -156,13 +156,18 @@ export function validateCandle(candle) {
   );
 }
 
-export async function getKlines(symbol, interval = '15m', limit = 240) {
-  const cacheKey = `${symbol}-${interval}-${limit}`;
+export async function getKlines(symbol, interval = '15m', limit = 240, startTime = null, endTime = null) {
+  const cacheKey = `${symbol}-${interval}-${limit}-${startTime}-${endTime}`;
   const cached = candleCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
 
   const mexcInterval = interval === '1h' ? '60m' : interval;
-  const response = await fetchWithTimeout(`${MEXC_API}/klines?symbol=${symbol}&interval=${mexcInterval}&limit=${limit}`);
+  let url = `${MEXC_API}/klines?symbol=${symbol}&interval=${mexcInterval}&limit=${limit}`;
+  if (startTime) url += `&startTime=${startTime}`;
+  if (endTime) url += `&endTime=${endTime}`;
+  
+  console.log(`[DEBUG] Fetching: ${url}`);
+  const response = await fetchWithTimeout(url);
   if (!response.ok) {
     const body = await response.text().catch(() => '');
     throw new Error(`MEXC klines ${symbol} ${interval}: ${response.status} ${body}`.trim());
@@ -983,7 +988,7 @@ export function detectBTCContext(candles4h, candles1h, ticker24h) {
 export function detectMarketRegime({ bull4h, adx15m, atrPercentile, btcRisk }) {
   if (btcRisk === 'RED') return 'RISK_OFF';
   if (bull4h && Number.isFinite(adx15m) && adx15m >= 24 && atrPercentile >= 65) return 'HIGH_VOL_BREAKOUT';
-  if (bull4h && Number.isFinite(adx15m) && adx15m >= 18) return 'TRENDING';
+  if (bull4h && Number.isFinite(adx15m) && adx15m >= 14) return 'TRENDING';
   if (atrPercentile >= 75) return 'VOLATILE_TRANSITION';
   return 'RANGING';
 }

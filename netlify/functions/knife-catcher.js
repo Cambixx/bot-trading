@@ -56,10 +56,10 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
 const GLOBAL_SHADOW_MODE = (process.env.KNIFE_GLOBAL_SHADOW_MODE || 'false').toLowerCase() === 'true';
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
-const SIGNAL_SCORE_THRESHOLD = process.env.KNIFE_SIGNAL_SCORE_THRESHOLD ? Number(process.env.KNIFE_SIGNAL_SCORE_THRESHOLD) : 72;
-const MAX_SPREAD_BPS = process.env.KNIFE_MAX_SPREAD_BPS ? Number(process.env.KNIFE_MAX_SPREAD_BPS) : 10;
-const MIN_DEPTH_QUOTE = process.env.KNIFE_MIN_DEPTH_QUOTE ? Number(process.env.KNIFE_MIN_DEPTH_QUOTE) : 75000;
-const MIN_ATR_PCT = process.env.KNIFE_MIN_ATR_PCT ? Number(process.env.KNIFE_MIN_ATR_PCT) : 0.14;
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 5;
+const MAX_SPREAD_BPS = process.env.KNIFE_MAX_SPREAD_BPS ? Number(process.env.KNIFE_MAX_SPREAD_BPS) : 100;
+const MIN_DEPTH_QUOTE = process.env.KNIFE_MIN_DEPTH_QUOTE ? Number(process.env.KNIFE_MIN_DEPTH_QUOTE) : 1000;
+const MIN_ATR_PCT = process.env.KNIFE_MIN_ATR_PCT ? Number(process.env.KNIFE_MIN_ATR_PCT) : 0.08;
 const MAX_ATR_PCT = process.env.KNIFE_MAX_ATR_PCT ? Number(process.env.KNIFE_MAX_ATR_PCT) : 7;
 const MAX_SYMBOLS = process.env.KNIFE_MAX_SYMBOLS ? Number(process.env.KNIFE_MAX_SYMBOLS) : 64;
 const MIN_QUOTE_VOL_24H = process.env.KNIFE_MIN_QUOTE_VOL_24H ? Number(process.env.KNIFE_MIN_QUOTE_VOL_24H) : 8000000;
@@ -665,10 +665,13 @@ function getRequiredScore(candidate, ctx) {
 
 function evaluateTwoPoleCapitulation(ctx) {
   const { twoPole5m, twoPole15m, rsi5m, rsi15m, volumeRatio5m, deltaRatio5m, return12x5m, redStreak5m, executionQuality } = ctx;
-  const impulse = return12x5m <= -1.1 || redStreak5m >= 4 || rsi5m <= 30 || rsi15m <= 36;
+  const distToEma50 = ctx.ema50_15m ? ((ctx.currentPrice - ctx.ema50_15m) / ctx.ema50_15m) * 100 : 0;
+  const isExtremeOversold = rsi15m < 20 || rsi5m < 15;
+  const impulse = return12x5m <= -0.1 || redStreak5m >= 1 || rsi5m <= 50 || rsi15m <= 55 || distToEma50 < -4 || isExtremeOversold;
   if (!impulse) return { rejectCode: 'TWOPOLE_NO_CAPITULATION' };
-  if (!(twoPole5m?.buy || (twoPole5m?.bullish && twoPole5m.deeplyOversold) || twoPole15m?.buy)) return { rejectCode: 'TWOPOLE_NO_RESET' };
-  if (volumeRatio5m < 1.05) return { rejectCode: 'TWOPOLE_LOW_VOLUME' };
+  const twoPoleReset = twoPole5m?.buy || (twoPole5m?.value < -0.5 && twoPole5m?.slope > 0) || twoPole15m?.buy || rsi5m < 25 || distToEma50 < -5 || isExtremeOversold;
+  if (!twoPoleReset) return { rejectCode: 'TWOPOLE_NO_RESET' };
+  if (volumeRatio5m < 0.9) return { rejectCode: 'TWOPOLE_LOW_VOLUME' };
 
   const stretchQuality = 62
     + clamp(Math.abs(Math.min(return12x5m, 0)) * 4, 0, 14)
@@ -689,7 +692,7 @@ function evaluateTwoPoleCapitulation(ctx) {
       entryArchetype: 'Two-Pole capitulation reset',
       score: clamp(score, 0, 100),
       baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
-      minVolumeRatio: 1.05,
+      minVolumeRatio: 0.4,
       tpR: 2.25,
       slAtr: 1.15,
       timeStopHours: 5,
@@ -727,7 +730,7 @@ function evaluateVidyaLiquiditySweep(ctx) {
       module: 'VIDYA_LIQUIDITY_SWEEP',
       entryArchetype: 'Liquidity sweep reclaim',
       score: clamp(score, 0, 100),
-      baseRequiredScore: SIGNAL_SCORE_THRESHOLD + 1,
+      baseRequiredScore: 5,
       minVolumeRatio: 1.15,
       tpR: 2.45,
       slAtr: 1.25,
@@ -765,7 +768,7 @@ function evaluateSottBandReclaim(ctx) {
       entryArchetype: 'SOTT Bollinger reclaim',
       score: clamp(score, 0, 100),
       baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
-      minVolumeRatio: 0.9,
+      minVolumeRatio: 0.4,
       tpR: 2.15,
       slAtr: 1.1,
       timeStopHours: 7,
