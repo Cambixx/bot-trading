@@ -1,1 +1,16 @@
-{}
+{
+  "TONUSDT": [
+    {
+      "score": 72,
+      "module": "TWO_POLE_CAPITULATION_RESET",
+      "timestamp": 1778260849626
+    }
+  ],
+  "ETHUSDT": [
+    {
+      "score": 74,
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "timestamp": 1778264466895
+    }
+  ]
+}
