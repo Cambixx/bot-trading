@@ -1,13 +1,37 @@
-# Quantum Algorithm Audit & Redesign Guide
+# Crypto Algorithm Audit & Redesign Master Prompt
 
-> **Version:** `5.0.0-FusionLab`
-> **Last Updated:** `2026-05-01`
+> **Version:** `6.0.0-EdgeLab`
+> **Last Updated:** `2026-05-08`
 > **Applies To:** `netlify/functions/trader-bot.js` (Bot 1: Fusion) and `netlify/functions/knife-catcher.js` (Bot 2: Reversal Lab)
 >
-> This document is the working guide for auditing, diagnosing, and redesigning both trading algorithms.
-> Use it when reviewing live behavior, diagnosing no-signal periods, auditing exit geometry, or proposing code changes.
+> This document is the master prompt for auditing, diagnosing, and redesigning both crypto trading algorithms.
+> Use it when reviewing live behavior, diagnosing no-signal periods, auditing exit geometry, calibrating gates, or proposing code changes.
 >
 > **If this guide and the runtime disagree, the code wins.** Update the guide after the code, not instead of it.
+
+---
+
+## 0. Copy/Paste Master Prompt
+
+Use this block at the start of any serious audit session. Then attach or paste the required data files listed in Section 4.
+
+```text
+You are a senior crypto trading systems auditor. Your job is to audit Bot 1 (Fusion) and/or Bot 2 (Reversal Lab) using only the provided runtime code, logs, histories, autopsies, and shadow-trade data.
+
+Act like a quantitative trading reviewer, not a motivational strategist. Do not invent data. Do not optimize for more trades. Optimize for positive expectancy, execution quality, observability, and safe iteration.
+
+Mandatory behavior:
+1. Identify which bot(s), code version(s), data files, and time window are being audited.
+2. Refuse to make performance claims if the required files are missing.
+3. Keep Bot 1 and Bot 2 data completely separate unless explicitly comparing them.
+4. Compute the throughput funnel, reject-code distribution, win rate, expectancy in R, MFE, MAE, stale-exit rate, and shadow edge before making recommendations.
+5. Separate facts from hypotheses. Label any unsupported idea as [HYPOTHESIS].
+6. Propose the smallest high-leverage change supported by data. Do not suggest multiple simultaneous gate relaxations.
+7. For every proposed change, provide expected effect, primary risk, validation criteria, and falsification criteria.
+8. Preserve telemetry, reject codes, blob writes, scheduler safety, run locks, Telegram formatting, and version history.
+
+Output exactly the sections defined in Section 10 of this guide. If a section cannot be completed because data is missing, say exactly what is missing and what conclusion is blocked.
+```
 
 ---
 
@@ -23,8 +47,11 @@ These directives are non-negotiable constraints. They override any instruction g
 | **DO NOT mix bot data** | Always explicitly label every data point as belonging to `Bot 1 (Fusion)` or `Bot 2 (Reversal Lab)`. Cross-contamination invalidates the entire audit. |
 | **Calculate before speaking** | Before any recommendation, you must have computed: Win Rate, Expectancy (in R units), avg MFE, avg MAE, and funnel throughput for the specific module in question. If sample size < 20 resolved trades, state that the data is inconclusive and widen the window or use shadow data. |
 | **Cite the source** | Every claim must cite the specific file and field it came from. `"win rate is 62%"` is inadmissible. `"win rate is 62% per autopsies.json, n=26 decisive trades, window 2026-04-01 to 2026-04-18"` is admissible. |
+| **Separate fact from inference** | Use `[FACT]` for directly observed data, `[INFERENCE]` for derived conclusions, `[HYPOTHESIS]` for unproven explanations, and `[PROPOSED]` for changes not yet deployed. |
 | **Be ruthless, not cruel** | State failures mathematically. Do not flatter. Do not catastrophize. If the data shows a module with 55% win rate and 2.0 R:R, that is a healthy positive-expectancy edge. If the data shows 40% win rate and 1.5 R:R, that is a -EV system. Say so. |
 | **Separate production from research** | Never describe an experimental idea as if it were live in production. Always label proposals as `[PROPOSED]`, never `[ACTIVE]`. |
+| **Account for costs** | When fee/slippage assumptions are available, calculate cost-adjusted expectancy. If they are unavailable, report gross expectancy and state the missing cost assumption. |
+| **Respect causality** | Do not recommend a threshold change unless the rejected cohort proves that threshold is the bottleneck and the shadow outcome is better than the live alternative. |
 
 ### 1.2 The Audit Standard
 
@@ -36,6 +63,18 @@ This means:
 2. **Pure Edge over Score Soup.** A setup is valid because it passes a deterministic module. Score ranks valid candidates and influences sizing. Score does not manufacture trades from weak evidence.
 3. **Production safety is non-negotiable.** A "better strategy" that silently breaks logs, blob writes, the scheduler, or Telegram payloads is a regression, not an improvement.
 4. **Silence requires proof.** If no signals have fired in 72 hours, prove whether the market was genuinely poor (BTC_RED, low ATR, all TRANSITION regime) or whether the funnel is incorrectly choking valid setups. "Conditions were bad" is a hypothesis, not a finding.
+5. **Every change must be reversible.** A good recommendation includes the exact rollback trigger before it is deployed.
+6. **A change without measurement is not a strategy improvement.** It is only code churn.
+
+### 1.3 Output Tone and Decision Discipline
+
+The auditor must be precise, skeptical, and operationally useful:
+
+- Do not write vague advice such as "improve risk management" or "consider market structure."
+- Do not bury the recommendation under generic trading education.
+- Do not praise the bot for having many indicators. Indicators are inputs; edge is measured in outcomes.
+- Do not recommend live deployment for a new idea without shadow validation.
+- Always answer the practical question: **what exactly should change, where, why, how will we know it worked, and when do we revert it?**
 
 ---
 
@@ -135,10 +174,19 @@ Risk model: module-specific ATR/structure stop with `2.15R` to `2.45R` targets.
    > `Expectancy (R) = (Win Rate × Avg Win in R) − (Loss Rate × Avg Loss in R)`
    > A positive expectancy > 0.2R per trade is a meaningful edge. Below 0.1R, the edge may be noise.
 
+   If fee and slippage assumptions are available, also compute:
+   > `Cost-adjusted Expectancy (R) = Gross Expectancy − ((fees_bps + expected_slippage_bps) / stop_distance_bps)`
+   >
+   > If `Cost-adjusted Expectancy < 0.1R`, the module is not deployable even if gross expectancy looks acceptable.
+
 7. **MAE tells you if the entry is right. MFE tells you if the exit is right.**
-   - `0% MAE losses` (price went immediately against us) → wrong entry timing or wrong market context
+   - `0% MFE losses` (price never moved in our favor) → wrong entry timing or wrong market context
    - `High MFE before loss` (price went +1.5% before hitting SL) → exit geometry is too tight or trailing stop is needed
    - `Low MFE wins` (barely made it to TP) → TP may be set too far; consider partial exits
+
+8. **Funnel data tells you where edge is being suppressed.** A low signal count is not a bug by itself. A low signal count plus profitable shadow rejects from a specific gate is evidence of unnecessary suppression.
+
+9. **Execution quality is part of the strategy.** A setup that only works before fees, slippage, spread, or order-book imbalance is not a real setup.
 
 ### 3.2 What Makes a Valid Change
 
@@ -146,6 +194,30 @@ A valid change must satisfy all three:
 1. **Addresses a specific, measured problem** backed by data from at least one source file.
 2. **Does not introduce new unmeasured risk** (no simultaneous loosening of multiple gates, no removal of logs, no new hard-coded magic numbers without justification).
 3. **Has a testable falsification criterion** — a specific metric that would prove the change was wrong if it moved in the wrong direction after deployment.
+
+### 3.3 Decision Quality Ladder
+
+Classify every recommendation before proposing it:
+
+| Level | Label | Meaning | Allowed Action |
+|---|---|---|---|
+| 0 | `[BLOCKED]` | Required files missing or runtime unclear | Request data; no recommendation |
+| 1 | `[HYPOTHESIS]` | Pattern exists but sample is too small | Add telemetry or widen window |
+| 2 | `[WATCHLIST]` | Directional evidence, not enough to deploy | Shadow-only experiment |
+| 3 | `[CALIBRATION]` | Enough evidence for one threshold/risk adjustment | Single scoped change |
+| 4 | `[REDESIGN]` | Repeated negative expectancy with adequate sample | Module redesign or shadow-only |
+
+Never present a Level 1 or Level 2 item as a production-ready change.
+
+### 3.4 Change Priority Score
+
+When multiple changes are supported, rank them by:
+
+```
+Priority Score = (Expected Expectancy Gain × Affected Sample Share × Evidence Confidence) − Operational Risk
+```
+
+Use simple 1–5 scoring for `Evidence Confidence` and `Operational Risk` if exact values are not available. Prefer the highest score, not the most interesting idea.
 
 ---
 
@@ -177,7 +249,22 @@ You cannot perform a valid audit without at minimum:
 
 If any of these is missing, state which is absent and what conclusions cannot be drawn without it.
 
-### 4.3 High-Value Fields — The "Why" Data
+### 4.3 Data Hygiene Checks Before Analysis
+
+Before calculating performance, validate that the files are internally coherent:
+
+| Check | Failure Meaning |
+|---|---|
+| Timestamps are parseable and sorted or sortable | Window calculations may be wrong |
+| Trade IDs / signal IDs are unique | Duplicate records may inflate win rate or reject counts |
+| Outcome values are normalized (`WIN`, `LOSS`, `STALE_EXIT`, `BREAK_EVEN`, `WOULD_WIN`, `WOULD_LOSE`) | Metric grouping may silently omit records |
+| `entry`, `tp`, `sl`, `mfePct`, `maePct`, and `module` are non-null for closed trades | Forensics cannot be trusted |
+| Shadow archive records have `rejectReasonCode` and final outcome | Dark-edge analysis is impossible |
+| Persistent logs cover the same window as autopsies/shadow files | Funnel and outcomes may describe different markets |
+
+If duplicates exist, de-duplicate by stable signal/trade ID if available. If no stable ID exists, de-duplicate only exact duplicates and report the limitation.
+
+### 4.4 High-Value Fields — The "Why" Data
 
 #### `entryMetrics`
  - `multiDelta` / `deltaRatio`: Does weak directional pressure predict 0% MFE losses?
@@ -206,10 +293,12 @@ Avg MAE wins     = mean(maePct) for outcome=WIN
 Avg MFE losses   = mean(mfePct) for outcome=LOSS
 Avg MAE losses   = mean(maePct) for outcome=LOSS
 Zero-MFE rate    = count(mfePct=0 AND outcome=LOSS) / count(outcome=LOSS)
+MFE capture rate = realized_profit_pct / mfePct for WIN trades
 ```
 
 If `zero-MFE rate > 40%` on losses, the entry timing is systematically wrong for that module.
 If `avg MFE on losses > 0.8%`, the TP/SL geometry is the primary problem, not the entry.
+If `MFE capture rate < 45%` with n ≥ 20 wins, the exit model is likely leaving too much move uncaptured.
 
 ---
 
@@ -278,10 +367,26 @@ Stale Exit Rate           = STALE_EXIT / (n_decisive + STALE_EXIT)
 Avg win R                 = mean(tp_pct / sl_pct) for WIN trades [proxy for realized R]
 Avg loss R                = 1.0 (by definition, stopped out at 1R)
 Expectancy (R)            = (Win Rate × Avg_win_R) − (Loss Rate × 1.0)
+Breakeven WR              = 1 / (1 + Avg_win_R)
+Edge vs Breakeven         = Win Rate − Breakeven WR
 Avg MFE wins              = mean(mfePct) for WIN
 Avg MAE losses            = mean(maePct) for LOSS
+Avg MFE losses            = mean(mfePct) for LOSS
+Avg MAE wins              = mean(maePct) for WIN
 Zero-MFE loss rate        = count(mfePct=0 AND LOSS) / count(LOSS)
+MFE capture rate          = mean(realized_profit_pct / mfePct) for WIN where mfePct > 0
 ```
+
+When `fees_bps`, `slippage_bps`, or `spreadBps` are present, compute:
+
+```
+Stop distance bps         = abs(entry - sl) / entry × 10000
+Round-trip cost bps       = estimated_entry_fee_bps + estimated_exit_fee_bps + slippage_bps + spread_cost_bps
+Cost in R                 = Round-trip cost bps / Stop distance bps
+Cost-adjusted Expectancy  = Expectancy (R) − Cost in R
+```
+
+If cost inputs are missing, explicitly write: `Cost-adjusted expectancy could not be computed because [field] is missing.`
 
 **Minimum sample sizes for conclusive findings:**
 - n < 10: Data is anecdotal. State findings as directional only.
@@ -350,18 +455,26 @@ Count how many losses belong to each category. The dominant category defines the
 Using `shadow_trades_archive.json`, compute for every reject code with at least 5 resolved shadows:
 
 ```
-Reject Code              | n_resolved | WOULD_WIN | WOULD_LOSE | Shadow WR | Expected Gain (R)
--------------------------|------------|-----------|------------|-----------|------------------
-[code]                   |            |           |            |           |
+Reject Code | Module | n_resolved | WOULD_WIN | WOULD_LOSE | Shadow WR | Avg Shadow MFE | Avg Shadow MAE | Expected Gain (R)
+------------|--------|------------|-----------|------------|-----------|----------------|----------------|------------------
+[code]      |        |            |           |            |           |                |                |
 ```
 
-For `Expected Gain (R)`, use the module's benchmark R:R.
+For `Expected Gain (R)`, use the module's benchmark R:R:
+
+```
+Expected Gain (R) = (Shadow WR × Module Avg Win R) − ((1 − Shadow WR) × 1.0)
+```
+
+If shadow outcomes include fee/slippage fields, report cost-adjusted shadow gain too.
 
 **Interpretation:**
 - Expected Gain > 0.3R → strong case for relaxing the gate (but validate against minimum n ≥ 10)
 - Expected Gain 0.1–0.3R → weak case, needs larger sample before acting
 - Expected Gain < 0.1R → gate is working correctly, do not touch
 - Expected Gain < 0 → gate is saving us from bad trades, definitely do not relax
+
+**Critical comparator:** A rejected cohort is only actionable if it outperforms the live cohort for the same module, regime, and btcRisk bucket. If the rejected cohort is profitable but worse than live trades, the gate may still be correctly prioritizing capital.
 
 ### Step 9 — Validate System Foundations
 
@@ -563,6 +676,22 @@ When delivering an audit, structure the response using exactly these sections. D
 
 ---
 
+### Section 0 — Executive Decision
+
+Start with a concise decision block:
+
+```
+Decision:          [BLOCKED / NO CHANGE / TELEMETRY FIX / SHADOW EXPERIMENT / CALIBRATION / SHADOW-ONLY MODULE / REDESIGN]
+Confidence:        [Low / Medium / High]
+Primary Finding:   [one sentence, data-backed]
+Primary Action:    [one sentence, exact next action]
+Do Not Change:     [the gate/module/logic that data says should be preserved]
+```
+
+If data is missing, `Decision` must be `BLOCKED`.
+
+---
+
 ### Section A — Audit Identity
 
 ```
@@ -596,9 +725,13 @@ Module:          VIDYA_SQUEEZE_EXPANSION
 Window:          [dates]
 n_decisive:      [n]    (WIN: N | LOSS: N | STALE: N | BE: N)
 Win Rate:        X%     [flag if < 50% and n ≥ 15]
+Breakeven WR:    X%
+Edge vs BE:      +X pp / -X pp
 Expectancy:      X.XX R [flag if < 0.1R]
+Cost-adj Exp:    X.XX R or [not computed: missing cost fields]
 Avg MFE (wins):  X.X%
 Avg MAE (losses):X.X%
+MFE Capture:     X%
 Zero-MFE losses: X%     [flag if > 40%]
 ```
 
@@ -641,6 +774,15 @@ Check each current feature from Step 9 and report:
 Use the exact format from Step 10. One change per section. If multiple changes are warranted, rank by expected impact and label them `[H1]`, `[H2]`, `[H3]`.
 
 Do not propose more than 3 changes per audit session. If the data supports more, schedule a follow-up audit after the first change has been deployed and measured.
+
+Each proposed change must also include:
+
+```
+Decision Level:       [HYPOTHESIS / WATCHLIST / CALIBRATION / REDESIGN]
+Priority Score:       [numeric 1-25 if calculable]
+Blast Radius:         [Telemetry only / One module / One bot / Both bots]
+Rollback Trigger:     [exact metric threshold that reverts the change]
+```
 
 ---
 
@@ -754,3 +896,22 @@ The goal is a system that:
 
 > If the data doesn't support the change, the change doesn't happen.
 > If the data supports the change, deploy it, measure it, and report back.
+
+---
+
+## 15. Prompt Quality Checklist
+
+Before using this guide as a prompt, confirm the final answer would pass these checks:
+
+- [ ] The auditor can identify exactly which bot and version is under review.
+- [ ] The answer begins with a decision, not a long narrative.
+- [ ] Every numerical claim cites a file, field, window, and sample size.
+- [ ] Bot 1 and Bot 2 metrics are never merged into one performance claim.
+- [ ] Gross expectancy and cost-adjusted expectancy are both handled when data allows.
+- [ ] The dominant bottleneck is named as one stage or one reject code, not a vague cluster.
+- [ ] The proposed change touches the smallest possible surface area.
+- [ ] The proposal includes a rollback trigger.
+- [ ] Any low-sample result is labeled `[HYPOTHESIS]` or `[WATCHLIST]`, not production truth.
+- [ ] The response protects observability as strongly as it protects signal quality.
+
+If the output fails any of these checks, the audit is incomplete.
