@@ -711,14 +711,20 @@ function evaluateVidyaSqueeze(ctx) {
   const { vidya15, squeeze15, macd15, mlma1h, sott1h, volumeRatio, deltaRatio, executionQuality } = ctx;
   // Super Aggressive: Ignore VIDYA trend
   // if (!vidya15?.trendUp) return { rejectCode: 'VIDYA_TREND_DOWN' };
-  const hasMomentum = (squeeze15?.bullish && squeeze15?.rising) || (macd15?.aboveSignal && macd15?.histDelta > 0);
+  const hasMomentum = squeeze15?.rising || macd15?.histDelta > 0 || (squeeze15?.bullish && macd15?.aboveSignal);
   if (!hasMomentum) return { rejectCode: 'NO_MOMENTUM' };
   
-  const isStrongTrendExpansion = (squeeze15?.fired || macd15?.crossUp) && volumeRatio > 1.2;
+  const isStrongTrendExpansion = (squeeze15?.fired || macd15?.crossUp) && volumeRatio > 1.1;
   if (!isStrongTrendExpansion) {
     if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'OVEREXTENDED' };
+  } else {
+    if (ctx.vwapDistance > 3.5 || ctx.distToEma9 > 2.5) return { rejectCode: 'OVEREXTENDED_STRONG_TREND' };
   }
-  if (!macd15?.aboveSignal || macd15.histDelta < -Math.abs(macd15.hist) * 0.2) return { rejectCode: 'MACD_NOT_CONFIRMED' };
+
+  const distToEma21 = ctx.ema21_15m ? ((ctx.currentPrice - ctx.ema21_15m) / ctx.ema21_15m) * 100 : 0;
+  if (distToEma21 > 3.0) return { rejectCode: 'EMA21_OVEREXTENDED' };
+
+  if (macd15?.histDelta < -Math.abs(macd15?.hist || 0) * 0.5) return { rejectCode: 'MACD_NOT_CONFIRMED' };
 
   const trendQuality = 66
     + (vidya15.trendCrossUp ? 10 : 0)
@@ -770,6 +776,8 @@ function evaluateSMCReclaim(ctx) {
   const { smc1h, smc15, currentPrice, ema21_15m, vwap15m, macd15, twoPole15, volumeRatio, executionQuality } = ctx;
   const structureOk = smc1h?.recentBullishBOS || smc15?.recentBullishBOS || smc15?.bullishBOS;
   if (!structureOk) return { rejectCode: 'SMC_NO_BULLISH_STRUCTURE' };
+
+  if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'SMC_OVEREXTENDED' };
 
   const reclaimedValue = (
     Number.isFinite(ema21_15m) && ctx.last15m.low <= ema21_15m * 1.004 && currentPrice > ema21_15m
@@ -1002,6 +1010,7 @@ function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
     vwap: ctx.vwap15m,
     vwapDistance: ctx.vwap15m ? roundMetric(((ctx.currentPrice - ctx.vwap15m) / ctx.vwap15m) * 100) : null,
     module: candidate.module,
+    shadowOnly: candidate.shadowOnly === true,
     entryArchetype: candidate.entryArchetype,
     liquidityTier: ctx.liquidityTier,
     sector: getSector(symbol, QUOTE_ASSET),
@@ -1309,10 +1318,10 @@ export async function runAnalysis(context) {
           selectedSectorLeaders.set(signal.sector, symbol);
         }
 
-        if (GLOBAL_SHADOW_MODE) {
-          shadowCandidates.push(recordShadowNearMiss(signal, 'GLOBAL_SHADOW_MODE'));
-          telegramSignals.push(signal);
-          pLog(`[${runId}] SHADOW_FORCED: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
+        if (GLOBAL_SHADOW_MODE || signal.shadowOnly) {
+          shadowCandidates.push(recordShadowNearMiss(signal, GLOBAL_SHADOW_MODE ? 'GLOBAL_SHADOW_MODE' : 'SHADOW_ONLY_MODULE'));
+          if (GLOBAL_SHADOW_MODE) telegramSignals.push(signal);
+          pLog(`[${runId}] SHADOW_${GLOBAL_SHADOW_MODE ? 'FORCED' : 'MODULE'}: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
         } else {
           await recordSignalHistory(signal, context);
           signals.push(signal);

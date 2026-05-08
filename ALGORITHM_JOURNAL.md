@@ -6,7 +6,35 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-### Current Version: v13.0.0 (TradingView Fusion / Reversal Lab)
+### Current Version: v13.1.0 (TradingView Fusion / Reversal Lab)
+**Date:** May 8, 2026
+**Theme:** "ENTRY HARDENING & SHADOW SIDELINING"
+
+### Core Logic & Parameters:
+- **Runtime Versions:** `v13.1.0-TradingViewFusion` / `v3.1.0-TradingViewReversalLab`.
+- **Bot 1 Strategy:** Trend/reclaim bot with tightened overextension thresholds to prevent buying the top.
+- **Bot 2 Strategy:** Reversal lab with negative-EV modules sidelined.
+
+### Changes Made:
+
+#### [H1] Module Sidelining (Shadow-Only)
+- **Problem:** Forensic audit identified `SMC_DISCOUNT_RECLAIM` (-0.73 R) and `VIDYA_LIQUIDITY_SWEEP` (-0.17 R) as significant capital leaks with high Zero-MFE loss rates.
+- **Fix:** Implemented a `shadowOnly: true` flag for these modules. The signal generation loop now intercepts these candidates and records them purely as shadow signals, blocking live alerts.
+- **Expected Effect:** Stops the bleeding from these specific sub-strategies while continuing to collect performance data for future rehabilitation.
+- **Falsification:** If live trades from these modules appear in `persistent_logs.json` or Telegram, the shadow block failed.
+
+#### [H2] Entry Refactoring (Overextension Constraints)
+- **Problem:** High Zero-MFE rates indicated the bots were entering trends too late (exhaustion points).
+- **Fix:** Tightened the expansion limits in `evaluateVidyaSqueeze` and `evaluateSMCReclaim`. `vwapDistance` tolerance lowered from `> 2.5` to `> 1.5`, and `distToEma9` lowered from `> 1.8` to `> 1.2`. Added a strict check against `ema21_15m` deviation (`> 2.0`). Added `vwapDistance > 1.5` check to `evaluateVidyaLiquiditySweep` before sidelining.
+- **Expected Effect:** Lower overall signal frequency, but higher expectancy (EV) per trade by entering closer to the moving average anchors.
+
+### Validation Criteria:
+- **Zero-MFE Rate:** Must drop below 40% on new decisive trades over the next 14 days.
+- **Expectancy:** Remaining active modules (e.g., `TWO_POLE_CAPITULATION_RESET`, `VIDYA_SQUEEZE_EXPANSION`) should maintain positive expectancy > +0.2R.
+
+---
+
+### Previous Version: v13.0.0 (TradingView Fusion / Reversal Lab)
 **Date:** May 1, 2026
 **Theme:** "FULL STRATEGY RESET — TRADINGVIEW INDICATOR TRANSLATION"
 

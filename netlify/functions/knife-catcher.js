@@ -716,6 +716,9 @@ function evaluateVidyaLiquiditySweep(ctx) {
   const sweptLow = range20_5m && last5m.low < range20_5m.low * 0.998 && currentPrice > range20_5m.low;
   const structureReclaim = smc5m?.bullishBOS || smc5m?.nearBullishOrderBlock;
   if (!(sweptLow || structureReclaim)) return { rejectCode: 'VIDYA_NO_LIQUIDITY_SWEEP' };
+  
+  if (ctx.vwapDistance > 2.5) return { rejectCode: 'VIDYA_SWEEP_OVEREXTENDED' };
+
   if (!(macd5m?.histDelta > 0 || twoPole5m?.buy || twoPole5m?.bullish)) return { rejectCode: 'VIDYA_NO_RECLAIM_MOMENTUM' };
   if (volumeRatio5m < 1.15) return { rejectCode: 'VIDYA_SWEEP_LOW_VOLUME' };
   if (obMetrics?.obi < -0.12) return { rejectCode: 'VIDYA_ORDERBOOK_ASK_HEAVY' };
@@ -949,6 +952,7 @@ function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
     vwap: ctx.vwap15m,
     vwapDistance: ctx.vwap15m ? roundMetric(((ctx.currentPrice - ctx.vwap15m) / ctx.vwap15m) * 100) : null,
     module: candidate.module,
+    shadowOnly: candidate.shadowOnly === true,
     entryArchetype: candidate.entryArchetype,
     liquidityTier: ctx.liquidityTier,
     sector: getSector(symbol, QUOTE_ASSET),
@@ -1247,10 +1251,10 @@ export async function runAnalysis(context) {
           selectedSectorLeaders.set(signal.sector, symbol);
         }
 
-        if (GLOBAL_SHADOW_MODE) {
-          shadowCandidates.push(recordShadowNearMiss(signal, 'GLOBAL_SHADOW_MODE'));
-          telegramSignals.push(signal);
-          pLog(`[${runId}] SHADOW_FORCED: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
+        if (GLOBAL_SHADOW_MODE || signal.shadowOnly) {
+          shadowCandidates.push(recordShadowNearMiss(signal, GLOBAL_SHADOW_MODE ? 'GLOBAL_SHADOW_MODE' : 'SHADOW_ONLY_MODULE'));
+          if (GLOBAL_SHADOW_MODE) telegramSignals.push(signal);
+          pLog(`[${runId}] SHADOW_${GLOBAL_SHADOW_MODE ? 'FORCED' : 'MODULE'}: ${symbol} | ${signal.module} | score ${signal.score}/${signal.requiredScore}`);
         } else {
           await recordSignalHistory(signal, context);
           signals.push(signal);
