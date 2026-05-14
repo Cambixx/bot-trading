@@ -1,494 +1,270 @@
 import fs from 'fs';
 import path from 'path';
-import 'dotenv/config';
-import { 
-  getKlines, 
-  intervalToMs, 
-  formatPrice,
-  detectBTCContext,
-  MEXC_API,
-  fetchWithTimeout
-} from '../netlify/functions/tradingview-strategy-core.js';
+import { fileURLToPath } from 'url';
 
-// We will dynamically import the bots to avoid issues
-let traderBot, knifeBot;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const CONFIG = {
-  quoteAsset: 'USDT',
-  initialBalance: 10000,
-  defaultSlippage: 0.001, // 0.1%
-};
+async function getKlines(symbol, interval, limit = 1000, startTime = null, endTime = null) {
+  const mexcInterval = interval === '1h' ? '60m' : interval;
+  let url = `https://api.mexc.com/api/v3/klines?symbol=${symbol}&interval=${mexcInterval}&limit=${limit}`;
+  if (startTime) url += `&startTime=${startTime}`;
+  if (endTime) url += `&endTime=${endTime}`;
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data)) return [];
+    return data.map(k => ({
+      time: k[0],
+      open: parseFloat(k[1]),
+      high: parseFloat(k[2]),
+      low: parseFloat(k[3]),
+      close: parseFloat(k[4]),
+      volume: parseFloat(k[5])
+    }));
+  } catch (err) {
+    console.error(`[ERROR] Fetching ${symbol} ${interval}:`, err.message);
+    return [];
+  }
+}
 
-class BacktestEngine {
-  constructor(options) {
-    this.symbol = options.symbol;
-    this.botType = options.botType; // 'trader' or 'knife'
-    this.days = options.days || 7;
-    this.debug = options.debug || false;
-    this.start = options.start;
-    
-    this.balance = CONFIG.initialBalance;
-    this.position = null;
-    this.trades = [];
-    
-    this.data = {
-      '5m': [],
-      '15m': [],
-      '1h': [],
-      '4h': []
-    };
-    
-    this.btcData = {
-      '15m': [],
-      '1h': [],
-      '4h': []
-    };
-    
-    this.intervals = ['5m', '15m', '1h', '4h'];
-    this.mainInterval = this.botType === 'trader' ? '15m' : '5m';
-    this.start = options.start;
+class Backtester {
+  constructor(options = {}) {
+    this.symbol = (options.symbol || 'SOLUSDT').toUpperCase();
+    this.months = options.months || 1;
+    this.days = this.months * 30;
+    this.intervals = ['15m', '1h', '4h'];
+    this.relax = options.relax || false;
+    this.data = {};
+    this.btcData = {};
   }
 
   async loadData() {
-    console.log(`\n[DATA] Loading historical data for ${this.symbol} and BTCUSDT (${this.days} days)...`);
-    
-    const limit = 1000; 
-    const startTime = this.start ? new Date(this.start).getTime() : null;
-    
+    console.log(`[DATA] Loading ${this.days} days for ${this.symbol}...`);
+    const durationMs = this.days * 24 * 60 * 60 * 1000;
+    const endTime = Date.now();
+    // Load extra 5 days of history for indicators (EMA50, etc)
+    const startTime = endTime - durationMs - (5 * 24 * 60 * 60 * 1000);
+
     for (const interval of this.intervals) {
-      console.log(`  - Fetching ${this.symbol} ${interval} klines...`);
-      try {
-        this.data[interval] = await this.getKlinesPaged(this.symbol, interval, this.days);
-        if (interval !== '5m') {
-          this.btcData[interval] = await this.getKlinesPaged('BTCUSDT', interval, this.days);
-        }
-      } catch (err) {
-        console.error(`    Error loading ${interval}:`, err.message);
-      }
+      this.data[interval] = await this.fetchPaged(this.symbol, interval, startTime, endTime);
+      this.btcData[interval] = await this.fetchPaged('BTCUSDT', interval, startTime, endTime);
+      console.log(`  - ${interval}: ${this.data[interval].length} candles loaded.`);
     }
-    
-    console.log(`[DATA] Loaded data series for each interval.`);
   }
 
-  async getKlinesPaged(symbol, interval, days) {
-    const intervalMin = intervalToMs(interval) / 60000;
-    const totalNeeded = Math.ceil((days * 24 * 60) / intervalMin);
-    const limit = 500; 
-    let allKlines = [];
-    
-    // Start from 'days' ago
-    let currentStartTime = this.start 
-      ? new Date(this.start).getTime() 
-      : Date.now() - (days * 24 * 60 * 60 * 1000) - (200 * intervalMin * 60000);
-
-    const now = Date.now();
-
-    while (allKlines.length < totalNeeded + 200) {
-      // IMPORTANT: Provide both startTime and endTime to ensure MEXC pages correctly
-      const klines = await getKlines(symbol, interval, limit, currentStartTime, now);
+  async fetchPaged(symbol, interval, start, end) {
+    const all = [];
+    let cursor = start;
+    while (cursor < end) {
+      const klines = await getKlines(symbol, interval, 1000, cursor, end);
       if (!klines || klines.length === 0) break;
-      
-      const lastTime = allKlines.length > 0 ? allKlines[allKlines.length - 1].time : -1;
-      const newKlines = klines.filter(k => k.time > lastTime);
-      
-      if (newKlines.length === 0) break;
-      
-      allKlines = allKlines.concat(newKlines);
-      currentStartTime = allKlines[allKlines.length - 1].time + 1;
-      
-      if (klines.length < limit) break; 
-      if (allKlines.length > 15000) break; 
+      all.push(...klines);
+      const lastTime = klines[klines.length - 1].time;
+      if (lastTime <= cursor) break;
+      cursor = lastTime + 1;
+      if (all.length > 50000) break;
     }
-
-    console.log(`    -> Loaded ${allKlines.length} candles for ${symbol} ${interval}`);
-    return allKlines;
-  }
-
-  getSnapshot(data, currentTime, interval) {
-    if (!data[interval]) return [];
-    return data[interval].filter(c => c.time <= currentTime);
+    return all;
   }
 
   async run() {
     await this.loadData();
-    
-    const mainCandles = this.data[this.mainInterval];
-    if (mainCandles.length < 150) {
-      console.error("[ERROR] Not enough data to run simulation.");
-      return;
-    }
+    const botModule = await import('../netlify/functions/trader-bot.js');
+    const { generateSignal } = botModule;
 
-    console.log(`\n[RUN] Starting backtest for ${this.botType} bot...`);
-    
-    try {
-      if (this.botType === 'trader') {
-        traderBot = await import('../netlify/functions/trader-bot.js');
-      } else {
-        knifeBot = await import('../netlify/functions/knife-catcher.js');
-      }
-    } catch (err) {
-      console.error("[ERROR] Failed to import bot logic:", err.message);
-      return;
-    }
+    const main = this.data['15m'];
+    const trades = [];
+    let active = null;
+    let stats = { wins: 0, losses: 0, be: 0, pnl: 0 };
+    const analysisState = { 
+      rejectCounts: {}, 
+      stageCounts: {},
+      relaxedMode: this.relax 
+    };
 
-    const botMod = this.botType === 'trader' ? traderBot : knifeBot;
+    // Find the real start time of the simulation (after history)
+    const simulationStartTime = Date.now() - (this.days * 24 * 60 * 60 * 1000);
+    const startIndex = main.findIndex(c => c.time >= simulationStartTime);
+    const effectiveStart = startIndex === -1 ? 200 : Math.max(200, startIndex);
 
-    const globalState = { rejectCounts: {} };
-    if (mainCandles.length > 0) {
-      console.log(`[RUN] First candle time: ${new Date(mainCandles[0].time).toUTCString()}`);
-    }
+    console.log(`\n[RUN] Simulating from candle index ${effectiveStart} (${main.length - effectiveStart} total candles)...`);
 
-    // Simulation Loop - Start at 250 to ensure MTF history
-    for (let i = 250; i < mainCandles.length; i++) {
-      const currentCandle = mainCandles[i];
-      const currentTime = currentCandle.time;
-      
-      if (this.position) {
-        this.updatePosition(currentCandle);
+    for (let i = effectiveStart; i < main.length; i++) {
+      const candle = main[i];
+      const t = candle.time;
+
+      if (active) {
+        // High/Low check for exit
+        if (candle.high >= active.tp) {
+          stats.wins++; stats.pnl += active.tpPct;
+          trades.push({ ...active, exitPrice: active.tp, exitTime: t, result: 'WIN', pnl: active.tpPct });
+          active = null;
+        } else if (candle.low <= active.sl) {
+          const exitPnl = ((active.sl - active.entry) / active.entry) * 100;
+          if (active.be) stats.be++; else stats.losses++;
+          stats.pnl += exitPnl;
+          trades.push({ ...active, exitPrice: active.sl, exitTime: t, result: active.be ? 'BE' : 'LOSS', pnl: exitPnl });
+          active = null;
+        } else {
+          // Break-even check during trade
+          const currentPnl = ((candle.close - active.entry) / active.entry) * 100;
+          if (!active.be && currentPnl >= active.tpPct * 0.5) {
+            active.sl = active.entry * 1.001;
+            active.be = true;
+          }
+        }
         continue;
       }
 
-      const snapshot = {};
-      for (const interval of this.intervals) {
-        snapshot[interval] = this.getSnapshot(this.data, currentTime, interval);
-      }
-      
-      const btcSnapshot = {};
-      for (const interval of ['15m', '1h', '4h']) {
-        btcSnapshot[interval] = this.getSnapshot(this.btcData, currentTime, interval);
-      }
+      const signal = await generateSignal(
+        this.symbol, 
+        main.slice(0, i + 1),
+        this.data['1h'].filter(c => c.time <= t),
+        this.data['4h'].filter(c => c.time <= t),
+        { bids: [[candle.close, 1000000]], asks: [[candle.close, 1000000]], depthQuoteTopN: 500000, spreadBps: 2 }, // mock OB
+        { priceChangePercent: 0, quoteVolume: 100000000 }, // mock 100M volume
+        { 
+          status: 'GREEN', 
+          regime: 'TRENDING',
+          bias: 'BULLISH',
+          closes1h: this.btcData['1h'].filter(c => c.time <= t).map(c => c.close), 
+          closes4h: this.btcData['4h'].filter(c => c.time <= t).map(c => c.close),
+          priceChange24h: 0
+        },
+        analysisState
+      );
 
-
-
-      const btcContext = btcSnapshot['15m'].length > 20 
-        ? detectBTCContext(btcSnapshot['15m'], btcSnapshot['1h'], btcSnapshot['4h'])
-        : { regime: 'NEUTRAL', bias: 'NEUTRAL', volatility: 'NORMAL' };
-
-      // FORCED FOR EXPERIMENT: Ignore BTC risk
-      btcContext.status = 'GREEN';
-      btcContext.regime = 'TRENDING';
-
-      let signal = null;
-      const state = { stageCounts: {}, rejectCounts: {}, moduleCandidates: {}, debug: i < 260 };
-      try {
-        const mockTicker = { 
-          lastPrice: currentCandle.close, 
-          priceChangePercent: 0,
-          quoteVolume: 100000000 
+      if (signal) {
+        active = {
+          entry: candle.close, 
+          tp: signal.takeProfit, 
+          sl: signal.stopLoss,
+          tpPct: ((signal.takeProfit - candle.close) / candle.close) * 100,
+          module: signal.module, 
+          entryTime: t, 
+          be: false
         };
-        const mockOB = { 
-          bids: [[currentCandle.close * 0.999, 100000]], 
-          asks: [[currentCandle.close * 1.001, 100000]],
-          depthQuoteTopN: 500000,
-          spreadBps: 2
-        };
-
-        if (this.botType === 'trader') {
-          signal = await botMod.generateSignal(
-            this.symbol, 
-            snapshot['15m'], 
-            snapshot['1h'], 
-            snapshot['4h'],
-            mockOB,
-            mockTicker,
-            btcContext,
-            state
-          );
-        } else {
-          signal = await botMod.generateSignal(
-            this.symbol,
-            snapshot['5m'],
-            snapshot['15m'],
-            snapshot['1h'],
-            snapshot['4h'],
-            mockOB,
-            mockTicker,
-            btcContext,
-            state
-          );
-        }
-        
-        // Aggregate rejections
-        for (const [code, count] of Object.entries(state.rejectCounts)) {
-          globalState.rejectCounts[code] = (globalState.rejectCounts[code] || 0) + count;
-        }
-
-        if (this.debug) {
-           if (signal) {
-             console.log(`[DEBUG] ${new Date(currentTime).toISOString().substring(11, 16)} | Signal! Score: ${signal.score?.toFixed(1)}`);
-           }
-        }
-      } catch (err) {
-         if (this.debug) console.error(`Error at ${new Date(currentTime).toISOString()}:`, err.message);
-      }
-
-      if (signal && signal.side === 'BUY') {
-        this.openPosition(signal, currentCandle);
+        console.log(`[TRADE] ${new Date(t).toISOString().slice(0,16)} | OPEN at ${candle.close.toFixed(2)} | ${signal.module}`);
       }
     }
 
-    this.printReport();
-    this.printRejectionSummary(globalState);
-    await this.saveResults(globalState);
+    if (active) {
+      const pnl = ((main[main.length - 1].close - active.entry) / active.entry) * 100;
+      trades.push({ ...active, exitPrice: main[main.length - 1].close, exitTime: main[main.length - 1].time, result: 'OPEN', pnl });
+      stats.pnl += pnl;
+    }
+
+    this.report(stats, trades, analysisState);
   }
 
-  async saveResults(state) {
-    const results = {
-      timestamp: new Date().toISOString(),
+  report(stats, trades, analysisState) {
+    const totalTrades = trades.length;
+    const winRate = totalTrades > 0 ? ((stats.wins + stats.be) / totalTrades * 100).toFixed(2) : 0;
+    
+    console.log(`\n============================================================`);
+    console.log(`BACKTEST REPORT: ${this.symbol}`);
+    console.log(`============================================================`);
+    console.log(`Total Trades:  ${totalTrades}`);
+    console.log(`Win Rate:      ${winRate}% (Wins + BE)`);
+    console.log(`Net PnL %:     ${stats.pnl.toFixed(2)}%`);
+    console.log(`Avg Trade %:   ${(stats.pnl / (totalTrades || 1)).toFixed(2)}%`);
+    console.log(`============================================================`);
+
+    if (totalTrades === 0) {
+      console.log(`\nREJECTION SUMMARY (Top 5 reasons):`);
+      const sortedRejections = Object.entries(analysisState.rejectCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+      sortedRejections.forEach(([reason, count]) => {
+        console.log(`  - ${reason}: ${count}`);
+      });
+    }
+
+    const reportData = {
       symbol: this.symbol,
-      botType: this.botType,
-      config: CONFIG,
-      metrics: {
-        totalTrades: this.trades.length,
-        winRate: this.trades.length > 0 ? (this.trades.filter(t => t.pnlPct > 0).length / this.trades.length * 100) : 0,
-        netPnlPct: this.trades.reduce((sum, t) => sum + t.pnlPct, 0),
-        avgTradePct: this.trades.length > 0 ? (this.trades.reduce((sum, t) => sum + t.pnlPct, 0) / this.trades.length) : 0,
-      },
-      rejections: state.rejectCounts,
-      trades: this.trades
+      config: { months: this.months, relax: this.relax },
+      stats: { ...stats, totalTrades, winRate },
+      rejections: analysisState.rejectCounts,
+      stages: analysisState.stageCounts,
+      trades: trades
     };
 
-    const fileName = `${this.botType}-${this.symbol}-${new Date().getTime()}`;
-    const jsonPath = path.join('backtests', `${fileName}.json`);
-    const htmlPath = path.join('backtests', `${fileName}.html`);
+    const reportDir = path.join(__dirname, '../backtests');
+    if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir);
 
-    fs.writeFileSync(jsonPath, JSON.stringify(results, null, 2));
-    fs.writeFileSync(htmlPath, this.generateHtml(results));
+    const jsonPath = path.join(reportDir, 'backtest-report.json');
+    const htmlPath = path.join(reportDir, 'backtest-report.html');
 
-    console.log(`\n[EXPORT] Results saved to:`);
-    console.log(`  - JSON: ${jsonPath}`);
-    console.log(`  - HTML: ${htmlPath}`);
-  }
+    fs.writeFileSync(jsonPath, JSON.stringify(reportData, null, 2));
 
-  generateHtml(data) {
-    const tradesHtml = data.trades.map(t => `
-      <tr class="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
-        <td class="py-4 px-4 text-gray-400 text-sm">${new Date(t.entryTime).toISOString().replace('T', ' ').substring(0, 16)}</td>
-        <td class="py-4 px-4 font-medium text-blue-400">${t.exitReason}</td>
-        <td class="py-4 px-4 text-gray-300">$${t.entryPrice.toFixed(4)}</td>
-        <td class="py-4 px-4 text-gray-300">$${t.exitPrice.toFixed(4)}</td>
-        <td class="py-4 px-4 font-bold ${t.pnlPct > 0 ? 'text-green-400' : 'text-red-400'}">
-          ${t.pnlPct > 0 ? '+' : ''}${t.pnlPct.toFixed(2)}%
-        </td>
-      </tr>
-    `).join('');
-
-    const rejectionsHtml = Object.entries(data.rejections).sort((a,b) => b[1] - a[1]).map(([code, count]) => `
-      <div class="flex justify-between items-center py-2 border-b border-gray-800">
-        <span class="text-gray-400 text-sm">${code}</span>
-        <span class="bg-gray-800 px-3 py-1 rounded-full text-xs font-mono text-gray-300">${count}</span>
+    const html = `
+    <html>
+    <head>
+      <title>Backtest Report - ${this.symbol}</title>
+      <style>
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: #f1f5f9; padding: 40px; line-height: 1.6; }
+        .card { background: #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #334155; }
+        h1 { color: #38bdf8; margin-top: 0; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .stat-item { text-align: center; padding: 16px; background: #0f172a; border-radius: 8px; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #38bdf8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; background: #334155; padding: 12px; border-bottom: 2px solid #475569; }
+        td { padding: 12px; border-bottom: 1px solid #334155; }
+        .win { color: #4ade80; }
+        .loss { color: #f87171; }
+        .be { color: #94a3b8; }
+      </style>
+    </head>
+    <body>
+      <h1>Backtest: ${this.symbol} (${this.months} Months)</h1>
+      <div class="card">
+        <div class="stat-grid">
+          <div class="stat-item"><div class="stat-label">Total Trades</div><div class="stat-value">${totalTrades}</div></div>
+          <div class="stat-item"><div class="stat-label">Win Rate</div><div class="stat-value">${winRate}%</div></div>
+          <div class="stat-item"><div class="stat-label">Net PnL</div><div class="stat-value">${stats.pnl.toFixed(2)}%</div></div>
+          <div class="stat-item"><div class="stat-label">Avg Trade</div><div class="stat-value">${(stats.pnl / (totalTrades || 1)).toFixed(2)}%</div></div>
+        </div>
       </div>
-    `).join('');
+      <div class="card">
+        <h2>Trade History</h2>
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Module</th><th>Result</th><th>PnL %</th></tr>
+          </thead>
+          <tbody>
+            ${trades.map(t => `
+              <tr>
+                <td>${new Date(t.entryTime).toLocaleString()}</td>
+                <td>${t.module}</td>
+                <td class="${t.result.toLowerCase()}">${t.result}</td>
+                <td class="${t.pnl >= 0 ? 'win' : 'loss'}">${t.pnl.toFixed(2)}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </body>
+    </html>`;
 
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Backtest Report - ${data.symbol}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f1f5f9; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .metric-card { transition: transform 0.2s; }
-        .metric-card:hover { transform: translateY(-4px); }
-    </style>
-</head>
-<body class="p-8">
-    <div class="max-w-6xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-12">
-            <div>
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-                    Backtest Analysis
-                </h1>
-                <p class="text-gray-400 mt-2">${data.botType.toUpperCase()} Bot • ${data.symbol} • ${new Date(data.timestamp).toLocaleString()}</p>
-            </div>
-            <div class="text-right">
-                <span class="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full border border-blue-500/20 text-sm font-semibold">
-                    ${data.config.quoteAsset} Base
-                </span>
-            </div>
-        </div>
-
-        <!-- Metrics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div class="glass p-6 rounded-2xl metric-card">
-                <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold">Net PnL</p>
-                <h2 class="text-3xl font-bold mt-2 ${data.metrics.netPnlPct > 0 ? 'text-green-400' : 'text-red-400'}">
-                    ${data.metrics.netPnlPct > 0 ? '+' : ''}${data.metrics.netPnlPct.toFixed(2)}%
-                </h2>
-            </div>
-            <div class="glass p-6 rounded-2xl metric-card">
-                <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold">Win Rate</p>
-                <h2 class="text-3xl font-bold mt-2 text-blue-400">${data.metrics.winRate.toFixed(1)}%</h2>
-            </div>
-            <div class="glass p-6 rounded-2xl metric-card">
-                <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold">Total Trades</p>
-                <h2 class="text-3xl font-bold mt-2 text-white">${data.metrics.totalTrades}</h2>
-            </div>
-            <div class="glass p-6 rounded-2xl metric-card">
-                <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold">Avg / Trade</p>
-                <h2 class="text-3xl font-bold mt-2 text-gray-300">${data.metrics.avgTradePct.toFixed(2)}%</h2>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <!-- Trade List -->
-            <div class="lg:col-span-2">
-                <h3 class="text-xl font-bold mb-6 flex items-center">
-                    <span class="w-2 h-8 bg-blue-500 rounded-full mr-4"></span>
-                    Recent Executions
-                </h3>
-                <div class="glass rounded-2xl overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-800/50 text-gray-400 text-xs uppercase tracking-wider">
-                            <tr>
-                                <th class="py-4 px-4 font-semibold">Date</th>
-                                <th class="py-4 px-4 font-semibold">Reason</th>
-                                <th class="py-4 px-4 font-semibold">Entry</th>
-                                <th class="py-4 px-4 font-semibold">Exit</th>
-                                <th class="py-4 px-4 font-semibold">PnL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tradesHtml || '<tr><td colspan="5" class="py-8 text-center text-gray-500">No trades executed in this window</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Rejection Summary -->
-            <div>
-                <h3 class="text-xl font-bold mb-6 flex items-center">
-                    <span class="w-2 h-8 bg-indigo-500 rounded-full mr-4"></span>
-                    Rejection Profile
-                </h3>
-                <div class="glass p-6 rounded-2xl">
-                    <p class="text-gray-400 text-sm mb-6">Why signals were ignored by the engine:</p>
-                    <div class="space-y-2">
-                        ${rejectionsHtml || '<p class="text-gray-500">No data</p>'}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-16 text-center text-gray-600 text-xs border-t border-gray-800 pt-8">
-            Backtest engine v1.2 • High Fidelity Simulation • Generated by Antigravity AI
-        </div>
-    </div>
-</body>
-</html>
-    `;
-  }
-
-  openPosition(signal, candle) {
-    const entryPrice = candle.close * (1 + CONFIG.defaultSlippage);
-    this.position = {
-      symbol: this.symbol,
-      entryPrice,
-      entryTime: candle.time,
-      stopLoss: signal.stopLoss || (entryPrice * 0.98),
-      takeProfit: signal.takeProfit1 || (entryPrice * 1.05),
-      tp2: signal.takeProfit2,
-      confidence: signal.confidence,
-      reason: signal.reason,
-      maxSeen: entryPrice,
-      trailActive: false
-    };
-    
-    console.log(`[TRADE] ${new Date(candle.time).toISOString().replace('T', ' ').substring(0, 16)} | OPEN  at ${formatPrice(entryPrice)} | Reason: ${signal.reason.substring(0, 60)}...`);
-  }
-
-  updatePosition(candle) {
-    const p = this.position;
-    
-    if (candle.high > p.maxSeen) {
-      p.maxSeen = candle.high;
-      const profitPct = (p.maxSeen - p.entryPrice) / p.entryPrice;
-      
-      // Dynamic Trailing Stop (1.5% from peak after 2.5% profit)
-      if (profitPct > 0.025) {
-        p.trailActive = true;
-        const newSL = p.maxSeen * 0.985;
-        if (newSL > p.stopLoss) {
-          p.stopLoss = newSL;
-        }
-      }
-    }
-
-    if (candle.low <= p.stopLoss) {
-      this.closePosition(p.stopLoss, candle.time, 'STOP_LOSS');
-    } else if (candle.high >= p.takeProfit) {
-      // For backtest simplicity, we close 100% at TP1. 
-      // In live, it might be partial.
-      this.closePosition(p.takeProfit, candle.time, 'TAKE_PROFIT');
-    }
-  }
-
-  closePosition(exitPrice, exitTime, reason) {
-    const p = this.position;
-    const pnlPct = (exitPrice - p.entryPrice) / p.entryPrice;
-    
-    const trade = {
-      ...p,
-      exitPrice,
-      exitTime,
-      exitReason: reason,
-      pnlPct: pnlPct * 100
-    };
-    
-    this.trades.push(trade);
-    this.position = null;
-    
-    const emoji = pnlPct > 0 ? '✅' : '❌';
-    console.log(`[TRADE] ${new Date(exitTime).toISOString().replace('T', ' ').substring(0, 16)} | CLOSE at ${formatPrice(exitPrice)} | Result: ${emoji} ${trade.pnlPct.toFixed(2)}% | Reason: ${reason}`);
-  }
-
-  printReport() {
-    console.log(`\n${'='.repeat(60)}`);
-    console.log(`BACKTEST REPORT: ${this.botType.toUpperCase()} on ${this.symbol}`);
-    console.log(`${'='.repeat(60)}`);
-    
-    if (this.trades.length === 0) {
-      console.log("No trades executed.");
-      return;
-    }
-
-    const wins = this.trades.filter(t => t.pnlPct > 0);
-    const totalPnl = this.trades.reduce((sum, t) => sum + t.pnlPct, 0);
-    
-    console.log(`Total Trades:  ${this.trades.length}`);
-    console.log(`Win Rate:      ${(wins.length / this.trades.length * 100).toFixed(2)}%`);
-    console.log(`Net PnL %:     ${totalPnl.toFixed(2)}%`);
-    console.log(`Avg Trade:     ${(totalPnl / this.trades.length).toFixed(2)}%`);
-    console.log(`Best Trade:    ${Math.max(...this.trades.map(t => t.pnlPct)).toFixed(2)}%`);
-    console.log(`Worst Trade:   ${Math.min(...this.trades.map(t => t.pnlPct)).toFixed(2)}%`);
-    console.log(`${'='.repeat(60)}\n`);
-  }
-
-  printRejectionSummary(state) {
-    console.log(`\nREJECTION SUMMARY:`);
-    console.log(`${'='.repeat(30)}`);
-    const sorted = Object.entries(state.rejectCounts || {}).sort((a, b) => b[1] - a[1]);
-    for (const [code, count] of sorted) {
-      console.log(`${code.padEnd(25)}: ${count}`);
-    }
-    console.log(`${'='.repeat(30)}\n`);
+    fs.writeFileSync(htmlPath, html);
+    console.log(`\n[EXPORT] Reports saved to: \n  - JSON: ${jsonPath}\n  - HTML: ${htmlPath}`);
   }
 }
 
 const args = process.argv.slice(2);
-const options = {
-  symbol: args.find(a => !a.startsWith('--')) || 'BTCUSDT',
-  botType: args.includes('--bot=knife') ? 'knife' : 'trader',
-  days: parseInt(args.find(a => a.startsWith('--days='))?.split('=')[1]) || 5,
-  debug: args.includes('--debug'),
-  start: args.find(a => a.startsWith('--start='))?.split('=')[1]
-};
+const options = {};
+args.forEach(a => { 
+  if (a.includes('=')) { 
+    const [k, v] = a.split('='); 
+    options[k.replace('--','')] = v === 'true' ? true : v === 'false' ? false : v; 
+  } else if (a.startsWith('--')) {
+    options[a.replace('--','')] = true;
+  }
+});
 
-const engine = new BacktestEngine(options);
-engine.run().catch(console.error);
+const tester = new Backtester(options);
+tester.run().catch(console.error);

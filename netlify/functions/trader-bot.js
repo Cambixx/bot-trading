@@ -59,10 +59,11 @@ const GLOBAL_SHADOW_MODE = (process.env.TRADER_GLOBAL_SHADOW_MODE || 'false').to
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 48;
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 15000000;
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 5;
+const SIGNAL_SCORE_THRESHOLD = 65; // Balanced threshold
 const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 100;
 const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 1000;
-const MIN_ATR_PCT = process.env.MIN_ATR_PCT ? Number(process.env.MIN_ATR_PCT) : 0.10;
+const MIN_SCORE_THRESHOLD = 68; // Balanced floor
+const MIN_ATR_PCT = 0.05;
 const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 5.5;
 const ALERT_COOLDOWN_MIN = process.env.ALERT_COOLDOWN_MIN ? Number(process.env.ALERT_COOLDOWN_MIN) : 240;
 const AVOID_ASIA_SESSION = (process.env.AVOID_ASIA_SESSION || 'false').toLowerCase() === 'true';
@@ -698,8 +699,8 @@ function calculateRecommendedSize(score, atrPct, regime, module, liquidityTier, 
 }
 
 function getRequiredScore(candidate, ctx) {
-  let required = candidate.baseRequiredScore ?? SIGNAL_SCORE_THRESHOLD;
-  if (ctx.liquidityTier === 'MEDIUM') required += 2;
+  let required = Math.max(candidate.baseRequiredScore || 0, SIGNAL_SCORE_THRESHOLD);
+  if (ctx.liquidityTier === 'MEDIUM') required += 3;
   if (ctx.btcContext?.status === 'AMBER') required += 3;
   if (ctx.regime === 'RANGING' && candidate.module === 'VIDYA_SQUEEZE_EXPANSION') required += 4;
   if (ctx.regime === 'VOLATILE_TRANSITION') required += 3;
@@ -711,30 +712,40 @@ function evaluateVidyaSqueeze(ctx) {
   const { vidya15, squeeze15, macd15, mlma1h, sott1h, volumeRatio, deltaRatio, executionQuality } = ctx;
   // Super Aggressive: Ignore VIDYA trend
   // if (!vidya15?.trendUp) return { rejectCode: 'VIDYA_TREND_DOWN' };
-  const hasMomentum = squeeze15?.rising || macd15?.histDelta > 0 || (squeeze15?.bullish && macd15?.aboveSignal);
-  if (!hasMomentum) return { rejectCode: 'NO_MOMENTUM' };
+  const hasMomentum = ctx.macd15?.histDelta > 0 || squeeze15?.rising;
+  if (!hasMomentum && !ctx.relaxedMode) return { rejectCode: 'MACD_NOT_CONFIRMED' };
   
   const isStrongTrendExpansion = (squeeze15?.fired || macd15?.crossUp) && volumeRatio > 1.1;
   if (!isStrongTrendExpansion) {
-    if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'OVEREXTENDED' };
+    const vwapLimit = ctx.relaxedMode ? 5.0 : 2.5;
+    const emaLimit = ctx.relaxedMode ? 3.5 : 1.8;
+    if (ctx.vwapDistance > vwapLimit || ctx.distToEma9 > emaLimit) return { rejectCode: 'OVEREXTENDED' };
   } else {
-    if (ctx.vwapDistance > 3.5 || ctx.distToEma9 > 2.5) return { rejectCode: 'OVEREXTENDED_STRONG_TREND' };
+    const vwapLimit = ctx.relaxedMode ? 7.0 : 3.5;
+    const emaLimit = ctx.relaxedMode ? 5.0 : 2.5;
+    if (ctx.vwapDistance > vwapLimit || ctx.distToEma9 > emaLimit) return { rejectCode: 'OVEREXTENDED_STRONG_TREND' };
   }
 
   const distToEma21 = ctx.ema21_15m ? ((ctx.currentPrice - ctx.ema21_15m) / ctx.ema21_15m) * 100 : 0;
-  if (distToEma21 > 3.0) return { rejectCode: 'EMA21_OVEREXTENDED' };
+  const ema21Limit = ctx.relaxedMode ? 5.0 : 3.0;
+  if (distToEma21 > ema21Limit) return { rejectCode: 'EMA21_OVEREXTENDED' };
 
-  if (macd15?.histDelta < -Math.abs(macd15?.hist || 0) * 0.5) return { rejectCode: 'MACD_NOT_CONFIRMED' };
+  if (macd15?.histDelta < -Math.abs(macd15?.hist || 0) * 0.5 && !ctx.relaxedMode) return { rejectCode: 'MACD_NOT_CONFIRMED' };
 
   const trendQuality = 66
     + (vidya15.trendCrossUp ? 10 : 0)
     + (mlma1h?.bullish ? 7 : 0)
     + (sott1h?.strongBull ? 7 : 0);
+  
+  // Regime penalty for ranging markets to avoid chop
+  const regimePenalty = (ctx.regime === 'RANGING') ? 5 : 0;
+
   const expansionQuality = 64
     + (squeeze15.fired ? 12 : 0)
     + (squeeze15.sqzOff ? 5 : 0)
     + (macd15.crossUp ? 7 : 0)
-    + clamp(macd15.histDelta * 1000, 0, 8);
+    + clamp(macd15.histDelta * 1000, 0, 8)
+    - regimePenalty;
   const participationQuality = 58
     + clamp((volumeRatio - 1) * 18, -8, 16)
     + clamp((deltaRatio || 0) * 12, -5, 8)
@@ -752,7 +763,7 @@ function evaluateVidyaSqueeze(ctx) {
       module: 'VIDYA_SQUEEZE_EXPANSION',
       entryArchetype: 'Volumatic VIDYA trend expansion',
       score: clamp(score, 0, 100),
-      baseRequiredScore: 5,
+      baseRequiredScore: 65,
       minVolumeRatio: 0.5,
       tpR: 2.3,
       slAtr: 1.35,
@@ -774,10 +785,12 @@ function evaluateVidyaSqueeze(ctx) {
 
 function evaluateSMCReclaim(ctx) {
   const { smc1h, smc15, currentPrice, ema21_15m, vwap15m, macd15, twoPole15, volumeRatio, executionQuality } = ctx;
-  const structureOk = smc1h?.recentBullishBOS || smc15?.recentBullishBOS || smc15?.bullishBOS;
+  const structureOk = smc1h?.recentBullishBOS || smc15?.recentBullishBOS || smc15?.bullishBOS || smc15?.bullishCHoCH;
   if (!structureOk) return { rejectCode: 'SMC_NO_BULLISH_STRUCTURE' };
 
-  if (ctx.vwapDistance > 2.5 || ctx.distToEma9 > 1.8) return { rejectCode: 'SMC_OVEREXTENDED' };
+  const vwapLimit = ctx.relaxedMode ? 5.0 : 2.5;
+  const emaLimit = ctx.relaxedMode ? 3.5 : 1.8;
+  if (ctx.vwapDistance > vwapLimit || ctx.distToEma9 > emaLimit) return { rejectCode: 'SMC_OVEREXTENDED' };
 
   const reclaimedValue = (
     Number.isFinite(ema21_15m) && ctx.last15m.low <= ema21_15m * 1.004 && currentPrice > ema21_15m
@@ -786,7 +799,7 @@ function evaluateSMCReclaim(ctx) {
   ) || smc15?.nearBullishOrderBlock;
 
   if (!reclaimedValue) return { rejectCode: 'SMC_NO_VALUE_RECLAIM' };
-  if (!(macd15?.histDelta > 0 || twoPole15?.bullish || twoPole15?.buy)) return { rejectCode: 'SMC_NO_MOMENTUM_RECLAIM' };
+  if (!((macd15?.histDelta > 0) || twoPole15?.bullish || twoPole15?.buy)) return { rejectCode: 'SMC_NO_MOMENTUM_RECLAIM' };
 
   const trendQuality = 66 + (smc1h?.recentBullishBOS ? 8 : 0) + (smc15?.bullishBOS ? 8 : 0) + (smc15?.bullishFVG ? 4 : 0);
   const expansionQuality = 60 + (twoPole15?.buy ? 10 : 0) + (macd15?.histDelta > 0 ? 6 : 0);
@@ -798,7 +811,7 @@ function evaluateSMCReclaim(ctx) {
       module: 'SMC_DISCOUNT_RECLAIM',
       entryArchetype: 'SMC value reclaim',
       score: clamp(score, 0, 100),
-      baseRequiredScore: 5,
+      baseRequiredScore: 65,
       minVolumeRatio: 0.5,
       tpR: 2.4,
       slAtr: 1.2,
@@ -837,7 +850,7 @@ function evaluateTwoPoleContinuation(ctx) {
       module: 'TWO_POLE_PULLBACK_CONTINUATION',
       entryArchetype: 'Two-Pole pullback continuation',
       score: clamp(score, 0, 100),
-      baseRequiredScore: 5,
+      baseRequiredScore: 66,
       minVolumeRatio: 0.5,
       tpR: 2.05,
       slAtr: 1.15,
@@ -856,6 +869,144 @@ function evaluateTwoPoleContinuation(ctx) {
     }
   };
 }
+function evaluateQuantumReversion(ctx) {
+  const { rsi15m, currentPrice, ema9_15m, ema21_15m, volumeRatio, executionQuality, bb15m } = ctx;
+  const rsiThreshold = ctx.relaxedMode ? 50 : 45;
+  if (!rsi15m || rsi15m > rsiThreshold) return { rejectCode: 'REVERSION_RSI_NOT_OVERSOLD' };
+  
+  const isDeepPullback = currentPrice < bb15m?.lower * 1.002 || currentPrice < ctx.ema50_15m * 0.99;
+  if (!isDeepPullback && !ctx.relaxedMode) return { rejectCode: 'REVERSION_NOT_DEEP_ENOUGH' };
+
+  const priceReclaim = currentPrice > ema9_15m;
+  if (!priceReclaim && !ctx.relaxedMode) return { rejectCode: 'REVERSION_NO_RECLAIM' };
+
+  const trendQuality = 60 + (rsi15m < 30 ? 15 : 5);
+  const expansionQuality = 65 + (ctx.macd15?.histDelta > 0 ? 10 : 0);
+  const participationQuality = 55 + clamp((volumeRatio - 1.0) * 20, 0, 15);
+  const score = Math.round(trendQuality * 0.25 + expansionQuality * 0.35 + participationQuality * 0.25 + executionQuality * 0.15);
+
+  return {
+    candidate: {
+      module: 'QUANTUM_REVERSION',
+      entryArchetype: 'Mean Reversion - RSI Reclaim',
+      score: clamp(score, 0, 100),
+      baseRequiredScore: 68,
+      minVolumeRatio: 0.3,
+      tpR: 2.1,
+      slAtr: 1.2,
+      timeStopHours: 6,
+      qualityBreakdown: {
+        trend: roundMetric(trendQuality, 1),
+        expansion: roundMetric(expansionQuality, 1),
+        participation: roundMetric(participationQuality, 1),
+        execution: roundMetric(executionQuality, 1)
+      },
+      reasons: [
+        'Oversold condition reached',
+        'Mean reversion price reclaim',
+        'Volatility cooling after drop'
+      ]
+    }
+  };
+}
+
+function evaluateMacdDivergence(ctx) {
+  const { macd15, rsi15m, currentPrice, last15m, executionQuality } = ctx;
+  if (!macd15 || !rsi15m) return { rejectCode: 'DIVERGENCE_INDICATOR_GAP' };
+
+  // Calculate a small series for divergence check
+  const closes = ctx.closes15m.slice(-20);
+  const fastSeries = calculateEMA(closes, 12, true); // Assuming calculateEMA can return series
+  const slowSeries = calculateEMA(closes, 26, true);
+  
+  if (!fastSeries || !slowSeries) return { rejectCode: 'DIVERGENCE_SERIES_GAP' };
+  
+  const histSeries = fastSeries.map((f, i) => {
+    const s = slowSeries[i];
+    if (f === null || s === null) return null;
+    return f - s;
+  });
+
+  const recentCandles = ctx.candles15m.slice(-10);
+  const lowestPriceIdx = recentCandles.reduce((minIdx, c, i, arr) => c.low < arr[minIdx].low ? i : minIdx, 0);
+  
+  // Price lower low vs previous local low
+  const isPriceLow = lowestPriceIdx < recentCandles.length - 2;
+  // MACD higher low at that same index
+  const currentHist = macd15.hist;
+  const histAtLow = histSeries[histSeries.length - (recentCandles.length - lowestPriceIdx)];
+  
+  const isMacdDivergent = isPriceLow && histAtLow !== null && currentHist > histAtLow && macd15.histDelta > 0;
+
+  if (!isMacdDivergent && !ctx.relaxedMode) return { rejectCode: 'NO_MACD_DIVERGENCE' };
+
+  const trendQuality = 70 + (rsi15m < 40 ? 10 : 0);
+  const expansionQuality = 65 + (macd15.crossUp ? 15 : 5);
+  const participationQuality = 55 + clamp((ctx.volumeRatio - 0.8) * 15, 0, 10);
+  const score = Math.round(trendQuality * 0.35 + expansionQuality * 0.3 + participationQuality * 0.2 + executionQuality * 0.15);
+
+  return {
+    candidate: {
+      module: 'MACD_DIVERGENCE_REVERSAL',
+      entryArchetype: 'Trend Reversal Divergence',
+      score: clamp(score, 0, 100),
+      baseRequiredScore: 80,
+      minVolumeRatio: 0.4,
+      tpR: 2.5,
+      slAtr: 1.1,
+      timeStopHours: 12,
+      qualityBreakdown: {
+        trend: roundMetric(trendQuality, 1),
+        expansion: roundMetric(expansionQuality, 1),
+        participation: roundMetric(participationQuality, 1),
+        execution: roundMetric(executionQuality, 1)
+      },
+      reasons: [
+        'Bullish MACD divergence detected',
+        'Price momentum exhausting',
+        'Potential trend reversal'
+      ]
+    }
+  };
+}
+
+
+function evaluateVelocityBreakout(ctx) {
+  const { bb15m, adx15m, currentPrice, volumeRatio, executionQuality } = ctx;
+  if (!bb15m || currentPrice <= bb15m.upper) return { rejectCode: 'VELOCITY_NO_BB_BREAKOUT' };
+  if (!adx15m || adx15m.adx < 22) return { rejectCode: 'VELOCITY_LOW_ADX' };
+  if (volumeRatio < 1.3) return { rejectCode: 'VELOCITY_LOW_VOLUME' };
+
+  const trendQuality = 65 + (adx15m.adx > 30 ? 15 : 5);
+  const expansionQuality = 70 + (ctx.atrPercentile > 70 ? 10 : 0);
+  const participationQuality = 60 + clamp((volumeRatio - 1.5) * 15, 0, 15);
+  const score = Math.round(trendQuality * 0.3 + expansionQuality * 0.35 + participationQuality * 0.2 + executionQuality * 0.15);
+
+  return {
+    candidate: {
+      module: 'VELOCITY_BREAKOUT',
+      entryArchetype: 'Volatility Expansion Breakout',
+      score: clamp(score, 0, 100),
+      baseRequiredScore: 80,
+      minVolumeRatio: 1.2,
+      tpR: 2.5,
+      slAtr: 1.5,
+      timeStopHours: 12,
+      qualityBreakdown: {
+        trend: roundMetric(trendQuality, 1),
+        expansion: roundMetric(expansionQuality, 1),
+        participation: roundMetric(participationQuality, 1),
+        execution: roundMetric(executionQuality, 1)
+      },
+      reasons: [
+        'Bollinger Band upper breakout',
+        'High ADX trend strength',
+        'Volume expansion confirmed'
+      ]
+    }
+  };
+}
+
 
 function buildContext(symbol, candles15mRaw, candles1hRaw, candles4hRaw, orderBook, ticker24h, btcContext) {
   const baseAsset = normalizeBaseAsset(symbol, QUOTE_ASSET);
@@ -1058,6 +1209,7 @@ function createSignalFromCandidate(symbol, candidate, ctx, requiredScore) {
 
 export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext, analysisState = null, shadowCollector = null) {
   const ctx = buildContext(symbol, candles15m, candles1h, candles4h, orderBook, ticker24h, btcContext);
+  if (analysisState?.relaxedMode) ctx.relaxedMode = true;
   if (ctx.rejectCode) {
     if (['LIQUIDITY_FLOOR', 'INDICATOR_GAP', 'ATR_FILTER'].includes(ctx.rejectCode)) {
       countMetric(analysisState?.stageCounts, 'ORDERBOOK_OK');
@@ -1074,8 +1226,19 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
   countMetric(analysisState?.stageCounts, 'REGIME_OK');
   countMetric(analysisState?.stageCounts, 'CONTEXT_OK');
 
-  if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED') {
-    countMetric(analysisState?.rejectCounts, 'BTC_RED_BLOCK');
+  if (ctx.regime === 'RISK_OFF' || btcContext?.status === 'RED' || (!ctx.bull4h && !ctx.bull1h)) {
+    countMetric(analysisState?.rejectCounts, 'HTF_TREND_BEARISH');
+    return null;
+  }
+  
+  const isBtc = symbol.startsWith('BTC');
+  if (!isBtc && (ctx.rs1h < 0 || ctx.rs4h < 0)) {
+    countMetric(analysisState?.rejectCounts, 'WEAK_RELATIVE_STRENGTH');
+    return null;
+  }
+
+  if (Math.abs(ctx.distToEma9) > 2.0) {
+    countMetric(analysisState?.rejectCounts, 'OVEREXTENDED_EMA9');
     return null;
   }
   
@@ -1087,7 +1250,10 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
   const moduleResults = [
     evaluateVidyaSqueeze(ctx),
     evaluateSMCReclaim(ctx),
-    evaluateTwoPoleContinuation(ctx)
+    evaluateTwoPoleContinuation(ctx),
+    evaluateQuantumReversion(ctx),
+    evaluateVelocityBreakout(ctx),
+    evaluateMacdDivergence(ctx)
   ];
 
   if (analysisState?.debug) {
@@ -1122,15 +1288,17 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
   }
   countMetric(analysisState?.stageCounts, 'EXECUTION_OK');
 
-  if (ctx.volumeRatio < best.minVolumeRatio) {
+  const volFloor = ctx.relaxedMode ? 0.01 : best.minVolumeRatio;
+  if (ctx.volumeRatio < volFloor) {
     countMetric(analysisState?.rejectCounts, 'VOLUME_BELOW_MODULE_FLOOR');
-    if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, 'VOLUME_BELOW_MODULE_FLOOR'));
+    if (shadowCollector && signal.score >= (requiredScore - 8)) shadowCollector.push(recordShadowNearMiss(signal, 'VOLUME_BELOW_MODULE_FLOOR'));
     return null;
   }
 
-  if (signal.score < requiredScore) {
+  const finalScoreThreshold = ctx.relaxedMode ? 1 : requiredScore;
+  if (signal.score < finalScoreThreshold) {
     countMetric(analysisState?.rejectCounts, 'SCORE_BELOW_FLOOR');
-    if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, 'SCORE_BELOW_FLOOR'));
+    if (shadowCollector && signal.score >= (requiredScore - 8)) shadowCollector.push(recordShadowNearMiss(signal, 'SCORE_BELOW_FLOOR'));
     return null;
   }
   countMetric(analysisState?.stageCounts, 'SCORE_OK');

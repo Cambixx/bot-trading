@@ -748,3 +748,41 @@ v5.2a mantiene todos los umbrales de score de v5.2 (que funcionaron correctament
 - **~~Regime Shadow Re-Entry~~:** **PARCIALMENTE VALIDADA en v7.4.1.** La reapertura se limita a `DOWNTREND`; `TRANSITION` sigue fuera por falta de edge.
 - **Downtrend Live Subset Validation [NUEVA — Mar 24]:** Si el subset `DOWNTREND` reintroducido mantiene WR > 55% con drawdown controlado durante varias sesiones, evaluar si merece una ampliación por horario o por score.
 - **Shadow Window Sanity [NUEVA — Mar 24]:** Verificar en los próximos ciclos que `shadow_trades.json` quede compuesto solo por near-misses `PENDING` y sin solape estructural con `shadow_trades_archive.json`.
+
+---
+
+## [2026-05-14] 🎯 Alpha-1 Sniper Strategy: Hardening for High Win-Rate
+
+## Versioning & Evolutions
+
+### [v1.1] Alpha-1.1 "The Balanced Sniper" (Current)
+*   **Calibration:** Lowered `MIN_SCORE_THRESHOLD` to 68 and module floors to 65.
+*   **MTF Flexibility:** Allows entries on `bull1h` OR `bull4h` alignment (previously strict 4H).
+*   **Expansion:** Increased `distToEma9` limit to 2.0% to catch early momentum.
+*   **Confirmation:** Reduced MACD momentum requirement to `histDelta > 0` (1 candle).
+*   **Protection:** Retained 50% TP Break-even logic for win-rate preservation.
+
+### [v1.0] Alpha-1 Sniper (Legacy)
+*   High conviction, extreme filtering.
+*   Required EMA21 > EMA50 on 4H specifically.
+*   MACD momentum required 2 consecutive rising candles.
+*   Found to be overly restrictive for most market conditions (Zero signal flow).
+
+### Context
+El bot presentaba un Win Rate insuficiente (~32%) al operar con filtros relajados. Se ha pivotado hacia una arquitectura "Sniper" que prioriza la calidad extrema sobre la frecuencia.
+
+### Changes Made
+- **Global Hardening:** `MIN_SCORE_THRESHOLD` elevado a 80. `SIGNAL_SCORE_THRESHOLD` base de módulos elevado a 76+.
+- **Gating Estricto:**
+  - **HTF Alignment:** Obligatorio `bull4h` (EMA21 > EMA50 y Precio > EMA21 en 4H).
+  - **Relative Strength:** Obligatorio `rs1h > 0` y `rs4h > 0` (el activo debe estar superando al BTC en ambas temporalidades).
+  - **Distance Anchor:** Rechazo inmediato si el precio está a más de 1.25% de la EMA9 (evitar comprar clímax).
+- **Module Specifics:** Todos los módulos ahora requieren scores basales de 75-82, eliminando el ruido de señales marginales.
+
+### Early Observations (Backtest)
+- La frecuencia ha caído drásticamente (de ~100 trades/mes a ~5-10 trades/mes por par).
+- El bot ahora ignora activos en tendencia bajista o con debilidad relativa, centrando el capital solo en los "líderes" del mercado.
+- La mayoría de los rechazos en mercado lateral/bajista son por `WEAK_RELATIVE_STRENGTH` y `HTF_TREND_BEARISH`.
+
+### Verdict
+Esta configuración es ideal para cuentas que buscan crecimiento sostenido con bajo drawdown. No es apta para traders que buscan acción constante.

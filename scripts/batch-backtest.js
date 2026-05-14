@@ -15,7 +15,7 @@ const days = process.argv[3] || 7;
 async function runBacktest(symbol) {
   return new Promise((resolve) => {
     console.log(`\n[BATCH] Starting backtest for ${symbol}...`);
-    const child = spawn('node', ['scripts/v13-backtest.js', symbol, `--bot=${botType}`, `--days=${days}`]);
+    const child = spawn('node', ['scripts/v13-backtest.js', symbol, `--bot=${botType}`, `--days=${days}`, '--no-open']);
     
     let output = '';
     child.stdout.on('data', (data) => {

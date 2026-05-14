@@ -561,20 +561,30 @@ export function calculateMACD(closes, fast = 12, slow = 26, signalLength = 9) {
 
   const lastIndex = macdSeries.length - 1;
   const prevIndex = macdSeries.length - 2;
+  const prevPrevIndex = macdSeries.length - 3;
+  
   const macd = macdSeries[lastIndex];
   const signal = signalSeries[lastIndex];
   const prevMacd = macdSeries[prevIndex];
   const prevSignal = signalSeries[prevIndex];
+
   if (![macd, signal, prevMacd, prevSignal].every(Number.isFinite)) return null;
 
   const hist = macd - signal;
   const prevHist = prevMacd - prevSignal;
+  const prevPrevHist = prevPrevIndex >= 0 ? macdSeries[prevPrevIndex] - signalSeries[prevPrevIndex] : null;
+
+  const histDelta = hist - prevHist;
+  const prevHistDelta = prevPrevHist !== null ? prevHist - prevPrevHist : 0;
+
   return {
     macd,
     signal,
     hist,
     prevHist,
-    histDelta: hist - prevHist,
+    histDelta,
+    prevHistDelta,
+    histDeltaConsecutive: (histDelta > 0 && prevHistDelta > 0) ? 2 : (histDelta > 0 ? 1 : 0),
     crossUp: prevMacd <= prevSignal && macd > signal,
     crossDown: prevMacd >= prevSignal && macd < signal,
     aboveSignal: macd >= signal
@@ -833,12 +843,14 @@ export function detectSMC(candles, pivotLength = 4) {
   }
 
   const nearBullishOrderBlock = !!orderBlock && last.low <= orderBlock.high * 1.003 && last.close >= orderBlock.low;
+  const bullishCHoCH = previous && previous.close <= lastHigh.price && last.close > lastHigh.price && recentBearishBOS;
   const bullishFVG = candles.length >= 3 && candles[candles.length - 3].high < last.low;
   const bearishFVG = candles.length >= 3 && candles[candles.length - 3].low > last.high;
 
   return {
     bullishBOS,
     bearishBOS,
+    bullishCHoCH,
     recentBullishBOS,
     recentBearishBOS,
     lastHigh: lastHigh.price,
@@ -850,7 +862,7 @@ export function detectSMC(candles, pivotLength = 4) {
     nearBullishOrderBlock,
     bullishFVG,
     bearishFVG,
-    rangePct: lastLow.price > 0 ? (range / lastLow.price) * 100 : null
+    rangePct: range > 0 ? (range / lastLow.price) * 100 : 0
   };
 }
 

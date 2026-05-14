@@ -1,0 +1,42 @@
+{
+  "symbol": "SOLUSDT",
+  "config": {
+    "months": "12",
+    "relax": false
+  },
+  "stats": {
+    "wins": 0,
+    "losses": 0,
+    "be": 0,
+    "pnl": -48.352269515572885,
+    "totalTrades": 1,
+    "winRate": "0.00"
+  },
+  "rejections": {
+    "DATA_MTF_SHORT": 430,
+    "WEAK_RELATIVE_STRENGTH": 56,
+    "MACD_NOT_CONFIRMED": 4
+  },
+  "stages": {
+    "ORDERBOOK_OK": 61,
+    "LIQUIDITY_BASE_OK": 61,
+    "REGIME_OK": 61,
+    "CONTEXT_OK": 61,
+    "MODULE_OK": 1,
+    "EXECUTION_OK": 1,
+    "SCORE_OK": 1
+  },
+  "trades": [
+    {
+      "entry": 176.91,
+      "tpPct": null,
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "entryTime": 1748257200000,
+      "be": false,
+      "exitPrice": 91.37,
+      "exitTime": 1778740200000,
+      "result": "OPEN",
+      "pnl": -48.352269515572885
+    }
+  ]
+}
