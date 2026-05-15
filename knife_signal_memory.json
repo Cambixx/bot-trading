@@ -1,16 +1,23 @@
 {
-  "TONUSDT": [
-    {
-      "score": 72,
-      "module": "TWO_POLE_CAPITULATION_RESET",
-      "timestamp": 1778260849626
-    }
-  ],
   "ETHUSDT": [
     {
+      "score": 70,
+      "module": "TWO_POLE_CAPITULATION_RESET",
+      "timestamp": 1778856654433
+    }
+  ],
+  "XRPUSDT": [
+    {
       "score": 74,
+      "module": "TWO_POLE_CAPITULATION_RESET",
+      "timestamp": 1778855733394
+    }
+  ],
+  "TRXUSDT": [
+    {
+      "score": 73,
       "module": "VIDYA_LIQUIDITY_SWEEP",
-      "timestamp": 1778264466895
+      "timestamp": 1778856655365
     }
   ]
 }

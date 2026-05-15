@@ -1,1 +1,78 @@
-[]
+[
+  {
+    "id": "knife-shadow-1778853920564-ETHUSDT",
+    "symbol": "ETHUSDT",
+    "score": 76,
+    "requiredScore": 69,
+    "scoreGap": -7,
+    "price": 2212.46,
+    "regime": "VOLATILE_TRANSITION",
+    "rejectReasonCode": "SECTOR_CORRELATION",
+    "rejectReason": "SECTOR_CORRELATION",
+    "btcRisk": "GREEN",
+    "sector": "BLUE_CHIP",
+    "module": "TWO_POLE_CAPITULATION_RESET",
+    "entryArchetype": "Two-Pole capitulation reset",
+    "liquidityTier": "ELITE",
+    "expectedHoldingHours": 4,
+    "riskModel": {
+      "slAtr": 1.15,
+      "tpR": 2.25,
+      "realRR": 2.25,
+      "timeStopHours": 4
+    },
+    "relativeStrengthSnapshot": {
+      "rs1h": 0.0038,
+      "rs4h": -0.0133,
+      "rs24h": -0.01
+    },
+    "volumeLiquidityConfirmation": {
+      "minVolumeRatio": 0.4,
+      "volumeRatio": 4.28,
+      "volumePass": true,
+      "deltaRatio": -0.247,
+      "deltaPass": false,
+      "obi": -0.629,
+      "obiPass": false,
+      "spreadBps": 1.2,
+      "depthQuoteTopN": 1212880,
+      "liquidityTier": "ELITE"
+    },
+    "timestamp": 1778853920564,
+    "entryMetrics": {
+      "atrPercent5m": 0.32,
+      "atrPercent15m": 0.36,
+      "adx15m": 23.5,
+      "adx": 23.5,
+      "deltaRatio": -0.247,
+      "multiDelta": -0.247,
+      "rs1h": 0.0038,
+      "rs4h": -0.0133,
+      "vwapDistance": -2.69,
+      "return12x5m": -1.55,
+      "redStreak5m": 3,
+      "sottValue": -0.573,
+      "twoPole5m": -1.183,
+      "twoPoleValue": -1.183,
+      "twoPole15m": 0.1,
+      "vidyaDistancePct": -1.67,
+      "riskRewardRatio": 2.25
+    },
+    "qualityBreakdown": {
+      "stretch": 74.2,
+      "reset": 67,
+      "participation": 71.5,
+      "execution": 100
+    },
+    "shadowBenchmark": {
+      "version": "v3.1.0-TradingViewReversalLab-shadow-v1-TWO_POLE_CAPITULATION_RESET",
+      "tpPct": 0.014625000000000062,
+      "slPct": 0.00650000000000005
+    },
+    "maxFavorableMovePct": null,
+    "maxAdverseMovePct": null,
+    "outcome": "PENDING",
+    "resolvedAt": null,
+    "archivedAt": null
+  }
+]
