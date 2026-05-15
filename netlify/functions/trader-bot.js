@@ -50,7 +50,7 @@ import {
   toSummaryPairs
 } from './tradingview-strategy-core.js';
 
-export const ALGORITHM_VERSION = 'v13.1.0-TradingViewFusion';
+export const ALGORITHM_VERSION = 'v13.2.0-ExecutionFlowHardening';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -60,8 +60,8 @@ const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
 const MAX_SYMBOLS = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : 48;
 const MIN_QUOTE_VOL_24H = process.env.MIN_QUOTE_VOL_24H ? Number(process.env.MIN_QUOTE_VOL_24H) : 15000000;
 const SIGNAL_SCORE_THRESHOLD = 65; // Balanced threshold
-const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 100;
-const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 1000;
+const MAX_SPREAD_BPS = process.env.MAX_SPREAD_BPS ? Number(process.env.MAX_SPREAD_BPS) : 8;
+const MIN_DEPTH_QUOTE = process.env.MIN_DEPTH_QUOTE ? Number(process.env.MIN_DEPTH_QUOTE) : 90000;
 const MIN_SCORE_THRESHOLD = 68; // Balanced floor
 const MIN_ATR_PCT = 0.05;
 const MAX_ATR_PCT = process.env.MAX_ATR_PCT ? Number(process.env.MAX_ATR_PCT) : 5.5;
@@ -708,6 +708,15 @@ function getRequiredScore(candidate, ctx) {
   return required;
 }
 
+function getOrderFlowRejectCode(ctx) {
+  const obi = ctx.obMetrics?.obi;
+  if (Number.isFinite(obi) && obi < -0.3) return 'ORDERFLOW_ASK_HEAVY';
+  if (Number.isFinite(ctx.deltaRatio) && ctx.deltaRatio < -0.05 && (!Number.isFinite(obi) || obi < 0.05)) {
+    return 'ORDERFLOW_WEAK_BUY_PRESSURE';
+  }
+  return null;
+}
+
 function evaluateVidyaSqueeze(ctx) {
   const { vidya15, squeeze15, macd15, mlma1h, sott1h, volumeRatio, deltaRatio, executionQuality } = ctx;
   // Super Aggressive: Ignore VIDYA trend
@@ -890,6 +899,7 @@ function evaluateQuantumReversion(ctx) {
       module: 'QUANTUM_REVERSION',
       entryArchetype: 'Mean Reversion - RSI Reclaim',
       score: clamp(score, 0, 100),
+      shadowOnly: true,
       baseRequiredScore: 68,
       minVolumeRatio: 0.3,
       tpR: 2.1,
@@ -950,6 +960,7 @@ function evaluateMacdDivergence(ctx) {
       module: 'MACD_DIVERGENCE_REVERSAL',
       entryArchetype: 'Trend Reversal Divergence',
       score: clamp(score, 0, 100),
+      shadowOnly: true,
       baseRequiredScore: 80,
       minVolumeRatio: 0.4,
       tpR: 2.5,
@@ -987,6 +998,7 @@ function evaluateVelocityBreakout(ctx) {
       module: 'VELOCITY_BREAKOUT',
       entryArchetype: 'Volatility Expansion Breakout',
       score: clamp(score, 0, 100),
+      shadowOnly: true,
       baseRequiredScore: 80,
       minVolumeRatio: 1.2,
       tpR: 2.5,
@@ -1287,6 +1299,13 @@ export function generateSignal(symbol, candles15m, candles1h, candles4h, orderBo
     }
   }
   countMetric(analysisState?.stageCounts, 'EXECUTION_OK');
+
+  const orderFlowReject = getOrderFlowRejectCode(ctx);
+  if (orderFlowReject) {
+    countMetric(analysisState?.rejectCounts, orderFlowReject);
+    if (shadowCollector && signal.score >= requiredScore - 8) shadowCollector.push(recordShadowNearMiss(signal, orderFlowReject));
+    return null;
+  }
 
   const volFloor = ctx.relaxedMode ? 0.01 : best.minVolumeRatio;
   if (ctx.volumeRatio < volFloor) {

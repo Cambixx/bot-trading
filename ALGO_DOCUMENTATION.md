@@ -1,4 +1,4 @@
-# 🦅 Documentación del Algoritmo de Trading (v13.0.0 / v3.0.0)
+# Documentación del Algoritmo de Trading (v13.2.0 / v3.2.0)
 
 Esta documentación sirve como guía técnica para entender, mantener y optimizar el sistema de señales de trading de contado (Spot-Only) alojado en Netlify Functions.
 
@@ -8,10 +8,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v13.0.0)
+## Current Runtime Snapshot (v13.2.0 / v3.2.0)
 
 ### Resumen
-- **Runtime Version:** `v13.0.0-TradingViewFusion` / `v3.0.0-TradingViewReversalLab`
+- **Runtime Version:** `v13.2.0-ExecutionFlowHardening` / `v3.2.0-ReversalShadowHardening`
 - **File Core:** `trader-bot.js` y `knife-catcher.js`
 - **Estilo Bot 1 (TradingView Fusion):** `spot`, `long-only`, trend/reclaim scanner (`trader-bot.js`).
 - **Estilo Bot 2 (Reversal Lab):** `spot`, `long-only`, confirmed reversal scanner (`knife-catcher.js`).
@@ -29,14 +29,19 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 - **`TWO_POLE_PULLBACK_CONTINUATION`**
   - **Lógica:** reset del oscilador Two-Pole dentro de tendencia 1H compatible por SOTT/MLMA.
   - **Uso:** pullbacks controlados, evitando persecución de velas extendidas.
+- **Módulos experimentales shadow-only:** `QUANTUM_REVERSION`, `VELOCITY_BREAKOUT` y `MACD_DIVERGENCE_REVERSAL` pueden generar shadow candidates, pero no señales live.
+- **Order-flow hardening v13.2:** después del execution gate, una señal live se bloquea con `ORDERFLOW_ASK_HEAVY` si `obi < -0.30`, o con `ORDERFLOW_WEAK_BUY_PRESSURE` si `deltaRatio < -0.05` sin OBI favorable. El objetivo es reducir pérdidas de 0% MFE sin relajar ningún gate.
 
 #### Bot 2: Reversal Lab (`knife-catcher.js`)
 - **`TWO_POLE_CAPITULATION_RESET`**
   - **Lógica:** impulso de capitulación + reset/buy cross de Two-Pole + volumen.
+  - **Estado v3.2:** shadow-only hasta recuperar expectativa positiva en shadow archive.
 - **`VIDYA_LIQUIDITY_SWEEP`**
   - **Lógica:** barrido de mínimo previo o reclaim SMC + VIDYA/MACD/Two-Pole confirmando giro.
+  - **Estado v3.2:** shadow-only; requiere floor base 72, delta no negativo fuerte y VWAP distance <= 1.8%.
 - **`SOTT_BAND_RECLAIM`**
   - **Lógica:** recuperación de banda inferior de Bollinger + cruce alcista SOTT + momentum girando.
+  - **Estado v3.2:** shadow-only hasta tener muestra shadow resuelta suficiente.
 - **Modo Shadow opcional:** `KNIFE_GLOBAL_SHADOW_MODE=true` fuerza Bot 2 a registrar señales como shadow sin enviarlas como live.
 - **Exit Telemetry:** Bot 2 sigue persistiendo `exitPrice`, `exitReason` y `closedAt` para auditoría.
 
@@ -51,6 +56,10 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 - **Penalización de Régimen (v13/v3):**
   - Bot 1 sube el suelo en `RANGING` para expansiones VIDYA y en `VOLATILE_TRANSITION`.
   - Bot 2 sube el suelo en `TRENDING`, `HIGH_VOL_BREAKOUT` y `VOLATILE_TRANSITION` para evitar comprar reversión contra tendencias violentas.
+- **Score Floors v13.2/v3.2:**
+  - Bot 1 mantiene floor runtime base 65 con penalizaciones por liquidez/régimen/BTC; se endureció order-flow en vez de subir score global por muestra insuficiente.
+  - Bot 2 restaura floor runtime base 72, pero sus módulos activos están en shadow-only por expectativa reciente negativa.
+- **Execution Floors:** ambos bots bloquean por defecto spreads superiores a 8 bps y profundidad top-N inferior a `$90k` (`MAX_SPREAD_BPS`, `KNIFE_MAX_SPREAD_BPS`, `MIN_DEPTH_QUOTE`, `KNIFE_MIN_DEPTH_QUOTE` pueden sobreescribirlo por env si hace falta).
 
 ### Filtros de Liquidez (v10.1.0 Update)
 - `ELITE` / `HIGH` → Live ✅
@@ -127,6 +136,14 @@ graph TD
 ---
 
 ## 5. Changelog Reciente
+
+### v13.2.0-ExecutionFlowHardening / v3.2.0-ReversalShadowHardening (15 May 2026)
+- **Bot 1 Order-Flow Gate:** nuevo bloqueo live `ORDERFLOW_ASK_HEAVY` para `obi < -0.30` y `ORDERFLOW_WEAK_BUY_PRESSURE` para `deltaRatio < -0.05` sin OBI favorable.
+- **Execution Gate Restored:** default spread máximo vuelve a 8 bps y profundidad mínima a `$90k` en ambos bots; `8.5 bps` debe rechazar con `EXEC_SPREAD` y depth `< $90k` con `EXEC_DEPTH`.
+- **Bot 1 Experimental Modules Shadow-Only:** `QUANTUM_REVERSION`, `VELOCITY_BREAKOUT` y `MACD_DIVERGENCE_REVERSAL` se preservan como investigación, sin live alerts.
+- **Bot 2 Shadow Quarantine:** `TWO_POLE_CAPITULATION_RESET`, `VIDYA_LIQUIDITY_SWEEP` y `SOTT_BAND_RECLAIM` quedan shadow-only hasta demostrar expectancy > +0.2R con n >= 30 resolved shadows.
+- **Bot 2 Score Floor Restored:** `SIGNAL_SCORE_THRESHOLD` vuelve a 72 por defecto; `VIDYA_LIQUIDITY_SWEEP` deja de usar `baseRequiredScore: 5`.
+- **VIDYA Sweep Hardening:** Bot 2 bloquea `VIDYA_SWEEP_OVEREXTENDED` sobre 1.8% de distancia VWAP y `VIDYA_NEGATIVE_DELTA` si `deltaRatio5m < -0.05`.
 
 ### v13.0.0-TradingViewFusion / v3.0.0-TradingViewReversalLab (1 May 2026)
 - **Full Strategy Reset:** `trader-bot.js` y `knife-catcher.js` fueron reconstruidos desde cero usando traducciones JS de los indicadores en `tradinview-indicators`.

@@ -49,16 +49,16 @@ import {
   toSummaryPairs
 } from './tradingview-strategy-core.js';
 
-export const ALGORITHM_VERSION = 'v3.1.0-TradingViewReversalLab';
+export const ALGORITHM_VERSION = 'v3.2.0-ReversalShadowHardening';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const TELEGRAM_ENABLED = (process.env.TELEGRAM_ENABLED || 'true').toLowerCase() !== 'false';
 const GLOBAL_SHADOW_MODE = (process.env.KNIFE_GLOBAL_SHADOW_MODE || 'false').toLowerCase() === 'true';
 const QUOTE_ASSET = (process.env.QUOTE_ASSET || 'USDT').toUpperCase();
-const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 5;
-const MAX_SPREAD_BPS = process.env.KNIFE_MAX_SPREAD_BPS ? Number(process.env.KNIFE_MAX_SPREAD_BPS) : 100;
-const MIN_DEPTH_QUOTE = process.env.KNIFE_MIN_DEPTH_QUOTE ? Number(process.env.KNIFE_MIN_DEPTH_QUOTE) : 1000;
+const SIGNAL_SCORE_THRESHOLD = process.env.SIGNAL_SCORE_THRESHOLD ? Number(process.env.SIGNAL_SCORE_THRESHOLD) : 72;
+const MAX_SPREAD_BPS = process.env.KNIFE_MAX_SPREAD_BPS ? Number(process.env.KNIFE_MAX_SPREAD_BPS) : 8;
+const MIN_DEPTH_QUOTE = process.env.KNIFE_MIN_DEPTH_QUOTE ? Number(process.env.KNIFE_MIN_DEPTH_QUOTE) : 90000;
 const MIN_ATR_PCT = process.env.KNIFE_MIN_ATR_PCT ? Number(process.env.KNIFE_MIN_ATR_PCT) : 0.08;
 const MAX_ATR_PCT = process.env.KNIFE_MAX_ATR_PCT ? Number(process.env.KNIFE_MAX_ATR_PCT) : 7;
 const MAX_SYMBOLS = process.env.KNIFE_MAX_SYMBOLS ? Number(process.env.KNIFE_MAX_SYMBOLS) : 64;
@@ -664,14 +664,16 @@ function getRequiredScore(candidate, ctx) {
 }
 
 function evaluateTwoPoleCapitulation(ctx) {
-  const { twoPole5m, twoPole15m, rsi5m, rsi15m, volumeRatio5m, deltaRatio5m, return12x5m, redStreak5m, executionQuality } = ctx;
+  const { twoPole5m, twoPole15m, rsi5m, rsi15m, volumeRatio5m, deltaRatio5m, return12x5m, redStreak5m, obMetrics, executionQuality } = ctx;
   const distToEma50 = ctx.ema50_15m ? ((ctx.currentPrice - ctx.ema50_15m) / ctx.ema50_15m) * 100 : 0;
   const isExtremeOversold = rsi15m < 20 || rsi5m < 15;
-  const impulse = return12x5m <= -0.1 || redStreak5m >= 1 || rsi5m <= 50 || rsi15m <= 55 || distToEma50 < -4 || isExtremeOversold;
+  const impulse = return12x5m <= -0.35 || redStreak5m >= 2 || rsi5m <= 35 || rsi15m <= 42 || distToEma50 < -4 || isExtremeOversold;
   if (!impulse) return { rejectCode: 'TWOPOLE_NO_CAPITULATION' };
   const twoPoleReset = twoPole5m?.buy || (twoPole5m?.value < -0.5 && twoPole5m?.slope > 0) || twoPole15m?.buy || rsi5m < 25 || distToEma50 < -5 || isExtremeOversold;
   if (!twoPoleReset) return { rejectCode: 'TWOPOLE_NO_RESET' };
   if (volumeRatio5m < 0.9) return { rejectCode: 'TWOPOLE_LOW_VOLUME' };
+  if (Number.isFinite(deltaRatio5m) && deltaRatio5m < -0.05) return { rejectCode: 'TWOPOLE_NEGATIVE_DELTA' };
+  if (Number.isFinite(obMetrics?.obi) && obMetrics.obi < -0.12) return { rejectCode: 'TWOPOLE_ORDERBOOK_ASK_HEAVY' };
 
   const stretchQuality = 62
     + clamp(Math.abs(Math.min(return12x5m, 0)) * 4, 0, 14)
@@ -691,6 +693,7 @@ function evaluateTwoPoleCapitulation(ctx) {
       module: 'TWO_POLE_CAPITULATION_RESET',
       entryArchetype: 'Two-Pole capitulation reset',
       score: clamp(score, 0, 100),
+      shadowOnly: true,
       baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
       minVolumeRatio: 0.4,
       tpR: 2.25,
@@ -717,10 +720,11 @@ function evaluateVidyaLiquiditySweep(ctx) {
   const structureReclaim = smc5m?.bullishBOS || smc5m?.nearBullishOrderBlock;
   if (!(sweptLow || structureReclaim)) return { rejectCode: 'VIDYA_NO_LIQUIDITY_SWEEP' };
   
-  if (ctx.vwapDistance > 2.5) return { rejectCode: 'VIDYA_SWEEP_OVEREXTENDED' };
+  if (ctx.vwapDistance > 1.8) return { rejectCode: 'VIDYA_SWEEP_OVEREXTENDED' };
 
   if (!(macd5m?.histDelta > 0 || twoPole5m?.buy || twoPole5m?.bullish)) return { rejectCode: 'VIDYA_NO_RECLAIM_MOMENTUM' };
   if (volumeRatio5m < 1.15) return { rejectCode: 'VIDYA_SWEEP_LOW_VOLUME' };
+  if (Number.isFinite(ctx.deltaRatio5m) && ctx.deltaRatio5m < -0.05) return { rejectCode: 'VIDYA_NEGATIVE_DELTA' };
   if (obMetrics?.obi < -0.12) return { rejectCode: 'VIDYA_ORDERBOOK_ASK_HEAVY' };
 
   const stretchQuality = 64 + (sweptLow ? 10 : 0) + (structureReclaim ? 8 : 0);
@@ -733,7 +737,8 @@ function evaluateVidyaLiquiditySweep(ctx) {
       module: 'VIDYA_LIQUIDITY_SWEEP',
       entryArchetype: 'Liquidity sweep reclaim',
       score: clamp(score, 0, 100),
-      baseRequiredScore: 5,
+      shadowOnly: true,
+      baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
       minVolumeRatio: 1.15,
       tpR: 2.45,
       slAtr: 1.25,
@@ -770,8 +775,9 @@ function evaluateSottBandReclaim(ctx) {
       module: 'SOTT_BAND_RECLAIM',
       entryArchetype: 'SOTT Bollinger reclaim',
       score: clamp(score, 0, 100),
+      shadowOnly: true,
       baseRequiredScore: SIGNAL_SCORE_THRESHOLD,
-      minVolumeRatio: 0.4,
+      minVolumeRatio: 0.9,
       tpR: 2.15,
       slAtr: 1.1,
       timeStopHours: 7,

@@ -6,7 +6,44 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-### Current Version: v13.1.0 (TradingView Fusion / Reversal Lab)
+### Current Version: v13.2.0 / v3.2.0 (Execution Flow Hardening)
+**Date:** May 15, 2026
+**Theme:** "ORDER-FLOW GATES & REVERSAL LAB SHADOW QUARANTINE"
+
+### Core Logic & Parameters:
+- **Runtime Versions:** `v13.2.0-ExecutionFlowHardening` / `v3.2.0-ReversalShadowHardening`.
+- **Bot 1 Strategy:** Trend/reclaim bot remains live, but live candidates now require non-toxic order flow after execution gates.
+- **Bot 2 Strategy:** Reversal Lab is shadow-only by module until it proves positive expectancy again.
+
+### Changes Made:
+
+#### [H1] Bot 1 Order-Flow Hard Gate
+- **Problem:** Local audit window `2026-05-14T07:03:55Z` to `2026-05-15T18:05:36Z` showed 4/4 Bot 1 losses classified as weak order flow. Three losses had zero MFE, and the loss set showed negative delta or heavily ask-heavy OBI.
+- **Fix:** Added `getOrderFlowRejectCode(ctx)` after execution gates and before score acceptance. It rejects `ORDERFLOW_ASK_HEAVY` when `obi < -0.30`, and `ORDERFLOW_WEAK_BUY_PRESSURE` when `deltaRatio < -0.05` without supportive OBI. Restored default `MAX_SPREAD_BPS` / `KNIFE_MAX_SPREAD_BPS` to 8 bps and depth floor to `$90k` so execution rejects match the documented test boundary.
+- **Expected Effect:** Reduce zero-MFE losses without relaxing score, liquidity, or module gates.
+- **Falsification:** If the next 10 Bot 1 losses still show zero-MFE rate >40%, this gate is insufficient and module-level entry geometry must be audited.
+
+#### [H2] Bot 1 Experimental Module Quarantine
+- **Problem:** Runtime included additional experimental candidates not documented as baseline live modules (`QUANTUM_REVERSION`, `VELOCITY_BREAKOUT`, `MACD_DIVERGENCE_REVERSAL`). Shadow data did not justify promoting them.
+- **Fix:** Marked those candidates `shadowOnly: true`. They still write shadows and telemetry but cannot create live signals.
+- **Expected Effect:** Keeps the research surface without contaminating live expectancy.
+- **Falsification:** If any live history entry appears with one of those modules, the shadow-only guard failed.
+
+#### [H3] Bot 2 Reversal Lab Shadow Quarantine
+- **Problem:** Local audit window showed Bot 2 `VIDYA_LIQUIDITY_SWEEP` at 1W/11L, expectancy -0.71R, and `TWO_POLE_CAPITULATION_RESET` at 0W/4L with 75% zero-MFE losses. Runtime score floor had drifted to `5`, while the intended Reversal Lab floor was 72.
+- **Fix:** Restored default `SIGNAL_SCORE_THRESHOLD` to 72 and marked `TWO_POLE_CAPITULATION_RESET`, `VIDYA_LIQUIDITY_SWEEP`, and `SOTT_BAND_RECLAIM` as `shadowOnly: true`. Added stricter negative-delta/order-book rejects and tightened VIDYA sweep overextension from 2.5% VWAP distance to 1.8%.
+- **Expected Effect:** Stop live capital exposure from currently negative/research modules while preserving shadow evidence.
+- **Falsification:** Bot 2 can only return live after a follow-up audit shows module expectancy > +0.2R with n >= 30 resolved shadow trades.
+
+### Validation Criteria:
+- **Bot 1:** Zero-MFE loss rate below 40% over the next 10 decisive live trades; no live entries with `ORDERFLOW_ASK_HEAVY` or `ORDERFLOW_WEAK_BUY_PRESSURE` conditions.
+- **Bot 2:** Zero live signals unless explicitly forced by env/global changes; shadow archive must continue resolving with non-null `entryMetrics.multiDelta`, `deltaRatio`, `riskModel`, and reject codes.
+- **Telemetry:** `[THROUGHPUT]` lines must include new reject codes when triggered; Telegram must continue rendering WR and version strings.
+- **Review:** 14 calendar days or 20 Bot 1 decisive trades / 30 Bot 2 resolved shadows, whichever comes first.
+
+---
+
+### Previous Version: v13.1.0 (TradingView Fusion / Reversal Lab)
 **Date:** May 8, 2026
 **Theme:** "ENTRY HARDENING & SHADOW SIDELINING"
 
