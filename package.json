@@ -15,7 +15,11 @@
     "scan": "node scripts/manual-run.js",
     "reset": "node scripts/clear-blobs.js",
     "backtest": "node scripts/v13-backtest.js",
-    "backtest:batch": "node scripts/batch-backtest.js"
+    "backtest:trader": "node scripts/v13-backtest.js --bot=trader",
+    "backtest:knife": "node scripts/v13-backtest.js --bot=knife",
+    "backtest:batch": "node scripts/batch-backtest.js",
+    "tournament:trader": "node scripts/strategy-tournament.js --bot=trader",
+    "tournament:knife": "node scripts/strategy-tournament.js --bot=knife"
   },
   "dependencies": {
     "@netlify/blobs": "^10.5.0",

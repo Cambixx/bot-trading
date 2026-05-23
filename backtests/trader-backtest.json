@@ -1,0 +1,3389 @@
+{
+  "meta": {
+    "bot": "trader",
+    "botVersion": "v13.2.0-ExecutionFlowHardening",
+    "label": "trader",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "XRPUSDT"
+    ],
+    "days": 30,
+    "months": 1,
+    "oosSplitRatio": 0.7,
+    "splitDate": "2026-05-14",
+    "startBalance": 5000,
+    "allocPct": 0.2,
+    "knobs": {
+      "allowShadowOnly": false,
+      "moduleFilter": null,
+      "rrMult": 1,
+      "slMult": 1,
+      "beFraction": 0.5,
+      "slippagePct": 0.001
+    },
+    "generatedAt": "2026-05-23T16:18:25.937Z"
+  },
+  "summary": {
+    "totalTrades": 131,
+    "wins": 40,
+    "losses": 91,
+    "winRate": 30.53,
+    "finalBalance": 5030.54,
+    "totalProfit": 30.54,
+    "roi": 0.61,
+    "profitFactor": 1.05,
+    "maxDrawdown": 2.08,
+    "avgWin": 15.13,
+    "avgLoss": 6.31,
+    "expectancy": 0.23,
+    "avgDurationHours": 5.6,
+    "byReason": {
+      "STOP_LOSS": 71,
+      "BREAKEVEN": 20,
+      "TAKE_PROFIT": 40
+    },
+    "bySymbol": {
+      "BTCUSDT": {
+        "trades": 40,
+        "wins": 11,
+        "profit": -15.431365458500295
+      },
+      "SOLUSDT": {
+        "trades": 32,
+        "wins": 9,
+        "profit": -18.470225153031343
+      },
+      "XRPUSDT": {
+        "trades": 23,
+        "wins": 7,
+        "profit": 20.148309734873102
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "wins": 5,
+        "profit": 19.34263962729564
+      },
+      "BNBUSDT": {
+        "trades": 24,
+        "wins": 8,
+        "profit": 24.95188298464281
+      }
+    },
+    "byModule": {
+      "VIDYA_SQUEEZE_EXPANSION": {
+        "trades": 120,
+        "wins": 36
+      },
+      "SMC_DISCOUNT_RECLAIM": {
+        "trades": 10,
+        "wins": 3
+      },
+      "TWO_POLE_PULLBACK_CONTINUATION": {
+        "trades": 1,
+        "wins": 1
+      }
+    },
+    "equityCurve": [
+      {
+        "time": 1776961081610,
+        "equity": 5000
+      },
+      {
+        "time": 1777021200000,
+        "equity": 4992.01
+      },
+      {
+        "time": 1777034700000,
+        "equity": 4984.03
+      },
+      {
+        "time": 1777039200000,
+        "equity": 4984.03
+      },
+      {
+        "time": 1777040100000,
+        "equity": 4984.03
+      },
+      {
+        "time": 1777042800000,
+        "equity": 4976.07
+      },
+      {
+        "time": 1777048200000,
+        "equity": 4976.07
+      },
+      {
+        "time": 1777051800000,
+        "equity": 4968.12
+      },
+      {
+        "time": 1777134600000,
+        "equity": 4960.18
+      },
+      {
+        "time": 1777230900000,
+        "equity": 4975.14
+      },
+      {
+        "time": 1777239900000,
+        "equity": 4990.14
+      },
+      {
+        "time": 1777239900000,
+        "equity": 4982.17
+      },
+      {
+        "time": 1777242600000,
+        "equity": 4974.21
+      },
+      {
+        "time": 1777242600000,
+        "equity": 4966.26
+      },
+      {
+        "time": 1777251600000,
+        "equity": 4981.24
+      },
+      {
+        "time": 1777266000000,
+        "equity": 4973.28
+      },
+      {
+        "time": 1777266900000,
+        "equity": 4973.28
+      },
+      {
+        "time": 1777464000000,
+        "equity": 4973.28
+      },
+      {
+        "time": 1777464900000,
+        "equity": 4965.33
+      },
+      {
+        "time": 1777643100000,
+        "equity": 4980.3
+      },
+      {
+        "time": 1777645800000,
+        "equity": 4972.35
+      },
+      {
+        "time": 1777668300000,
+        "equity": 4964.4
+      },
+      {
+        "time": 1777788900000,
+        "equity": 4964.4
+      },
+      {
+        "time": 1777845600000,
+        "equity": 4979.37
+      },
+      {
+        "time": 1777853700000,
+        "equity": 4979.37
+      },
+      {
+        "time": 1777859100000,
+        "equity": 4994.39
+      },
+      {
+        "time": 1777868100000,
+        "equity": 5009.45
+      },
+      {
+        "time": 1777874400000,
+        "equity": 5001.45
+      },
+      {
+        "time": 1777875300000,
+        "equity": 5001.45
+      },
+      {
+        "time": 1777875300000,
+        "equity": 4993.46
+      },
+      {
+        "time": 1777888800000,
+        "equity": 4985.48
+      },
+      {
+        "time": 1777888800000,
+        "equity": 4977.51
+      },
+      {
+        "time": 1777888800000,
+        "equity": 4969.56
+      },
+      {
+        "time": 1777905900000,
+        "equity": 4984.54
+      },
+      {
+        "time": 1777905900000,
+        "equity": 4999.58
+      },
+      {
+        "time": 1777907700000,
+        "equity": 4991.59
+      },
+      {
+        "time": 1777916700000,
+        "equity": 5001.98
+      },
+      {
+        "time": 1777986000000,
+        "equity": 5017.07
+      },
+      {
+        "time": 1777990500000,
+        "equity": 5009.05
+      },
+      {
+        "time": 1778026500000,
+        "equity": 5001.04
+      },
+      {
+        "time": 1778028300000,
+        "equity": 4993.05
+      },
+      {
+        "time": 1778051700000,
+        "equity": 5008.11
+      },
+      {
+        "time": 1778057100000,
+        "equity": 5023.22
+      },
+      {
+        "time": 1778065200000,
+        "equity": 5038.37
+      },
+      {
+        "time": 1778066100000,
+        "equity": 5053.56
+      },
+      {
+        "time": 1778066100000,
+        "equity": 5068.8
+      },
+      {
+        "time": 1778070600000,
+        "equity": 5084.09
+      },
+      {
+        "time": 1778072400000,
+        "equity": 5075.97
+      },
+      {
+        "time": 1778072400000,
+        "equity": 5067.86
+      },
+      {
+        "time": 1778072400000,
+        "equity": 5059.76
+      },
+      {
+        "time": 1778090400000,
+        "equity": 5051.67
+      },
+      {
+        "time": 1778108400000,
+        "equity": 5043.6
+      },
+      {
+        "time": 1778113800000,
+        "equity": 5043.6
+      },
+      {
+        "time": 1778115600000,
+        "equity": 5035.54
+      },
+      {
+        "time": 1778115600000,
+        "equity": 5027.49
+      },
+      {
+        "time": 1778139000000,
+        "equity": 5042.66
+      },
+      {
+        "time": 1778142600000,
+        "equity": 5034.6
+      },
+      {
+        "time": 1778148900000,
+        "equity": 5026.55
+      },
+      {
+        "time": 1778148900000,
+        "equity": 5018.52
+      },
+      {
+        "time": 1778161500000,
+        "equity": 5010.5
+      },
+      {
+        "time": 1778161500000,
+        "equity": 5002.49
+      },
+      {
+        "time": 1778164200000,
+        "equity": 5002.49
+      },
+      {
+        "time": 1778187600000,
+        "equity": 4994.5
+      },
+      {
+        "time": 1778191200000,
+        "equity": 4986.52
+      },
+      {
+        "time": 1778224500000,
+        "equity": 4978.55
+      },
+      {
+        "time": 1778253300000,
+        "equity": 4978.55
+      },
+      {
+        "time": 1778261400000,
+        "equity": 4994.26
+      },
+      {
+        "time": 1778264100000,
+        "equity": 5009.32
+      },
+      {
+        "time": 1778265900000,
+        "equity": 5025.13
+      },
+      {
+        "time": 1778302800000,
+        "equity": 5017.1
+      },
+      {
+        "time": 1778310000000,
+        "equity": 5017.1
+      },
+      {
+        "time": 1778318100000,
+        "equity": 5009.09
+      },
+      {
+        "time": 1778318100000,
+        "equity": 5009.09
+      },
+      {
+        "time": 1778373900000,
+        "equity": 5001.08
+      },
+      {
+        "time": 1778374800000,
+        "equity": 4993.09
+      },
+      {
+        "time": 1778375700000,
+        "equity": 4985.11
+      },
+      {
+        "time": 1778403600000,
+        "equity": 5000.15
+      },
+      {
+        "time": 1778407200000,
+        "equity": 4992.16
+      },
+      {
+        "time": 1778428800000,
+        "equity": 5007.21
+      },
+      {
+        "time": 1778428800000,
+        "equity": 5022.31
+      },
+      {
+        "time": 1778432400000,
+        "equity": 5037.46
+      },
+      {
+        "time": 1778433300000,
+        "equity": 5052.65
+      },
+      {
+        "time": 1778435100000,
+        "equity": 5067.89
+      },
+      {
+        "time": 1778436900000,
+        "equity": 5083.18
+      },
+      {
+        "time": 1778444100000,
+        "equity": 5075.06
+      },
+      {
+        "time": 1778444100000,
+        "equity": 5066.95
+      },
+      {
+        "time": 1778445000000,
+        "equity": 5058.85
+      },
+      {
+        "time": 1778453100000,
+        "equity": 5074.11
+      },
+      {
+        "time": 1778458500000,
+        "equity": 5066
+      },
+      {
+        "time": 1778460300000,
+        "equity": 5066
+      },
+      {
+        "time": 1778466600000,
+        "equity": 5056.12
+      },
+      {
+        "time": 1778468400000,
+        "equity": 5048.04
+      },
+      {
+        "time": 1778487300000,
+        "equity": 5048.04
+      },
+      {
+        "time": 1778509800000,
+        "equity": 5039.97
+      },
+      {
+        "time": 1778512500000,
+        "equity": 5055.17
+      },
+      {
+        "time": 1778515200000,
+        "equity": 5071.77
+      },
+      {
+        "time": 1778517000000,
+        "equity": 5063.67
+      },
+      {
+        "time": 1778521500000,
+        "equity": 5078.94
+      },
+      {
+        "time": 1778526000000,
+        "equity": 5070.82
+      },
+      {
+        "time": 1778535900000,
+        "equity": 5086.12
+      },
+      {
+        "time": 1778548500000,
+        "equity": 5077.99
+      },
+      {
+        "time": 1778549400000,
+        "equity": 5067.53
+      },
+      {
+        "time": 1778549400000,
+        "equity": 5067.53
+      },
+      {
+        "time": 1778549400000,
+        "equity": 5059.43
+      },
+      {
+        "time": 1778555700000,
+        "equity": 5051.35
+      },
+      {
+        "time": 1778568300000,
+        "equity": 5043.28
+      },
+      {
+        "time": 1778569200000,
+        "equity": 5035.22
+      },
+      {
+        "time": 1778580000000,
+        "equity": 5027.17
+      },
+      {
+        "time": 1778582700000,
+        "equity": 5019.14
+      },
+      {
+        "time": 1778593500000,
+        "equity": 5011.12
+      },
+      {
+        "time": 1778629500000,
+        "equity": 5003.11
+      },
+      {
+        "time": 1778632200000,
+        "equity": 5018.2
+      },
+      {
+        "time": 1778635800000,
+        "equity": 5033.33
+      },
+      {
+        "time": 1778652000000,
+        "equity": 5033.33
+      },
+      {
+        "time": 1778656500000,
+        "equity": 5025.29
+      },
+      {
+        "time": 1778670000000,
+        "equity": 5025.29
+      },
+      {
+        "time": 1778670000000,
+        "equity": 5017.26
+      },
+      {
+        "time": 1778675400000,
+        "equity": 5009.24
+      },
+      {
+        "time": 1778767200000,
+        "equity": 5009.24
+      },
+      {
+        "time": 1778769900000,
+        "equity": 5024.35
+      },
+      {
+        "time": 1778777100000,
+        "equity": 5039.5
+      },
+      {
+        "time": 1778778000000,
+        "equity": 5054.7
+      },
+      {
+        "time": 1778780700000,
+        "equity": 5071.88
+      },
+      {
+        "time": 1778810400000,
+        "equity": 5071.88
+      },
+      {
+        "time": 1778812200000,
+        "equity": 5063.77
+      },
+      {
+        "time": 1778820300000,
+        "equity": 5055.68
+      },
+      {
+        "time": 1778823000000,
+        "equity": 5047.6
+      },
+      {
+        "time": 1778829300000,
+        "equity": 5062.83
+      },
+      {
+        "time": 1778836500000,
+        "equity": 5054.73
+      },
+      {
+        "time": 1778846400000,
+        "equity": 5046.66
+      },
+      {
+        "time": 1778850000000,
+        "equity": 5038.59
+      },
+      {
+        "time": 1778850000000,
+        "equity": 5030.54
+      }
+    ]
+  },
+  "trainSummary": {
+    "totalTrades": 122,
+    "wins": 38,
+    "losses": 84,
+    "winRate": 31.15,
+    "finalBalance": 5054.7,
+    "totalProfit": 54.7,
+    "roi": 1.09,
+    "profitFactor": 1.11,
+    "maxDrawdown": 2.08,
+    "avgWin": 15.07,
+    "avgLoss": 6.17,
+    "expectancy": 0.45,
+    "avgDurationHours": 5.8,
+    "byReason": {
+      "STOP_LOSS": 64,
+      "BREAKEVEN": 20,
+      "TAKE_PROFIT": 38
+    },
+    "bySymbol": {
+      "BTCUSDT": {
+        "trades": 38,
+        "wins": 11,
+        "profit": 0.7251018806363163
+      },
+      "SOLUSDT": {
+        "trades": 32,
+        "wins": 9,
+        "profit": -18.470225153031343
+      },
+      "XRPUSDT": {
+        "trades": 21,
+        "wins": 6,
+        "profit": 11.049900004165877
+      },
+      "ETHUSDT": {
+        "trades": 12,
+        "wins": 5,
+        "profit": 19.34263962729564
+      },
+      "BNBUSDT": {
+        "trades": 19,
+        "wins": 7,
+        "profit": 42.05422051022027
+      }
+    },
+    "byModule": {
+      "VIDYA_SQUEEZE_EXPANSION": {
+        "trades": 113,
+        "wins": 35
+      },
+      "SMC_DISCOUNT_RECLAIM": {
+        "trades": 8,
+        "wins": 2
+      },
+      "TWO_POLE_PULLBACK_CONTINUATION": {
+        "trades": 1,
+        "wins": 1
+      }
+    },
+    "equityCurve": [
+      {
+        "time": 1776961081610,
+        "equity": 5000
+      },
+      {
+        "time": 1777021200000,
+        "equity": 4992.01
+      },
+      {
+        "time": 1777034700000,
+        "equity": 4984.03
+      },
+      {
+        "time": 1777039200000,
+        "equity": 4984.03
+      },
+      {
+        "time": 1777040100000,
+        "equity": 4984.03
+      },
+      {
+        "time": 1777042800000,
+        "equity": 4976.07
+      },
+      {
+        "time": 1777048200000,
+        "equity": 4976.07
+      },
+      {
+        "time": 1777051800000,
+        "equity": 4968.12
+      },
+      {
+        "time": 1777134600000,
+        "equity": 4960.18
+      },
+      {
+        "time": 1777230900000,
+        "equity": 4975.14
+      },
+      {
+        "time": 1777239900000,
+        "equity": 4990.14
+      },
+      {
+        "time": 1777239900000,
+        "equity": 4982.17
+      },
+      {
+        "time": 1777242600000,
+        "equity": 4974.21
+      },
+      {
+        "time": 1777242600000,
+        "equity": 4966.26
+      },
+      {
+        "time": 1777251600000,
+        "equity": 4981.24
+      },
+      {
+        "time": 1777266000000,
+        "equity": 4973.28
+      },
+      {
+        "time": 1777266900000,
+        "equity": 4973.28
+      },
+      {
+        "time": 1777464000000,
+        "equity": 4973.28
+      },
+      {
+        "time": 1777464900000,
+        "equity": 4965.33
+      },
+      {
+        "time": 1777643100000,
+        "equity": 4980.3
+      },
+      {
+        "time": 1777645800000,
+        "equity": 4972.35
+      },
+      {
+        "time": 1777668300000,
+        "equity": 4964.4
+      },
+      {
+        "time": 1777788900000,
+        "equity": 4964.4
+      },
+      {
+        "time": 1777845600000,
+        "equity": 4979.37
+      },
+      {
+        "time": 1777853700000,
+        "equity": 4979.37
+      },
+      {
+        "time": 1777859100000,
+        "equity": 4994.39
+      },
+      {
+        "time": 1777868100000,
+        "equity": 5009.45
+      },
+      {
+        "time": 1777874400000,
+        "equity": 5001.45
+      },
+      {
+        "time": 1777875300000,
+        "equity": 5001.45
+      },
+      {
+        "time": 1777875300000,
+        "equity": 4993.46
+      },
+      {
+        "time": 1777888800000,
+        "equity": 4985.48
+      },
+      {
+        "time": 1777888800000,
+        "equity": 4977.51
+      },
+      {
+        "time": 1777888800000,
+        "equity": 4969.56
+      },
+      {
+        "time": 1777905900000,
+        "equity": 4984.54
+      },
+      {
+        "time": 1777905900000,
+        "equity": 4999.58
+      },
+      {
+        "time": 1777907700000,
+        "equity": 4991.59
+      },
+      {
+        "time": 1777916700000,
+        "equity": 5001.98
+      },
+      {
+        "time": 1777986000000,
+        "equity": 5017.07
+      },
+      {
+        "time": 1777990500000,
+        "equity": 5009.05
+      },
+      {
+        "time": 1778026500000,
+        "equity": 5001.04
+      },
+      {
+        "time": 1778028300000,
+        "equity": 4993.05
+      },
+      {
+        "time": 1778051700000,
+        "equity": 5008.11
+      },
+      {
+        "time": 1778057100000,
+        "equity": 5023.22
+      },
+      {
+        "time": 1778065200000,
+        "equity": 5038.37
+      },
+      {
+        "time": 1778066100000,
+        "equity": 5053.56
+      },
+      {
+        "time": 1778066100000,
+        "equity": 5068.8
+      },
+      {
+        "time": 1778070600000,
+        "equity": 5084.09
+      },
+      {
+        "time": 1778072400000,
+        "equity": 5075.97
+      },
+      {
+        "time": 1778072400000,
+        "equity": 5067.86
+      },
+      {
+        "time": 1778072400000,
+        "equity": 5059.76
+      },
+      {
+        "time": 1778090400000,
+        "equity": 5051.67
+      },
+      {
+        "time": 1778108400000,
+        "equity": 5043.6
+      },
+      {
+        "time": 1778113800000,
+        "equity": 5043.6
+      },
+      {
+        "time": 1778115600000,
+        "equity": 5035.54
+      },
+      {
+        "time": 1778115600000,
+        "equity": 5027.49
+      },
+      {
+        "time": 1778139000000,
+        "equity": 5042.66
+      },
+      {
+        "time": 1778142600000,
+        "equity": 5034.6
+      },
+      {
+        "time": 1778148900000,
+        "equity": 5026.55
+      },
+      {
+        "time": 1778148900000,
+        "equity": 5018.52
+      },
+      {
+        "time": 1778161500000,
+        "equity": 5010.5
+      },
+      {
+        "time": 1778161500000,
+        "equity": 5002.49
+      },
+      {
+        "time": 1778164200000,
+        "equity": 5002.49
+      },
+      {
+        "time": 1778187600000,
+        "equity": 4994.5
+      },
+      {
+        "time": 1778191200000,
+        "equity": 4986.52
+      },
+      {
+        "time": 1778224500000,
+        "equity": 4978.55
+      },
+      {
+        "time": 1778253300000,
+        "equity": 4978.55
+      },
+      {
+        "time": 1778261400000,
+        "equity": 4994.26
+      },
+      {
+        "time": 1778264100000,
+        "equity": 5009.32
+      },
+      {
+        "time": 1778265900000,
+        "equity": 5025.13
+      },
+      {
+        "time": 1778302800000,
+        "equity": 5017.1
+      },
+      {
+        "time": 1778310000000,
+        "equity": 5017.1
+      },
+      {
+        "time": 1778318100000,
+        "equity": 5009.09
+      },
+      {
+        "time": 1778318100000,
+        "equity": 5009.09
+      },
+      {
+        "time": 1778373900000,
+        "equity": 5001.08
+      },
+      {
+        "time": 1778374800000,
+        "equity": 4993.09
+      },
+      {
+        "time": 1778375700000,
+        "equity": 4985.11
+      },
+      {
+        "time": 1778403600000,
+        "equity": 5000.15
+      },
+      {
+        "time": 1778407200000,
+        "equity": 4992.16
+      },
+      {
+        "time": 1778428800000,
+        "equity": 5007.21
+      },
+      {
+        "time": 1778428800000,
+        "equity": 5022.31
+      },
+      {
+        "time": 1778432400000,
+        "equity": 5037.46
+      },
+      {
+        "time": 1778433300000,
+        "equity": 5052.65
+      },
+      {
+        "time": 1778435100000,
+        "equity": 5067.89
+      },
+      {
+        "time": 1778436900000,
+        "equity": 5083.18
+      },
+      {
+        "time": 1778444100000,
+        "equity": 5075.06
+      },
+      {
+        "time": 1778444100000,
+        "equity": 5066.95
+      },
+      {
+        "time": 1778445000000,
+        "equity": 5058.85
+      },
+      {
+        "time": 1778453100000,
+        "equity": 5074.11
+      },
+      {
+        "time": 1778458500000,
+        "equity": 5066
+      },
+      {
+        "time": 1778460300000,
+        "equity": 5066
+      },
+      {
+        "time": 1778466600000,
+        "equity": 5056.12
+      },
+      {
+        "time": 1778468400000,
+        "equity": 5048.04
+      },
+      {
+        "time": 1778487300000,
+        "equity": 5048.04
+      },
+      {
+        "time": 1778509800000,
+        "equity": 5039.97
+      },
+      {
+        "time": 1778512500000,
+        "equity": 5055.17
+      },
+      {
+        "time": 1778515200000,
+        "equity": 5071.77
+      },
+      {
+        "time": 1778517000000,
+        "equity": 5063.67
+      },
+      {
+        "time": 1778521500000,
+        "equity": 5078.94
+      },
+      {
+        "time": 1778526000000,
+        "equity": 5070.82
+      },
+      {
+        "time": 1778535900000,
+        "equity": 5086.12
+      },
+      {
+        "time": 1778548500000,
+        "equity": 5077.99
+      },
+      {
+        "time": 1778549400000,
+        "equity": 5067.53
+      },
+      {
+        "time": 1778549400000,
+        "equity": 5067.53
+      },
+      {
+        "time": 1778549400000,
+        "equity": 5059.43
+      },
+      {
+        "time": 1778555700000,
+        "equity": 5051.35
+      },
+      {
+        "time": 1778568300000,
+        "equity": 5043.28
+      },
+      {
+        "time": 1778569200000,
+        "equity": 5035.22
+      },
+      {
+        "time": 1778580000000,
+        "equity": 5027.17
+      },
+      {
+        "time": 1778582700000,
+        "equity": 5019.14
+      },
+      {
+        "time": 1778593500000,
+        "equity": 5011.12
+      },
+      {
+        "time": 1778629500000,
+        "equity": 5003.11
+      },
+      {
+        "time": 1778632200000,
+        "equity": 5018.2
+      },
+      {
+        "time": 1778635800000,
+        "equity": 5033.33
+      },
+      {
+        "time": 1778652000000,
+        "equity": 5033.33
+      },
+      {
+        "time": 1778656500000,
+        "equity": 5025.29
+      },
+      {
+        "time": 1778670000000,
+        "equity": 5025.29
+      },
+      {
+        "time": 1778670000000,
+        "equity": 5017.26
+      },
+      {
+        "time": 1778675400000,
+        "equity": 5009.24
+      },
+      {
+        "time": 1778767200000,
+        "equity": 5009.24
+      },
+      {
+        "time": 1778769900000,
+        "equity": 5024.35
+      },
+      {
+        "time": 1778777100000,
+        "equity": 5039.5
+      },
+      {
+        "time": 1778778000000,
+        "equity": 5054.7
+      },
+      {
+        "time": 1778810400000,
+        "equity": 5054.7
+      }
+    ]
+  },
+  "holdoutSummary": {
+    "totalTrades": 9,
+    "wins": 2,
+    "losses": 7,
+    "winRate": 22.22,
+    "finalBalance": 5030.54,
+    "totalProfit": -24.16,
+    "roi": -0.48,
+    "profitFactor": 0.57,
+    "maxDrawdown": 0.82,
+    "avgWin": 16.2,
+    "avgLoss": 8.08,
+    "expectancy": -2.68,
+    "avgDurationHours": 2.5,
+    "byReason": {
+      "TAKE_PROFIT": 2,
+      "STOP_LOSS": 7
+    },
+    "bySymbol": {
+      "XRPUSDT": {
+        "trades": 2,
+        "wins": 1,
+        "profit": 9.098406784359746
+      },
+      "BNBUSDT": {
+        "trades": 5,
+        "wins": 1,
+        "profit": -17.102331987309718
+      },
+      "BTCUSDT": {
+        "trades": 2,
+        "wins": 0,
+        "profit": -16.156462107170995
+      }
+    },
+    "byModule": {
+      "SMC_DISCOUNT_RECLAIM": {
+        "trades": 2,
+        "wins": 1
+      },
+      "VIDYA_SQUEEZE_EXPANSION": {
+        "trades": 7,
+        "wins": 1
+      }
+    },
+    "equityCurve": [
+      {
+        "time": 1776961081610,
+        "equity": 5054.7
+      },
+      {
+        "time": 1778780700000,
+        "equity": 5071.88
+      },
+      {
+        "time": 1778812200000,
+        "equity": 5063.77
+      },
+      {
+        "time": 1778820300000,
+        "equity": 5055.68
+      },
+      {
+        "time": 1778823000000,
+        "equity": 5047.6
+      },
+      {
+        "time": 1778829300000,
+        "equity": 5062.82
+      },
+      {
+        "time": 1778836500000,
+        "equity": 5054.73
+      },
+      {
+        "time": 1778846400000,
+        "equity": 5046.66
+      },
+      {
+        "time": 1778850000000,
+        "equity": 5038.59
+      },
+      {
+        "time": 1778850000000,
+        "equity": 5030.54
+      }
+    ]
+  },
+  "trades": [
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 78055.98800999999,
+      "exit": 77432.16393,
+      "tp": 79233.455961,
+      "sl": 77432.16393,
+      "openTime": "2026-04-23T18:00:00.000Z",
+      "closeTime": "2026-04-24T09:00:00.000Z",
+      "openTimeMs": 1776967200000,
+      "closeTimeMs": 1777021200000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 77762.84516,
+      "exit": 77762.84516,
+      "tp": 78935.891076,
+      "sl": 77762.84516,
+      "openTime": "2026-04-24T10:15:00.000Z",
+      "closeTime": "2026-04-24T14:15:00.000Z",
+      "openTimeMs": 1777025700000,
+      "closeTimeMs": 1777040100000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 1.4329314999999998,
+      "exit": 1.4329314999999998,
+      "tp": 1.45454715,
+      "sl": 1.4329314999999998,
+      "openTime": "2026-04-24T10:45:00.000Z",
+      "closeTime": "2026-04-24T14:00:00.000Z",
+      "openTimeMs": 1777027500000,
+      "closeTimeMs": 1777039200000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 78,
+      "entry": 86.79670999999999,
+      "exit": 86.10302999999999,
+      "tp": 88.106031,
+      "sl": 86.10302999999999,
+      "openTime": "2026-04-24T12:00:00.000Z",
+      "closeTime": "2026-04-24T12:45:00.000Z",
+      "openTimeMs": 1777032000000,
+      "closeTimeMs": 1777034700000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 86.26617999999999,
+      "exit": 85.57674,
+      "tp": 87.56749800000001,
+      "sl": 85.57674,
+      "openTime": "2026-04-24T14:30:00.000Z",
+      "closeTime": "2026-04-24T15:00:00.000Z",
+      "openTimeMs": 1777041000000,
+      "closeTimeMs": 1777042800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 78115.67764,
+      "exit": 77491.37652,
+      "tp": 79294.04600399999,
+      "sl": 77491.37652,
+      "openTime": "2026-04-24T14:45:00.000Z",
+      "closeTime": "2026-04-24T17:30:00.000Z",
+      "openTimeMs": 1777041900000,
+      "closeTimeMs": 1777051800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 1.4392378,
+      "exit": 1.4392378,
+      "tp": 1.46094858,
+      "sl": 1.4392378,
+      "openTime": "2026-04-24T15:15:00.000Z",
+      "closeTime": "2026-04-24T16:30:00.000Z",
+      "openTimeMs": 1777043700000,
+      "closeTimeMs": 1777048200000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 86.46637999999999,
+      "exit": 85.77534,
+      "tp": 87.77071799999999,
+      "sl": 85.77534,
+      "openTime": "2026-04-24T15:30:00.000Z",
+      "closeTime": "2026-04-25T16:30:00.000Z",
+      "openTimeMs": 1777044600000,
+      "closeTimeMs": 1777134600000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 70,
+      "entry": 77678.11050999998,
+      "exit": 78849.87821099999,
+      "tp": 78849.87821099999,
+      "sl": 77678.11050999998,
+      "openTime": "2026-04-24T19:00:00.000Z",
+      "closeTime": "2026-04-26T21:45:00.000Z",
+      "openTimeMs": 1777057200000,
+      "closeTimeMs": 1777239900000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 86.17608999999999,
+      "exit": 87.47604900000002,
+      "tp": 87.47604900000002,
+      "sl": 86.17608999999999,
+      "openTime": "2026-04-26T04:00:00.000Z",
+      "closeTime": "2026-04-27T01:00:00.000Z",
+      "openTimeMs": 1777176000000,
+      "closeTimeMs": 1777251600000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 2337.2449099999994,
+      "exit": 2372.5020509999995,
+      "tp": 2372.5020509999995,
+      "sl": 2337.2449099999994,
+      "openTime": "2026-04-26T10:00:00.000Z",
+      "closeTime": "2026-04-26T19:15:00.000Z",
+      "openTimeMs": 1777197600000,
+      "closeTimeMs": 1777230900000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 76,
+      "entry": 2368.1958299999997,
+      "exit": 2349.26919,
+      "tp": 2405.5759439999997,
+      "sl": 2349.26919,
+      "openTime": "2026-04-26T19:15:00.000Z",
+      "closeTime": "2026-04-26T21:45:00.000Z",
+      "openTimeMs": 1777230900000,
+      "closeTimeMs": 1777239900000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 82,
+      "entry": 78648.08952,
+      "exit": 78019.53336,
+      "tp": 79834.489272,
+      "sl": 78019.53336,
+      "openTime": "2026-04-26T22:00:00.000Z",
+      "closeTime": "2026-04-26T22:30:00.000Z",
+      "openTimeMs": 1777240800000,
+      "closeTimeMs": 1777242600000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 80,
+      "entry": 2372.91054,
+      "exit": 2353.94622,
+      "tp": 2408.705694,
+      "sl": 2353.94622,
+      "openTime": "2026-04-26T22:00:00.000Z",
+      "closeTime": "2026-04-26T22:30:00.000Z",
+      "openTimeMs": 1777240800000,
+      "closeTimeMs": 1777242600000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 74,
+      "entry": 78359.80152,
+      "exit": 78359.80152,
+      "tp": 79596.649536,
+      "sl": 78359.80152,
+      "openTime": "2026-04-26T22:30:00.000Z",
+      "closeTime": "2026-04-27T05:15:00.000Z",
+      "openTimeMs": 1777242600000,
+      "closeTimeMs": 1777266900000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 2395.40301,
+      "exit": 2376.2589300000004,
+      "tp": 2431.537461,
+      "sl": 2376.2589300000004,
+      "openTime": "2026-04-27T02:15:00.000Z",
+      "closeTime": "2026-04-27T05:00:00.000Z",
+      "openTimeMs": 1777256100000,
+      "closeTimeMs": 1777266000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 77141.96489999999,
+      "exit": 77141.96489999999,
+      "tp": 78305.64489,
+      "sl": 77141.96489999999,
+      "openTime": "2026-04-29T08:30:00.000Z",
+      "closeTime": "2026-04-29T12:00:00.000Z",
+      "openTimeMs": 1777451400000,
+      "closeTimeMs": 1777464000000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 2333.1207899999995,
+      "exit": 2314.47447,
+      "tp": 2368.3157189999997,
+      "sl": 2314.47447,
+      "openTime": "2026-04-29T09:30:00.000Z",
+      "closeTime": "2026-04-29T12:15:00.000Z",
+      "openTimeMs": 1777455000000,
+      "closeTimeMs": 1777464900000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 81,
+      "entry": 77631.20364999998,
+      "exit": 78802.26376499998,
+      "tp": 78802.26376499998,
+      "sl": 77631.20364999998,
+      "openTime": "2026-05-01T12:00:00.000Z",
+      "closeTime": "2026-05-01T13:45:00.000Z",
+      "openTimeMs": 1777636800000,
+      "closeTimeMs": 1777643100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 81,
+      "entry": 78759.88119999999,
+      "exit": 78130.4316,
+      "tp": 79947.96732,
+      "sl": 78130.4316,
+      "openTime": "2026-05-01T14:00:00.000Z",
+      "closeTime": "2026-05-01T14:30:00.000Z",
+      "openTimeMs": 1777644000000,
+      "closeTimeMs": 1777645800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 78539.40093999999,
+      "exit": 77911.71342,
+      "tp": 79724.16113400001,
+      "sl": 77911.71342,
+      "openTime": "2026-05-01T15:00:00.000Z",
+      "closeTime": "2026-05-01T20:45:00.000Z",
+      "openTimeMs": 1777647600000,
+      "closeTimeMs": 1777668300000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 78099.47144999998,
+      "exit": 78099.47144999998,
+      "tp": 79277.595345,
+      "sl": 78099.47144999998,
+      "openTime": "2026-05-01T21:15:00.000Z",
+      "closeTime": "2026-05-03T06:15:00.000Z",
+      "openTimeMs": 1777670100000,
+      "closeTimeMs": 1777788900000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 78366.58829999999,
+      "exit": 78366.58829999999,
+      "tp": 79548.74163,
+      "sl": 78366.58829999999,
+      "openTime": "2026-05-03T06:45:00.000Z",
+      "closeTime": "2026-05-04T00:15:00.000Z",
+      "openTimeMs": 1777790700000,
+      "closeTimeMs": 1777853700000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 71,
+      "entry": 2312.48017,
+      "exit": 2347.363737,
+      "tp": 2347.363737,
+      "sl": 2312.48017,
+      "openTime": "2026-05-03T08:30:00.000Z",
+      "closeTime": "2026-05-03T22:00:00.000Z",
+      "openTimeMs": 1777797000000,
+      "closeTimeMs": 1777845600000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 78625.68714,
+      "exit": 79811.74895399998,
+      "tp": 79811.74895399998,
+      "sl": 77997.31002,
+      "openTime": "2026-05-04T00:45:00.000Z",
+      "closeTime": "2026-05-04T01:45:00.000Z",
+      "openTimeMs": 1777855500000,
+      "closeTimeMs": 1777859100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 89,
+      "entry": 79849.19942999998,
+      "exit": 79849.19942999998,
+      "tp": 81053.717823,
+      "sl": 79849.19942999998,
+      "openTime": "2026-05-04T01:45:00.000Z",
+      "closeTime": "2026-05-04T06:15:00.000Z",
+      "openTimeMs": 1777859100000,
+      "closeTimeMs": 1777875300000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 83,
+      "entry": 2362.6903299999994,
+      "exit": 2398.3313129999997,
+      "tp": 2398.3313129999997,
+      "sl": 2362.6903299999994,
+      "openTime": "2026-05-04T02:00:00.000Z",
+      "closeTime": "2026-05-04T04:15:00.000Z",
+      "openTimeMs": 1777860000000,
+      "closeTimeMs": 1777868100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 80,
+      "entry": 636.1655299999999,
+      "exit": 631.08129,
+      "tp": 645.762033,
+      "sl": 631.08129,
+      "openTime": "2026-05-04T04:00:00.000Z",
+      "closeTime": "2026-05-04T06:15:00.000Z",
+      "openTimeMs": 1777867200000,
+      "closeTimeMs": 1777875300000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 2392.48009,
+      "exit": 2373.35937,
+      "tp": 2428.5704490000003,
+      "sl": 2373.35937,
+      "openTime": "2026-05-04T04:15:00.000Z",
+      "closeTime": "2026-05-04T06:00:00.000Z",
+      "openTimeMs": 1777868100000,
+      "closeTimeMs": 1777874400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 84,
+      "entry": 79957.77789999999,
+      "exit": 79318.75469999999,
+      "tp": 81163.93419,
+      "sl": 79318.75469999999,
+      "openTime": "2026-05-04T06:45:00.000Z",
+      "closeTime": "2026-05-04T10:00:00.000Z",
+      "openTimeMs": 1777877100000,
+      "closeTimeMs": 1777888800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 2370.40804,
+      "exit": 2351.4637199999997,
+      "tp": 2406.1654440000007,
+      "sl": 2351.4637199999997,
+      "openTime": "2026-05-04T07:30:00.000Z",
+      "closeTime": "2026-05-04T10:00:00.000Z",
+      "openTimeMs": 1777879800000,
+      "closeTimeMs": 1777888800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 629.34872,
+      "exit": 624.3189600000001,
+      "tp": 638.8423919999999,
+      "sl": 624.3189600000001,
+      "openTime": "2026-05-04T08:00:00.000Z",
+      "closeTime": "2026-05-04T10:00:00.000Z",
+      "openTimeMs": 1777881600000,
+      "closeTimeMs": 1777888800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 79019.20025999998,
+      "exit": 80211.19818600001,
+      "tp": 80211.19818600001,
+      "sl": 78387.67817999999,
+      "openTime": "2026-05-04T10:45:00.000Z",
+      "closeTime": "2026-05-04T14:45:00.000Z",
+      "openTimeMs": 1777891500000,
+      "closeTimeMs": 1777905900000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 2343.99165,
+      "exit": 2379.3505649999997,
+      "tp": 2379.3505649999997,
+      "sl": 2325.2584500000003,
+      "openTime": "2026-05-04T11:00:00.000Z",
+      "closeTime": "2026-05-04T14:45:00.000Z",
+      "openTimeMs": 1777892400000,
+      "closeTimeMs": 1777905900000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 84,
+      "entry": 80296.37616,
+      "exit": 79654.64688,
+      "tp": 81507.64017600002,
+      "sl": 79654.64688,
+      "openTime": "2026-05-04T14:45:00.000Z",
+      "closeTime": "2026-05-04T15:15:00.000Z",
+      "openTimeMs": 1777905900000,
+      "closeTimeMs": 1777907700000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "TWO_POLE_PULLBACK_CONTINUATION",
+      "score": 74,
+      "entry": 79780.07036999999,
+      "exit": 80610.97607208557,
+      "tp": 80610.97607208557,
+      "sl": 79780.07036999999,
+      "openTime": "2026-05-04T15:15:00.000Z",
+      "closeTime": "2026-05-04T17:45:00.000Z",
+      "openTimeMs": 1777907700000,
+      "closeTimeMs": 1777916700000,
+      "pnlPct": 1.041,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 80339.42916999999,
+      "exit": 81551.34263700001,
+      "tp": 81551.34263700001,
+      "sl": 80339.42916999999,
+      "openTime": "2026-05-04T21:45:00.000Z",
+      "closeTime": "2026-05-05T13:00:00.000Z",
+      "openTimeMs": 1777931100000,
+      "closeTimeMs": 1777986000000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 82,
+      "entry": 81703.62199999999,
+      "exit": 81050.646,
+      "tp": 82936.11420000001,
+      "sl": 81050.646,
+      "openTime": "2026-05-05T13:00:00.000Z",
+      "closeTime": "2026-05-05T14:15:00.000Z",
+      "openTimeMs": 1777986000000,
+      "closeTimeMs": 1777990500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 72,
+      "entry": 81417.92658999999,
+      "exit": 80767.23387,
+      "tp": 82703.044712,
+      "sl": 80767.23387,
+      "openTime": "2026-05-05T14:45:00.000Z",
+      "closeTime": "2026-05-06T00:45:00.000Z",
+      "openTimeMs": 1777992300000,
+      "closeTimeMs": 1778028300000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 82,
+      "entry": 86.82673999999999,
+      "exit": 86.13282,
+      "tp": 88.13651399999999,
+      "sl": 86.13282,
+      "openTime": "2026-05-05T20:00:00.000Z",
+      "closeTime": "2026-05-06T00:15:00.000Z",
+      "openTimeMs": 1778011200000,
+      "closeTimeMs": 1778026500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 86.47639,
+      "exit": 87.78087900000001,
+      "tp": 87.78087900000001,
+      "sl": 86.47639,
+      "openTime": "2026-05-06T00:30:00.000Z",
+      "closeTime": "2026-05-06T07:15:00.000Z",
+      "openTimeMs": 1778027400000,
+      "closeTimeMs": 1778051700000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 81242.74157999999,
+      "exit": 82468.281438,
+      "tp": 82468.281438,
+      "sl": 81242.74157999999,
+      "openTime": "2026-05-06T01:00:00.000Z",
+      "closeTime": "2026-05-06T11:00:00.000Z",
+      "openTimeMs": 1778029200000,
+      "closeTimeMs": 1778065200000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 87.84776,
+      "exit": 89.17293600000002,
+      "tp": 89.17293600000002,
+      "sl": 87.14568,
+      "openTime": "2026-05-06T07:15:00.000Z",
+      "closeTime": "2026-05-06T08:45:00.000Z",
+      "openTimeMs": 1778051700000,
+      "closeTimeMs": 1778057100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 78,
+      "entry": 641.10046,
+      "exit": 650.771406,
+      "tp": 650.771406,
+      "sl": 641.10046,
+      "openTime": "2026-05-06T08:00:00.000Z",
+      "closeTime": "2026-05-06T11:15:00.000Z",
+      "openTimeMs": 1778054400000,
+      "closeTimeMs": 1778066100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 1.4338323999999998,
+      "exit": 1.4554616400000002,
+      "tp": 1.4554616400000002,
+      "sl": 1.4338323999999998,
+      "openTime": "2026-05-06T08:00:00.000Z",
+      "closeTime": "2026-05-06T11:15:00.000Z",
+      "openTimeMs": 1778054400000,
+      "closeTimeMs": 1778066100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 82499.96754999999,
+      "exit": 81840.62715,
+      "tp": 83744.47255500001,
+      "sl": 81840.62715,
+      "openTime": "2026-05-06T11:00:00.000Z",
+      "closeTime": "2026-05-06T13:00:00.000Z",
+      "openTimeMs": 1778065200000,
+      "closeTimeMs": 1778072400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 80,
+      "entry": 650.15951,
+      "exit": 659.9671109999999,
+      "tp": 659.9671109999999,
+      "sl": 650.15951,
+      "openTime": "2026-05-06T11:15:00.000Z",
+      "closeTime": "2026-05-06T12:30:00.000Z",
+      "openTimeMs": 1778066100000,
+      "closeTimeMs": 1778070600000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 71,
+      "entry": 1.4548534,
+      "exit": 1.4432262,
+      "tp": 1.47781712,
+      "sl": 1.4432262,
+      "openTime": "2026-05-06T11:15:00.000Z",
+      "closeTime": "2026-05-06T13:00:00.000Z",
+      "openTimeMs": 1778066100000,
+      "closeTimeMs": 1778072400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 657.73708,
+      "exit": 652.48044,
+      "tp": 667.658988,
+      "sl": 652.48044,
+      "openTime": "2026-05-06T12:45:00.000Z",
+      "closeTime": "2026-05-06T13:00:00.000Z",
+      "openTimeMs": 1778071500000,
+      "closeTimeMs": 1778072400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 81961.83996,
+      "exit": 81306.80028000001,
+      "tp": 83198.227356,
+      "sl": 81306.80028000001,
+      "openTime": "2026-05-06T14:30:00.000Z",
+      "closeTime": "2026-05-06T18:00:00.000Z",
+      "openTimeMs": 1778077800000,
+      "closeTimeMs": 1778090400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 88.49840999999999,
+      "exit": 88.49840999999999,
+      "tp": 89.833401,
+      "sl": 88.49840999999999,
+      "openTime": "2026-05-06T15:00:00.000Z",
+      "closeTime": "2026-05-07T00:30:00.000Z",
+      "openTimeMs": 1778079600000,
+      "closeTimeMs": 1778113800000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 81561.49000999998,
+      "exit": 80909.64993,
+      "tp": 82791.83816099998,
+      "sl": 80909.64993,
+      "openTime": "2026-05-06T18:00:00.000Z",
+      "closeTime": "2026-05-07T01:00:00.000Z",
+      "openTimeMs": 1778090400000,
+      "closeTimeMs": 1778115600000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 650.0093599999999,
+      "exit": 644.81448,
+      "tp": 659.814696,
+      "sl": 644.81448,
+      "openTime": "2026-05-06T18:00:00.000Z",
+      "closeTime": "2026-05-06T23:00:00.000Z",
+      "openTimeMs": 1778090400000,
+      "closeTimeMs": 1778108400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 69,
+      "entry": 1.4268253999999998,
+      "exit": 1.4154222,
+      "tp": 1.4483489399999998,
+      "sl": 1.4154222,
+      "openTime": "2026-05-06T19:15:00.000Z",
+      "closeTime": "2026-05-07T01:00:00.000Z",
+      "openTimeMs": 1778094900000,
+      "closeTimeMs": 1778115600000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 81291.22000999999,
+      "exit": 80641.53993,
+      "tp": 82517.49116099998,
+      "sl": 80641.53993,
+      "openTime": "2026-05-07T01:15:00.000Z",
+      "closeTime": "2026-05-07T10:15:00.000Z",
+      "openTimeMs": 1778116500000,
+      "closeTimeMs": 1778148900000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 644.09345,
+      "exit": 644.09345,
+      "tp": 653.809545,
+      "sl": 644.09345,
+      "openTime": "2026-05-07T04:00:00.000Z",
+      "closeTime": "2026-05-07T14:30:00.000Z",
+      "openTimeMs": 1778126400000,
+      "closeTimeMs": 1778164200000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 88.65856999999998,
+      "exit": 89.995977,
+      "tp": 89.995977,
+      "sl": 88.65856999999998,
+      "openTime": "2026-05-07T05:00:00.000Z",
+      "closeTime": "2026-05-07T07:30:00.000Z",
+      "openTimeMs": 1778130000000,
+      "closeTimeMs": 1778139000000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 1.4202188,
+      "exit": 1.4088684,
+      "tp": 1.4416426800000002,
+      "sl": 1.4088684,
+      "openTime": "2026-05-07T07:00:00.000Z",
+      "closeTime": "2026-05-07T10:15:00.000Z",
+      "openTimeMs": 1778137200000,
+      "closeTimeMs": 1778148900000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 81,
+      "entry": 90.28018999999999,
+      "exit": 89.55866999999999,
+      "tp": 91.642059,
+      "sl": 89.55866999999999,
+      "openTime": "2026-05-07T07:30:00.000Z",
+      "closeTime": "2026-05-07T08:30:00.000Z",
+      "openTimeMs": 1778139000000,
+      "closeTimeMs": 1778142600000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 80961.97108999999,
+      "exit": 80314.92237,
+      "tp": 82183.27554899998,
+      "sl": 80314.92237,
+      "openTime": "2026-05-07T10:30:00.000Z",
+      "closeTime": "2026-05-07T13:45:00.000Z",
+      "openTimeMs": 1778149800000,
+      "closeTimeMs": 1778161500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 78,
+      "entry": 89.54945999999998,
+      "exit": 88.83377999999999,
+      "tp": 90.900306,
+      "sl": 88.83377999999999,
+      "openTime": "2026-05-07T11:00:00.000Z",
+      "closeTime": "2026-05-07T13:45:00.000Z",
+      "openTimeMs": 1778151600000,
+      "closeTimeMs": 1778161500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 88.44836,
+      "exit": 87.74148,
+      "tp": 89.78259600000001,
+      "sl": 87.74148,
+      "openTime": "2026-05-07T15:00:00.000Z",
+      "closeTime": "2026-05-07T21:00:00.000Z",
+      "openTimeMs": 1778166000000,
+      "closeTimeMs": 1778187600000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 71,
+      "entry": 643.9132699999999,
+      "exit": 638.76711,
+      "tp": 653.6266469999999,
+      "sl": 638.76711,
+      "openTime": "2026-05-07T15:30:00.000Z",
+      "closeTime": "2026-05-07T22:00:00.000Z",
+      "openTimeMs": 1778167800000,
+      "closeTimeMs": 1778191200000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 71,
+      "entry": 88.41832999999998,
+      "exit": 87.71169,
+      "tp": 89.75211299999998,
+      "sl": 87.71169,
+      "openTime": "2026-05-08T04:00:00.000Z",
+      "closeTime": "2026-05-08T07:15:00.000Z",
+      "openTimeMs": 1778212800000,
+      "closeTimeMs": 1778224500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 88.63854999999998,
+      "exit": 88.63854999999998,
+      "tp": 89.97565499999999,
+      "sl": 88.63854999999998,
+      "openTime": "2026-05-08T09:00:00.000Z",
+      "closeTime": "2026-05-08T15:15:00.000Z",
+      "openTimeMs": 1778230800000,
+      "closeTimeMs": 1778253300000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 68,
+      "entry": 639.5989599999999,
+      "exit": 649.247256,
+      "tp": 649.247256,
+      "sl": 639.5989599999999,
+      "openTime": "2026-05-08T13:45:00.000Z",
+      "closeTime": "2026-05-08T18:15:00.000Z",
+      "openTimeMs": 1778247900000,
+      "closeTimeMs": 1778264100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 78,
+      "entry": 89.67958999999999,
+      "exit": 91.09511199999999,
+      "tp": 91.09511199999999,
+      "sl": 88.96287000000001,
+      "openTime": "2026-05-08T15:45:00.000Z",
+      "closeTime": "2026-05-08T17:30:00.000Z",
+      "openTimeMs": 1778255100000,
+      "closeTimeMs": 1778261400000,
+      "pnlPct": 1.578,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 71,
+      "entry": 1.4021006999999999,
+      "exit": 1.42423176,
+      "tp": 1.42423176,
+      "sl": 1.4021006999999999,
+      "openTime": "2026-05-08T17:15:00.000Z",
+      "closeTime": "2026-05-08T18:45:00.000Z",
+      "openTimeMs": 1778260500000,
+      "closeTimeMs": 1778265900000,
+      "pnlPct": 1.578,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 649.2686199999999,
+      "exit": 649.2686199999999,
+      "tp": 659.0627820000001,
+      "sl": 649.2686199999999,
+      "openTime": "2026-05-08T18:15:00.000Z",
+      "closeTime": "2026-05-09T07:00:00.000Z",
+      "openTimeMs": 1778264100000,
+      "closeTimeMs": 1778310000000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 71,
+      "entry": 1.4205191,
+      "exit": 1.4205191,
+      "tp": 1.4419475099999999,
+      "sl": 1.4205191,
+      "openTime": "2026-05-08T18:45:00.000Z",
+      "closeTime": "2026-05-09T09:15:00.000Z",
+      "openTimeMs": 1778265900000,
+      "closeTimeMs": 1778318100000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 69,
+      "entry": 80275.28508999999,
+      "exit": 81486.23094899999,
+      "tp": 81486.23094899999,
+      "sl": 80275.28508999999,
+      "openTime": "2026-05-09T00:30:00.000Z",
+      "closeTime": "2026-05-10T16:00:00.000Z",
+      "openTimeMs": 1778286600000,
+      "closeTimeMs": 1778428800000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 84,
+      "entry": 93.60351,
+      "exit": 92.85543,
+      "tp": 95.01551100000002,
+      "sl": 92.85543,
+      "openTime": "2026-05-09T01:45:00.000Z",
+      "closeTime": "2026-05-09T05:00:00.000Z",
+      "openTimeMs": 1778291100000,
+      "closeTimeMs": 1778302800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 93.96387,
+      "exit": 93.21291000000001,
+      "tp": 95.38130699999999,
+      "sl": 93.21291000000001,
+      "openTime": "2026-05-09T08:15:00.000Z",
+      "closeTime": "2026-05-09T09:15:00.000Z",
+      "openTimeMs": 1778314500000,
+      "closeTimeMs": 1778318100000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 81,
+      "entry": 2332.6603299999997,
+      "exit": 2367.8483129999995,
+      "tp": 2367.8483129999995,
+      "sl": 2332.6603299999997,
+      "openTime": "2026-05-09T17:00:00.000Z",
+      "closeTime": "2026-05-10T17:45:00.000Z",
+      "openTimeMs": 1778346000000,
+      "closeTimeMs": 1778435100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 93.45335999999999,
+      "exit": 92.70648,
+      "tp": 94.863096,
+      "sl": 92.70648,
+      "openTime": "2026-05-09T21:00:00.000Z",
+      "closeTime": "2026-05-10T01:15:00.000Z",
+      "openTimeMs": 1778360400000,
+      "closeTimeMs": 1778375700000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 652.50185,
+      "exit": 647.28705,
+      "tp": 662.344785,
+      "sl": 647.28705,
+      "openTime": "2026-05-09T21:00:00.000Z",
+      "closeTime": "2026-05-10T00:45:00.000Z",
+      "openTimeMs": 1778360400000,
+      "closeTimeMs": 1778373900000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 1.4261247,
+      "exit": 1.4147271000000001,
+      "tp": 1.44763767,
+      "sl": 1.4147271000000001,
+      "openTime": "2026-05-09T22:30:00.000Z",
+      "closeTime": "2026-05-10T01:00:00.000Z",
+      "openTimeMs": 1778365800000,
+      "closeTimeMs": 1778374800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 93.26316999999999,
+      "exit": 94.67003700000001,
+      "tp": 94.67003700000001,
+      "sl": 93.26316999999999,
+      "openTime": "2026-05-10T03:00:00.000Z",
+      "closeTime": "2026-05-10T09:00:00.000Z",
+      "openTimeMs": 1778382000000,
+      "closeTimeMs": 1778403600000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 71,
+      "entry": 1.4239225,
+      "exit": 1.4454022500000003,
+      "tp": 1.4454022500000003,
+      "sl": 1.4239225,
+      "openTime": "2026-05-10T08:00:00.000Z",
+      "closeTime": "2026-05-10T16:00:00.000Z",
+      "openTimeMs": 1778400000000,
+      "closeTimeMs": 1778428800000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 94.57448,
+      "exit": 93.81864,
+      "tp": 96.00112800000001,
+      "sl": 93.81864,
+      "openTime": "2026-05-10T09:00:00.000Z",
+      "closeTime": "2026-05-10T10:00:00.000Z",
+      "openTimeMs": 1778403600000,
+      "closeTimeMs": 1778407200000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 93.64354999999999,
+      "exit": 95.05615499999999,
+      "tp": 95.05615499999999,
+      "sl": 93.64354999999999,
+      "openTime": "2026-05-10T11:45:00.000Z",
+      "closeTime": "2026-05-10T17:00:00.000Z",
+      "openTimeMs": 1778413500000,
+      "closeTimeMs": 1778432400000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 82,
+      "entry": 81559.2778,
+      "exit": 80907.4554,
+      "tp": 82789.59258,
+      "sl": 80907.4554,
+      "openTime": "2026-05-10T16:00:00.000Z",
+      "closeTime": "2026-05-10T20:30:00.000Z",
+      "openTimeMs": 1778428800000,
+      "closeTimeMs": 1778445000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 1.4735720999999997,
+      "exit": 1.49580081,
+      "tp": 1.49580081,
+      "sl": 1.4735720999999997,
+      "openTime": "2026-05-10T16:45:00.000Z",
+      "closeTime": "2026-05-10T17:15:00.000Z",
+      "openTimeMs": 1778431500000,
+      "closeTimeMs": 1778433300000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 95.31521999999998,
+      "exit": 96.753042,
+      "tp": 96.753042,
+      "sl": 95.31521999999998,
+      "openTime": "2026-05-10T17:00:00.000Z",
+      "closeTime": "2026-05-10T18:15:00.000Z",
+      "openTimeMs": 1778432400000,
+      "closeTimeMs": 1778436900000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 78,
+      "entry": 2366.4640999999997,
+      "exit": 2347.5513,
+      "tp": 2402.1620099999996,
+      "sl": 2347.5513,
+      "openTime": "2026-05-10T17:45:00.000Z",
+      "closeTime": "2026-05-10T20:15:00.000Z",
+      "openTimeMs": 1778435100000,
+      "closeTimeMs": 1778444100000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 96.69659999999999,
+      "exit": 95.9238,
+      "tp": 98.15525999999998,
+      "sl": 95.9238,
+      "openTime": "2026-05-10T19:30:00.000Z",
+      "closeTime": "2026-05-10T20:15:00.000Z",
+      "openTimeMs": 1778441400000,
+      "closeTimeMs": 1778444100000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 80,
+      "entry": 80920.82999,
+      "exit": 82141.51383899999,
+      "tp": 82141.51383899999,
+      "sl": 80920.82999,
+      "openTime": "2026-05-10T21:15:00.000Z",
+      "closeTime": "2026-05-10T22:45:00.000Z",
+      "openTimeMs": 1778447700000,
+      "closeTimeMs": 1778453100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 95.45535999999998,
+      "exit": 95.45535999999998,
+      "tp": 96.98859838888443,
+      "sl": 95.45535999999998,
+      "openTime": "2026-05-10T21:30:00.000Z",
+      "closeTime": "2026-05-11T00:45:00.000Z",
+      "openTimeMs": 1778448600000,
+      "closeTimeMs": 1778460300000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 83,
+      "entry": 82126.53448999999,
+      "exit": 81470.17857,
+      "tp": 83365.406289,
+      "sl": 81470.17857,
+      "openTime": "2026-05-10T22:45:00.000Z",
+      "closeTime": "2026-05-11T00:15:00.000Z",
+      "openTimeMs": 1778453100000,
+      "closeTimeMs": 1778458500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 70,
+      "entry": 81708.50688,
+      "exit": 81055.49184,
+      "tp": 82998.211584,
+      "sl": 81055.49184,
+      "openTime": "2026-05-11T01:15:00.000Z",
+      "closeTime": "2026-05-11T03:00:00.000Z",
+      "openTimeMs": 1778462100000,
+      "closeTimeMs": 1778468400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 96.21611999999999,
+      "exit": 95.27771198892954,
+      "tp": 98.05726242546207,
+      "sl": 95.27771198892954,
+      "openTime": "2026-05-11T01:15:00.000Z",
+      "closeTime": "2026-05-11T02:30:00.000Z",
+      "openTimeMs": 1778462100000,
+      "closeTimeMs": 1778466600000,
+      "pnlPct": -0.975,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 94.85476,
+      "exit": 94.85476,
+      "tp": 96.32343555400865,
+      "sl": 94.85476,
+      "openTime": "2026-05-11T03:45:00.000Z",
+      "closeTime": "2026-05-11T08:15:00.000Z",
+      "openTimeMs": 1778471100000,
+      "closeTimeMs": 1778487300000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 1.4523509,
+      "exit": 1.4742594900000001,
+      "tp": 1.4742594900000001,
+      "sl": 1.4523509,
+      "openTime": "2026-05-11T05:00:00.000Z",
+      "closeTime": "2026-05-11T15:15:00.000Z",
+      "openTimeMs": 1778475600000,
+      "closeTimeMs": 1778512500000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 71,
+      "entry": 80830.98022999999,
+      "exit": 82050.30870300002,
+      "tp": 82050.30870300002,
+      "sl": 80830.98022999999,
+      "openTime": "2026-05-11T08:00:00.000Z",
+      "closeTime": "2026-05-11T17:45:00.000Z",
+      "openTimeMs": 1778486400000,
+      "closeTimeMs": 1778521500000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 95.31521999999998,
+      "exit": 94.55346,
+      "tp": 96.753042,
+      "sl": 94.55346,
+      "openTime": "2026-05-11T09:00:00.000Z",
+      "closeTime": "2026-05-11T14:30:00.000Z",
+      "openTimeMs": 1778490000000,
+      "closeTimeMs": 1778509800000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 654.2435899999999,
+      "exit": 664.1127990000002,
+      "tp": 664.1127990000002,
+      "sl": 654.2435899999999,
+      "openTime": "2026-05-11T10:00:00.000Z",
+      "closeTime": "2026-05-11T21:45:00.000Z",
+      "openTimeMs": 1778493600000,
+      "closeTimeMs": 1778535900000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 78,
+      "entry": 95.42532999999999,
+      "exit": 96.99225408595493,
+      "tp": 96.99225408595493,
+      "sl": 95.42532999999999,
+      "openTime": "2026-05-11T15:00:00.000Z",
+      "closeTime": "2026-05-11T16:00:00.000Z",
+      "openTimeMs": 1778511600000,
+      "closeTimeMs": 1778515200000,
+      "pnlPct": 1.642,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 1.4882867999999998,
+      "exit": 1.4763924,
+      "tp": 1.5107374799999997,
+      "sl": 1.4763924,
+      "openTime": "2026-05-11T15:15:00.000Z",
+      "closeTime": "2026-05-11T16:30:00.000Z",
+      "openTimeMs": 1778512500000,
+      "closeTimeMs": 1778517000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 97.53743999999999,
+      "exit": 96.53282587152604,
+      "tp": 99.5265004954901,
+      "sl": 96.53282587152604,
+      "openTime": "2026-05-11T16:15:00.000Z",
+      "closeTime": "2026-05-12T01:30:00.000Z",
+      "openTimeMs": 1778516100000,
+      "closeTimeMs": 1778549400000,
+      "pnlPct": -1.03,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 1.4791777,
+      "exit": 1.4673561,
+      "tp": 1.50149097,
+      "sl": 1.4673561,
+      "openTime": "2026-05-11T17:30:00.000Z",
+      "closeTime": "2026-05-11T19:00:00.000Z",
+      "openTimeMs": 1778520600000,
+      "closeTimeMs": 1778526000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 82023.03108999999,
+      "exit": 81367.50237,
+      "tp": 83260.34154899999,
+      "sl": 81367.50237,
+      "openTime": "2026-05-11T17:45:00.000Z",
+      "closeTime": "2026-05-12T01:15:00.000Z",
+      "openTimeMs": 1778521500000,
+      "closeTimeMs": 1778548500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 664.60394,
+      "exit": 664.60394,
+      "tp": 674.629434,
+      "sl": 664.60394,
+      "openTime": "2026-05-11T21:45:00.000Z",
+      "closeTime": "2026-05-12T01:30:00.000Z",
+      "openTimeMs": 1778535900000,
+      "closeTimeMs": 1778549400000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 1.4761746999999998,
+      "exit": 1.4643770999999999,
+      "tp": 1.49844267,
+      "sl": 1.4643770999999999,
+      "openTime": "2026-05-11T23:00:00.000Z",
+      "closeTime": "2026-05-12T01:30:00.000Z",
+      "openTimeMs": 1778540400000,
+      "closeTimeMs": 1778549400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 79,
+      "entry": 81280.37917999999,
+      "exit": 80630.78573999999,
+      "tp": 82506.486798,
+      "sl": 80630.78573999999,
+      "openTime": "2026-05-12T01:45:00.000Z",
+      "closeTime": "2026-05-12T10:45:00.000Z",
+      "openTimeMs": 1778550300000,
+      "closeTimeMs": 1778582700000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 665.2145499999999,
+      "exit": 659.89815,
+      "tp": 675.2492549999998,
+      "sl": 659.89815,
+      "openTime": "2026-05-12T02:00:00.000Z",
+      "closeTime": "2026-05-12T06:45:00.000Z",
+      "openTimeMs": 1778551200000,
+      "closeTimeMs": 1778568300000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 1.4714699999999998,
+      "exit": 1.45971,
+      "tp": 1.4936669999999999,
+      "sl": 1.45971,
+      "openTime": "2026-05-12T02:00:00.000Z",
+      "closeTime": "2026-05-12T03:15:00.000Z",
+      "openTimeMs": 1778551200000,
+      "closeTimeMs": 1778555700000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 96.79669999999999,
+      "exit": 96.0231,
+      "tp": 98.25687,
+      "sl": 96.0231,
+      "openTime": "2026-05-12T06:00:00.000Z",
+      "closeTime": "2026-05-12T07:00:00.000Z",
+      "openTimeMs": 1778565600000,
+      "closeTimeMs": 1778569200000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 71,
+      "entry": 1.4642628,
+      "exit": 1.4525604,
+      "tp": 1.4863510800000002,
+      "sl": 1.4525604,
+      "openTime": "2026-05-12T07:45:00.000Z",
+      "closeTime": "2026-05-12T10:00:00.000Z",
+      "openTimeMs": 1778571900000,
+      "closeTimeMs": 1778580000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 662.3616999999999,
+      "exit": 657.0681000000001,
+      "tp": 672.35337,
+      "sl": 657.0681000000001,
+      "openTime": "2026-05-12T09:30:00.000Z",
+      "closeTime": "2026-05-12T13:45:00.000Z",
+      "openTimeMs": 1778578200000,
+      "closeTimeMs": 1778593500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 658.0774199999998,
+      "exit": 668.004462,
+      "tp": 668.004462,
+      "sl": 658.0774199999998,
+      "openTime": "2026-05-12T18:00:00.000Z",
+      "closeTime": "2026-05-13T00:30:00.000Z",
+      "openTimeMs": 1778608800000,
+      "closeTimeMs": 1778632200000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 73,
+      "entry": 95.03493999999999,
+      "exit": 94.27542,
+      "tp": 96.468534,
+      "sl": 94.27542,
+      "openTime": "2026-05-12T19:00:00.000Z",
+      "closeTime": "2026-05-12T23:45:00.000Z",
+      "openTimeMs": 1778612400000,
+      "closeTimeMs": 1778629500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 80735.09443999999,
+      "exit": 80089.85892,
+      "tp": 81952.97648400001,
+      "sl": 80089.85892,
+      "openTime": "2026-05-13T00:15:00.000Z",
+      "closeTime": "2026-05-13T12:30:00.000Z",
+      "openTimeMs": 1778631300000,
+      "closeTimeMs": 1778675400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 668.61795,
+      "exit": 678.7039950000001,
+      "tp": 678.7039950000001,
+      "sl": 668.61795,
+      "openTime": "2026-05-13T00:30:00.000Z",
+      "closeTime": "2026-05-13T01:30:00.000Z",
+      "openTimeMs": 1778632200000,
+      "closeTimeMs": 1778635800000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 81,
+      "entry": 679.679,
+      "exit": 679.679,
+      "tp": 689.9319,
+      "sl": 679.679,
+      "openTime": "2026-05-13T01:30:00.000Z",
+      "closeTime": "2026-05-13T11:00:00.000Z",
+      "openTimeMs": 1778635800000,
+      "closeTimeMs": 1778670000000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 95.68558999999999,
+      "exit": 94.92087000000001,
+      "tp": 97.128999,
+      "sl": 94.92087000000001,
+      "openTime": "2026-05-13T04:00:00.000Z",
+      "closeTime": "2026-05-13T07:15:00.000Z",
+      "openTimeMs": 1778644800000,
+      "closeTimeMs": 1778656500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 70,
+      "entry": 1.4528514,
+      "exit": 1.4528514,
+      "tp": 1.4747675400000002,
+      "sl": 1.4528514,
+      "openTime": "2026-05-13T04:15:00.000Z",
+      "closeTime": "2026-05-13T06:00:00.000Z",
+      "openTimeMs": 1778645700000,
+      "closeTimeMs": 1778652000000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 72,
+      "entry": 1.4615600999999998,
+      "exit": 1.4498792999999999,
+      "tp": 1.4836076100000002,
+      "sl": 1.4498792999999999,
+      "openTime": "2026-05-13T07:15:00.000Z",
+      "closeTime": "2026-05-13T11:00:00.000Z",
+      "openTimeMs": 1778656500000,
+      "closeTimeMs": 1778670000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 73,
+      "entry": 1.4393378999999997,
+      "exit": 1.4393378999999997,
+      "tp": 1.4620567199999999,
+      "sl": 1.4393378999999997,
+      "openTime": "2026-05-14T12:00:00.000Z",
+      "closeTime": "2026-05-14T14:00:00.000Z",
+      "openTimeMs": 1778760000000,
+      "closeTimeMs": 1778767200000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 74,
+      "entry": 79502.61318999999,
+      "exit": 80701.90335899999,
+      "tp": 80701.90335899999,
+      "sl": 79502.61318999999,
+      "openTime": "2026-05-14T12:15:00.000Z",
+      "closeTime": "2026-05-14T14:45:00.000Z",
+      "openTimeMs": 1778760900000,
+      "closeTimeMs": 1778769900000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 70,
+      "entry": 672.9522799999999,
+      "exit": 683.103708,
+      "tp": 683.103708,
+      "sl": 672.9522799999999,
+      "openTime": "2026-05-14T12:15:00.000Z",
+      "closeTime": "2026-05-14T17:00:00.000Z",
+      "openTimeMs": 1778760900000,
+      "closeTimeMs": 1778778000000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 1.4564549999999998,
+      "exit": 1.4784255000000004,
+      "tp": 1.4784255000000004,
+      "sl": 1.4564549999999998,
+      "openTime": "2026-05-14T14:15:00.000Z",
+      "closeTime": "2026-05-14T16:45:00.000Z",
+      "openTimeMs": 1778768100000,
+      "closeTimeMs": 1778777100000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 81,
+      "entry": 81045.81485,
+      "exit": 81045.81485,
+      "tp": 82268.384085,
+      "sl": 81045.81485,
+      "openTime": "2026-05-14T14:45:00.000Z",
+      "closeTime": "2026-05-15T02:00:00.000Z",
+      "openTimeMs": 1778769900000,
+      "closeTimeMs": 1778810400000,
+      "pnlPct": 0,
+      "reason": "BREAKEVEN",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 74,
+      "entry": 1.4753739,
+      "exit": 1.500439113844933,
+      "tp": 1.500439113844933,
+      "sl": 1.4753739,
+      "openTime": "2026-05-14T17:15:00.000Z",
+      "closeTime": "2026-05-14T17:45:00.000Z",
+      "openTimeMs": 1778778900000,
+      "closeTimeMs": 1778780700000,
+      "pnlPct": 1.699,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 78,
+      "entry": 683.56288,
+      "exit": 678.09984,
+      "tp": 693.874368,
+      "sl": 678.09984,
+      "openTime": "2026-05-15T00:00:00.000Z",
+      "closeTime": "2026-05-15T02:30:00.000Z",
+      "openTimeMs": 1778803200000,
+      "closeTimeMs": 1778812200000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 81,
+      "entry": 81380.43913999999,
+      "exit": 80730.04602,
+      "tp": 82608.056154,
+      "sl": 80730.04602,
+      "openTime": "2026-05-15T02:45:00.000Z",
+      "closeTime": "2026-05-15T04:45:00.000Z",
+      "openTimeMs": 1778813100000,
+      "closeTimeMs": 1778820300000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 75,
+      "entry": 681.0803999999999,
+      "exit": 675.6372,
+      "tp": 691.35444,
+      "sl": 675.6372,
+      "openTime": "2026-05-15T03:00:00.000Z",
+      "closeTime": "2026-05-15T05:30:00.000Z",
+      "openTimeMs": 1778814000000,
+      "closeTimeMs": 1778823000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 77,
+      "entry": 80914.80397,
+      "exit": 80268.13221,
+      "tp": 82135.396917,
+      "sl": 80268.13221,
+      "openTime": "2026-05-15T05:00:00.000Z",
+      "closeTime": "2026-05-15T13:00:00.000Z",
+      "openTimeMs": 1778821200000,
+      "closeTimeMs": 1778850000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 76,
+      "entry": 678.5378599999999,
+      "exit": 688.7735459999999,
+      "tp": 688.7735459999999,
+      "sl": 678.5378599999999,
+      "openTime": "2026-05-15T06:00:00.000Z",
+      "closeTime": "2026-05-15T07:15:00.000Z",
+      "openTimeMs": 1778824800000,
+      "closeTimeMs": 1778829300000,
+      "pnlPct": 1.508,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 80,
+      "entry": 687.75707,
+      "exit": 682.2605100000001,
+      "tp": 698.131827,
+      "sl": 682.2605100000001,
+      "openTime": "2026-05-15T07:15:00.000Z",
+      "closeTime": "2026-05-15T09:15:00.000Z",
+      "openTimeMs": 1778829300000,
+      "closeTimeMs": 1778836500000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "module": "VIDYA_SQUEEZE_EXPANSION",
+      "score": 78,
+      "entry": 686.7460599999998,
+      "exit": 681.25758,
+      "tp": 697.105566,
+      "sl": 681.25758,
+      "openTime": "2026-05-15T10:15:00.000Z",
+      "closeTime": "2026-05-15T13:00:00.000Z",
+      "openTimeMs": 1778840100000,
+      "closeTimeMs": 1778850000000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "SMC_DISCOUNT_RECLAIM",
+      "score": 75,
+      "entry": 1.4763749,
+      "exit": 1.4645757000000001,
+      "tp": 1.49967832,
+      "sl": 1.4645757000000001,
+      "openTime": "2026-05-15T10:45:00.000Z",
+      "closeTime": "2026-05-15T12:00:00.000Z",
+      "openTimeMs": 1778841900000,
+      "closeTimeMs": 1778846400000,
+      "pnlPct": -0.799,
+      "reason": "STOP_LOSS",
+      "shadowOnly": false
+    }
+  ],
+  "diagnostics": {
+    "rejections": {
+      "ORDERFLOW_WEAK_BUY_PRESSURE": 81,
+      "MACD_NOT_CONFIRMED": 218,
+      "VOLUME_BELOW_MODULE_FLOOR": 50,
+      "HTF_TREND_BEARISH": 8709,
+      "SCORE_BELOW_FLOOR": 28,
+      "WEAK_RELATIVE_STRENGTH": 2269,
+      "OVEREXTENDED": 36,
+      "EXEC_DEPTH": 67,
+      "OVEREXTENDED_EMA9": 1
+    },
+    "stages": {
+      "ORDERBOOK_OK": 11598,
+      "LIQUIDITY_BASE_OK": 11598,
+      "REGIME_OK": 11598,
+      "CONTEXT_OK": 11598,
+      "MODULE_OK": 365,
+      "EXECUTION_OK": 298,
+      "SCORE_OK": 139
+    },
+    "moduleCandidates": {
+      "VIDYA_SQUEEZE_EXPANSION": 310,
+      "SMC_DISCOUNT_RECLAIM": 153,
+      "VELOCITY_BREAKOUT": 43,
+      "TWO_POLE_PULLBACK_CONTINUATION": 23
+    }
+  }
+}

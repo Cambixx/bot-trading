@@ -1,0 +1,544 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Tournament · KNIFE</title>
+<style>
+  body{font-family:-apple-system,Inter,sans-serif;background:#0f172a;color:#e2e8f0;padding:32px;line-height:1.5;max-width:1400px;margin:0 auto}
+  h1{color:#38bdf8;margin:0 0 4px} h2{color:#94a3b8;margin:32px 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:0.08em}
+  h4{color:#94a3b8;margin:18px 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em}
+  .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+  .stat{background:#0f172a;border-radius:8px;padding:10px;text-align:center}
+  .stat .v{font-size:20px;font-weight:700;color:#38bdf8} .stat .l{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:7px 10px;border-bottom:1px solid #334155;text-align:left;vertical-align:top}
+  table.small th,table.small td{padding:5px 8px;font-size:12px}
+  th{background:#0f172a;color:#94a3b8;font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:0.06em}
+  .win{color:#4ade80} .loss{color:#f87171} .muted{color:#64748b}
+  .winner-row{background:#1e3a2f}
+  .winner-row td{border-bottom-color:#16a34a;font-weight:600}
+  .links{font-size:12px} .links a{color:#38bdf8;text-decoration:none;margin:0 4px}
+  a{color:#38bdf8;text-decoration:none} a:hover{text-decoration:underline}
+  .verdict{font-size:13px;background:#0f172a;border-radius:6px;padding:10px;margin:8px 0}
+  details.variant{background:#1e293b;border:1px solid #334155;border-radius:10px;margin-bottom:10px;padding:14px 18px}
+  details.variant[open]{padding-bottom:20px}
+  details.variant.winner{border-color:#16a34a;background:#1a2c24}
+  details summary{cursor:pointer;font-size:14px;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▶";color:#64748b;font-size:10px;transition:transform 0.15s}
+  details[open] summary::before{transform:rotate(90deg)}
+  .rank{color:#64748b;font-family:Menlo,monospace;font-size:12px;min-width:30px}
+  .trophy{color:#facc15}
+  .oneliner{color:#94a3b8;font-size:12px;margin-left:auto}
+  .variant-body{margin-top:12px;padding-top:14px;border-top:1px solid #334155}
+  .desc{margin-bottom:8px;font-size:13px}
+  .knobs{margin:8px 0}
+  .chip{display:inline-block;background:#0f172a;border:1px solid #334155;border-radius:5px;padding:3px 7px;margin:2px 4px 2px 0;font-size:11px;font-family:Menlo,monospace}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px} .row>.col{flex:1;min-width:240px}
+  .toolbar{display:flex;gap:8px;margin:10px 0}
+  .btn{background:#0f172a;border:1px solid #334155;border-radius:6px;padding:6px 12px;font-size:12px;color:#e2e8f0;cursor:pointer;font-family:inherit}
+  .btn:hover{background:#1e293b}
+</style></head><body>
+<h1>Strategy Tournament · KNIFE</h1>
+<div class="muted">v3.2.0-ReversalShadowHardening · BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT · 30 días · 8 variantes · 2026-05-23 16:17</div>
+
+<h2>Ganador</h2>
+<div class="card">
+  <h3 style="margin-top:0">🏆 no-be</h3>
+  <div class="muted">All modules, disable breakeven move</div>
+  <div class="verdict">
+    <b>101 trades</b> · ROI <span class="win">+1.27%</span> ·
+    PF <b>1.13</b> · WR 36.63% · Max DD -1.51% · Expectancy 0.63 USD/trade · Avg hold 7.4h
+    <br><br>
+    OOS holdout: 9 trades · PF 0 · WR 0% · ROI -1.32%
+  </div>
+</div>
+
+<h2>Ranking</h2>
+<div class="card"><table><thead><tr><th>#</th><th>Strategy</th><th>Trades</th><th>WR</th><th>ROI</th><th>PF</th><th>Max DD</th><th>Expect</th><th>Hold</th><th>OOS PF</th><th>OOS WR</th><th>OOS Trd</th><th>Score</th></tr></thead><tbody><tr class="winner-row">
+      <td>1</td>
+      <td title="All modules, disable breakeven move"><a href="#variant-4"><b>no-be</b></a></td>
+      <td>101</td>
+      <td>36.63%</td>
+      <td class="win">+1.27%</td>
+      <td>1.13</td>
+      <td class="loss">-1.51%</td>
+      <td>0.63</td>
+      <td>7.4h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>9</td>
+      <td>0.65</td>
+    </tr><tr >
+      <td>2</td>
+      <td title="Only VIDYA_LIQUIDITY_SWEEP"><a href="#variant-6"><b>vidya-only</b></a></td>
+      <td>103</td>
+      <td>31.07%</td>
+      <td class="win">+0.41%</td>
+      <td>1.04</td>
+      <td class="loss">-1.83%</td>
+      <td>0.2</td>
+      <td>6.9h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>9</td>
+      <td>0.58</td>
+    </tr><tr >
+      <td>3</td>
+      <td title="All modules, TP × 1.3"><a href="#variant-2"><b>wider-tp</b></a></td>
+      <td>94</td>
+      <td>23.4%</td>
+      <td class="win">+0.26%</td>
+      <td>1.03</td>
+      <td class="loss">-2.06%</td>
+      <td>0.14</td>
+      <td>9h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>9</td>
+      <td>0.57</td>
+    </tr><tr >
+      <td>4</td>
+      <td title="All 3 reversal modules enabled, default risk"><a href="#variant-0"><b>baseline-allmods</b></a></td>
+      <td>106</td>
+      <td>29.25%</td>
+      <td class="win">+0.16%</td>
+      <td>1.02</td>
+      <td class="loss">-2.08%</td>
+      <td>0.08</td>
+      <td>6.9h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>9</td>
+      <td>0.56</td>
+    </tr><tr >
+      <td>5</td>
+      <td title="All modules, SL × 0.75"><a href="#variant-1"><b>tighter-sl</b></a></td>
+      <td>113</td>
+      <td>21.24%</td>
+      <td class="loss">-1.42%</td>
+      <td>0.84</td>
+      <td class="loss">-2.59%</td>
+      <td>-0.63</td>
+      <td>5.1h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>9</td>
+      <td>0.42</td>
+    </tr><tr >
+      <td>6</td>
+      <td title="All modules, SL × 0.8 + TP × 1.25"><a href="#variant-3"><b>aggressive-rr</b></a></td>
+      <td>102</td>
+      <td>17.65%</td>
+      <td class="loss">-1.48%</td>
+      <td>0.82</td>
+      <td class="loss">-2.97%</td>
+      <td>-0.72</td>
+      <td>6.6h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>9</td>
+      <td>0.41</td>
+    </tr><tr >
+      <td>7</td>
+      <td title="Only TWO_POLE_CAPITULATION_RESET"><a href="#variant-5"><b>twopole-only</b></a></td>
+      <td>4</td>
+      <td>0%</td>
+      <td class="loss">-0.23%</td>
+      <td>0</td>
+      <td class="loss">-0.23%</td>
+      <td>-2.89</td>
+      <td>7.9h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>0</td>
+      <td>—</td>
+    </tr><tr >
+      <td>8</td>
+      <td title="Only SOTT_BAND_RECLAIM"><a href="#variant-7"><b>sott-only</b></a></td>
+      <td>2</td>
+      <td>0%</td>
+      <td class="loss">-0.1%</td>
+      <td>0</td>
+      <td class="loss">-0.1%</td>
+      <td>-2.51</td>
+      <td>3.6h</td>
+      <td>0</td>
+      <td>0%</td>
+      <td>0</td>
+      <td>—</td>
+    </tr></tbody></table></div>
+
+<h2>Variantes</h2>
+<div class="toolbar">
+  <button class="btn" onclick="document.querySelectorAll('details.variant').forEach(d=>d.open=true)">Expandir todas</button>
+  <button class="btn" onclick="document.querySelectorAll('details.variant').forEach(d=>d.open=false)">Colapsar todas</button>
+</div>
+<div id="variant-4">
+<details open class="variant winner">
+  <summary>
+    <span class="rank">#1</span>
+    <b>no-be</b>
+    <span class="trophy">🏆</span>
+    <span class="oneliner">101 trades · ROI <span class="win">+1.27%</span> · PF 1.13 · WR 36.63% · DD -1.51%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">All modules, disable breakeven move</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span><span class="chip"><b>beFraction</b>:&nbsp;0</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">101</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v win">+1.27%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">36.63%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">1.13</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-1.51%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">0.63</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">7.4h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">5063.45</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>92</td><td>9</td></tr>
+      <tr><td>Win Rate</td><td>40.22%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>1.3</td><td>0</td></tr>
+      <tr><td>ROI</td><td>2.62%</td><td>-1.32%</td></tr>
+      <tr><td>Max DD</td><td>-1.51%</td><td>-1.32%</td></tr>
+    </tbody></table>
+    
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>ETHUSDT</td><td>31</td><td>38.7%</td><td class="win">+36.20</td></tr><tr><td>XRPUSDT</td><td>13</td><td>30.8%</td><td class="loss">-11.37</td></tr><tr><td>SOLUSDT</td><td>29</td><td>27.6%</td><td class="loss">-51.91</td></tr><tr><td>BTCUSDT</td><td>23</td><td>39.1%</td><td class="win">+38.84</td></tr><tr><td>BNBUSDT</td><td>5</td><td>80.0%</td><td class="win">+51.69</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>VIDYA_LIQUIDITY_SWEEP</td><td>96</td><td>36.5%</td></tr><tr><td>TWO_POLE_CAPITULATION_RESET</td><td>3</td><td>33.3%</td></tr><tr><td>SOTT_BAND_RECLAIM</td><td>2</td><td>50.0%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>STOP_LOSS</td><td>64</td></tr><tr><td>TAKE_PROFIT</td><td>37</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5591</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>2008</td></tr><tr><td>ATR_FILTER</td><td>1550</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>1485</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>415</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>196</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>108</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>1</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 30 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-11 14:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-11 15:15</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-1.60%</td></tr><tr><td>2026-05-11 16:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.59%</td></tr><tr><td>2026-05-11 16:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.36%</td></tr><tr><td>2026-05-11 22:00</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-11 23:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.76%</td></tr><tr><td>2026-05-12 02:45</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.83%</td></tr><tr><td>2026-05-12 04:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-12 09:30</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-12 18:00</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.42%</td></tr><tr><td>2026-05-12 19:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.63%</td></tr><tr><td>2026-05-12 20:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-12 22:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.54%</td></tr><tr><td>2026-05-12 22:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.67%</td></tr><tr><td>2026-05-13 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.56%</td></tr><tr><td>2026-05-13 06:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.57%</td></tr><tr><td>2026-05-14 12:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.35%</td></tr><tr><td>2026-05-14 12:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.53%</td></tr><tr><td>2026-05-14 12:45</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-14 14:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.44%</td></tr><tr><td>2026-05-14 14:15</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.53%</td></tr><tr><td>2026-05-14 21:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-15 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.41%</td></tr><tr><td>2026-05-15 01:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-15 06:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.70%</td></tr><tr><td>2026-05-15 06:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.68%</td></tr><tr><td>2026-05-15 06:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.84%</td></tr><tr><td>2026-05-15 10:45</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.91%</td></tr></tbody></table>
+  </div>
+</details></div><div id="variant-6">
+<details  class="variant ">
+  <summary>
+    <span class="rank">#2</span>
+    <b>vidya-only</b>
+    
+    <span class="oneliner">103 trades · ROI <span class="win">+0.41%</span> · PF 1.04 · WR 31.07% · DD -1.83%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">Only VIDYA_LIQUIDITY_SWEEP</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span><span class="chip"><b>moduleFilter</b>:&nbsp;VIDYA_LIQUIDITY_SWEEP</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">103</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v win">+0.41%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">31.07%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">1.04</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-1.83%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">0.2</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">6.9h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">5020.51</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>94</td><td>9</td></tr>
+      <tr><td>Win Rate</td><td>34.04%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>1.2</td><td>0</td></tr>
+      <tr><td>ROI</td><td>1.61%</td><td>-1.18%</td></tr>
+      <tr><td>Max DD</td><td>-1.8%</td><td>-1.18%</td></tr>
+    </tbody></table>
+    
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>ETHUSDT</td><td>31</td><td>35.5%</td><td class="win">+24.46</td></tr><tr><td>XRPUSDT</td><td>11</td><td>27.3%</td><td class="loss">-8.11</td></tr><tr><td>SOLUSDT</td><td>30</td><td>23.3%</td><td class="loss">-54.26</td></tr><tr><td>BTCUSDT</td><td>26</td><td>30.8%</td><td class="win">+22.47</td></tr><tr><td>BNBUSDT</td><td>5</td><td>60.0%</td><td class="win">+35.95</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>VIDYA_LIQUIDITY_SWEEP</td><td>103</td><td>31.1%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>STOP_LOSS</td><td>59</td></tr><tr><td>TAKE_PROFIT</td><td>32</td></tr><tr><td>BREAKEVEN</td><td>12</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5596</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>2124</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>1576</td></tr><tr><td>ATR_FILTER</td><td>1427</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>436</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>202</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>109</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>1</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 30 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-11 14:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-11 15:15</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-1.60%</td></tr><tr><td>2026-05-11 16:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.59%</td></tr><tr><td>2026-05-11 22:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.63%</td></tr><tr><td>2026-05-11 22:00</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-11 23:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.76%</td></tr><tr><td>2026-05-12 02:45</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.83%</td></tr><tr><td>2026-05-12 04:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-12 09:30</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-12 18:00</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.42%</td></tr><tr><td>2026-05-12 19:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.63%</td></tr><tr><td>2026-05-12 20:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-12 22:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.54%</td></tr><tr><td>2026-05-12 22:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.67%</td></tr><tr><td>2026-05-13 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.56%</td></tr><tr><td>2026-05-13 06:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.57%</td></tr><tr><td>2026-05-14 12:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.35%</td></tr><tr><td>2026-05-14 12:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.53%</td></tr><tr><td>2026-05-14 12:45</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-14 14:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.44%</td></tr><tr><td>2026-05-14 14:15</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-14 21:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-15 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.41%</td></tr><tr><td>2026-05-15 01:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-15 06:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.70%</td></tr><tr><td>2026-05-15 06:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-15 06:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.84%</td></tr><tr><td>2026-05-15 10:45</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.91%</td></tr></tbody></table>
+  </div>
+</details></div><div id="variant-2">
+<details  class="variant ">
+  <summary>
+    <span class="rank">#3</span>
+    <b>wider-tp</b>
+    
+    <span class="oneliner">94 trades · ROI <span class="win">+0.26%</span> · PF 1.03 · WR 23.4% · DD -2.06%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">All modules, TP × 1.3</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span><span class="chip"><b>rrMult</b>:&nbsp;1.3</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">94</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v win">+0.26%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">23.4%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">1.03</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-2.06%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">0.14</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">9h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">5013.11</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>85</td><td>9</td></tr>
+      <tr><td>Win Rate</td><td>25.88%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>1.2</td><td>0</td></tr>
+      <tr><td>ROI</td><td>1.46%</td><td>-1.18%</td></tr>
+      <tr><td>Max DD</td><td>-2.06%</td><td>-1.18%</td></tr>
+    </tbody></table>
+    
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>ETHUSDT</td><td>28</td><td>25.0%</td><td class="win">+18.32</td></tr><tr><td>XRPUSDT</td><td>13</td><td>30.8%</td><td class="win">+8.76</td></tr><tr><td>SOLUSDT</td><td>26</td><td>15.4%</td><td class="loss">-58.73</td></tr><tr><td>BTCUSDT</td><td>22</td><td>18.2%</td><td class="loss">-5.33</td></tr><tr><td>BNBUSDT</td><td>5</td><td>60.0%</td><td class="win">+50.09</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>VIDYA_LIQUIDITY_SWEEP</td><td>89</td><td>24.7%</td></tr><tr><td>TWO_POLE_CAPITULATION_RESET</td><td>3</td><td>0.0%</td></tr><tr><td>SOTT_BAND_RECLAIM</td><td>2</td><td>0.0%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>STOP_LOSS</td><td>55</td></tr><tr><td>TAKE_PROFIT</td><td>22</td></tr><tr><td>BREAKEVEN</td><td>17</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5576</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>1846</td></tr><tr><td>ATR_FILTER</td><td>1423</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>1413</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>385</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>189</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>99</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>2</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 30 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-11 08:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+2.11%</td></tr><tr><td>2026-05-11 11:15</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.89%</td></tr><tr><td>2026-05-11 14:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-11 15:15</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-1.60%</td></tr><tr><td>2026-05-11 16:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.59%</td></tr><tr><td>2026-05-11 22:00</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-11 23:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.76%</td></tr><tr><td>2026-05-12 02:45</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.83%</td></tr><tr><td>2026-05-12 04:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-12 09:30</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-12 18:00</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.88%</td></tr><tr><td>2026-05-12 19:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-12 20:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-12 22:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.54%</td></tr><tr><td>2026-05-12 22:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.67%</td></tr><tr><td>2026-05-13 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-14 12:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.79%</td></tr><tr><td>2026-05-14 12:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+2.02%</td></tr><tr><td>2026-05-14 12:45</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-14 14:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.90%</td></tr><tr><td>2026-05-14 14:15</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-14 21:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-15 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.41%</td></tr><tr><td>2026-05-15 01:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-15 06:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.70%</td></tr><tr><td>2026-05-15 06:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-15 06:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.84%</td></tr><tr><td>2026-05-15 10:45</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.91%</td></tr></tbody></table>
+  </div>
+</details></div><div id="variant-0">
+<details  class="variant ">
+  <summary>
+    <span class="rank">#4</span>
+    <b>baseline-allmods</b>
+    
+    <span class="oneliner">106 trades · ROI <span class="win">+0.16%</span> · PF 1.02 · WR 29.25% · DD -2.08%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">All 3 reversal modules enabled, default risk</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">106</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v win">+0.16%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">29.25%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">1.02</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-2.08%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">0.08</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">6.9h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">5008.02</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>97</td><td>9</td></tr>
+      <tr><td>Win Rate</td><td>31.96%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>1.17</td><td>0</td></tr>
+      <tr><td>ROI</td><td>1.36%</td><td>-1.18%</td></tr>
+      <tr><td>Max DD</td><td>-2.04%</td><td>-1.18%</td></tr>
+    </tbody></table>
+    
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>ETHUSDT</td><td>32</td><td>34.4%</td><td class="win">+31.96</td></tr><tr><td>XRPUSDT</td><td>13</td><td>23.1%</td><td class="loss">-17.56</td></tr><tr><td>SOLUSDT</td><td>30</td><td>23.3%</td><td class="loss">-54.23</td></tr><tr><td>BTCUSDT</td><td>26</td><td>26.9%</td><td class="win">+12.00</td></tr><tr><td>BNBUSDT</td><td>5</td><td>60.0%</td><td class="win">+35.86</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>VIDYA_LIQUIDITY_SWEEP</td><td>101</td><td>30.7%</td></tr><tr><td>TWO_POLE_CAPITULATION_RESET</td><td>3</td><td>0.0%</td></tr><tr><td>SOTT_BAND_RECLAIM</td><td>2</td><td>0.0%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>STOP_LOSS</td><td>59</td></tr><tr><td>TAKE_PROFIT</td><td>31</td></tr><tr><td>BREAKEVEN</td><td>16</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5596</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>2094</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>1547</td></tr><tr><td>ATR_FILTER</td><td>1427</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>432</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>200</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>109</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>2</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 30 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-11 14:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-11 15:15</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-1.60%</td></tr><tr><td>2026-05-11 15:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-11 16:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.59%</td></tr><tr><td>2026-05-11 22:00</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-11 23:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.76%</td></tr><tr><td>2026-05-12 02:45</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.83%</td></tr><tr><td>2026-05-12 04:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-12 09:30</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.82%</td></tr><tr><td>2026-05-12 18:00</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.42%</td></tr><tr><td>2026-05-12 19:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.63%</td></tr><tr><td>2026-05-12 20:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-12 22:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.54%</td></tr><tr><td>2026-05-12 22:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.67%</td></tr><tr><td>2026-05-13 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.56%</td></tr><tr><td>2026-05-13 06:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.57%</td></tr><tr><td>2026-05-14 12:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.35%</td></tr><tr><td>2026-05-14 12:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.53%</td></tr><tr><td>2026-05-14 12:45</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-14 14:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.44%</td></tr><tr><td>2026-05-14 14:15</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-14 21:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.79%</td></tr><tr><td>2026-05-15 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.78%</td></tr><tr><td>2026-05-15 00:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.41%</td></tr><tr><td>2026-05-15 01:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr><tr><td>2026-05-15 06:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.70%</td></tr><tr><td>2026-05-15 06:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-15 06:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.84%</td></tr><tr><td>2026-05-15 10:45</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.91%</td></tr></tbody></table>
+  </div>
+</details></div><div id="variant-1">
+<details  class="variant ">
+  <summary>
+    <span class="rank">#5</span>
+    <b>tighter-sl</b>
+    
+    <span class="oneliner">113 trades · ROI <span class="loss">-1.42%</span> · PF 0.84 · WR 21.24% · DD -2.59%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">All modules, SL × 0.75</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span><span class="chip"><b>slMult</b>:&nbsp;0.75</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">113</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v loss">-1.42%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">21.24%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">0.84</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-2.59%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">-0.63</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">5.1h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">4929.07</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>104</td><td>9</td></tr>
+      <tr><td>Win Rate</td><td>23.08%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>0.94</td><td>0</td></tr>
+      <tr><td>ROI</td><td>-0.5%</td><td>-0.93%</td></tr>
+      <tr><td>Max DD</td><td>-2.51%</td><td>-0.93%</td></tr>
+    </tbody></table>
+    
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>ETHUSDT</td><td>34</td><td>23.5%</td><td class="loss">-11.92</td></tr><tr><td>SOLUSDT</td><td>31</td><td>22.6%</td><td class="loss">-29.10</td></tr><tr><td>XRPUSDT</td><td>15</td><td>13.3%</td><td class="loss">-37.52</td></tr><tr><td>BTCUSDT</td><td>28</td><td>17.9%</td><td class="loss">-8.99</td></tr><tr><td>BNBUSDT</td><td>5</td><td>40.0%</td><td class="win">+16.59</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>VIDYA_LIQUIDITY_SWEEP</td><td>108</td><td>22.2%</td></tr><tr><td>TWO_POLE_CAPITULATION_RESET</td><td>3</td><td>0.0%</td></tr><tr><td>SOTT_BAND_RECLAIM</td><td>2</td><td>0.0%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>STOP_LOSS</td><td>72</td></tr><tr><td>TAKE_PROFIT</td><td>24</td></tr><tr><td>BREAKEVEN</td><td>17</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5642</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>2287</td></tr><tr><td>ATR_FILTER</td><td>1650</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>1644</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>456</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>212</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>114</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>2</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 30 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-11 16:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.47%</td></tr><tr><td>2026-05-11 22:00</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.51%</td></tr><tr><td>2026-05-11 23:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.59%</td></tr><tr><td>2026-05-11 23:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.76%</td></tr><tr><td>2026-05-12 02:45</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-12 04:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.62%</td></tr><tr><td>2026-05-12 09:30</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.64%</td></tr><tr><td>2026-05-12 18:00</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.42%</td></tr><tr><td>2026-05-12 19:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.48%</td></tr><tr><td>2026-05-12 20:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.48%</td></tr><tr><td>2026-05-12 22:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.43%</td></tr><tr><td>2026-05-12 22:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.53%</td></tr><tr><td>2026-05-13 00:15</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-13 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.51%</td></tr><tr><td>2026-05-13 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.56%</td></tr><tr><td>2026-05-13 06:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.45%</td></tr><tr><td>2026-05-14 12:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.35%</td></tr><tr><td>2026-05-14 12:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.56%</td></tr><tr><td>2026-05-14 12:45</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.58%</td></tr><tr><td>2026-05-14 14:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.44%</td></tr><tr><td>2026-05-14 14:15</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-14 21:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-15 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.62%</td></tr><tr><td>2026-05-15 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-15 00:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.33%</td></tr><tr><td>2026-05-15 01:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.58%</td></tr><tr><td>2026-05-15 06:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.55%</td></tr><tr><td>2026-05-15 06:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-15 06:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-15 10:45</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.70%</td></tr></tbody></table>
+  </div>
+</details></div><div id="variant-3">
+<details  class="variant ">
+  <summary>
+    <span class="rank">#6</span>
+    <b>aggressive-rr</b>
+    
+    <span class="oneliner">102 trades · ROI <span class="loss">-1.48%</span> · PF 0.82 · WR 17.65% · DD -2.97%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">All modules, SL × 0.8 + TP × 1.25</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span><span class="chip"><b>rrMult</b>:&nbsp;1.25</span><span class="chip"><b>slMult</b>:&nbsp;0.8</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">102</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v loss">-1.48%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">17.65%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">0.82</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-2.97%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">-0.72</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">6.6h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">4926.06</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>93</td><td>9</td></tr>
+      <tr><td>Win Rate</td><td>19.35%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>0.93</td><td>0</td></tr>
+      <tr><td>ROI</td><td>-0.5%</td><td>-0.98%</td></tr>
+      <tr><td>Max DD</td><td>-2.7%</td><td>-0.98%</td></tr>
+    </tbody></table>
+    
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>ETHUSDT</td><td>33</td><td>18.2%</td><td class="loss">-24.18</td></tr><tr><td>SOLUSDT</td><td>27</td><td>14.8%</td><td class="loss">-47.80</td></tr><tr><td>XRPUSDT</td><td>14</td><td>21.4%</td><td class="loss">-0.17</td></tr><tr><td>BTCUSDT</td><td>23</td><td>13.0%</td><td class="loss">-25.59</td></tr><tr><td>BNBUSDT</td><td>5</td><td>40.0%</td><td class="win">+23.81</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>VIDYA_LIQUIDITY_SWEEP</td><td>97</td><td>18.6%</td></tr><tr><td>TWO_POLE_CAPITULATION_RESET</td><td>3</td><td>0.0%</td></tr><tr><td>SOTT_BAND_RECLAIM</td><td>2</td><td>0.0%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>STOP_LOSS</td><td>68</td></tr><tr><td>BREAKEVEN</td><td>16</td></tr><tr><td>TAKE_PROFIT</td><td>18</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5603</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>2091</td></tr><tr><td>ATR_FILTER</td><td>1685</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>1536</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>422</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>204</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>104</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>2</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 30 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-11 14:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.68%</td></tr><tr><td>2026-05-11 16:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.49%</td></tr><tr><td>2026-05-11 22:00</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.54%</td></tr><tr><td>2026-05-11 23:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.63%</td></tr><tr><td>2026-05-11 23:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.80%</td></tr><tr><td>2026-05-12 02:45</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.68%</td></tr><tr><td>2026-05-12 04:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-12 09:30</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.68%</td></tr><tr><td>2026-05-12 18:00</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.80%</td></tr><tr><td>2026-05-12 19:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.51%</td></tr><tr><td>2026-05-12 20:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.51%</td></tr><tr><td>2026-05-12 22:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.45%</td></tr><tr><td>2026-05-12 22:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.56%</td></tr><tr><td>2026-05-13 00:15</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.67%</td></tr><tr><td>2026-05-13 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-13 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-14 12:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.72%</td></tr><tr><td>2026-05-14 12:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.59%</td></tr><tr><td>2026-05-14 12:45</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-14 14:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>TAKE_PROFIT</td><td class="win">+1.82%</td></tr><tr><td>2026-05-14 14:15</td><td>BNBUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-14 21:30</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-15 00:15</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-15 00:15</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.65%</td></tr><tr><td>2026-05-15 00:30</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.35%</td></tr><tr><td>2026-05-15 01:00</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.61%</td></tr><tr><td>2026-05-15 06:00</td><td>BTCUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.58%</td></tr><tr><td>2026-05-15 06:00</td><td>SOLUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-15 06:30</td><td>XRPUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.69%</td></tr><tr><td>2026-05-15 10:45</td><td>ETHUSDT</td><td>VIDYA_LIQUIDITY_SWEEP</td><td>STOP_LOSS</td><td class="loss">-0.74%</td></tr></tbody></table>
+  </div>
+</details></div><div id="variant-5">
+<details  class="variant ">
+  <summary>
+    <span class="rank">#7</span>
+    <b>twopole-only</b>
+    
+    <span class="oneliner">4 trades · ROI <span class="loss">-0.23%</span> · PF 0 · WR 0% · DD -0.23%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">Only TWO_POLE_CAPITULATION_RESET</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span><span class="chip"><b>moduleFilter</b>:&nbsp;TWO_POLE_CAPITULATION_RESET</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">4</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v loss">-0.23%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">0%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">0</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-0.23%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">-2.89</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">7.9h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">4988.46</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>4</td><td>0</td></tr>
+      <tr><td>Win Rate</td><td>0%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>0</td><td>0</td></tr>
+      <tr><td>ROI</td><td>-0.23%</td><td>0%</td></tr>
+      <tr><td>Max DD</td><td>-0.23%</td><td>-0%</td></tr>
+    </tbody></table>
+    <div class="verdict">⚠️ OOS sin trades</div>
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>ETHUSDT</td><td>2</td><td>0.0%</td><td class="loss">-7.15</td></tr><tr><td>XRPUSDT</td><td>1</td><td>0.0%</td><td class="loss">-4.39</td></tr><tr><td>BTCUSDT</td><td>1</td><td>0.0%</td><td class="win">+0.00</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>TWO_POLE_CAPITULATION_RESET</td><td>4</td><td>0.0%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>BREAKEVEN</td><td>2</td></tr><tr><td>STOP_LOSS</td><td>2</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5747</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>3097</td></tr><tr><td>ATR_FILTER</td><td>2143</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>2056</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>586</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>230</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>119</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>2</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 4 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-07 02:30</td><td>ETHUSDT</td><td>TWO_POLE_CAPITULATION_RESET</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-07 10:15</td><td>XRPUSDT</td><td>TWO_POLE_CAPITULATION_RESET</td><td>STOP_LOSS</td><td class="loss">-0.44%</td></tr><tr><td>2026-05-11 04:00</td><td>BTCUSDT</td><td>TWO_POLE_CAPITULATION_RESET</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr><tr><td>2026-05-11 04:00</td><td>ETHUSDT</td><td>TWO_POLE_CAPITULATION_RESET</td><td>STOP_LOSS</td><td class="loss">-0.72%</td></tr></tbody></table>
+  </div>
+</details></div><div id="variant-7">
+<details  class="variant ">
+  <summary>
+    <span class="rank">#8</span>
+    <b>sott-only</b>
+    
+    <span class="oneliner">2 trades · ROI <span class="loss">-0.1%</span> · PF 0 · WR 0% · DD -0.1%</span>
+  </summary>
+  <div class="variant-body">
+    <div class="muted desc">Only SOTT_BAND_RECLAIM</div>
+    <div class="knobs"><span class="chip"><b>allowShadowOnly</b>:&nbsp;true</span><span class="chip"><b>moduleFilter</b>:&nbsp;SOTT_BAND_RECLAIM</span></div>
+
+    <div class="grid">
+      <div class="stat"><div class="v">2</div><div class="l">Trades</div></div>
+      <div class="stat"><div class="v loss">-0.1%</div><div class="l">ROI</div></div>
+      <div class="stat"><div class="v">0%</div><div class="l">Win Rate</div></div>
+      <div class="stat"><div class="v">0</div><div class="l">Profit Factor</div></div>
+      <div class="stat"><div class="v loss">-0.1%</div><div class="l">Max DD</div></div>
+      <div class="stat"><div class="v">-2.51</div><div class="l">Expectancy USD</div></div>
+      <div class="stat"><div class="v">3.6h</div><div class="l">Avg Hold</div></div>
+      <div class="stat"><div class="v">4994.98</div><div class="l">Final Balance</div></div>
+    </div>
+
+    <h4>OOS (split 2026-05-14)</h4>
+    <table class="small"><thead><tr><th>Métrica</th><th>Train</th><th>Holdout</th></tr></thead><tbody>
+      <tr><td>Trades</td><td>2</td><td>0</td></tr>
+      <tr><td>Win Rate</td><td>0%</td><td>0%</td></tr>
+      <tr><td>Profit Factor</td><td>0</td><td>0</td></tr>
+      <tr><td>ROI</td><td>-0.1%</td><td>0%</td></tr>
+      <tr><td>Max DD</td><td>-0.1%</td><td>-0%</td></tr>
+    </tbody></table>
+    <div class="verdict">⚠️ OOS sin trades</div>
+
+    <div class="row">
+      <div class="col"><h4>Por símbolo</h4><table class="small"><thead><tr><th>Sím</th><th>T</th><th>WR</th><th>Profit</th></tr></thead><tbody><tr><td>XRPUSDT</td><td>1</td><td>0.0%</td><td class="loss">-5.02</td></tr><tr><td>ETHUSDT</td><td>1</td><td>0.0%</td><td class="win">+0.00</td></tr></tbody></table></div>
+      <div class="col"><h4>Por módulo</h4><table class="small"><thead><tr><th>Módulo</th><th>T</th><th>WR</th></tr></thead><tbody><tr><td>SOTT_BAND_RECLAIM</td><td>2</td><td>0.0%</td></tr></tbody></table></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><h4>Motivos salida</h4><table class="small"><thead><tr><th>Motivo</th><th>#</th></tr></thead><tbody><tr><td>STOP_LOSS</td><td>1</td></tr><tr><td>BREAKEVEN</td><td>1</td></tr></tbody></table></div>
+      <div class="col"><h4>Top rechazos</h4><table class="small"><thead><tr><th>Código</th><th>#</th></tr></thead><tbody><tr><td>BTC_RED_BLOCK</td><td>5747</td></tr><tr><td>TWOPOLE_NO_CAPITULATION</td><td>3134</td></tr><tr><td>ATR_FILTER</td><td>2143</td></tr><tr><td>TWOPOLE_NO_RESET</td><td>2095</td></tr><tr><td>SCORE_BELOW_FLOOR</td><td>594</td></tr><tr><td>TWOPOLE_LOW_VOLUME</td><td>235</td></tr><tr><td>TWOPOLE_NEGATIVE_DELTA</td><td>120</td></tr><tr><td>EXEC_DEPTH</td><td>71</td></tr><tr><td>VOLUME_BELOW_MODULE_FLOOR</td><td>2</td></tr></tbody></table></div>
+    </div>
+
+    <h4>Últimos 2 trades</h4>
+    <table class="small"><thead><tr><th>Apertura</th><th>Sím</th><th>Módulo</th><th>Cierre</th><th>PnL</th></tr></thead><tbody><tr><td>2026-05-07 13:30</td><td>XRPUSDT</td><td>SOTT_BAND_RECLAIM</td><td>STOP_LOSS</td><td class="loss">-0.50%</td></tr><tr><td>2026-05-08 06:00</td><td>ETHUSDT</td><td>SOTT_BAND_RECLAIM</td><td>BREAKEVEN</td><td class="win">+0.00%</td></tr></tbody></table>
+  </div>
+</details></div>
+
+<p class="muted" style="margin-top:24px;font-size:11px">Score = 0.5·min(PF,3) + 0.03·ROI + 0.075·min(OOS_PF,2) + 0.05·(1 - MaxDD/25). Penaliza &lt;8 trades.</p>
+</body></html>
