@@ -37,29 +37,50 @@ function parseArgs() {
 
 function buildStrategies(bot) {
   if (bot === 'trader') {
+    // v14 experimental: code-level entry filters layered on top of the bot signal.
+    // Goal: 40-50% WR with PF > 1.3 by adding HTF momentum / 5m confirmation / pullback /
+    // positive RS / drop weak module.
+    const NO_TWOPOLE = 'TWO_POLE_PULLBACK_CONTINUATION';
     return [
-      { label: 'baseline-prod',     desc: 'Live modules, default risk (current production behaviour)',  knobs: {} },
-      { label: 'tighter-sl',        desc: 'Live modules, SL distance × 0.75',                            knobs: { slMult: 0.75 } },
-      { label: 'wider-tp',          desc: 'Live modules, TP distance × 1.3',                             knobs: { rrMult: 1.3 } },
-      { label: 'aggressive-rr',     desc: 'Live modules, SL × 0.8 + TP × 1.25',                          knobs: { slMult: 0.8, rrMult: 1.25 } },
-      { label: 'no-be',             desc: 'Live modules, disable breakeven move',                        knobs: { 'no-be': true } },
-      { label: 'early-be',          desc: 'Live modules, move SL to BE at 30% of TP travel',             knobs: { beFraction: 0.3 } },
-      { label: 'vidya-only',        desc: 'Only VIDYA_SQUEEZE_EXPANSION signals',                        knobs: { modules: 'VIDYA_SQUEEZE_EXPANSION' } },
-      { label: 'smc-only',          desc: 'Only SMC_DISCOUNT_RECLAIM signals',                           knobs: { modules: 'SMC_DISCOUNT_RECLAIM' } },
-      { label: 'twopole-only',      desc: 'Only TWO_POLE_PULLBACK_CONTINUATION signals',                 knobs: { modules: 'TWO_POLE_PULLBACK_CONTINUATION' } },
-      { label: 'shadow-enabled',    desc: 'Live + shadowOnly modules enabled (all 6)',                   knobs: { shadow: true } }
+      { label: 'baseline',              desc: 'Reference — live modules, default risk',                       knobs: {} },
+      { label: 'best-knob',             desc: 'Best knob-only result from previous tournament (time-stop 8h)', knobs: { 'time-stop': 8 } },
+
+      // Individual v14 filters (measure each in isolation)
+      { label: 'v14-htf-momentum',      desc: 'Filter: MACD hist 1h rising ≥2 bars',                          knobs: { 'require-htf-momentum': true } },
+      { label: 'v14-5m-confirm',        desc: 'Filter: last 3 15m candles ≥2 bullish (5m proxy)',             knobs: { 'require-5m-bullish': true } },
+      { label: 'v14-pullback',          desc: 'Filter: recent pullback to EMA9 + reclaim',                    knobs: { 'require-pullback': true } },
+      { label: 'v14-no-twopole',        desc: 'Drop TWO_POLE module entirely',                                knobs: { 'exclude-modules': NO_TWOPOLE } },
+      { label: 'v14-min-rs',            desc: 'Filter: rs1h ≥ 0.003 (positive HTF RS)',                       knobs: { 'min-rs1h': 0.003 } },
+
+      // Combinations (the real candidates for production)
+      { label: 'v14-mom+notp',          desc: 'HTF momentum + no TWO_POLE',                                   knobs: { 'require-htf-momentum': true, 'exclude-modules': NO_TWOPOLE } },
+      { label: 'v14-mom+pull',          desc: 'HTF momentum + pullback reclaim',                              knobs: { 'require-htf-momentum': true, 'require-pullback': true } },
+      { label: 'v14-mom+5m+notp',       desc: 'HTF momentum + 5m confirm + no TWO_POLE',                      knobs: { 'require-htf-momentum': true, 'require-5m-bullish': true, 'exclude-modules': NO_TWOPOLE } },
+      { label: 'v14-full',              desc: 'All 5 v14 filters combined',                                   knobs: { 'require-htf-momentum': true, 'require-5m-bullish': true, 'require-pullback': true, 'exclude-modules': NO_TWOPOLE, 'min-rs1h': 0.003 } },
+      { label: 'v14-full+timestop',     desc: 'v14-full + time-stop 8h',                                      knobs: { 'require-htf-momentum': true, 'require-5m-bullish': true, 'require-pullback': true, 'exclude-modules': NO_TWOPOLE, 'min-rs1h': 0.003, 'time-stop': 8 } },
+      { label: 'v14-full+partial',      desc: 'v14-full + partial 50-50',                                     knobs: { 'require-htf-momentum': true, 'require-5m-bullish': true, 'require-pullback': true, 'exclude-modules': NO_TWOPOLE, 'min-rs1h': 0.003, 'partial-tp': '0.5,0.5' } }
     ];
   }
   if (bot === 'knife') {
+    // v4 experimental: drop dead modules + bullish reclaim from oversold + volume spike.
+    // Goal: WR 45-55% with PF > 1.3 by filtering out failed sweeps.
+    const VIDYA = 'VIDYA_LIQUIDITY_SWEEP';
     return [
-      { label: 'baseline-allmods',  desc: 'All 3 reversal modules enabled, default risk',                knobs: { shadow: true } },
-      { label: 'tighter-sl',        desc: 'All modules, SL × 0.75',                                      knobs: { shadow: true, slMult: 0.75 } },
-      { label: 'wider-tp',          desc: 'All modules, TP × 1.3',                                       knobs: { shadow: true, rrMult: 1.3 } },
-      { label: 'aggressive-rr',     desc: 'All modules, SL × 0.8 + TP × 1.25',                           knobs: { shadow: true, slMult: 0.8, rrMult: 1.25 } },
-      { label: 'no-be',             desc: 'All modules, disable breakeven move',                         knobs: { shadow: true, 'no-be': true } },
-      { label: 'twopole-only',      desc: 'Only TWO_POLE_CAPITULATION_RESET',                            knobs: { shadow: true, modules: 'TWO_POLE_CAPITULATION_RESET' } },
-      { label: 'vidya-only',        desc: 'Only VIDYA_LIQUIDITY_SWEEP',                                  knobs: { shadow: true, modules: 'VIDYA_LIQUIDITY_SWEEP' } },
-      { label: 'sott-only',         desc: 'Only SOTT_BAND_RECLAIM',                                      knobs: { shadow: true, modules: 'SOTT_BAND_RECLAIM' } }
+      { label: 'baseline',              desc: 'Reference — all 3 modules, shadow on, defaults',               knobs: { shadow: true } },
+      { label: 'best-knob',             desc: 'Best knob-only result (VIDYA-only)',                           knobs: { shadow: true, modules: VIDYA } },
+
+      // Individual v4 filters
+      { label: 'v4-oversold-reclaim',   desc: 'Filter: 5m RSI dipped <30 then reclaimed >38',                 knobs: { shadow: true, modules: VIDYA, 'require-oversold-reclaim': true } },
+      { label: 'v4-volspike-1.5',       desc: 'Filter: 5m volume ≥1.5× 20-bar avg',                           knobs: { shadow: true, modules: VIDYA, 'require-volume-spike': 1.5 } },
+      { label: 'v4-volspike-2.0',       desc: 'Filter: 5m volume ≥2.0× 20-bar avg',                           knobs: { shadow: true, modules: VIDYA, 'require-volume-spike': 2.0 } },
+      { label: 'v4-5m-confirm',         desc: 'Filter: 5m bullish action confirmed',                          knobs: { shadow: true, modules: VIDYA, 'require-5m-bullish': true } },
+
+      // Combinations
+      { label: 'v4-os+vol',             desc: 'Oversold reclaim + volume spike 1.5×',                         knobs: { shadow: true, modules: VIDYA, 'require-oversold-reclaim': true, 'require-volume-spike': 1.5 } },
+      { label: 'v4-os+5m',              desc: 'Oversold reclaim + 5m confirm',                                knobs: { shadow: true, modules: VIDYA, 'require-oversold-reclaim': true, 'require-5m-bullish': true } },
+      { label: 'v4-full',               desc: 'All 4 v4 filters combined',                                    knobs: { shadow: true, modules: VIDYA, 'require-oversold-reclaim': true, 'require-volume-spike': 1.5, 'require-5m-bullish': true } },
+      { label: 'v4-full+timestop',      desc: 'v4-full + time-stop 4h',                                       knobs: { shadow: true, modules: VIDYA, 'require-oversold-reclaim': true, 'require-volume-spike': 1.5, 'require-5m-bullish': true, 'time-stop': 4 } },
+      { label: 'v4-full+partial',       desc: 'v4-full + partial 50-50',                                      knobs: { shadow: true, modules: VIDYA, 'require-oversold-reclaim': true, 'require-volume-spike': 1.5, 'require-5m-bullish': true, 'partial-tp': '0.5,0.5' } }
     ];
   }
   throw new Error(`Unknown bot: ${bot}`);
@@ -96,7 +117,13 @@ function scoreStrategy(row) {
 
 function renderVariantSection(report, strat, rank, isWinner) {
   const s = report.summary, tr = report.trainSummary, ho = report.holdoutSummary;
-  const KNOB_DEFAULTS = { allowShadowOnly: false, moduleFilter: null, rrMult: 1.0, slMult: 1.0, beFraction: 0.5, slippagePct: 0.001 };
+  const KNOB_DEFAULTS = {
+    allowShadowOnly: false, moduleFilter: null, moduleExclude: null,
+    rrMult: 1.0, slMult: 1.0, beFraction: 0.5, slippagePct: 0.001,
+    minScore: null, partialTpTrigger: null, partialTpSize: null, timeStopHours: null,
+    requireHtfMomentum: false, require5mBullish: false, requirePullback: false,
+    requireOversoldReclaim: false, requireVolumeSpike: null, minRs1h: null
+  };
   const knobs = Object.entries(report.meta.knobs)
     .filter(([k, v]) => {
       const def = KNOB_DEFAULTS[k];

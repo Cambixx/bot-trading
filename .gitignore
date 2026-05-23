@@ -17,6 +17,9 @@ dist-ssr
 # Netlify
 .netlify
 
+# Backtest klines cache (regenerated automatically from Binance)
+backtests/.cache/
+
 
 # Editor directories and files
 .vscode/*

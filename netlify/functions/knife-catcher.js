@@ -1135,7 +1135,7 @@ async function sendTelegramNotification(signals, stats = null) {
   }
 }
 
-export async function runAnalysis(context) {
+export async function runAnalysis(context, options = {}) {
   const sessionStatus = getTradingSessionStatus();
   if (!sessionStatus.allowed) {
     const messages = [
@@ -1219,7 +1219,7 @@ export async function runAnalysis(context) {
         ]);
         analyzed++;
 
-        const signal = generateSignal(
+        let signal = generateSignal(
           symbol,
           candles5m,
           candles15m,
@@ -1231,6 +1231,27 @@ export async function runAnalysis(context) {
           analysisState,
           shadowCandidates
         );
+
+        // External post-signal hook (used by knife-catcher-v4 wrapper to apply entry-quality filters).
+        // Returns null/false to reject, or a (possibly mutated) signal to continue.
+        if (signal && typeof options.signalFilter === 'function') {
+          try {
+            const filtered = options.signalFilter(signal, {
+              candles5m, candles15m, candles1h, candles4h,
+              ticker24h: tickersBySymbol.get(symbol) || null,
+              btcContext, orderBook
+            });
+            if (!filtered) {
+              countMetric(analysisState.rejectCounts, 'EXTERNAL_FILTER_REJECT');
+              signal = null;
+            } else {
+              signal = filtered;
+            }
+          } catch (filterError) {
+            pLog(`[FILTER] ${symbol} error: ${filterError.message}`);
+            signal = null;
+          }
+        }
 
         if (!signal) {
           await sleep(8);
@@ -1389,4 +1410,8 @@ const scheduledHandler = async (event = {}, context = {}) => {
   };
 };
 
-export const handler = schedule("5,20,35,50 * * * *", scheduledHandler);
+// CRON DISABLED 2026-05-23 — superseded by knife-catcher-v4.js (oversold-reclaim filter).
+// runAnalysis() and all other exports remain intact so the wrapper can import them.
+// To roll back: restore the schedule line below and disable knife-catcher-v4.js.
+// export const handler = schedule("5,20,35,50 * * * *", scheduledHandler);
+export const handler = scheduledHandler;

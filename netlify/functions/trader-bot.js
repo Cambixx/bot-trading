@@ -1385,7 +1385,7 @@ async function sendTelegramNotification(signals, stats = null) {
   }
 }
 
-export async function runAnalysis(context) {
+export async function runAnalysis(context, options = {}) {
   const sessionStatus = getTradingSessionStatus();
   if (!sessionStatus.allowed) {
     const messages = [
@@ -1468,7 +1468,7 @@ export async function runAnalysis(context) {
         ]);
         analyzed++;
 
-        const signal = generateSignal(
+        let signal = generateSignal(
           symbol,
           candles15m,
           candles1h,
@@ -1479,6 +1479,27 @@ export async function runAnalysis(context) {
           analysisState,
           shadowCandidates
         );
+
+        // External post-signal hook (used by trader-bot-v14 wrapper to apply entry-quality filters).
+        // Returns null/false to reject, or a (possibly mutated) signal to continue.
+        if (signal && typeof options.signalFilter === 'function') {
+          try {
+            const filtered = options.signalFilter(signal, {
+              candles15m, candles1h, candles4h,
+              ticker24h: tickersBySymbol.get(symbol) || null,
+              btcContext, orderBook
+            });
+            if (!filtered) {
+              countMetric(analysisState.rejectCounts, 'EXTERNAL_FILTER_REJECT');
+              signal = null;
+            } else {
+              signal = filtered;
+            }
+          } catch (filterError) {
+            pLog(`[FILTER] ${symbol} error: ${filterError.message}`);
+            signal = null;
+          }
+        }
 
         if (!signal) {
           await sleep(8);
@@ -1636,4 +1657,8 @@ const scheduledHandler = async (event = {}, context = {}) => {
   };
 };
 
-export const handler = schedule("0,15,30,45 * * * *", scheduledHandler);
+// CRON DISABLED 2026-05-23 — superseded by trader-bot-v14.js (entry-quality filters).
+// runAnalysis() and all other exports remain intact so the wrapper can import them.
+// To roll back: restore the schedule line below and disable trader-bot-v14.js.
+// export const handler = schedule("0,15,30,45 * * * *", scheduledHandler);
+export const handler = scheduledHandler;

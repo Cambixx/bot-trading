@@ -1,0 +1,1283 @@
+{
+  "meta": {
+    "bot": "knife",
+    "botVersion": "v3.2.0-ReversalShadowHardening",
+    "label": "knife",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "XRPUSDT"
+    ],
+    "days": 90,
+    "months": 3,
+    "oosSplitRatio": 0.7,
+    "splitDate": "2026-04-26",
+    "startBalance": 5000,
+    "allocPct": 0.2,
+    "knobs": {
+      "allowShadowOnly": true,
+      "moduleFilter": [
+        "VIDYA_LIQUIDITY_SWEEP"
+      ],
+      "moduleExclude": null,
+      "rrMult": 1,
+      "slMult": 1,
+      "beFraction": 0.5,
+      "slippagePct": 0.001,
+      "minScore": null,
+      "partialTpTrigger": null,
+      "partialTpSize": null,
+      "timeStopHours": null,
+      "requireHtfMomentum": false,
+      "require5mBullish": false,
+      "requirePullback": false,
+      "requireOversoldReclaim": true,
+      "requireVolumeSpike": null,
+      "minRs1h": null
+    },
+    "generatedAt": "2026-05-23T17:11:43.253Z"
+  },
+  "summary": {
+    "totalTrades": 42,
+    "wins": 16,
+    "losses": 26,
+    "winRate": 38.1,
+    "finalBalance": 5123.5,
+    "totalProfit": 123.5,
+    "roi": 2.47,
+    "profitFactor": 2,
+    "maxDrawdown": 0.71,
+    "avgWin": 15.43,
+    "avgLoss": 4.75,
+    "expectancy": 2.94,
+    "avgDurationHours": 4.7,
+    "byReason": {
+      "STOP_LOSS": 19,
+      "BREAKEVEN": 7,
+      "TAKE_PROFIT": 16
+    },
+    "bySymbol": {
+      "SOLUSDT": {
+        "trades": 16,
+        "wins": 6,
+        "profit": 27.321149881204462
+      },
+      "XRPUSDT": {
+        "trades": 3,
+        "wins": 1,
+        "profit": 4.239509859035438
+      },
+      "ETHUSDT": {
+        "trades": 9,
+        "wins": 4,
+        "profit": 47.96220659494626
+      },
+      "BTCUSDT": {
+        "trades": 14,
+        "wins": 5,
+        "profit": 43.974164489751374
+      }
+    },
+    "byModule": {
+      "VIDYA_LIQUIDITY_SWEEP": {
+        "trades": 42,
+        "wins": 16
+      }
+    },
+    "equityCurve": [
+      {
+        "time": 1771779657928,
+        "equity": 5000
+      },
+      {
+        "time": 1772496900000,
+        "equity": 4996.18
+      },
+      {
+        "time": 1772515800000,
+        "equity": 4990.49
+      },
+      {
+        "time": 1772516700000,
+        "equity": 4981.98
+      },
+      {
+        "time": 1772589600000,
+        "equity": 4981.98
+      },
+      {
+        "time": 1772674200000,
+        "equity": 4981.98
+      },
+      {
+        "time": 1772705700000,
+        "equity": 4995.44
+      },
+      {
+        "time": 1772721000000,
+        "equity": 4989.07
+      },
+      {
+        "time": 1772763300000,
+        "equity": 4979.93
+      },
+      {
+        "time": 1773222300000,
+        "equity": 4974.08
+      },
+      {
+        "time": 1773235800000,
+        "equity": 4989.29
+      },
+      {
+        "time": 1773287100000,
+        "equity": 4983.79
+      },
+      {
+        "time": 1773308700000,
+        "equity": 5001.28
+      },
+      {
+        "time": 1773750600000,
+        "equity": 4993.58
+      },
+      {
+        "time": 1773810000000,
+        "equity": 4993.58
+      },
+      {
+        "time": 1773832500000,
+        "equity": 4985.19
+      },
+      {
+        "time": 1775742300000,
+        "equity": 4981.46
+      },
+      {
+        "time": 1775748600000,
+        "equity": 4994.97
+      },
+      {
+        "time": 1775932200000,
+        "equity": 5010.22
+      },
+      {
+        "time": 1775957400000,
+        "equity": 5010.22
+      },
+      {
+        "time": 1776025800000,
+        "equity": 5024.69
+      },
+      {
+        "time": 1776262500000,
+        "equity": 5039.79
+      },
+      {
+        "time": 1776267000000,
+        "equity": 5039.79
+      },
+      {
+        "time": 1776467700000,
+        "equity": 5032.25
+      },
+      {
+        "time": 1776500100000,
+        "equity": 5025.72
+      },
+      {
+        "time": 1776537000000,
+        "equity": 5018.54
+      },
+      {
+        "time": 1776582900000,
+        "equity": 5011.31
+      },
+      {
+        "time": 1776582900000,
+        "equity": 5004.15
+      },
+      {
+        "time": 1776669300000,
+        "equity": 5020.87
+      },
+      {
+        "time": 1776669300000,
+        "equity": 5036.44
+      },
+      {
+        "time": 1776903300000,
+        "equity": 5034.81
+      },
+      {
+        "time": 1777302900000,
+        "equity": 5028.33
+      },
+      {
+        "time": 1777899600000,
+        "equity": 5021.5
+      },
+      {
+        "time": 1777905900000,
+        "equity": 5036.98
+      },
+      {
+        "time": 1777986000000,
+        "equity": 5051.16
+      },
+      {
+        "time": 1778059800000,
+        "equity": 5067.45
+      },
+      {
+        "time": 1778066100000,
+        "equity": 5084.01
+      },
+      {
+        "time": 1778245200000,
+        "equity": 5084.01
+      },
+      {
+        "time": 1778375700000,
+        "equity": 5084.01
+      },
+      {
+        "time": 1778511600000,
+        "equity": 5100.31
+      },
+      {
+        "time": 1778646600000,
+        "equity": 5116.18
+      },
+      {
+        "time": 1778662800000,
+        "equity": 5131.6
+      },
+      {
+        "time": 1778809500000,
+        "equity": 5123.5
+      }
+    ]
+  },
+  "trainSummary": {
+    "totalTrades": 30,
+    "wins": 9,
+    "losses": 21,
+    "winRate": 30,
+    "finalBalance": 5034.81,
+    "totalProfit": 34.81,
+    "roi": 0.7,
+    "profitFactor": 1.34,
+    "maxDrawdown": 0.71,
+    "avgWin": 15.2,
+    "avgLoss": 4.86,
+    "expectancy": 1.16,
+    "avgDurationHours": 4.1,
+    "byReason": {
+      "STOP_LOSS": 16,
+      "BREAKEVEN": 5,
+      "TAKE_PROFIT": 9
+    },
+    "bySymbol": {
+      "SOLUSDT": {
+        "trades": 14,
+        "wins": 4,
+        "profit": -2.7250951672924124
+      },
+      "XRPUSDT": {
+        "trades": 2,
+        "wins": 0,
+        "profit": -12.059836672866394
+      },
+      "ETHUSDT": {
+        "trades": 4,
+        "wins": 2,
+        "profit": 31.18339301099093
+      },
+      "BTCUSDT": {
+        "trades": 10,
+        "wins": 3,
+        "profit": 18.412266798031325
+      }
+    },
+    "byModule": {
+      "VIDYA_LIQUIDITY_SWEEP": {
+        "trades": 30,
+        "wins": 9
+      }
+    },
+    "equityCurve": [
+      {
+        "time": 1771779657928,
+        "equity": 5000
+      },
+      {
+        "time": 1772496900000,
+        "equity": 4996.18
+      },
+      {
+        "time": 1772515800000,
+        "equity": 4990.49
+      },
+      {
+        "time": 1772516700000,
+        "equity": 4981.98
+      },
+      {
+        "time": 1772589600000,
+        "equity": 4981.98
+      },
+      {
+        "time": 1772674200000,
+        "equity": 4981.98
+      },
+      {
+        "time": 1772705700000,
+        "equity": 4995.44
+      },
+      {
+        "time": 1772721000000,
+        "equity": 4989.07
+      },
+      {
+        "time": 1772763300000,
+        "equity": 4979.93
+      },
+      {
+        "time": 1773222300000,
+        "equity": 4974.08
+      },
+      {
+        "time": 1773235800000,
+        "equity": 4989.29
+      },
+      {
+        "time": 1773287100000,
+        "equity": 4983.79
+      },
+      {
+        "time": 1773308700000,
+        "equity": 5001.28
+      },
+      {
+        "time": 1773750600000,
+        "equity": 4993.58
+      },
+      {
+        "time": 1773810000000,
+        "equity": 4993.58
+      },
+      {
+        "time": 1773832500000,
+        "equity": 4985.19
+      },
+      {
+        "time": 1775742300000,
+        "equity": 4981.46
+      },
+      {
+        "time": 1775748600000,
+        "equity": 4994.97
+      },
+      {
+        "time": 1775932200000,
+        "equity": 5010.22
+      },
+      {
+        "time": 1775957400000,
+        "equity": 5010.22
+      },
+      {
+        "time": 1776025800000,
+        "equity": 5024.69
+      },
+      {
+        "time": 1776262500000,
+        "equity": 5039.79
+      },
+      {
+        "time": 1776267000000,
+        "equity": 5039.79
+      },
+      {
+        "time": 1776467700000,
+        "equity": 5032.25
+      },
+      {
+        "time": 1776500100000,
+        "equity": 5025.72
+      },
+      {
+        "time": 1776537000000,
+        "equity": 5018.54
+      },
+      {
+        "time": 1776582900000,
+        "equity": 5011.31
+      },
+      {
+        "time": 1776582900000,
+        "equity": 5004.15
+      },
+      {
+        "time": 1776669300000,
+        "equity": 5020.87
+      },
+      {
+        "time": 1776669300000,
+        "equity": 5036.44
+      },
+      {
+        "time": 1776903300000,
+        "equity": 5034.81
+      }
+    ]
+  },
+  "holdoutSummary": {
+    "totalTrades": 12,
+    "wins": 7,
+    "losses": 5,
+    "winRate": 58.33,
+    "finalBalance": 5123.5,
+    "totalProfit": 88.69,
+    "roi": 1.76,
+    "profitFactor": 5.14,
+    "maxDrawdown": 0.26,
+    "avgWin": 15.73,
+    "avgLoss": 4.28,
+    "expectancy": 7.39,
+    "avgDurationHours": 6.3,
+    "byReason": {
+      "STOP_LOSS": 3,
+      "TAKE_PROFIT": 7,
+      "BREAKEVEN": 2
+    },
+    "bySymbol": {
+      "BTCUSDT": {
+        "trades": 4,
+        "wins": 2,
+        "profit": 25.56189399579845
+      },
+      "ETHUSDT": {
+        "trades": 5,
+        "wins": 2,
+        "profit": 16.778811157954713
+      },
+      "SOLUSDT": {
+        "trades": 2,
+        "wins": 2,
+        "profit": 30.046240704196332
+      },
+      "XRPUSDT": {
+        "trades": 1,
+        "wins": 1,
+        "profit": 16.299344175225983
+      }
+    },
+    "byModule": {
+      "VIDYA_LIQUIDITY_SWEEP": {
+        "trades": 12,
+        "wins": 7
+      }
+    },
+    "equityCurve": [
+      {
+        "time": 1771779657928,
+        "equity": 5034.81
+      },
+      {
+        "time": 1777302900000,
+        "equity": 5028.33
+      },
+      {
+        "time": 1777899600000,
+        "equity": 5021.5
+      },
+      {
+        "time": 1777905900000,
+        "equity": 5036.98
+      },
+      {
+        "time": 1777986000000,
+        "equity": 5051.16
+      },
+      {
+        "time": 1778059800000,
+        "equity": 5067.45
+      },
+      {
+        "time": 1778066100000,
+        "equity": 5084.01
+      },
+      {
+        "time": 1778245200000,
+        "equity": 5084.01
+      },
+      {
+        "time": 1778375700000,
+        "equity": 5084.01
+      },
+      {
+        "time": 1778511600000,
+        "equity": 5100.31
+      },
+      {
+        "time": 1778646600000,
+        "equity": 5116.18
+      },
+      {
+        "time": 1778662800000,
+        "equity": 5131.6
+      },
+      {
+        "time": 1778809500000,
+        "equity": 5123.5
+      }
+    ]
+  },
+  "trades": [
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 86.57648999999998,
+      "exit": 86.24573500000001,
+      "tp": 88.19244924999998,
+      "sl": 86.24573500000001,
+      "openTime": "2026-03-03T00:00:00.000Z",
+      "closeTime": "2026-03-03T00:15:00.000Z",
+      "openTimeMs": 1772496000000,
+      "closeTimeMs": 1772496900000,
+      "pnlPct": -0.382,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 86.29620999999999,
+      "exit": 85.56022000000002,
+      "tp": 87.49146099999997,
+      "sl": 85.56022000000002,
+      "openTime": "2026-03-03T02:45:00.000Z",
+      "closeTime": "2026-03-03T05:45:00.000Z",
+      "openTimeMs": 1772505900000,
+      "closeTimeMs": 1772516700000,
+      "pnlPct": -0.853,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 1.3755742,
+      "exit": 1.36775145,
+      "tp": 1.3986239475,
+      "sl": 1.36775145,
+      "openTime": "2026-03-03T05:15:00.000Z",
+      "closeTime": "2026-03-03T05:30:00.000Z",
+      "openTimeMs": 1772514900000,
+      "closeTimeMs": 1772515800000,
+      "pnlPct": -0.569,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 1978.6566799999998,
+      "exit": 1978.6566799999998,
+      "tp": 2009.5809239999994,
+      "sl": 1978.6566799999998,
+      "openTime": "2026-03-04T00:45:00.000Z",
+      "closeTime": "2026-03-04T02:00:00.000Z",
+      "openTimeMs": 1772585100000,
+      "closeTimeMs": 1772589600000,
+      "pnlPct": 0,
+      "sizeFraction": 1,
+      "reason": "BREAKEVEN",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 72778.18547999999,
+      "exit": 72778.18547999999,
+      "tp": 73834.71648024999,
+      "sl": 72778.18547999999,
+      "openTime": "2026-03-05T00:00:00.000Z",
+      "closeTime": "2026-03-05T01:30:00.000Z",
+      "openTimeMs": 1772668800000,
+      "closeTimeMs": 1772674200000,
+      "pnlPct": 0,
+      "sizeFraction": 1,
+      "reason": "BREAKEVEN",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 72250.90872999998,
+      "exit": 73227.20348949998,
+      "tp": 73227.20348949998,
+      "sl": 72250.90872999998,
+      "openTime": "2026-03-05T08:30:00.000Z",
+      "closeTime": "2026-03-05T10:15:00.000Z",
+      "openTimeMs": 1772699400000,
+      "closeTimeMs": 1772705700000,
+      "pnlPct": 1.351,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 1.4290275999999997,
+      "exit": 1.4199102000000001,
+      "tp": 1.4519600099999999,
+      "sl": 1.4199102000000001,
+      "openTime": "2026-03-05T13:45:00.000Z",
+      "closeTime": "2026-03-05T14:30:00.000Z",
+      "openTimeMs": 1772718300000,
+      "closeTimeMs": 1772721000000,
+      "pnlPct": -0.638,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 89.21912999999999,
+      "exit": 88.40163000000001,
+      "tp": 90.39700649999999,
+      "sl": 88.40163000000001,
+      "openTime": "2026-03-06T01:30:00.000Z",
+      "closeTime": "2026-03-06T02:15:00.000Z",
+      "openTimeMs": 1772760600000,
+      "closeTimeMs": 1772763300000,
+      "pnlPct": -0.916,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 85.46537999999998,
+      "exit": 84.96412,
+      "tp": 86.881906,
+      "sl": 84.96412,
+      "openTime": "2026-03-11T08:00:00.000Z",
+      "closeTime": "2026-03-11T09:45:00.000Z",
+      "openTimeMs": 1773216000000,
+      "closeTimeMs": 1773222300000,
+      "pnlPct": -0.587,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 69320.51125999998,
+      "exit": 70380.480047,
+      "tp": 70380.480047,
+      "sl": 69320.51125999998,
+      "openTime": "2026-03-11T12:30:00.000Z",
+      "closeTime": "2026-03-11T13:30:00.000Z",
+      "openTimeMs": 1773232200000,
+      "closeTimeMs": 1773235800000,
+      "pnlPct": 1.529,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 76,
+      "entry": 85.31523,
+      "exit": 84.84490000000001,
+      "tp": 86.75999499999999,
+      "sl": 84.84490000000001,
+      "openTime": "2026-03-12T03:30:00.000Z",
+      "closeTime": "2026-03-12T03:45:00.000Z",
+      "openTimeMs": 1773286200000,
+      "closeTimeMs": 1773287100000,
+      "pnlPct": -0.551,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 85.13504999999999,
+      "exit": 86.62792474999999,
+      "tp": 86.62792474999999,
+      "sl": 85.13504999999999,
+      "openTime": "2026-03-12T04:15:00.000Z",
+      "closeTime": "2026-03-12T09:45:00.000Z",
+      "openTimeMs": 1773288900000,
+      "closeTimeMs": 1773308700000,
+      "pnlPct": 1.754,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 93.88378999999999,
+      "exit": 93.160495,
+      "tp": 95.26328724999999,
+      "sl": 93.160495,
+      "openTime": "2026-03-17T11:15:00.000Z",
+      "closeTime": "2026-03-17T12:30:00.000Z",
+      "openTimeMs": 1773746100000,
+      "closeTimeMs": 1773750600000,
+      "pnlPct": -0.77,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 74,
+      "entry": 2326.5642399999997,
+      "exit": 2326.5642399999997,
+      "tp": 2357.7384215,
+      "sl": 2326.5642399999997,
+      "openTime": "2026-03-18T00:45:00.000Z",
+      "closeTime": "2026-03-18T05:00:00.000Z",
+      "openTimeMs": 1773794700000,
+      "closeTimeMs": 1773810000000,
+      "pnlPct": 0,
+      "sizeFraction": 1,
+      "reason": "BREAKEVEN",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 74245.72154999999,
+      "exit": 73621.81731500001,
+      "tp": 75283.58807825,
+      "sl": 73621.81731500001,
+      "openTime": "2026-03-18T06:15:00.000Z",
+      "closeTime": "2026-03-18T11:15:00.000Z",
+      "openTimeMs": 1773814500000,
+      "closeTimeMs": 1773832500000,
+      "pnlPct": -0.84,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 82.02193999999999,
+      "exit": 81.71537500000001,
+      "tp": 83.55983124999997,
+      "sl": 81.71537500000001,
+      "openTime": "2026-04-09T01:30:00.000Z",
+      "closeTime": "2026-04-09T13:45:00.000Z",
+      "openTimeMs": 1775698200000,
+      "closeTimeMs": 1775742300000,
+      "pnlPct": -0.374,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 71194.83370999999,
+      "exit": 72160.06571025,
+      "tp": 72160.06571025,
+      "sl": 70567.24195499999,
+      "openTime": "2026-04-09T14:45:00.000Z",
+      "closeTime": "2026-04-09T15:30:00.000Z",
+      "openTimeMs": 1775745900000,
+      "closeTimeMs": 1775748600000,
+      "pnlPct": 1.356,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 74,
+      "entry": 84.31423,
+      "exit": 85.60184050000001,
+      "tp": 85.60184050000001,
+      "sl": 84.31423,
+      "openTime": "2026-04-11T05:30:00.000Z",
+      "closeTime": "2026-04-11T18:30:00.000Z",
+      "openTimeMs": 1775885400000,
+      "closeTimeMs": 1775932200000,
+      "pnlPct": 1.527,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 72689.39678,
+      "exit": 72689.39678,
+      "tp": 73926.72880749998,
+      "sl": 72689.39678,
+      "openTime": "2026-04-11T13:15:00.000Z",
+      "closeTime": "2026-04-12T01:30:00.000Z",
+      "openTimeMs": 1775913300000,
+      "closeTimeMs": 1775957400000,
+      "pnlPct": 0,
+      "sizeFraction": 1,
+      "reason": "BREAKEVEN",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 2185.1729899999996,
+      "exit": 2216.7280315000003,
+      "tp": 2216.7280315000003,
+      "sl": 2185.1729899999996,
+      "openTime": "2026-04-12T15:30:00.000Z",
+      "closeTime": "2026-04-12T20:30:00.000Z",
+      "openTimeMs": 1776007800000,
+      "closeTimeMs": 1776025800000,
+      "pnlPct": 1.444,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 73804.16042999999,
+      "exit": 73804.16042999999,
+      "tp": 74859.94735325,
+      "sl": 73804.16042999999,
+      "openTime": "2026-04-15T07:45:00.000Z",
+      "closeTime": "2026-04-15T15:30:00.000Z",
+      "openTimeMs": 1776239100000,
+      "closeTimeMs": 1776267000000,
+      "pnlPct": 0,
+      "sizeFraction": 1,
+      "reason": "BREAKEVEN",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 83.00291999999999,
+      "exit": 84.25066025000001,
+      "tp": 84.25066025000001,
+      "sl": 83.00291999999999,
+      "openTime": "2026-04-15T07:45:00.000Z",
+      "closeTime": "2026-04-15T14:15:00.000Z",
+      "openTimeMs": 1776239100000,
+      "closeTimeMs": 1776262500000,
+      "pnlPct": 1.503,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 89.23915,
+      "exit": 88.570525,
+      "tp": 90.56971375,
+      "sl": 88.570525,
+      "openTime": "2026-04-17T21:00:00.000Z",
+      "closeTime": "2026-04-17T23:15:00.000Z",
+      "openTimeMs": 1776459600000,
+      "closeTimeMs": 1776467700000,
+      "pnlPct": -0.749,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 77173.94685,
+      "exit": 76673.98840500001,
+      "tp": 78404.65190774998,
+      "sl": 76673.98840500001,
+      "openTime": "2026-04-18T00:00:00.000Z",
+      "closeTime": "2026-04-18T08:15:00.000Z",
+      "openTimeMs": 1776470400000,
+      "closeTimeMs": 1776500100000,
+      "pnlPct": -0.648,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 86.8868,
+      "exit": 86.26560500000001,
+      "tp": 88.21276774999997,
+      "sl": 86.26560500000001,
+      "openTime": "2026-04-18T12:00:00.000Z",
+      "closeTime": "2026-04-18T18:30:00.000Z",
+      "openTimeMs": 1776513600000,
+      "closeTimeMs": 1776537000000,
+      "pnlPct": -0.715,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 75727.43177999998,
+      "exit": 75182.347505,
+      "tp": 76879.34211274999,
+      "sl": 75182.347505,
+      "openTime": "2026-04-18T18:45:00.000Z",
+      "closeTime": "2026-04-19T07:15:00.000Z",
+      "openTimeMs": 1776537900000,
+      "closeTimeMs": 1776582900000,
+      "pnlPct": -0.72,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 85.61552999999999,
+      "exit": 85.00386,
+      "tp": 86.922543,
+      "sl": 85.00386,
+      "openTime": "2026-04-19T02:45:00.000Z",
+      "closeTime": "2026-04-19T07:15:00.000Z",
+      "openTimeMs": 1776566700000,
+      "closeTimeMs": 1776582900000,
+      "pnlPct": -0.714,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 2272.83056,
+      "exit": 2310.79252725,
+      "tp": 2310.79252725,
+      "sl": 2259.785295,
+      "openTime": "2026-04-20T06:00:00.000Z",
+      "closeTime": "2026-04-20T07:15:00.000Z",
+      "openTimeMs": 1776664800000,
+      "closeTimeMs": 1776669300000,
+      "pnlPct": 1.67,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 83.97389,
+      "exit": 85.27674449999999,
+      "tp": 85.27674449999999,
+      "sl": 83.97389,
+      "openTime": "2026-04-20T06:00:00.000Z",
+      "closeTime": "2026-04-20T07:15:00.000Z",
+      "openTimeMs": 1776664800000,
+      "closeTimeMs": 1776669300000,
+      "pnlPct": 1.551,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 77965.89800999999,
+      "exit": 77839.960005,
+      "tp": 79596.94148774998,
+      "sl": 77839.960005,
+      "openTime": "2026-04-23T00:00:00.000Z",
+      "closeTime": "2026-04-23T00:15:00.000Z",
+      "openTimeMs": 1776902400000,
+      "closeTimeMs": 1776903300000,
+      "pnlPct": -0.162,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 77684.20659999999,
+      "exit": 77184.0215,
+      "tp": 78926.19732499999,
+      "sl": 77184.0215,
+      "openTime": "2026-04-27T07:45:00.000Z",
+      "closeTime": "2026-04-27T15:15:00.000Z",
+      "openTimeMs": 1777275900000,
+      "closeTimeMs": 1777302900000,
+      "pnlPct": -0.644,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 78995.82690999999,
+      "exit": 80213.93305875002,
+      "tp": 80213.93305875002,
+      "sl": 78443.332425,
+      "openTime": "2026-05-04T10:30:00.000Z",
+      "closeTime": "2026-05-04T14:45:00.000Z",
+      "openTimeMs": 1777890600000,
+      "closeTimeMs": 1777905900000,
+      "pnlPct": 1.542,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 2343.8014599999997,
+      "exit": 2327.88972,
+      "tp": 2380.4341859999995,
+      "sl": 2327.88972,
+      "openTime": "2026-05-04T10:30:00.000Z",
+      "closeTime": "2026-05-04T13:00:00.000Z",
+      "openTimeMs": 1777890600000,
+      "closeTimeMs": 1777899600000,
+      "pnlPct": -0.679,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 74,
+      "entry": 84.34425999999999,
+      "exit": 85.53072575,
+      "tp": 85.53072575,
+      "sl": 84.34425999999999,
+      "openTime": "2026-05-04T21:00:00.000Z",
+      "closeTime": "2026-05-05T13:00:00.000Z",
+      "openTimeMs": 1777928400000,
+      "closeTimeMs": 1777986000000,
+      "pnlPct": 1.407,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 77,
+      "entry": 81344.30303999998,
+      "exit": 82673.5585985,
+      "tp": 82673.5585985,
+      "sl": 81344.30303999998,
+      "openTime": "2026-05-06T06:00:00.000Z",
+      "closeTime": "2026-05-06T11:15:00.000Z",
+      "openTimeMs": 1778047200000,
+      "closeTimeMs": 1778066100000,
+      "pnlPct": 1.634,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 2365.5732099999996,
+      "exit": 2403.7293462499997,
+      "tp": 2403.7293462499997,
+      "sl": 2365.5732099999996,
+      "openTime": "2026-05-06T06:00:00.000Z",
+      "closeTime": "2026-05-06T09:30:00.000Z",
+      "openTimeMs": 1778047200000,
+      "closeTimeMs": 1778059800000,
+      "pnlPct": 1.613,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "BTCUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 72,
+      "entry": 79660.42083999999,
+      "exit": 79660.42083999999,
+      "tp": 80754.70993624999,
+      "sl": 79660.42083999999,
+      "openTime": "2026-05-08T07:30:00.000Z",
+      "closeTime": "2026-05-08T13:00:00.000Z",
+      "openTimeMs": 1778225400000,
+      "closeTimeMs": 1778245200000,
+      "pnlPct": 0,
+      "sizeFraction": 1,
+      "reason": "BREAKEVEN",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 2319.9476299999997,
+      "exit": 2319.9476299999997,
+      "tp": 2352.414974499999,
+      "sl": 2319.9476299999997,
+      "openTime": "2026-05-09T15:45:00.000Z",
+      "closeTime": "2026-05-10T01:15:00.000Z",
+      "openTimeMs": 1778341500000,
+      "closeTimeMs": 1778375700000,
+      "pnlPct": 0,
+      "sizeFraction": 1,
+      "reason": "BREAKEVEN",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "XRPUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 1.4497482999999998,
+      "exit": 1.4729896574999999,
+      "tp": 1.4729896574999999,
+      "sl": 1.4497482999999998,
+      "openTime": "2026-05-11T08:00:00.000Z",
+      "closeTime": "2026-05-11T15:00:00.000Z",
+      "openTimeMs": 1778486400000,
+      "closeTimeMs": 1778511600000,
+      "pnlPct": 1.603,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 75,
+      "entry": 2285.56328,
+      "exit": 2320.0171262499994,
+      "tp": 2320.0171262499994,
+      "sl": 2285.56328,
+      "openTime": "2026-05-13T00:15:00.000Z",
+      "closeTime": "2026-05-13T09:00:00.000Z",
+      "openTimeMs": 1778631300000,
+      "closeTimeMs": 1778662800000,
+      "pnlPct": 1.507,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "SOLUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 73,
+      "entry": 94.45436,
+      "exit": 95.92363849999998,
+      "tp": 95.92363849999998,
+      "sl": 94.45436,
+      "openTime": "2026-05-13T00:15:00.000Z",
+      "closeTime": "2026-05-13T04:30:00.000Z",
+      "openTimeMs": 1778631300000,
+      "closeTimeMs": 1778646600000,
+      "pnlPct": 1.556,
+      "sizeFraction": 1,
+      "reason": "TAKE_PROFIT",
+      "shadowOnly": true
+    },
+    {
+      "symbol": "ETHUSDT",
+      "module": "VIDYA_LIQUIDITY_SWEEP",
+      "score": 74,
+      "entry": 2295.37308,
+      "exit": 2277.2311550000004,
+      "tp": 2328.6321702499995,
+      "sl": 2277.2311550000004,
+      "openTime": "2026-05-15T00:15:00.000Z",
+      "closeTime": "2026-05-15T01:45:00.000Z",
+      "openTimeMs": 1778804100000,
+      "closeTimeMs": 1778809500000,
+      "pnlPct": -0.79,
+      "sizeFraction": 1,
+      "reason": "STOP_LOSS",
+      "shadowOnly": true
+    }
+  ],
+  "diagnostics": {
+    "rejections": {
+      "BTC_RED_BLOCK": 19821,
+      "ATR_FILTER": 3078,
+      "TWOPOLE_NO_CAPITULATION": 8780,
+      "TWOPOLE_NO_RESET": 7048,
+      "SCORE_BELOW_FLOOR": 1776,
+      "TWOPOLE_NEGATIVE_DELTA": 311,
+      "TWOPOLE_LOW_VOLUME": 740,
+      "VOLUME_BELOW_MODULE_FLOOR": 17,
+      "EXEC_DEPTH": 151
+    },
+    "stages": {
+      "ORDERBOOK_OK": 42449,
+      "LIQUIDITY_BASE_OK": 42449,
+      "REGIME_OK": 39371,
+      "CONTEXT_OK": 39371,
+      "MODULE_OK": 2671,
+      "EXECUTION_OK": 2520,
+      "SCORE_OK": 727
+    },
+    "moduleCandidates": {
+      "VIDYA_LIQUIDITY_SWEEP": 2529,
+      "TWO_POLE_CAPITULATION_RESET": 165,
+      "SOTT_BAND_RECLAIM": 51
+    }
+  }
+}

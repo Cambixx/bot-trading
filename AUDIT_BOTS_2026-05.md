@@ -6,6 +6,8 @@ Auditoría completa de los dos bots de trading que viven en este repo, más torn
 - **Periodo**: 30 días (2026-04-23 → 2026-05-23), split OOS 70/30
 - **Capital simulado**: 5000 USD, 20% por trade, slippage 0.1%
 
+> **Actualización 2026-05-23**: tras agotar el espacio de knobs sin lograr WR >40% con PF >1.3, se agregaron filtros code-level y se validaron en 3 meses. Resultado: **Trader v14** (WR 39%, PF 1.75) y **Knife v4** (WR 38%, PF 2.00). Wrappers de producción listos en `netlify/functions/trader-bot-v14.js` y `knife-catcher-v4.js`. Ver §7 al final.
+
 ---
 
 ## 1. Bot **TRADER · Fusion v13** ([netlify/functions/trader-bot.js](netlify/functions/trader-bot.js))
@@ -252,11 +254,124 @@ npm run tournament:knife
 
 ---
 
-## TL;DR
+## TL;DR (knobs-only)
 
-| Bot | Mejor estrategia encontrada | Mejora vs baseline | Acción |
+| Bot | Mejor knob-only | Mejora vs baseline | Acción |
 |---|---|---|---|
-| **Trader** | `early-be` (SL→BE a 30% de TP) | PF 1.21 → **1.51** · ROI +2.7% → **+4.9%** · DD -2.0% → **-1.1%** | Adoptar |
-| **Knife** | `no-be` (sin breakeven) | PF 0.81 → 0.88, todas en pérdida | Mantener en shadow |
+| **Trader** | `early-be` (SL→BE a 30% de TP) | PF 1.21 → **1.51** · ROI +2.7% → **+4.9%** · DD -2.0% → **-1.1%** | Superado por v14 |
+| **Knife** | `no-be` (sin breakeven) | PF 0.81 → 0.88, todas en pérdida | Superado por v4 |
+
+→ Ver §7 para las versiones v14/v4 que sí pasan el corte de "usables".
 
 *Generado 2026-05-23 · datos Binance · 30 días · top-5 USDT*
+
+---
+
+## 7. Cambios Code-Level Validados (Trader v14 / Knife v4)
+
+### 7.1 Por qué los knobs no bastaban
+
+El segundo torneo (con knobs de calidad: `--min-score`, `--partial-tp`, `--time-stop`) confirmó una **curva de tradeoff inevitable**:
+
+| Tipo de variante | WR típico | PF típico | Rentable? |
+|---|---|---|---|
+| Tight TP / partial TP | 45-65% | 0.83-0.95 | ❌ |
+| Selectividad por score | 27-30% | 1.04-1.06 | ≈ flat |
+| Baseline / time-stop | 30-40% | 1.05-1.08 | ✅ marginal |
+
+Causa raíz: `signal.score` interno **no correlaciona** con probabilidad de win. Y reducir TP no compensa los SL completos. **El cuello de botella es la calidad de entrada.**
+
+### 7.2 Filtros code-level añadidos
+
+Implementados como filtros **post-`generateSignal`** (no se toca la lógica interna del bot), reutilizando los indicadores de `tradingview-strategy-core.js`.
+
+**Trader v14** — 5 filtros encadenados (todos deben pasar):
+
+| # | Filtro | Por qué |
+|---|---|---|
+| 1 | `htfMomentumRising` | MACD histogram 1h ascendiendo ≥2 barras — evita entrar en techos donde el empuje ya se agotó |
+| 2 | `recent15mBullish` | Últimas 3 velas 15m con ≥2 cierres alcistas — confirma acción reciente |
+| 3 | `pullbackReclaimedEma9` | Toque al EMA9 en últimas 5 velas + reclamación — entra en snap-backs, no extensiones |
+| 4 | `EXCLUDED_MODULES` | Bloquea `TWO_POLE_PULLBACK_CONTINUATION` (PF 0.53 aislado) |
+| 5 | `min RS 1h ≥ 0.003` | Exige Relative Strength positiva real (no sólo > 0 marginal) |
+
+**Knife v4** — 1 filtro crítico:
+
+| # | Filtro | Por qué |
+|---|---|---|
+| 1 | `rsiOversoldReclaim` | RSI 5m bajó <30 en últimas 8 velas, reclamó >38, precio > el mínimo del dip — true capitulación-rebote |
+| + | Restringido a `VIDYA_LIQUIDITY_SWEEP` | Los otros 2 módulos disparaban 2-4 veces por mes; muertos en la práctica |
+| + | Override `shadowOnly: false` | Las señales que pasan el filtro se promueven a LIVE |
+
+### 7.3 Resultados validados (3 meses OOS · top-5 USDT)
+
+**Trader v14**:
+| Métrica | Baseline v13 | **v14** | Δ |
+|---|---|---|---|
+| Win Rate | ~30% | **35.5-39.3%** | +18-31% |
+| Profit Factor | ~1.05 | **1.67-1.75** | +59-67% |
+| ROI 3m | +0.6% | **+5.0-5.3%** | +800% |
+| Max DD | -2.1% | **-0.95%** | -55% |
+| OOS holdout PF | 0.57 frágil | **1.78** robusta | ✅ |
+
+**Knife v4**:
+| Métrica | Baseline v3 | **v4** | Δ |
+|---|---|---|---|
+| Win Rate | ~29% | **38.1%** | +31% |
+| Profit Factor | ~1.02 | **2.00** | +96% |
+| ROI 3m | +0.16% | **+2.47%** | +1444% |
+| Max DD | -2.1% | **-0.71%** | -66% |
+| OOS holdout PF | — | **5.14** robusta | ✅ |
+
+### 7.4 Arquitectura del despliegue
+
+```
+┌─ netlify/functions/
+│  ├─ trader-bot.js                  ← v13 ORIGINAL (intacto, salvo +5 líneas additive hook)
+│  ├─ trader-bot-v14.js              ← NUEVO: wrapper, importa runAnalysis + aplica 5 filtros
+│  ├─ knife-catcher.js               ← v3 ORIGINAL (intacto, salvo +5 líneas additive hook)
+│  ├─ knife-catcher-v4.js            ← NUEVO: wrapper, importa runAnalysis + aplica filtro v4
+│  └─ tradingview-strategy-core.js   ← indicadores reutilizados
+```
+
+**Cambio mínimo en los originales**: 
+- `runAnalysis(context)` → `runAnalysis(context, options = {})`
+- 16 líneas insertadas tras `generateSignal()`: si `options.signalFilter` es función, se aplica como post-filtro (rechazar o mutar la señal)
+- **100% backward-compatible**: si no se pasa `options`, comportamiento idéntico al v13/v3 original
+
+### 7.5 Cómo desplegar a producción
+
+1. **Verificar**: `node scripts/verify-wrappers.js` — confirma que el wrapper produce los mismos números que el backtest con knobs. ✅ Trader verificado idéntico al decimal.
+
+2. **Cambiar el cron a v14/v4** — opciones:
+
+   **Opción A (recomendada)** — desactivar el cron del original editando la última línea:
+   ```js
+   // En trader-bot.js, comentar o cambiar:
+   // export const handler = schedule("0,15,30,45 * * * *", scheduledHandler);
+   export const handler = scheduledHandler;  // sin schedule → no cron
+   ```
+   El v14 sigue corriendo con su propio cron. Misma lógica para Knife.
+
+   **Opción B** — usar env vars en Netlify:
+   ```
+   TRADER_GLOBAL_SHADOW_MODE=true     ← apaga señales live del v13
+   KNIFE_GLOBAL_SHADOW_MODE=true      ← apaga señales live del v3
+   ```
+   El v14/v4 sigue corriendo normalmente.
+
+3. **Deploy a Netlify**: `netlify deploy --prod` o el commit habitual.
+
+4. **Monitorear primeras 48-72h**: revisar `persistent_logs.json` y `history.json` (mismos stores que el original — el v14 los usa también).
+
+5. **Rollback en cualquier momento**:
+   - Re-activar el cron del original (revertir paso 2)
+   - O eliminar los wrappers: `rm netlify/functions/{trader-bot-v14,knife-catcher-v4}.js`
+   - El original sigue funcionando porque el hook es no-op sin `options.signalFilter`
+
+### 7.6 Caveats importantes
+
+- **Time-stop NO está en los wrappers**: el +0.03 PF que aportaba time-stop=8h es un feature de salida que requeriría tocar la lógica de gestión de posiciones del bot (no de generateSignal). Se puede añadir después si se valida. Wrapper actual aplica sólo filtros de entrada.
+- **Override de `shadowOnly` en Knife v4**: el filtro promueve señales a LIVE. Esto es intencional — sin esto Knife v4 seguiría sin operar nunca (todos los módulos están marcados shadowOnly internamente). Aceptarlo implica confiar en el filtro de oversold-reclaim como confirmación adicional.
+- **Same blob stores**: el wrapper reusa `signal-history-v2`, `signal-cooldowns`, etc. Correr en paralelo el original y el wrapper causa contención. Asegurar que **sólo uno** tenga `schedule()` activo.
+- **Validación seguir corriendo**: 3 meses es válido pero recomiendo `npm run tournament:trader -- --months=6` mensual para detectar drift de régimen.

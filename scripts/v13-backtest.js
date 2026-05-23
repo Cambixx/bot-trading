@@ -23,7 +23,70 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
-import { detectBTCContext } from '../netlify/functions/tradingview-strategy-core.js';
+import { detectBTCContext, calculateRSI, calculateEMA, calculateMACD } from '../netlify/functions/tradingview-strategy-core.js';
+
+// --- Entry-quality filters (applied post-signal to improve win rate) ---
+
+function htfMomentumRising(candles1h) {
+  // Require MACD histogram on 1h to be rising for ≥2 consecutive bars
+  if (!candles1h || candles1h.length < 40) return false;
+  const macd = calculateMACD(candles1h.map(c => c.close));
+  if (!macd) return false;
+  return macd.histDeltaConsecutive >= 2;
+}
+
+function recent5mBullish(candles5m, lookback = 3) {
+  // Require last `lookback` 5m candles to show bullish momentum (close > 5m EMA5)
+  if (!candles5m || candles5m.length < 10) return false;
+  const closes = candles5m.map(c => c.close);
+  const ema5 = calculateEMA(closes, 5);
+  if (!Number.isFinite(ema5)) return false;
+  const recent = candles5m.slice(-lookback);
+  const bullishCloses = recent.filter(c => c.close > ema5).length;
+  const greenCount = recent.filter(c => c.close > c.open).length;
+  return bullishCloses >= 2 && greenCount >= 2;
+}
+
+function pullbackReclaimedEma9(candles15m, lookback = 5) {
+  // Recent (within lookback bars) low touched EMA9 from below, and current close > EMA9
+  if (!candles15m || candles15m.length < 30) return false;
+  const closes = candles15m.map(c => c.close);
+  const ema9 = calculateEMA(closes, 9);
+  if (!Number.isFinite(ema9)) return false;
+  const recent = candles15m.slice(-lookback - 1, -1);
+  const touched = recent.some(c => c.low <= ema9 * 1.001);
+  const reclaimed = candles15m[candles15m.length - 1].close > ema9;
+  return touched && reclaimed;
+}
+
+function volumeSpike5m(candles5m, multiplier = 1.5, window = 20) {
+  if (!candles5m || candles5m.length < window + 2) return false;
+  const slice = candles5m.slice(-window - 1, -1);
+  const avg = slice.reduce((s, c) => s + c.volume, 0) / slice.length;
+  if (avg <= 0) return false;
+  return candles5m[candles5m.length - 1].volume >= avg * multiplier;
+}
+
+function rsiOversoldReclaim(candles5m, oversoldLevel = 30, reclaimLevel = 38, lookback = 8) {
+  // Bullish reclaim from oversold: RSI dipped below `oversoldLevel` in last `lookback`
+  // candles, now above `reclaimLevel`, and current close > close at the dip.
+  if (!candles5m || candles5m.length < 30) return false;
+  const closes = candles5m.map(c => c.close);
+  const currRsi = calculateRSI(closes, 14);
+  if (!Number.isFinite(currRsi) || currRsi < reclaimLevel) return false;
+  // Walk back computing RSI on truncated series — find any dip below oversoldLevel
+  let dipFound = false;
+  let dipPrice = null;
+  for (let i = closes.length - lookback - 1; i < closes.length - 1; i++) {
+    const r = calculateRSI(closes.slice(0, i + 1), 14);
+    if (Number.isFinite(r) && r <= oversoldLevel) {
+      dipFound = true;
+      dipPrice = closes[i];
+    }
+  }
+  if (!dipFound) return false;
+  return closes[closes.length - 1] > dipPrice;
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,13 +115,24 @@ function parseArgs() {
   return opts;
 }
 
-async function fetchJson(url) {
-  const res = await fetch(url);
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status} ${url}\n${body.slice(0, 200)}`);
+async function fetchJson(url, retries = 3) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status} ${url}\n${body.slice(0, 200)}`);
+      }
+      return await res.json();
+    } catch (e) {
+      lastErr = e;
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+      }
+    }
   }
-  return res.json();
+  throw lastErr;
 }
 
 function ensureDir(dir) {
@@ -196,10 +270,45 @@ export class Backtester {
     this.moduleFilter = opts.modules
       ? new Set((Array.isArray(opts.modules) ? opts.modules : String(opts.modules).split(',')).map(s => s.trim()))
       : null;
+    this.moduleExclude = opts['exclude-modules'] || opts.excludeModules
+      ? new Set((Array.isArray(opts['exclude-modules'] || opts.excludeModules)
+          ? (opts['exclude-modules'] || opts.excludeModules)
+          : String(opts['exclude-modules'] || opts.excludeModules).split(',')).map(s => s.trim()))
+      : null;
     this.rrMult = opts['rr-mult'] !== undefined ? parseFloat(opts['rr-mult']) : (opts.rrMult ?? 1.0);
     this.slMult = opts['sl-mult'] !== undefined ? parseFloat(opts['sl-mult']) : (opts.slMult ?? 1.0);
     this.beFraction = opts['no-be'] ? 0 : (opts.beFraction !== undefined ? parseFloat(opts.beFraction) : 0.5);
     this.slippagePct = opts.slippage !== undefined ? parseFloat(opts.slippage) : 0.001; // 0.1%
+
+    // Quality / exit knobs
+    this.minScore = opts['min-score'] !== undefined ? parseFloat(opts['min-score'])
+      : (opts.minScore !== undefined ? parseFloat(opts.minScore) : null);
+    // --partial-tp=trigger,size — e.g., 0.5,0.5 = take 50% off at 50% of TP travel
+    this.partialTpTrigger = null;
+    this.partialTpSize = 0;
+    const partialArg = opts['partial-tp'] || opts.partialTp;
+    if (partialArg) {
+      const [trig, size] = String(partialArg).split(',').map(parseFloat);
+      this.partialTpTrigger = Number.isFinite(trig) ? trig : 0.5;
+      this.partialTpSize = Number.isFinite(size) ? size : 0.5;
+    }
+    // --time-stop=Xh — force close after X hours
+    this.timeStopHours = opts['time-stop'] !== undefined ? parseFloat(opts['time-stop'])
+      : (opts.timeStopHours !== undefined ? parseFloat(opts.timeStopHours) : null);
+
+    // Entry-quality filters (boolean; trader-oriented unless noted)
+    this.requireHtfMomentum = !!opts['require-htf-momentum'] || !!opts.requireHtfMomentum;
+    this.require5mBullish = !!opts['require-5m-bullish'] || !!opts.require5mBullish;
+    this.requirePullback = !!opts['require-pullback'] || !!opts.requirePullback;
+    this.requireOversoldReclaim = !!opts['require-oversold-reclaim'] || !!opts.requireOversoldReclaim;
+    this.requireVolumeSpike = opts['require-volume-spike'] !== undefined ? parseFloat(opts['require-volume-spike'])
+      : (opts.requireVolumeSpike !== undefined ? parseFloat(opts.requireVolumeSpike) : null);
+    this.minRs1h = opts['min-rs1h'] !== undefined ? parseFloat(opts['min-rs1h'])
+      : (opts.minRs1h !== undefined ? parseFloat(opts.minRs1h) : null);
+
+    // Optional: import a wrapper module's signal filter function (e.g. trader-bot-v14).
+    // When set, this filter is applied AFTER all other knobs and can mutate/reject the signal.
+    this.customSignalFilter = opts.customSignalFilter || null;
 
     this.label = opts.label || this.bot;
     this.useCache = opts.useCache !== false;
@@ -281,6 +390,25 @@ export class Backtester {
       const t = candle.time;
 
       if (position) {
+        // Partial TP: take fraction of position off when price reaches the partial trigger.
+        if (this.partialTpTrigger && !position.partialTaken) {
+          const partialPrice = position.entry + (position.tp - position.entry) * this.partialTpTrigger;
+          if (candle.high >= partialPrice) {
+            // Record the partial exit as a separate trade row, scaled by partialTpSize.
+            this.closePartial(trades, position, partialPrice, t, this.partialTpSize);
+            position.partialTaken = true;
+            // Move SL to entry after partial — let the runner go free.
+            position.sl = Math.max(position.sl, position.entry);
+          }
+        }
+
+        // Time-stop: force close after N hours if still open.
+        if (this.timeStopHours && (t - position.openTime) >= this.timeStopHours * 3600 * 1000) {
+          this.closePosition(trades, position, candle.close, t, 'TIME_STOP');
+          position = null;
+        }
+      }
+      if (position) {
         const hitTp = candle.high >= position.tp;
         const hitSl = candle.low <= position.sl;
         if (hitTp && hitSl) {
@@ -342,11 +470,42 @@ export class Backtester {
       }
 
       if (!signal) continue;
-      if (!this.allowShadowOnly && signal.shadowOnly) {
-        // Honor the bot's shadowOnly contract by default — these modules don't execute in live.
+      if (!this.allowShadowOnly && signal.shadowOnly) continue;
+      if (this.moduleFilter && !this.moduleFilter.has(signal.module)) continue;
+      if (this.moduleExclude && this.moduleExclude.has(signal.module)) continue;
+      if (this.minScore !== null && signal.score < this.minScore) continue;
+
+      // Entry-quality filters — applied post-signal to improve win rate.
+      if (this.requireHtfMomentum && !htfMomentumRising(candles1h)) {
+        if (this.debug) console.log(`[FILTER] ${symbol} ${new Date(t).toISOString().slice(0,16)} rejected: HTF momentum not rising`);
         continue;
       }
-      if (this.moduleFilter && !this.moduleFilter.has(signal.module)) continue;
+      if (this.require5mBullish && this.bot === 'knife') {
+        if (!recent5mBullish(candles5m)) continue;
+      } else if (this.require5mBullish && this.bot === 'trader') {
+        // Trader doesn't load 5m by default — recompute from 15m direction
+        const last3 = candles15m.slice(-3);
+        const greens = last3.filter(c => c.close > c.open).length;
+        if (greens < 2) continue;
+      }
+      if (this.requirePullback && !pullbackReclaimedEma9(candles15m)) continue;
+      if (this.requireOversoldReclaim && candles5m && !rsiOversoldReclaim(candles5m)) continue;
+      if (this.requireVolumeSpike !== null && candles5m && !volumeSpike5m(candles5m, this.requireVolumeSpike)) continue;
+      if (this.minRs1h !== null) {
+        const rs1h = signal.relativeStrengthSnapshot?.rs1h;
+        if (!Number.isFinite(rs1h) || rs1h < this.minRs1h) continue;
+      }
+
+      // Optional external wrapper filter (validates that production wrapper produces same result)
+      if (this.customSignalFilter) {
+        const filtered = this.customSignalFilter(signal, {
+          candles5m: this.bot === 'knife' ? candles5m : null,
+          candles15m, candles1h, candles4h, btcContext, ticker24h, orderBook
+        });
+        if (!filtered) continue;
+        signal = filtered;
+      }
+
       if (!Number.isFinite(signal.tp) || !Number.isFinite(signal.sl)) continue;
       if (signal.tp <= candle.close || signal.sl >= candle.close) continue;
 
@@ -392,7 +551,9 @@ export class Backtester {
   }
 
   closePosition(trades, pos, exitPrice, exitTime, reason) {
-    const pnlPct = ((exitPrice - pos.entry) / pos.entry) * 100;
+    // Account for size after partial — what's left of the position scales the pnl impact.
+    const remainingFraction = 1 - (pos.partialTaken ? this.partialTpSize : 0);
+    const pnlPct = ((exitPrice - pos.entry) / pos.entry) * 100 * remainingFraction;
     trades.push({
       symbol: pos.symbol,
       module: pos.module,
@@ -406,7 +567,29 @@ export class Backtester {
       openTimeMs: pos.openTime,
       closeTimeMs: exitTime,
       pnlPct: Number(pnlPct.toFixed(3)),
+      sizeFraction: Number(remainingFraction.toFixed(3)),
       reason,
+      shadowOnly: pos.shadowOnly
+    });
+  }
+
+  closePartial(trades, pos, exitPrice, exitTime, sizeFraction) {
+    const pnlPct = ((exitPrice - pos.entry) / pos.entry) * 100 * sizeFraction;
+    trades.push({
+      symbol: pos.symbol,
+      module: pos.module,
+      score: pos.score,
+      entry: pos.entry,
+      exit: exitPrice,
+      tp: pos.tp,
+      sl: pos.sl,
+      openTime: new Date(pos.openTime).toISOString(),
+      closeTime: new Date(exitTime).toISOString(),
+      openTimeMs: pos.openTime,
+      closeTimeMs: exitTime,
+      pnlPct: Number(pnlPct.toFixed(3)),
+      sizeFraction: Number(sizeFraction.toFixed(3)),
+      reason: 'PARTIAL_TP',
       shadowOnly: pos.shadowOnly
     });
   }
@@ -502,10 +685,21 @@ export class Backtester {
         knobs: {
           allowShadowOnly: this.allowShadowOnly,
           moduleFilter: this.moduleFilter ? [...this.moduleFilter] : null,
+          moduleExclude: this.moduleExclude ? [...this.moduleExclude] : null,
           rrMult: this.rrMult,
           slMult: this.slMult,
           beFraction: this.beFraction,
-          slippagePct: this.slippagePct
+          slippagePct: this.slippagePct,
+          minScore: this.minScore,
+          partialTpTrigger: this.partialTpTrigger,
+          partialTpSize: this.partialTpSize || null,
+          timeStopHours: this.timeStopHours,
+          requireHtfMomentum: this.requireHtfMomentum,
+          require5mBullish: this.require5mBullish,
+          requirePullback: this.requirePullback,
+          requireOversoldReclaim: this.requireOversoldReclaim,
+          requireVolumeSpike: this.requireVolumeSpike,
+          minRs1h: this.minRs1h
         },
         generatedAt: new Date().toISOString()
       },
