@@ -1412,8 +1412,15 @@ const scheduledHandler = async (event = {}, context = {}) => {
   };
 };
 
-// CRON DISABLED 2026-05-23 — superseded by knife-catcher-v4.js (oversold-reclaim filter).
-// runAnalysis() and all other exports remain intact so the wrapper can import them.
-// To roll back: restore the schedule line below and disable knife-catcher-v4.js.
+// CRON DISABLED + HTTP LOCKDOWN 2026-05-24 — superseded by knife-catcher-v4.js (oversold-reclaim filter).
+// runAnalysis() and all other exports remain intact so the wrapper can import them as a module.
+// The HTTP route is sealed with 410 Gone so accidental URL hits / monitoring pings can't run v3 unfiltered.
+// To roll back: restore the schedule import + the schedule line below; disable knife-catcher-v4.js.
 // export const handler = schedule("5,20,35,50 * * * *", scheduledHandler);
-export const handler = scheduledHandler;
+export const handler = async () => ({
+  statusCode: 410,
+  body: JSON.stringify({
+    error: 'gone',
+    message: 'knife-catcher v3 HTTP route is disabled. The live bot is knife-catcher-v4 (scheduled). Import runAnalysis as a module if you need the v3 logic internally.'
+  })
+});
