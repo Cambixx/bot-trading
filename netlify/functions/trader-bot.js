@@ -4,7 +4,9 @@
  * tradinview-indicators: VIDYA, Squeeze, MACD, MLMA, SMC, SOTT and Two-Pole.
  */
 
-import { schedule } from "@netlify/functions";
+// CRON DISABLED 2026-05-23 — superseded by trader-bot-v14.js.
+// To roll back: uncomment the import + the schedule() line at the bottom of this file.
+// import { schedule } from "@netlify/functions";
 import {
   buildExecutionQuality,
   buildRelativeStrengthSnapshot,

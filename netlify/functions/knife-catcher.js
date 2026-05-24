@@ -4,7 +4,9 @@
  * with confirmed reset modules based on Two-Pole, SOTT, VIDYA, SMC and Squeeze.
  */
 
-import { schedule } from "@netlify/functions";
+// CRON DISABLED 2026-05-23 — superseded by knife-catcher-v4.js.
+// To roll back: uncomment the import + the schedule() line at the bottom of this file.
+// import { schedule } from "@netlify/functions";
 import {
   buildExecutionQuality,
   buildRelativeStrengthSnapshot,
