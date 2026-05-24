@@ -8,14 +8,39 @@ Esta documentación sirve como guía técnica para entender, mantener y optimiza
 
 ---
 
-## Current Runtime Snapshot (v13.2.0 / v3.2.0)
+## Current Runtime Snapshot (Trader v14 / Knife v4 — wrappers en producción)
+
+> **Cambio operativo 2026-05-23:** Los bots live ahora son los wrappers [`trader-bot-v14.js`](netlify/functions/trader-bot-v14.js) y [`knife-catcher-v4.js`](netlify/functions/knife-catcher-v4.js), que aplican filtros de calidad de entrada **encima** de la lógica v13/v3. Los originales `trader-bot.js` y `knife-catcher.js` están **intactos pero con su cron desactivado** — son importados por los wrappers vía `runAnalysis(context, { signalFilter })`. Ver [AUDIT_BOTS_2026-05.md §7](AUDIT_BOTS_2026-05.md) para la justificación y métricas validadas.
 
 ### Resumen
-- **Runtime Version:** `v13.2.0-ExecutionFlowHardening` / `v3.2.0-ReversalShadowHardening`
-- **File Core:** `trader-bot.js` y `knife-catcher.js`
-- **Estilo Bot 1 (TradingView Fusion):** `spot`, `long-only`, trend/reclaim scanner (`trader-bot.js`).
-- **Estilo Bot 2 (Reversal Lab):** `spot`, `long-only`, confirmed reversal scanner (`knife-catcher.js`).
+- **Runtime Versions (live):** `v14.0.0-EntryQualityFilters` (Trader) / `v4.0.0-OversoldReclaim` (Knife)
+- **Runtime Versions (core, sin cron):** `v13.2.0-ExecutionFlowHardening` / `v3.2.0-ReversalShadowHardening`
+- **File Core:** `trader-bot-v14.js` → wraps `trader-bot.js`; `knife-catcher-v4.js` → wraps `knife-catcher.js`
+- **Estilo Bot 1 (TradingView Fusion):** `spot`, `long-only`, trend/reclaim scanner.
+- **Estilo Bot 2 (Reversal Lab):** `spot`, `long-only`, confirmed reversal scanner.
 - **Filosofía:** módulos de estrategia separados, derivados de los indicadores en `tradinview-indicators`, con historial/cooldowns/shadow trading preservados en Netlify Blobs.
+
+### Filtros v14/v4 aplicados post-`generateSignal`
+
+**Trader v14** ([trader-bot-v14.js](netlify/functions/trader-bot-v14.js)) — los 5 filtros se aplican en cadena, una señal debe pasar todos para ser live:
+1. **`htfMomentumRising`** — MACD histogram 1h ascendiendo ≥2 barras consecutivas.
+2. **`recent15mBullish`** — ≥2 de las últimas 3 velas 15m con cierre alcista.
+3. **`pullbackReclaimedEma9`** — alguna vela de las últimas 5 tocó EMA9 + close actual reclama.
+4. **Module exclude** — `TWO_POLE_PULLBACK_CONTINUATION` rechazado (PF 0.53 aislado).
+5. **`min RS 1h ≥ 0.003`** — Relative Strength positiva real en 1h.
+
+**Knife v4** ([knife-catcher-v4.js](netlify/functions/knife-catcher-v4.js)):
+1. **Module restrict a `VIDYA_LIQUIDITY_SWEEP`** — los otros 2 módulos disparan ~2-4 veces/mes; muertos en la práctica.
+2. **`rsiOversoldReclaim`** — RSI 5m dipped <30 en últimas 8 velas, ahora >38, close actual > el mínimo del dip.
+3. **`shadowOnly: false` override** — las señales que pasan los filtros se promueven a LIVE (el bot las marca shadowOnly por defecto).
+
+**Métricas validadas (3 meses OOS, top-5 USDT):**
+| | Baseline | v14/v4 |
+|---|---|---|
+| Trader WR | ~30% | **35-39%** |
+| Trader PF | 1.05 | **1.67-1.75** |
+| Knife WR | ~29% | **38.1%** |
+| Knife PF | 1.02 | **2.00** |
 
 ### Arquitectura de Módulos Activa
 
@@ -137,6 +162,15 @@ graph TD
 
 ## 5. Changelog Reciente
 
+### v14.0.0-EntryQualityFilters / v4.0.0-OversoldReclaim (23 May 2026)
+- **Wrappers de producción**: `trader-bot-v14.js` y `knife-catcher-v4.js` son ahora los handlers scheduled. Importan `runAnalysis` del v13/v3 y aplican filtros post-`generateSignal` vía la opción `signalFilter`.
+- **Trader v14 filtros encadenados**: htfMomentumRising (MACD 1h ascendiendo 2 barras), recent15mBullish, pullbackReclaimedEma9, exclude TWO_POLE, min RS 1h ≥ 0.003.
+- **Knife v4 filtro crítico**: rsiOversoldReclaim (5m), restringido a `VIDYA_LIQUIDITY_SWEEP`, override de `shadowOnly: false` para activar señales live.
+- **Cambio mínimo en originales**: `runAnalysis(context)` → `runAnalysis(context, options = {})` con hook post-signal de 16 líneas. 100% backward-compatible. Crons originales desactivados (los wrappers asumen sus offsets `0,15,30,45` y `5,20,35,50`).
+- **Validación**: 3 meses OOS top-5 USDT. Trader v14 PF 1.75 (vs 1.05 baseline) WR 39.3%. Knife v4 PF 2.00 (vs 1.02) WR 38.1%. OOS holdout ambos veredicto "robusta" automático.
+- **Rollback**: descomentar `import { schedule }` + `export const handler = schedule(...)` en cada original; borrar los wrappers.
+- **Doc full**: [AUDIT_BOTS_2026-05.md §7](AUDIT_BOTS_2026-05.md).
+
 ### v13.2.0-ExecutionFlowHardening / v3.2.0-ReversalShadowHardening (15 May 2026)
 - **Bot 1 Order-Flow Gate:** nuevo bloqueo live `ORDERFLOW_ASK_HEAVY` para `obi < -0.30` y `ORDERFLOW_WEAK_BUY_PRESSURE` para `deltaRatio < -0.05` sin OBI favorable.
 - **Execution Gate Restored:** default spread máximo vuelve a 8 bps y profundidad mínima a `$90k` en ambos bots; `8.5 bps` debe rechazar con `EXEC_SPREAD` y depth `< $90k` con `EXEC_DEPTH`.
@@ -232,4 +266,4 @@ graph TD
 
 ---
 
-**Documentación actualizada v13.0.0 / v3.0.0 — 1 Mayo 2026**
+**Documentación actualizada v14.0.0 / v4.0.0 — 24 Mayo 2026**

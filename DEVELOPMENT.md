@@ -45,6 +45,25 @@ npm run build
 
 Genera carpeta `dist/` lista para deploy en Netlify.
 
+## Backtesting
+
+El motor de backtesting usa la API pública de Binance y soporta los dos bots con todos sus knobs de estrategia.
+
+```bash
+# Backtest individual (1 HTML+JSON por bot, sobrescritos)
+npm run backtest:trader              # top-5 USDT, 30 días por defecto
+npm run backtest:knife
+
+# Torneo de estrategias con HTML consolidado
+npm run tournament:trader            # 14 variantes
+npm run tournament:knife             # 12 variantes
+
+# Verificar que los wrappers de producción son equivalentes al backtest
+node scripts/verify-wrappers.js
+```
+
+Documentación: [BACKTEST_GUIDE.md](BACKTEST_GUIDE.md).
+
 ## Testing
 
 ### Test de Generación de Señales

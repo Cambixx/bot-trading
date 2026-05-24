@@ -265,15 +265,27 @@ Para controlar qué señales se envían al bot de Telegram, configura la variabl
 - **Descripción**: Mínimo score (0-100) requerido para enviar una notificación.
 - **Ejemplo**: Si quieres recibir más señales, bájalo a `60`. Si quieres solo las mejores, súbelo a `80`.
 
-### Nuevo: Ejecutar backtest de ejemplo
+### Ejecutar backtests con datos reales
 
-Hay un pequeño script de demostración que genera velas sintéticas y ejecuta el analizador para mostrar una señal de ejemplo.
+El motor de backtesting vive en [scripts/v13-backtest.js](scripts/v13-backtest.js). Descarga klines de Binance (con cache local 6h), simula el bot vela a vela y produce un reporte HTML + JSON con OOS train/holdout.
 
-Ejecutar:
+**Comandos rápidos:**
 ```bash
-node test/backtest_sample.mjs
+# Backtest individual del bot Trader o Knife (1 mes, top-5 USDT por defecto)
+npm run backtest:trader
+npm run backtest:knife
+
+# Torneo de estrategias: corre 10-14 variantes y elige ganador
+npm run tournament:trader
+npm run tournament:knife
+
+# Verificar que los wrappers de producción (v14/v4) coinciden con el backtest
+node scripts/verify-wrappers.js
 ```
-Este script es un punto de partida para crear un backtest real con datos históricos.
+
+Cada backtest abre automáticamente el HTML al terminar. Output va a [backtests/](backtests/) (1 archivo por tipo, se sobrescribe en cada run).
+
+Documentación completa: [BACKTEST_GUIDE.md](BACKTEST_GUIDE.md). Auditoría y justificación de las estrategias actuales: [AUDIT_BOTS_2026-05.md](AUDIT_BOTS_2026-05.md).
 
 ## 🧪 Estructura del Proyecto
 

@@ -6,7 +6,51 @@ This file tracks the evolution of the trading algorithm, the logic behind parame
 
 ---
 
-### Current Version: v13.2.0 / v3.2.0 (Execution Flow Hardening)
+### Current Version: v14.0.0 / v4.0.0 (Entry Quality Filters)
+**Date:** May 23, 2026
+**Theme:** "POST-SIGNAL CONFLUENCE FILTERS VIA WRAPPER MODULES"
+
+### Core Logic & Parameters:
+- **Runtime Versions (live):** `v14.0.0-EntryQualityFilters` (Trader) / `v4.0.0-OversoldReclaim` (Knife).
+- **Runtime Versions (sin cron):** `v13.2.0-ExecutionFlowHardening` / `v3.2.0-ReversalShadowHardening`. Originales intactos, importados por los wrappers.
+- **Architecture:** wrappers Netlify scheduled (`trader-bot-v14.js`, `knife-catcher-v4.js`) que llaman `runAnalysis(context, { signalFilter })` del bot original. El `signalFilter` se aplica después de `generateSignal()` y puede rechazar (return null) o mutar la señal.
+
+### Changes Made:
+
+#### [H1] Trader v14 — Filtros de confluencia post-signal
+- **Problem:** Auditoría 2026-05-23 con tournaments encontró que knobs (min-score, partial-tp, time-stop, tight-tp) no podían empujar WR sobre ~40% manteniendo PF > 1.3. La curva tradeoff WR↔PF era estructural: el bot entraba en ~30% de setups ganadores con RR 2.3, breakeven matemático. La calidad de entrada era el cuello de botella.
+- **Fix:** Wrapper aplica 5 filtros encadenados al signal:
+  1. `htfMomentumRising`: MACD histogram 1h ascendiendo ≥2 barras consecutivas — evita techos donde el empuje ya se agotó.
+  2. `recent15mBullish`: ≥2 de las últimas 3 velas 15m con cierre alcista.
+  3. `pullbackReclaimedEma9`: alguna de las últimas 5 velas tocó EMA9 y close actual > EMA9 — entra en snap-backs, no extensiones.
+  4. Module exclude `TWO_POLE_PULLBACK_CONTINUATION` — aislado tenía PF 0.53 en backtests.
+  5. `min RS 1h ≥ 0.003` — exige Relative Strength positiva real.
+- **Expected Effect:** WR 30→39%, PF 1.05→1.75, Max DD -2.1%→-0.95% (validado 3m OOS top-5 USDT, holdout PF 1.78).
+- **Falsification:** Si los próximos 30 días en vivo dan WR <33% o PF <1.3, alguno de los filtros está sobre-ajustado al periodo de backtest y hay que volver a baseline + iterar.
+
+#### [H2] Knife v4 — Restricción a un módulo + oversold reclaim
+- **Problem:** Misma auditoría reveló que TWO_POLE_CAPITULATION_RESET y SOTT_BAND_RECLAIM disparan ~2-4 veces/mes — son funcionalmente módulos muertos. Sólo VIDYA_LIQUIDITY_SWEEP produce volumen real (113/116 trades). Y el WR base de VIDYA es ~30% con muchos falsos positivos de sweeps que no rebotan.
+- **Fix:** Wrapper aplica:
+  1. Module restrict a `VIDYA_LIQUIDITY_SWEEP` — formaliza lo que ya pasaba.
+  2. `rsiOversoldReclaim`: RSI 5m dipped <30 en últimas 8 velas, ahora >38, current close > el close del dip. Captura true capitulation-rebote con confirmación de momentum.
+  3. Override `signal.shadowOnly = false` — el módulo está marcado shadowOnly en el código original (por baja confianza en muestra resuelta); el filtro v4 provee la confirmación adicional que faltaba.
+- **Expected Effect:** WR 29→38%, PF 1.02→2.00, Max DD -2.1%→-0.71% (validado 3m OOS, holdout PF 5.14 con 12 trades).
+- **Falsification:** Si los próximos 30 días en vivo dan PF <1.4 o WR <35%, el filtro oversold-reclaim era específico al régimen de mercado del periodo de backtest.
+
+#### [H3] Hook backward-compatible en `runAnalysis`
+- **Problem:** Wrapper necesitaba interceptar señales antes del downstream processing (cooldowns, history, Telegram) pero JS ESM imports son read-only — no se puede swap de `generateSignal` desde fuera.
+- **Fix:** `runAnalysis(context)` → `runAnalysis(context, options = {})`. Cuando `options.signalFilter` está set, se llama tras `generateSignal()` con `(signal, ctx)`. Retorna `null/false` para rechazar (count como `EXTERNAL_FILTER_REJECT`) o el signal (posiblemente mutado) para continuar.
+- **Reversibility:** Sin `options`, comportamiento idéntico al v13/v3. Rollback completo = restaurar `import { schedule }` + `export const handler = schedule(...)` al final de cada original; borrar wrappers.
+- **Verification:** `node scripts/verify-wrappers.js` ejecuta el mismo backtest dos veces (con flags vs con `customSignalFilter` apuntando al wrapper) y confirma métricas idénticas al decimal. ✅ Ambos wrappers verificados.
+
+### Falsification Watchpoints (futuras auditorías)
+- WR mensual del wrapper Trader/Knife. Si baja 5+ puntos del backtest, drift.
+- Si el `EXTERNAL_FILTER_REJECT` count sube desproporcionadamente, algún filtro está bloqueando setups que en vivo sí ganan — revisar.
+- Si Binance API saca nuevos pares líquidos en top-5, re-validar con `npm run tournament:trader -- --months=6`.
+
+---
+
+### v13.2.0 / v3.2.0 (Execution Flow Hardening)
 **Date:** May 15, 2026
 **Theme:** "ORDER-FLOW GATES & REVERSAL LAB SHADOW QUARANTINE"
 
