@@ -69,6 +69,7 @@ export function v14SignalFilter(signal, ctx) {
 // --- Scheduled handler ---
 
 const scheduledHandler = async (event, context) => {
+  console.log(`[WRAPPER ${ALGORITHM_VERSION}] active — applying v14SignalFilter to trader-bot generateSignal output`);
   return runAnalysis(context, { signalFilter: v14SignalFilter });
 };
 

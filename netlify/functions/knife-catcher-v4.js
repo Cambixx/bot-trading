@@ -60,6 +60,7 @@ export function v4SignalFilter(signal, ctx) {
 }
 
 const scheduledHandler = async (event, context) => {
+  console.log(`[WRAPPER ${ALGORITHM_VERSION}] active — applying v4SignalFilter to knife-catcher generateSignal output`);
   return runAnalysis(context, { signalFilter: v4SignalFilter });
 };
 

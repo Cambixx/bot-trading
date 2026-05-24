@@ -8,6 +8,7 @@ import {
     SHADOW_STORE_KEY,
     AUTOPSY_STORE_KEY
 } from './trader-bot.js';
+import { v14SignalFilter } from './trader-bot-v14.js';
 import { generateDigest } from './auto-digest.js';
 
 const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
@@ -178,7 +179,8 @@ export const handler = async (event, netlifyContext) => {
 
         } else if (text === '/scan' || text === 'scan') {
             await sendTelegramMessage(chatId, `🔍 *Iniciando análisis manual...*`);
-            const result = await runAnalysis(context);
+            // Apply v14 entry-quality filter so /scan matches the scheduled wrapper behaviour.
+            const result = await runAnalysis(context, { signalFilter: v14SignalFilter });
             let resMsg = `✅ *Análisis Completo*\n\n`;
             resMsg += `• Señales: ${result.signals || 0}\n`;
             resMsg += `• Errores: ${result.errors || 0}\n`;
